@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+@theme {
+  /* Spacing Scale - Required for Tailwind v4 */
+  --spacing-0: 0px;
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-7: 1.75rem;
+  --spacing-8: 2rem;
+  --spacing-9: 2.25rem;
+  --spacing-10: 2.5rem;
+  --spacing-11: 2.75rem;
+  --spacing-12: 3rem;
+  --spacing-14: 3.5rem;
+  --spacing-16: 4rem;
+  --spacing-20: 5rem;
+  --spacing-24: 6rem;
+  --spacing-28: 7rem;
+  --spacing-32: 8rem;
+  --spacing-36: 9rem;
+  --spacing-40: 10rem;
+  --spacing-44: 11rem;
+  --spacing-48: 12rem;
+  --spacing-52: 13rem;
+  --spacing-56: 14rem;
+  --spacing-60: 15rem;
+  --spacing-64: 16rem;
+  --spacing-72: 18rem;
+  --spacing-80: 20rem;
+  --spacing-96: 24rem;
+
+  /* Forest Green - Primary Brand Color */
+  --color-forest-50: #f0f7f2;
+  --color-forest-100: #d9ebe0;
+  --color-forest-200: #b3d7c1;
+  --color-forest-300: #8cc3a2;
+  --color-forest-400: #66af83;
+  --color-forest-500: #2d5f3f;
+  --color-forest-600: #1e4029;
+  --color-forest-700: #183320;
+  --color-forest-800: #122618;
+  --color-forest-900: #0f2515;
+
+  /* Sage Green - Accent Color */
+  --color-sage-50: #f5f8f4;
+  --color-sage-100: #e8f0e5;
+  --color-sage-200: #d1e1cb;
+  --color-sage-300: #a8c5a0;
+  --color-sage-400: #7fa876;
+  --color-sage-500: #5d8554;
+  --color-sage-600: #4a6a43;
+  --color-sage-700: #3a5335;
+  --color-sage-800: #2d4129;
+  --color-sage-900: #1f2d1c;
+
+  /* Terracotta - Call-to-Action Color */
+  --color-terracotta-50: #fef5f2;
+  --color-terracotta-100: #fde8e0;
+  --color-terracotta-200: #fbd1c1;
+  --color-terracotta-300: #f7b49a;
+  --color-terracotta-400: #e8967d;
+  --color-terracotta-500: #d97556;
+  --color-terracotta-600: #b85a3d;
+  --color-terracotta-700: #954731;
+  --color-terracotta-800: #733829;
+  --color-terracotta-900: #5c2d21;
+
+  /* Cream - Background Color */
+  --color-cream-50: #fdfbf7;
+  --color-cream-100: #f5f1e8;
+  --color-cream-200: #e8dfc9;
+  --color-cream-300: #d9c9a8;
+  --color-cream-400: #c9b387;
+  --color-cream-500: #b89d66;
+}
+
+/* * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+} */
+
+:root {
+  /* Additional CSS variables for custom use */
+  --color-bg-primary: 255 255 255;
+  --color-bg-secondary: 245 241 232;
+  --color-text-primary: 31 41 55;
+  --color-text-secondary: 107 114 128;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg-primary: 15 37 21;
+    --color-bg-secondary: 24 51 32;
+    --color-text-primary: 250 250 249;
+    --color-text-secondary: 209 213 219;
+  }
+}
+
+body {
+  background: rgb(var(--color-bg-primary));
+  color: rgb(var(--color-text-primary));
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
