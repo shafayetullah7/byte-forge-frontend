@@ -1,10 +1,3 @@
-import { Fa } from "solid-fa";
-import {
-  faGoogle,
-  faFacebook,
-  faXTwitter,
-} from "@fortawesome/free-brands-svg-icons";
-
 export default function SocialLogin() {
   return (
     <div class="mt-8">
@@ -28,9 +21,10 @@ export default function SocialLogin() {
           class="flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-forest-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-forest-600 hover:border-gray-300 dark:hover:border-gray-500 transition-all duration-200"
           title="Continue with Google"
         >
-          <Fa
-            icon={faGoogle}
-            class="w-5 h-5 text-gray-700 dark:text-gray-300"
+          <img
+            src="/google-brands-solid-full.svg"
+            alt="Google"
+            class="w-5 h-5"
           />
           <span class="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">
             Google
@@ -40,11 +34,15 @@ export default function SocialLogin() {
         {/* Facebook */}
         <button
           type="button"
-          class="flex items-center justify-center gap-2 px-4 py-3 bg-[#1877F2] hover:bg-[#0C63D4] border-2 border-[#1877F2] hover:border-[#0C63D4] rounded-lg transition-all duration-200"
+          class="flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-forest-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-forest-600 hover:border-gray-300 dark:hover:border-gray-500 transition-all duration-200"
           title="Continue with Facebook"
         >
-          <Fa icon={faFacebook} class="w-5 h-5 text-white" />
-          <span class="text-sm font-medium text-white hidden sm:inline">
+          <img
+            src="/facebook-brands-solid-full.svg"
+            alt="Facebook"
+            class="w-5 h-5"
+          />
+          <span class="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">
             Facebook
           </span>
         </button>
@@ -52,11 +50,17 @@ export default function SocialLogin() {
         {/* X (Twitter) */}
         <button
           type="button"
-          class="flex items-center justify-center gap-2 px-4 py-3 bg-black hover:bg-gray-900 border-2 border-black hover:border-gray-900 rounded-lg transition-all duration-200"
+          class="flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-forest-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-forest-600 hover:border-gray-300 dark:hover:border-gray-500 transition-all duration-200"
           title="Continue with X"
         >
-          <Fa icon={faXTwitter} class="w-5 h-5 text-white" />
-          <span class="text-sm font-medium text-white hidden sm:inline">X</span>
+          <img
+            src="/x-twitter-brands-solid-full.svg"
+            alt="X"
+            class="w-5 h-5 dark:invert"
+          />
+          <span class="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">
+            X
+          </span>
         </button>
       </div>
     </div>
