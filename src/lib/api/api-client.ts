@@ -9,6 +9,7 @@ interface ApiClientConfig {
   headers?: HeadersInit;
   timeout?: number; // Default timeout in ms (client-side)
   serverTimeout?: number; // Server-specific timeout in ms
+  withCredentials?: boolean; // Global default for credentials
 }
 
 /**
@@ -17,6 +18,7 @@ interface ApiClientConfig {
 interface RequestOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined>;
   timeout?: number; // Per-request timeout override in ms
+  withCredentials?: boolean; // Per-request credentials override
 }
 
 /**
@@ -108,6 +110,7 @@ class ApiClient {
       },
       timeout: options?.timeout || config.api.timeout.client,
       serverTimeout: options?.serverTimeout || config.api.timeout.server,
+      withCredentials: options?.withCredentials ?? true,
     };
   }
 
@@ -164,6 +167,7 @@ class ApiClient {
       params,
       headers,
       timeout: requestTimeout,
+      withCredentials,
       ...fetchOptions
     } = options;
 
@@ -200,7 +204,8 @@ class ApiClient {
         ...fetchOptions,
         signal: controller.signal, // Add abort signal for timeout
         headers: finalHeaders,
-        credentials: "include", // Include cookies for session management
+        credentials:
+          withCredentials ?? this.config.withCredentials ? "include" : "omit",
       });
 
       // Handle non-OK responses - simply throw ApiError

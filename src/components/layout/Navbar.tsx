@@ -48,16 +48,17 @@ export function Navbar() {
   };
 
   const handleLogout = async () => {
+    const { performLogout } = await import("~/lib/auth");
     setIsLoggingOut(true);
     try {
-      await authApi.logout();
+      await performLogout();
       // Redirect to home page after logout
       navigate("/");
-      // Reload to clear session state
-      window.location.reload();
     } catch (error) {
       console.error("Logout failed:", error);
+    } finally {
       setIsLoggingOut(false);
+      setDropdownOpen(false);
     }
   };
 

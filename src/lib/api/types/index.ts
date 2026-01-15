@@ -19,6 +19,12 @@ export interface ApiErrorResponse {
     field: string;
     message: string;
   }>;
+  validationErrors?: Array<{
+    field: string;
+    message: string;
+    code?: string;
+  }>;
+  details?: string;
 }
 
 /**

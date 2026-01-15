@@ -53,6 +53,35 @@ export const getSession = query(async () => {
 }, "user-session");
 
 /**
+ * Perform a logout operation
+ *
+ * This utility handles both the backend request and the frontend state cleanup.
+ * It's designed to be resilient: if the backend returns a 401 (already unauthorized),
+ * it still proceeds with clearing the local session state.
+ *
+ * @returns true if logout was performed (even if backend session was already gone)
+ */
+export const performLogout = async () => {
+  const { revalidate } = await import("@solidjs/router");
+
+  try {
+    await authApi.logout();
+  } catch (error: any) {
+    // If we get a 401, the session is already invalid/gone on the server.
+    // We should still proceed with clearing the local state.
+    if (error?.statusCode !== 401) {
+      console.error("[Auth] Logout error:", error);
+      // We still revalidate to be safe, but we log other errors
+    }
+  } finally {
+    // Revalidate the "user-session" query to trigger UI updates across the app
+    await revalidate("user-session");
+  }
+
+  return true;
+};
+
+/**
  * Client/Server hook to access the current session
  *
  * This hook returns a reactive signal that contains the current user's session data.
