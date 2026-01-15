@@ -111,3 +111,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+/* Custom Utility Classes */
+@utility text-gradient-brand {
+  background-image: linear-gradient(to right in oklab, var(--color-forest-600), var(--color-sage-500));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+

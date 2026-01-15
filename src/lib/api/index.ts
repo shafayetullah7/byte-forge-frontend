@@ -8,11 +8,9 @@ export * from "./types/media.types";
 export * from "./types/library.types";
 export * from "./types/seller.types";
 
-// Re-export configuration
-export * from "./config";
-
-// Re-export server utilities
+// Re-export auth utilities
 export * from "./utils/server-auth";
+export * from "./utils/client-auth";
 
 // Re-export API endpoints
 export * from "./endpoints/auth.api";

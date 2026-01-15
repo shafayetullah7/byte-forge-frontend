@@ -21,4 +21,6 @@ export const config = {
   isServer: typeof window === "undefined",
 } as const;
 
+console.log("config: ", config);
+
 export type AppConfig = typeof config;

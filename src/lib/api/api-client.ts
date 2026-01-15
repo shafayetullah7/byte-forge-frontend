@@ -1,5 +1,4 @@
 import { ApiError, type ApiErrorResponse, type ApiResponse } from "./types";
-import { type AuthErrorConfig, defaultAuthErrorConfig } from "./config";
 import { config } from "../config";
 
 /**
@@ -8,7 +7,6 @@ import { config } from "../config";
 interface ApiClientConfig {
   baseURL: string;
   headers?: HeadersInit;
-  authErrorConfig?: AuthErrorConfig;
   timeout?: number; // Default timeout in ms (client-side)
   serverTimeout?: number; // Server-specific timeout in ms
 }
@@ -69,11 +67,36 @@ const parseErrorResponse = async (
 
 /**
  * Core API client class
+ *
+ * This is a simple, unopinionated HTTP client that:
+ * - Makes HTTP requests with proper error handling
+ * - Supports timeouts and request cancellation
+ * - Handles FormData for file uploads
+ * - Includes cookies for session management
+ *
+ * **Error Handling:**
+ * - Throws ApiError for all non-2xx responses
+ * - Does NOT automatically redirect on 401
+ * - Developers choose how to handle errors (redirect, show UI, ignore, etc.)
+ *
+ * **Usage:**
+ * ```typescript
+ * // Direct usage (handle errors yourself)
+ * try {
+ *   const data = await api.get("/api/v1/user/profile");
+ * } catch (error) {
+ *   if (error instanceof ApiError && error.statusCode === 401) {
+ *     // Handle as you wish: redirect, show login modal, etc.
+ *   }
+ * }
+ *
+ * // Or use wrappers for automatic redirect
+ * import { withAuthRedirect } from "~/lib/api";
+ * const data = await withAuthRedirect(() => api.get("/api/v1/user/profile"));
+ * ```
  */
 class ApiClient {
   private config: ApiClientConfig;
-  private authErrorConfig: AuthErrorConfig;
-  private isRedirecting = false; // Prevent multiple simultaneous redirects
   private activeRequests = new Set<AbortController>(); // Track active requests for cleanup
 
   constructor(options?: Partial<ApiClientConfig>) {
@@ -85,10 +108,6 @@ class ApiClient {
       },
       timeout: options?.timeout || config.api.timeout.client,
       serverTimeout: options?.serverTimeout || config.api.timeout.server,
-    };
-    this.authErrorConfig = {
-      ...defaultAuthErrorConfig,
-      ...options?.authErrorConfig,
     };
   }
 
@@ -103,104 +122,6 @@ class ApiClient {
       this.activeRequests.forEach((controller) => controller.abort());
       this.activeRequests.clear();
     }
-  }
-
-  /**
-   * Handle authentication errors by redirecting to login
-   */
-  private handleAuthError(endpoint: string, error: ApiError): void {
-    // Check if endpoint is excluded from auth redirect
-    const isExcluded = this.authErrorConfig.excludedEndpoints?.some(
-      (excludedEndpoint) => endpoint.includes(excludedEndpoint)
-    );
-
-    if (isExcluded) {
-      return; // Don't redirect for excluded endpoints
-    }
-
-    // Use custom handler if provided
-    if (this.authErrorConfig.onAuthError) {
-      this.authErrorConfig.onAuthError(endpoint, error);
-      return;
-    }
-
-    const loginUrl = this.authErrorConfig.loginUrl || "/login";
-
-    // Server-side (SSR) - mark error for proper handling
-    if (typeof window === "undefined") {
-      error.isAuthRedirect = true;
-      error.redirectUrl = loginUrl;
-
-      // Add helpful error message for developers
-      error.message =
-        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-        `🔒 SSR Authentication Error\n` +
-        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-        `\n` +
-        `Endpoint: ${endpoint}\n` +
-        `Status: 401 Unauthorized\n` +
-        `Redirect: ${loginUrl}\n` +
-        `\n` +
-        `This error occurred during server-side rendering.\n` +
-        `To handle it properly, wrap your API call:\n` +
-        `\n` +
-        `❌ Current (won't redirect):\n` +
-        `   export const route = {\n` +
-        `     load: () => api.get("${endpoint}")\n` +
-        `   };\n` +
-        `\n` +
-        `✅ Correct (will redirect):\n` +
-        `   import { protectedLoader } from "~/lib/auth/middleware-auth";\n` +
-        `   \n` +
-        `   export const route = {\n` +
-        `     load: protectedLoader(() => api.get("${endpoint}"))\n` +
-        `   };\n` +
-        `\n` +
-        `Or use withServerAuthRedirect:\n` +
-        `   import { withServerAuthRedirect } from "~/lib/api";\n` +
-        `   \n` +
-        `   export const route = {\n` +
-        `     load: () => withServerAuthRedirect(() => api.get("${endpoint}"))\n` +
-        `   };\n` +
-        `\n` +
-        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-
-      return; // Let the error propagate
-    }
-
-    // Client-side - perform redirect
-    // Prevent multiple simultaneous redirects
-    if (this.isRedirecting) {
-      console.warn(
-        `[Auth] Redirect already in progress to ${loginUrl}. ` +
-          `Ignoring duplicate 401 from ${endpoint}`
-      );
-      return;
-    }
-
-    this.isRedirecting = true;
-
-    // Clear storage if configured
-    if (this.authErrorConfig.clearStorageOnAuthError) {
-      const keysToClear = this.authErrorConfig.storageKeysToClear || [];
-      console.info(
-        `[Auth] Clearing ${keysToClear.length} storage keys before redirect`
-      );
-      keysToClear.forEach((key) => {
-        try {
-          localStorage.removeItem(key);
-          sessionStorage.removeItem(key);
-        } catch (e) {
-          console.warn(`Failed to clear storage key: ${key}`, e);
-        }
-      });
-    }
-
-    // Redirect to login page
-    console.info(
-      `[Auth] Redirecting to ${loginUrl} due to 401 from ${endpoint}`
-    );
-    window.location.href = loginUrl;
   }
 
   /**
@@ -223,6 +144,17 @@ class ApiClient {
 
   /**
    * Make an HTTP request
+   *
+   * This method handles all HTTP communication with the backend.
+   * It throws ApiError for any non-2xx response - no automatic redirects.
+   *
+   * **Error Handling:**
+   * - 401 Unauthorized: Throws ApiError (no redirect)
+   * - 4xx/5xx: Throws ApiError with parsed error data
+   * - Timeout: Throws ApiError with 408 status
+   *
+   * Use wrapper functions (withAuthRedirect, withServerAuthRedirect) if you want
+   * automatic redirect behavior on 401 errors.
    */
   private async request<T>(
     endpoint: string,
@@ -271,22 +203,15 @@ class ApiClient {
         credentials: "include", // Include cookies for session management
       });
 
-      // Handle non-OK responses
+      // Handle non-OK responses - simply throw ApiError
       if (!response.ok) {
         const errorData = await parseErrorResponse(response);
 
-        const error = new ApiError(
+        throw new ApiError(
           errorData.message || "Request failed",
           response.status,
           errorData
         );
-
-        // Handle 401 Unauthorized - redirect to login
-        if (response.status === 401) {
-          this.handleAuthError(endpoint, error);
-        }
-
-        throw error;
       }
 
       // Handle 204 No Content

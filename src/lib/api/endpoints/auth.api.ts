@@ -58,4 +58,11 @@ export const authApi = {
       "/api/v1/user/auth/send-verification-email"
     );
   },
+
+  /**
+   * Logout current user
+   */
+  logout: async (): Promise<ApiResponse<null>> => {
+    return api.post<ApiResponse<null>>("/api/v1/user/auth/logout");
+  },
 };

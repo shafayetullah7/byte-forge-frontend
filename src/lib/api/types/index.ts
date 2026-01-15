@@ -46,11 +46,11 @@ export interface PaginatedResponse<T> {
 
 /**
  * Custom API Error class
+ *
+ * Thrown by the API client for all non-2xx responses.
+ * Contains the HTTP status code and the parsed error response from the server.
  */
 export class ApiError extends Error {
-  public isAuthRedirect?: boolean;
-  public redirectUrl?: string;
-
   constructor(
     message: string,
     public statusCode: number,
