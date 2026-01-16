@@ -1,40 +1,25 @@
+import { type Navigator } from "@solidjs/router";
 import { ApiError } from "../types";
 
 /**
  * Client-Side Auth Redirect Wrapper
  *
- * Wraps an API call and automatically redirects to login on 401 errors (CSR only).
- * This is a convenience wrapper for when you want automatic redirect behavior.
+ * Wraps an API call and automatically redirects to login on 401 errors.
+ * Supports both full page reload (default) and SPA navigation (via optional navigate param).
  *
  * **When to use:**
  * - Client-side API calls that require authentication
  * - When you want automatic redirect on session expiry
- * - In event handlers, effects, or client-only code
- *
- * **When NOT to use:**
- * - Server-side code (use withServerAuthRedirect instead)
- * - When you want custom 401 handling (show modal, toast, etc.)
- * - Public endpoints that don't require auth
  *
  * @param apiCall - The API call function to execute
  * @param redirectUrl - URL to redirect to on 401 (default: "/login")
+ * @param navigate - Optional SolidStart navigator for SPA transitions. If not provided, uses window.location.
  * @returns The result of the API call
- * @throws Redirects on 401, re-throws other errors
- *
- * @example
- * ```typescript
- * // In a component event handler
- * async function handleSubmit() {
- *   const data = await withAuthRedirect(() =>
- *     api.post("/api/v1/user/seller/plants", formData)
- *   );
- *   console.log("Plant created:", data);
- * }
- * ```
  */
 export async function withAuthRedirect<T>(
   apiCall: () => Promise<T>,
-  redirectUrl: string = "/login"
+  redirectUrl: string = "/login",
+  navigate?: Navigator
 ): Promise<T> {
   // Only works on client-side
   if (typeof window === "undefined") {
@@ -50,10 +35,14 @@ export async function withAuthRedirect<T>(
     // Redirect on 401 Unauthorized
     if (error instanceof ApiError && error.statusCode === 401) {
       console.info(`[Auth] Redirecting to ${redirectUrl} due to 401 error`);
-      window.location.href = redirectUrl;
+      
+      if (navigate) {
+        navigate(redirectUrl);
+      } else {
+        window.location.href = redirectUrl;
+      }
 
-      // Throw error anyway (though redirect will happen first)
-      // This prevents code from continuing after redirect
+      // Throw error anyway to stop execution flow
       throw error;
     }
 

@@ -119,4 +119,5 @@ export interface RegisterResponse {
  */
 export interface LoginResponse {
   session: UserSession;
+  user: AuthUser;
 }

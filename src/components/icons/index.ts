@@ -1,2 +1,9 @@
 export { EyeIcon } from "./EyeIcon";
 export { EyeSlashIcon } from "./EyeSlashIcon";
+export { MagnifyingGlassIcon } from "./MagnifyingGlassIcon";
+export { ShoppingBagIcon } from "./ShoppingBagIcon";
+export { Bars3Icon } from "./Bars3Icon";
+export { Squares2x2Icon } from "./Squares2x2Icon";
+export { UserIcon } from "./UserIcon";
+export { Cog6ToothIcon } from "./Cog6ToothIcon";
+export { ArrowRightOnRectangleIcon } from "./ArrowRightOnRectangleIcon";

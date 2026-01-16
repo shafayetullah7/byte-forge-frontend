@@ -38,8 +38,8 @@ export default function VerifyAccount() {
 
       if (response.success) {
         console.log("Verification successful");
-        // Redirect to login after successful verification
-        navigate("/login");
+        // Redirect to dashboard after successful verification
+        navigate("/");
       }
     } catch (error) {
       if (error instanceof ApiError) {

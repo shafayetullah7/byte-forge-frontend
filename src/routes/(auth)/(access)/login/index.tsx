@@ -39,7 +39,14 @@ export default function Login() {
         toaster.success("Logged in successfully! Redirecting...");
         // Keep the form in 'submitting' state during the delay to prevent double-clicks
         await new Promise((resolve) => setTimeout(resolve, 1200));
-        navigate("/");
+
+        const x = response.data?.user;
+
+        if (response.data && response.data.user && !response.data.user.emailVerified) {
+          navigate("/verify-account");
+        } else {
+          navigate("/");
+        }
       }
     } catch (error) {
       if (error instanceof ApiError && error.response) {
