@@ -1,7 +1,8 @@
-import { A, useNavigate } from "@solidjs/router";
+import { A, useNavigate, revalidate } from "@solidjs/router";
 import { createSignal, onMount } from "solid-js";
 import { createForm, setError } from "@modular-forms/solid";
 import { Button, Input } from "~/components/ui";
+import { EyeIcon, EyeSlashIcon } from "~/components/icons";
 import { loginSchema, type LoginFormData } from "~/schemas/login.schema";
 import { authApi, ApiError } from "~/lib/api";
 import { toaster } from "~/components/ui/Toast";
@@ -9,6 +10,7 @@ import { toaster } from "~/components/ui/Toast";
 export default function Login() {
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = createSignal<string | null>(null);
+  const [showPassword, setShowPassword] = createSignal(false);
 
   const [loginForm, { Form, Field }] = createForm<LoginFormData>({
     validate: (values) => {
@@ -39,6 +41,9 @@ export default function Login() {
         toaster.success("Logged in successfully! Redirecting...");
         // Keep the form in 'submitting' state during the delay to prevent double-clicks
         await new Promise((resolve) => setTimeout(resolve, 1200));
+
+        // Revalidate session to update UI immediately
+        await revalidate("user-session");
 
         const x = response.data?.user;
 
@@ -122,16 +127,25 @@ export default function Login() {
       {/* Password Field */}
       <Field name="password">
         {(field, props) => (
-          <div>
+          <div class="relative">
             <Input
               {...props}
               label="Password"
-              type="password"
+              type={showPassword() ? "text" : "password"}
               placeholder="Enter your password"
               value={field.value || ""}
               required
               disabled={loginForm.submitting}
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword())}
+              class="absolute right-3 top-9 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+              aria-label={showPassword() ? "Hide password" : "Show password"}
+              disabled={loginForm.submitting}
+            >
+              {showPassword() ? <EyeSlashIcon /> : <EyeIcon />}
+            </button>
             {field.error && (
               <p class="mt-1 text-sm text-red-600 dark:text-red-400">
                 {field.error}

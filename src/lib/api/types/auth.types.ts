@@ -121,3 +121,21 @@ export interface LoginResponse {
   session: UserSession;
   user: AuthUser;
 }
+// === Password Reset ===
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface VerifyResetOtpRequest {
+  token: string;
+  otp: string;
+}
+
+export interface ResendResetOtpRequest {
+  token: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  password: string;
+}

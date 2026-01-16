@@ -42,7 +42,18 @@ import { authApi } from "~/lib/api";
 export const getSession = query(async () => {
   "use server";
   try {
-    const response = await authApi.checkAuth();
+    let headers: HeadersInit | undefined;
+    
+    if (typeof window === "undefined") {
+      const { getRequestEvent } = await import("solid-js/web");
+      const event = getRequestEvent();
+      const cookie = event?.request.headers.get("cookie");
+      if (cookie) {
+        headers = { cookie };
+      }
+    }
+
+    const response = await authApi.checkAuth(headers);
     return response.success ? response.data : null;
   } catch (error) {
     // Fail silently for public session checks

@@ -1,6 +1,5 @@
 import { A, useNavigate } from "@solidjs/router";
 import { Show, createSignal } from "solid-js";
-import { useSession } from "~/lib/auth";
 import {
     UserIcon,
     Cog6ToothIcon,
@@ -8,14 +7,19 @@ import {
     Squares2x2Icon,
 } from "../icons";
 
+import { type Accessor } from "solid-js";
+import { type AuthUser } from "~/lib/api/types/auth.types";
+
 interface MobileMenuProps {
     isOpen: boolean;
     onClose: () => void;
+    user: Accessor<AuthUser | null | undefined>;
 }
 
 export function MobileMenu(props: MobileMenuProps) {
-    const user = useSession();
+    // const user = useSession(); // Removed local call
     const navigate = useNavigate();
+
     const [isLoggingOut, setIsLoggingOut] = createSignal(false);
 
     const handleLogout = async () => {
@@ -68,7 +72,7 @@ export function MobileMenu(props: MobileMenuProps) {
                     <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
 
                     <Show
-                        when={user()}
+                        when={props.user()}
                         fallback={
                             <div class="px-4 flex flex-col gap-2">
                                 <A

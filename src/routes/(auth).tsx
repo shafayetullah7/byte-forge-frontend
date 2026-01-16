@@ -1,5 +1,6 @@
-import { RouteSectionProps, A, useLocation } from "@solidjs/router";
-import { createMemo } from "solid-js";
+import { RouteSectionProps, A, useLocation, useNavigate } from "@solidjs/router";
+import { createMemo, createEffect } from "solid-js";
+import { useSession } from "~/lib/auth";
 
 // Route metadata for titles and subtitles
 const routeMetadata: Record<string, { title: string; subtitle: string }> = {
@@ -19,6 +20,10 @@ const routeMetadata: Record<string, { title: string; subtitle: string }> = {
     title: "Reset Password",
     subtitle: "Enter your new password",
   },
+  "/verify-reset": {
+    title: "Verify Code",
+    subtitle: "Enter the code sent to your email",
+  },
   "/verify-account": {
     title: "Verify Your Account",
     subtitle: "Enter the verification code sent to your email",
@@ -27,6 +32,34 @@ const routeMetadata: Record<string, { title: string; subtitle: string }> = {
 
 export default function AuthLayout(props: RouteSectionProps) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const user = useSession();
+
+  createEffect(() => {
+    const currentUser = user();
+    const path = location.pathname;
+
+    if (currentUser) {
+      // User IS logged in
+      if (currentUser.emailVerified) {
+        // 1. Verified User: should NOT be in auth layout at all (login, register, verify-account, etc.)
+        // Redirect to home or dashboard
+        navigate("/", { replace: true });
+      } else {
+        // 2. Unverified User: should ONLY be on /verify-account
+        if (path !== "/verify-account") {
+          navigate("/verify-account", { replace: true });
+        }
+      }
+    } else {
+      // User is Guest (NOT logged in)
+      // 3. Guest: Should NOT be on /verify-account (needs auth to verify)
+      if (path === "/verify-account") {
+        navigate("/login", { replace: true });
+      }
+      // Guests are allowed on login, register, forgot-password, etc.
+    }
+  });
 
   const metadata = createMemo(() => {
     return (

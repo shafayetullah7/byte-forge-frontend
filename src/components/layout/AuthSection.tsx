@@ -8,20 +8,15 @@ import {
     Squares2x2Icon,
 } from "../icons";
 
+import { getInitials } from "~/lib/utils/string.utils";
+
 export function AuthSection() {
     const user = useSession();
     const navigate = useNavigate();
     const [dropdownOpen, setDropdownOpen] = createSignal(false);
     const [isLoggingOut, setIsLoggingOut] = createSignal(false);
 
-    const getInitials = (name: string) => {
-        return name
-            .split(" ")
-            .map((n) => n[0])
-            .join("")
-            .toUpperCase()
-            .slice(0, 2);
-    };
+    // Removed local getInitials
 
     const handleClickOutside = (e: MouseEvent) => {
         const target = e.target as HTMLElement;
@@ -77,7 +72,7 @@ export function AuthSection() {
             }
         >
             {(userData) => (
-                <div class="relative profile-dropdown-container hidden md:block">
+                <div class="relative profile-dropdown-container hidden lg:block">
                     {/* Profile Button */}
                     <button
                         onClick={() => setDropdownOpen(!dropdownOpen())}

@@ -7,6 +7,10 @@ import type {
   LoginResponse,
   UserSession,
   AuthUser,
+  ForgotPasswordRequest,
+  VerifyResetOtpRequest,
+  ResendResetOtpRequest,
+  ResetPasswordRequest,
 } from "../types/auth.types";
 import type { ApiResponse } from "../types";
 
@@ -39,8 +43,10 @@ export const authApi = {
   /**
    * Check current authentication status
    */
-  checkAuth: async (): Promise<ApiResponse<AuthUser>> => {
-    return api.get<ApiResponse<AuthUser>>("/api/v1/user/auth/check");
+  checkAuth: async (headers?: HeadersInit): Promise<ApiResponse<AuthUser>> => {
+    return api.get<ApiResponse<AuthUser>>("/api/v1/user/auth/check", {
+      headers,
+    });
   },
 
   /**
@@ -53,8 +59,8 @@ export const authApi = {
   /**
    * Resend email verification code
    */
-  sendVerificationEmail: async (): Promise<ApiResponse<null>> => {
-    return api.post<ApiResponse<null>>(
+  sendVerificationEmail: async (): Promise<ApiResponse<{ expiresAt: string }>> => {
+    return api.post<ApiResponse<{ expiresAt: string }>>(
       "/api/v1/user/auth/send-verification-email"
     );
   },
@@ -62,7 +68,32 @@ export const authApi = {
   /**
    * Logout current user
    */
-  logout: async (): Promise<ApiResponse<null>> => {
-    return api.post<ApiResponse<null>>("/api/v1/user/auth/logout");
+  logout: async (): Promise<ApiResponse<void>> => {
+    return api.post("/api/v1/user/auth/logout");
+  },
+
+  // === Password Reset ===
+  forgotPassword: async (
+    data: ForgotPasswordRequest
+  ): Promise<ApiResponse<{ token: string; expiresAt: string }>> => {
+    return api.post("/api/v1/user/password-reset/forgot", data);
+  },
+
+  verifyResetOtp: async (
+    data: VerifyResetOtpRequest
+  ): Promise<ApiResponse<{ token: string; expiresAt: string }>> => {
+    return api.post("/api/v1/user/password-reset/verify", data);
+  },
+
+  resendResetOtp: async (
+    data: ResendResetOtpRequest
+  ): Promise<ApiResponse<{ token: string; expiresAt: string }>> => {
+    return api.post("/api/v1/user/password-reset/resend", data);
+  },
+
+  resetPassword: async (
+    data: ResetPasswordRequest
+  ): Promise<ApiResponse<void>> => {
+    return api.post("/api/v1/user/password-reset/reset", data);
   },
 };
