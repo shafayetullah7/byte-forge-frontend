@@ -1,39 +1,13 @@
 import { RouteSectionProps, A, useLocation, useNavigate } from "@solidjs/router";
 import { createMemo, createEffect } from "solid-js";
 import { useSession } from "~/lib/auth";
-
-// Route metadata for titles and subtitles
-const routeMetadata: Record<string, { title: string; subtitle: string }> = {
-  "/login": {
-    title: "Welcome Back",
-    subtitle: "Sign in to your ByteForge account",
-  },
-  "/register": {
-    title: "Create Account",
-    subtitle: "Start your journey with ByteForge",
-  },
-  "/forgot-password": {
-    title: "Forgot Password?",
-    subtitle: "Enter your email and we'll send you a reset link",
-  },
-  "/reset-password": {
-    title: "Reset Password",
-    subtitle: "Enter your new password",
-  },
-  "/verify-reset": {
-    title: "Verify Code",
-    subtitle: "Enter the code sent to your email",
-  },
-  "/verify-account": {
-    title: "Verify Your Account",
-    subtitle: "Enter the verification code sent to your email",
-  },
-};
+import { useI18n } from "~/i18n";
 
 export default function AuthLayout(props: RouteSectionProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const user = useSession();
+  const { t } = useI18n();
 
   createEffect(() => {
     const currentUser = user();
@@ -62,12 +36,44 @@ export default function AuthLayout(props: RouteSectionProps) {
   });
 
   const metadata = createMemo(() => {
-    return (
-      routeMetadata[location.pathname] || {
-        title: "ByteForge",
-        subtitle: "Welcome",
-      }
-    );
+    const path = location.pathname;
+    switch (path) {
+      case "/login":
+        return {
+          title: t("auth.login.title"),
+          subtitle: t("auth.login.subtitle"),
+        };
+      case "/register":
+        return {
+          title: t("auth.register.title"),
+          subtitle: t("auth.register.subtitle"),
+        };
+      case "/forgot-password":
+        return {
+          title: t("auth.forgotPassword.title"),
+          subtitle: t("auth.forgotPassword.subtitle"),
+        };
+      case "/reset-password":
+        return {
+          title: t("auth.resetPassword.title"),
+          subtitle: t("auth.resetPassword.subtitle"),
+        };
+      case "/verify-reset":
+        return {
+          title: t("auth.verifyReset.title"),
+          subtitle: t("auth.verifyReset.subtitle"),
+        };
+      case "/verify-account":
+        return {
+          title: t("auth.verifyAccount.title"),
+          subtitle: t("auth.verifyAccount.subtitle"),
+        };
+      default:
+        return {
+          title: "ByteForge",
+          subtitle: t("common.welcome"),
+        };
+    }
   });
 
   return (
@@ -92,7 +98,7 @@ export default function AuthLayout(props: RouteSectionProps) {
                 d="M15 19l-7-7 7-7"
               />
             </svg>
-            Back to Home
+            {t("common.home")}
           </A>
           <A
             href="/"

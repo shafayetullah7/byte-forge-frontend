@@ -6,9 +6,11 @@ import { EyeIcon, EyeSlashIcon } from "~/components/icons";
 import { loginSchema, type LoginFormData } from "~/schemas/login.schema";
 import { authApi, ApiError } from "~/lib/api";
 import { toaster } from "~/components/ui/Toast";
+import { useI18n } from "~/i18n";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [errorMessage, setErrorMessage] = createSignal<string | null>(null);
   const [showPassword, setShowPassword] = createSignal(false);
 
@@ -21,6 +23,9 @@ export default function Login() {
       const errors: Record<string, string> = {};
       result.error.issues.forEach((issue) => {
         if (issue.path.length > 0) {
+          // Map Zod errors to translation keys if possible, or use standard z.message
+          // For now we will rely on schema being updated to return keys, or just use what is there.
+          // In the next step I will update the schema to return keys like "auth.validation.emailRequired"
           errors[issue.path.join(".")] = issue.message;
         }
       });
@@ -38,14 +43,12 @@ export default function Login() {
       });
 
       if (response.success) {
-        toaster.success("Logged in successfully! Redirecting...");
+        toaster.success(t("auth.login.success"));
         // Keep the form in 'submitting' state during the delay to prevent double-clicks
         await new Promise((resolve) => setTimeout(resolve, 1200));
 
         // Revalidate session to update UI immediately
         await revalidate("user-session");
-
-        const x = response.data?.user;
 
         if (response.data && response.data.user && !response.data.user.emailVerified) {
           navigate("/verify-account");
@@ -62,6 +65,8 @@ export default function Login() {
         if (Array.isArray(errorData.validationErrors)) {
           errorData.validationErrors.forEach((err) => {
             const field = err.field.toLowerCase();
+            // TODO: backend should return keys or we translate keys here.
+            // For Level 2, backend returns translated string or key.
             if (field === "email") {
               setError(loginForm, "email", err.message);
               handled = true;
@@ -86,7 +91,7 @@ export default function Login() {
           toaster.error(msg);
         }
       } else {
-        setErrorMessage("An unexpected error occurred. Please try again.");
+        setErrorMessage(t("common.error"));
         toaster.error("Network error or server unreachable");
       }
       console.error("Login error:", error);
@@ -108,16 +113,16 @@ export default function Login() {
           <div>
             <Input
               {...props}
-              label="Email"
+              label={t("auth.login.emailLabel")}
               type="email"
-              placeholder="you@example.com"
+              placeholder={t("auth.login.emailPlaceholder")}
               value={field.value || ""}
               required
               disabled={loginForm.submitting}
             />
             {field.error && (
               <p class="mt-1 text-sm text-red-600 dark:text-red-400">
-                {field.error}
+                {t(field.error) /* Try to translate error if it's a key */}
               </p>
             )}
           </div>
@@ -130,9 +135,9 @@ export default function Login() {
           <div class="relative">
             <Input
               {...props}
-              label="Password"
+              label={t("auth.login.passwordLabel")}
               type={showPassword() ? "text" : "password"}
-              placeholder="Enter your password"
+              placeholder={t("auth.login.passwordPlaceholder")}
               value={field.value || ""}
               required
               disabled={loginForm.submitting}
@@ -148,7 +153,7 @@ export default function Login() {
             </button>
             {field.error && (
               <p class="mt-1 text-sm text-red-600 dark:text-red-400">
-                {field.error}
+                {t(field.error)}
               </p>
             )}
           </div>
@@ -167,7 +172,7 @@ export default function Login() {
                 class="mt-0.5 rounded border-gray-300 text-forest-600 focus:ring-forest-500"
                 disabled={loginForm.submitting}
               />
-              Remember me
+              {t("auth.login.rememberMe")}
             </label>
           )}
         </Field>
@@ -175,7 +180,7 @@ export default function Login() {
           href="/forgot-password"
           class="text-sm text-forest-600 dark:text-sage-400 hover:text-forest-700 dark:hover:text-sage-300 transition-colors underline-offset-2 hover:underline"
         >
-          Forgot password?
+          {t("auth.login.forgotPassword")}
         </A>
       </div>
 
@@ -186,17 +191,17 @@ export default function Login() {
         type="submit"
         disabled={loginForm.submitting || loginForm.invalid}
       >
-        {loginForm.submitting ? "Signing In..." : "Sign In"}
+        {loginForm.submitting ? t("auth.login.submitting") : t("auth.login.submit")}
       </Button>
 
       {/* Sign Up Link */}
       <p class="text-center text-sm text-gray-600 dark:text-gray-400">
-        Don't have an account?{" "}
+        {t("auth.login.noAccount")}{" "}
         <A
           href="/register"
           class="text-forest-600 dark:text-sage-400 hover:text-forest-700 dark:hover:text-sage-300 font-medium transition-colors underline-offset-2 hover:underline"
         >
-          Create one now
+          {t("auth.login.createAccount")}
         </A>
       </p>
     </Form>

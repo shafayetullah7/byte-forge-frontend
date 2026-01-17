@@ -5,15 +5,17 @@ import { Button, Input } from "~/components/ui";
 import { authApi, ApiError } from "~/lib/api";
 import { toaster } from "~/components/ui/Toast";
 import { z } from "zod";
+import { useI18n } from "~/i18n";
 
 const forgotPasswordSchema = z.object({
-  email: z.string().min(1, "Email is required").email("Invalid email address"),
+  email: z.string().min(1, "auth.validation.emailRequired").email("auth.validation.invalidEmail"),
 });
 
 type ForgotPasswordForm = z.infer<typeof forgotPasswordSchema>;
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [errorMessage, setErrorMessage] = createSignal<string | null>(null);
 
   const [forgotForm, { Form, Field }] = createForm<ForgotPasswordForm>({
@@ -47,7 +49,7 @@ export default function ForgotPassword() {
         // Persist to localStorage for page reloads
         localStorage.setItem("byteforge_reset_verify", JSON.stringify(sessionData));
 
-        toaster.success(response.message || "Reset code sent!");
+        toaster.success(response.message || t("auth.forgotPassword.success"));
         // Navigate to verify page with state (optional now, but good for immediate transition)
         navigate("/verify-reset", {
           state: sessionData
@@ -57,7 +59,7 @@ export default function ForgotPassword() {
       if (error instanceof ApiError) {
         setErrorMessage(error.message);
       } else {
-        setErrorMessage("An unexpected error occurred.");
+        setErrorMessage(t("common.error"));
       }
     }
   };
@@ -78,16 +80,16 @@ export default function ForgotPassword() {
             <div>
               <Input
                 {...props}
-                label="Email"
+                label={t("auth.login.emailLabel")}
                 type="email"
-                placeholder="you@example.com"
+                placeholder={t("auth.login.emailPlaceholder")}
                 value={field.value || ""}
                 required
                 disabled={forgotForm.submitting}
               />
               {field.error && (
                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {field.error}
+                  {t(field.error)}
                 </p>
               )}
             </div>
@@ -100,7 +102,7 @@ export default function ForgotPassword() {
           type="submit"
           disabled={forgotForm.submitting}
         >
-          {forgotForm.submitting ? "Sending..." : "Send Reset Code"}
+          {forgotForm.submitting ? t("auth.forgotPassword.submitting") : t("auth.forgotPassword.submit")}
         </Button>
 
         <p class="text-center text-sm text-gray-600 dark:text-gray-400 pt-4 border-t border-gray-100 dark:border-gray-800">
@@ -108,7 +110,7 @@ export default function ForgotPassword() {
             href="/login"
             class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
           >
-            Back to Sign In
+            {t("auth.forgotPassword.backToLogin")}
           </A>
         </p>
       </Form>

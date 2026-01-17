@@ -6,13 +6,13 @@ import { z } from "zod";
 export const loginSchema = z.object({
   email: z
     .string()
-    .min(1, "Email is required")
-    .email("Invalid email address")
-    .max(255, "Email is too long"),
+    .min(1, "auth.validation.emailRequired")
+    .email("auth.validation.invalidEmail")
+    .max(255, "auth.validation.emailTooLong"),
   password: z
     .string()
-    .min(1, "Password is required")
-    .min(8, "Password must be at least 8 characters"),
+    .min(1, "auth.validation.passwordRequired")
+    .min(8, "auth.validation.passwordMin"),
   rememberMe: z.boolean().optional(),
 });
 

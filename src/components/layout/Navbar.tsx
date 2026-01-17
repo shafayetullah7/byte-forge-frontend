@@ -5,12 +5,14 @@ import { AuthSection } from "./AuthSection";
 import { MobileMenu } from "./MobileMenu";
 import { useSession } from "~/lib/auth";
 import { getInitials } from "~/lib/utils/string.utils";
+import { useI18n } from "~/i18n";
 
 export function Navbar() {
   const user = useSession(); // Hoist auth state
   const location = useLocation();
   const [scrolled, setScrolled] = createSignal(false);
   const [mobileMenuOpen, setMobileMenuOpen] = createSignal(false);
+  const { t, locale, toggleLocale } = useI18n();
 
   // Handle scroll effect for navbar
   const handleScroll = () => {
@@ -72,28 +74,28 @@ export function Navbar() {
             activeClass="text-forest-600 dark:text-sage-400"
             end
           >
-            Home
+            {t("common.home")}
           </A>
           <A
             href="/plants"
             class="relative text-gray-600 dark:text-gray-300 font-medium text-sm hover:text-forest-600 dark:hover:text-sage-400 transition-colors"
             activeClass="text-forest-600 dark:text-sage-400"
           >
-            Plants
+            {t("common.plants")}
           </A>
           <A
             href="/shops"
             class="relative text-gray-600 dark:text-gray-300 font-medium text-sm hover:text-forest-600 dark:hover:text-sage-400 transition-colors"
             activeClass="text-forest-600 dark:text-sage-400"
           >
-            Shops
+            {t("common.shops")}
           </A>
           <A
             href="/about"
             class="relative text-gray-600 dark:text-gray-300 font-medium text-sm hover:text-forest-600 dark:hover:text-sage-400 transition-colors"
             activeClass="text-forest-600 dark:text-sage-400"
           >
-            About
+            {t("common.about")}
           </A>
         </div>
 
@@ -112,6 +114,14 @@ export function Navbar() {
             aria-label="Cart"
           >
             <ShoppingBagIcon class="w-5 h-5" />
+          </button>
+
+          <button
+            class="flex p-2 text-gray-600 dark:text-gray-300 hover:text-forest-600 dark:hover:text-sage-400 hover:-translate-y-0.5 transition-all font-semibold text-sm"
+            onClick={toggleLocale}
+            aria-label="Switch Language"
+          >
+            {locale() === "en" ? "BN" : "EN"}
           </button>
 
           {/* Auth Section (Desktop) */}

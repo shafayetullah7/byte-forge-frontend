@@ -1,48 +1,49 @@
 import { z } from "zod";
 import { passwordSchema } from "./password.schema";
 
+// Note: Validation keys are placeholders. Ensuring they exist in dictionaries is next step.
 export const registerSchema = z
   .object({
     firstName: z
       .string()
-      .min(1, "First name is required")
-      .max(50, "First name must be less than 50 characters")
-      .regex(/^[a-zA-Z]+$/, "First name must contain only letters"),
+      .min(1, "auth.validation.firstNameRequired")
+      .max(50, "auth.validation.firstNameTooLong")
+      .regex(/^[a-zA-Z]+$/, "auth.validation.firstNameAlpha"),
 
     lastName: z
       .string()
-      .min(1, "Last name is required")
-      .max(50, "Last name must be less than 50 characters")
-      .regex(/^[a-zA-Z]+$/, "Last name must contain only letters"),
+      .min(1, "auth.validation.lastNameRequired")
+      .max(50, "auth.validation.lastNameTooLong")
+      .regex(/^[a-zA-Z]+$/, "auth.validation.lastNameAlpha"),
 
     userName: z
       .string()
-      .min(3, "Username must be at least 3 characters")
-      .max(50, "Username must be less than 50 characters")
+      .min(3, "auth.validation.userNameMin")
+      .max(50, "auth.validation.userNameMax")
       .regex(
         /^[a-z0-9_]+$/,
-        "Username must contain only lowercase letters, numbers, and underscores"
+        "auth.validation.userNameRegex"
       ),
 
     email: z
       .string()
-      .min(1, "Email is required")
-      .email("Please enter a valid email address")
-      .max(255, "Email must be less than 255 characters"),
+      .min(1, "auth.validation.emailRequired")
+      .email("auth.validation.invalidEmail")
+      .max(255, "auth.validation.emailTooLong"),
 
     password: passwordSchema,
 
-    confirmPassword: z.string().min(1, "Please confirm your password"),
+    confirmPassword: z.string().min(1, "auth.validation.confirmPasswordRequired"),
 
     agreeToTerms: z
       .boolean()
       .refine(
         (val) => val === true,
-        "You must agree to the terms and conditions"
+        "auth.validation.agreeToTermsRequired"
       ),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
+    message: "auth.validation.passwordsDoNotMatch",
     path: ["confirmPassword"],
   });
 

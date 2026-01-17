@@ -9,10 +9,12 @@ import {
 } from "../icons";
 
 import { getInitials } from "~/lib/utils/string.utils";
+import { useI18n } from "~/i18n";
 
 export function AuthSection() {
     const user = useSession();
     const navigate = useNavigate();
+    const { t } = useI18n();
     const [dropdownOpen, setDropdownOpen] = createSignal(false);
     const [isLoggingOut, setIsLoggingOut] = createSignal(false);
 
@@ -60,13 +62,13 @@ export function AuthSection() {
                         href="/login"
                         class="text-gray-800 dark:text-gray-200 font-semibold text-sm px-4 py-2 hover:text-forest-600 dark:hover:text-sage-400 transition-colors"
                     >
-                        Login
+                        {t("common.signIn")}
                     </A>
                     <A
                         href="/register"
                         class="bg-forest-600 dark:bg-sage-500 text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:bg-forest-700 dark:hover:bg-sage-600 hover:shadow-lg transition-all"
                     >
-                        Join Now
+                        {t("common.signUp")}
                     </A>
                 </div>
             }
@@ -109,7 +111,7 @@ export function AuthSection() {
                                         onClick={() => setDropdownOpen(false)}
                                     >
                                         <Squares2x2Icon class="w-4 h-4" />
-                                        Dashboard
+                                        {t("common.dashboard")}
                                     </A>
 
                                     <A
@@ -118,7 +120,7 @@ export function AuthSection() {
                                         onClick={() => setDropdownOpen(false)}
                                     >
                                         <UserIcon class="w-4 h-4" />
-                                        Profile
+                                        {t("common.profile")}
                                     </A>
 
                                     <A
@@ -127,7 +129,7 @@ export function AuthSection() {
                                         onClick={() => setDropdownOpen(false)}
                                     >
                                         <Cog6ToothIcon class="w-4 h-4" />
-                                        Settings
+                                        {t("common.settings")}
                                     </A>
                                 </Show>
                             </div>
@@ -140,7 +142,7 @@ export function AuthSection() {
                                     class="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
                                 >
                                     <ArrowRightOnRectangleIcon class="w-4 h-4" />
-                                    {isLoggingOut() ? "Logging out..." : "Logout"}
+                                    {isLoggingOut() ? t("common.loading") : t("common.signOut")}
                                 </button>
                             </div>
                         </div>

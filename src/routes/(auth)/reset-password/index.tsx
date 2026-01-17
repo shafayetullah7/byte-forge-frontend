@@ -8,12 +8,13 @@ import { authApi, ApiError } from "~/lib/api";
 import { toaster } from "~/components/ui/Toast";
 import { z } from "zod";
 import { passwordSchema } from "~/schemas/password.schema";
+import { useI18n } from "~/i18n";
 
 const resetPasswordSchema = z.object({
   password: passwordSchema,
   confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
+  message: "auth.validation.passwordsDoNotMatch",
   path: ["confirmPassword"],
 });
 
@@ -22,6 +23,7 @@ type ResetPasswordForm = z.infer<typeof resetPasswordSchema>;
 export default function ResetPassword() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useI18n();
 
   const getInitialState = () => {
     const locState = location.state as { token?: string; expiresAt?: string } | undefined;
@@ -49,7 +51,7 @@ export default function ResetPassword() {
   // Redirect if no token state
   onMount(() => {
     if (!token()) {
-      toaster.error("Session expired or invalid. Start over.");
+      toaster.error(t("auth.resetPassword.sessionTimeout"));
       navigate("/forgot-password", { replace: true });
     }
   });
@@ -63,7 +65,7 @@ export default function ResetPassword() {
 
     if (diff <= 0) {
       if (!isSessionExpired()) {
-        setTimeLeft("Expired");
+        setTimeLeft(t("auth.resetPassword.sessionExpired"));
         setIsSessionExpired(true);
         // Optional: Auto redirect after few seconds?
         // navigate("/login", { replace: true }); 
@@ -115,14 +117,14 @@ export default function ResetPassword() {
       if (response.success) {
         // Clear session on success
         localStorage.removeItem("byteforge_reset_confirm");
-        toaster.success("Password reset successfully!");
+        toaster.success(t("auth.resetPassword.success"));
         navigate("/login", { replace: true });
       }
     } catch (error) {
       if (error instanceof ApiError) {
         setErrorMessage(error.message);
       } else {
-        setErrorMessage("Failed to reset password.");
+        setErrorMessage(t("common.error"));
       }
     }
   };
@@ -135,7 +137,7 @@ export default function ResetPassword() {
             ? "text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-900/20"
             : "text-forest-600 dark:text-sage-400 bg-forest-50 dark:bg-forest-900/20"
             }`}>
-            {isSessionExpired() ? "Session Expired" : `Session expires in ${timeLeft()}`}
+            {isSessionExpired() ? t("auth.resetPassword.sessionExpired") : `${t("auth.resetPassword.sessionExpiresIn")} ${timeLeft()}`}
           </p>
         )}
       </div>
@@ -150,13 +152,13 @@ export default function ResetPassword() {
         {isSessionExpired() && (
           <div class="text-center">
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              Your session has timed out. Please request a new code.
+              {t("auth.resetPassword.sessionTimeout")}
             </p>
             <A
               href="/forgot-password"
               class="text-forest-600 hover:text-forest-700 dark:text-sage-400 dark:hover:text-sage-300 font-medium"
             >
-              Start Over
+              {t("auth.resetPassword.startOver")}
             </A>
           </div>
         )}
@@ -168,9 +170,9 @@ export default function ResetPassword() {
               <div class="relative">
                 <Input
                   {...props}
-                  label="New Password"
+                  label={t("auth.resetPassword.newPasswordLabel")}
                   type={showPassword() ? "text" : "password"}
-                  placeholder="Unbreakable password"
+                  placeholder={t("auth.register.passwordPlaceholder")}
                   value={field.value || ""}
                   required
                   // disabled={resetForm.submitting} -> handled by fieldset
@@ -190,7 +192,7 @@ export default function ResetPassword() {
 
                 {field.error && (
                   <p class="mt-1 text-sm text-red-600 dark:text-red-400">
-                    {field.error}
+                    {t(field.error)}
                   </p>
                 )}
               </div>
@@ -202,9 +204,9 @@ export default function ResetPassword() {
               <div class="relative">
                 <Input
                   {...props}
-                  label="Confirm Password"
+                  label={t("auth.resetPassword.confirmPasswordLabel")}
                   type={showConfirmPassword() ? "text" : "password"}
-                  placeholder="Repeat password"
+                  placeholder={t("auth.register.confirmPasswordPlaceholder")}
                   value={field.value || ""}
                   required
                 // disabled={resetForm.submitting}
@@ -220,7 +222,7 @@ export default function ResetPassword() {
                 </button>
                 {field.error && (
                   <p class="mt-1 text-sm text-red-600 dark:text-red-400">
-                    {field.error}
+                    {t(field.error)}
                   </p>
                 )}
               </div>
@@ -233,7 +235,7 @@ export default function ResetPassword() {
             type="submit"
             disabled={resetForm.submitting || isSessionExpired()}
           >
-            {resetForm.submitting ? "Resetting..." : "Reset Password"}
+            {resetForm.submitting ? t("auth.resetPassword.submitting") : t("auth.resetPassword.submit")}
           </Button>
         </fieldset>
       </Form>
