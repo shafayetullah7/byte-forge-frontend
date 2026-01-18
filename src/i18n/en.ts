@@ -33,8 +33,8 @@ export const dict = {
     plants: "Plants",
     cart: "Cart",
     hero: {
-      title: "Bring Nature Into Your Digital World",
-      subtitle: "Discover the rarest indoor plants and elevate your workspace with our curated collection.",
+      title: "Cultivate Your Digital Sanctuary",
+      subtitle: "Discover the rarest indoor plants or open your own nursery in minutes.",
       shopNow: "Shop Plants",
       learnMore: "Learn More",
     },
