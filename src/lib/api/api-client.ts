@@ -100,6 +100,7 @@ const parseErrorResponse = async (
 class ApiClient {
   private config: ApiClientConfig;
   private activeRequests = new Set<AbortController>(); // Track active requests for cleanup
+  private isRedirecting = false; // Fix #2: Debounce multiple 401 redirects
 
   constructor(options?: Partial<ApiClientConfig>) {
     this.config = {
@@ -146,18 +147,89 @@ class ApiClient {
   }
 
   /**
+   * Handle 401 Unauthorized responses with critical fixes
+   * 
+   * Critical Fixes Applied:
+   * 1. Prevent infinite redirect loop
+   * 2. Debounce multiple simultaneous 401s
+   * 3. Proper SSR/CSR handling
+   * 4. Session cache invalidation
+   */
+  private async handle401(): Promise<never> {
+    const isServer = typeof window === "undefined";
+
+    if (isServer) {
+      // SSR: Use SolidStart's redirect
+      const { redirect } = await import("@solidjs/router");
+      throw redirect("/login");
+    }
+
+    // CSR: Client-side handling
+    
+    // Fix #1: Prevent infinite redirect loop
+    const currentPath = window.location.pathname;
+    if (currentPath === "/login" || currentPath === "/register") {
+      // Already on auth page, don't redirect
+      throw new ApiError("Unauthorized", 401);
+    }
+
+    // Fix #2: Debounce multiple 401 redirects
+    if (this.isRedirecting) {
+      throw new ApiError("Already redirecting to login", 401);
+    }
+
+    this.isRedirecting = true;
+
+    // Fix #5: Invalidate session cache
+    try {
+      const { revalidate } = await import("@solidjs/router");
+      revalidate("user-session");
+    } catch (e) {
+      // Revalidate might fail in some contexts, that's okay
+      console.warn("[Auth] Could not revalidate session cache");
+    }
+
+    // Hard redirect to clear all state
+    window.location.href = "/login";
+    
+    // Throw to stop execution
+    throw new ApiError("Unauthorized - redirecting to login", 401);
+  }
+
+  /**
+   * Handle response and check for errors
+   */
+  private async handleResponse<T>(response: Response): Promise<T> {
+    // Handle 401 Unauthorized with critical fixes
+    if (response.status === 401) {
+      return this.handle401();
+    }
+
+    // Handle other non-OK responses
+    if (!response.ok) {
+      const errorData = await parseErrorResponse(response);
+      throw new ApiError(
+        errorData.message || "Request failed",
+        response.status,
+        errorData
+      );
+    }
+
+    // Handle 204 No Content
+    if (response.status === 204) {
+      return {} as T;
+    }
+
+    // Parse JSON response
+    const data = await response.json();
+    return data as T;
+  }
+
+  /**
    * Make an HTTP request
    *
    * This method handles all HTTP communication with the backend.
-   * It throws ApiError for any non-2xx response - no automatic redirects.
-   *
-   * **Error Handling:**
-   * - 401 Unauthorized: Throws ApiError (no redirect)
-   * - 4xx/5xx: Throws ApiError with parsed error data
-   * - Timeout: Throws ApiError with 408 status
-   *
-   * Use wrapper functions (withAuthRedirect, withServerAuthRedirect) if you want
-   * automatic redirect behavior on 401 errors.
+   * 401 errors are automatically handled with redirect to login.
    */
   private async request<T>(
     endpoint: string,
@@ -208,26 +280,14 @@ class ApiClient {
           withCredentials ?? this.config.withCredentials ? "include" : "omit",
       });
 
-      // Handle non-OK responses - simply throw ApiError
-      if (!response.ok) {
-        const errorData = await parseErrorResponse(response);
+      // Use centralized response handler (includes 401 handling)
+      return this.handleResponse<T>(response);
 
-        throw new ApiError(
-          errorData.message || "Request failed",
-          response.status,
-          errorData
-        );
-      }
-
-      // Handle 204 No Content
-      if (response.status === 204) {
-        return {} as T;
-      }
-
-      // Parse JSON response
-      const data = await response.json();
-      return data as T;
     } catch (error: any) {
+      // Fix #3 & #4: Don't catch Response objects (SSR redirects)
+      if (error instanceof Response) {
+        throw error;
+      }
       // Handle timeout/abort errors
       if (error.name === "AbortError") {
         const isServer = typeof window === "undefined";

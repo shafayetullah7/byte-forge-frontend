@@ -44,5 +44,6 @@ export interface MediaRecord {
 export interface UploadMediaResponse {
   status: number;
   message: string;
-  data: MediaRecord;
+  data: Media; // Backend returns Media directly, not MediaRecord
 }
+

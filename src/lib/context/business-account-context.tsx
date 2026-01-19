@@ -1,47 +1,41 @@
-import { createContext, useContext, createResource, ParentComponent, Accessor } from "solid-js";
-import { sellerApi } from "~/lib/api";
+import { createContext, useContext, ParentComponent, createResource } from "solid-js";
+import { sellerApi, ApiError } from "~/lib/api";
 import type { BusinessAccount } from "~/lib/api/types/seller.types";
 
-type BusinessAccountContextType = {
-    businessAccount: Accessor<BusinessAccount | null | undefined>;
-    hasBusinessAccount: () => boolean;
+interface BusinessAccountContextValue {
+    businessAccount: () => BusinessAccount | null | undefined;
     refetch: () => void;
     isLoading: () => boolean;
-};
+}
 
-const BusinessAccountContext = createContext<BusinessAccountContextType>();
+const BusinessAccountContext = createContext<BusinessAccountContextValue>();
 
 export const BusinessAccountProvider: ParentComponent = (props) => {
     const [businessAccount, { refetch }] = createResource(async () => {
         try {
             const response = await sellerApi.businessAccount.get();
             return response.data;
-        } catch (error: any) {
-            // If 404, user doesn't have a business account yet
-            if (error.response?.status === 404) {
+        } catch (error) {
+            // Only handle 404 (no business account exists)
+            if (error instanceof ApiError && error.statusCode === 404) {
                 return null;
             }
-            // For other errors, rethrow
+
+            // Let all other errors propagate (including 401)
+            // The API client will handle 401 automatically
+            // The error boundary will catch other errors
             throw error;
         }
     });
 
-    const hasBusinessAccount = () => {
-        const account = businessAccount();
-        return account !== null && account !== undefined;
+    const value: BusinessAccountContextValue = {
+        businessAccount,
+        refetch,
+        isLoading: () => businessAccount.loading,
     };
 
-    const isLoading = () => businessAccount.loading;
-
     return (
-        <BusinessAccountContext.Provider
-            value={{
-                businessAccount,
-                hasBusinessAccount,
-                refetch,
-                isLoading
-            }}
-        >
+        <BusinessAccountContext.Provider value={value}>
             {props.children}
         </BusinessAccountContext.Provider>
     );

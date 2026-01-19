@@ -1,4 +1,5 @@
 import { createSignal, createContext, useContext, JSX, Component, onMount } from "solid-js";
+import { useNavigate } from "@solidjs/router";
 import { useSession } from "~/lib/auth";
 
 export type UserRole = "buyer" | "seller";
@@ -16,6 +17,7 @@ const RoleContext = createContext<RoleContextType>();
 export const RoleProvider: Component<{ children: JSX.Element }> = (props) => {
     const [role, setRoleSignal] = createSignal<UserRole>("buyer");
     const user = useSession();
+    const navigate = useNavigate(); // Added useNavigate hook
 
     // Load role from localStorage on mount
     onMount(() => {
@@ -34,7 +36,15 @@ export const RoleProvider: Component<{ children: JSX.Element }> = (props) => {
     };
 
     const toggleRole = () => {
-        setRole(role() === "buyer" ? "seller" : "buyer");
+        const newRole = role() === "buyer" ? "seller" : "buyer"; // Determine new role
+        setRole(newRole); // Update role and localStorage
+
+        // Navigate to appropriate route based on the new role
+        if (newRole === "seller") {
+            navigate("/app/seller/shops");
+        } else {
+            navigate("/app");
+        }
     };
 
     const isSeller = () => role() === "seller";
