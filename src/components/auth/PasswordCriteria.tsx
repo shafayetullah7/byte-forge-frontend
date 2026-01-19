@@ -45,11 +45,10 @@ export function PasswordCriteria(props: PasswordCriteriaProps) {
         {criteria().map((item) => (
           <div class="flex items-center gap-2.5">
             <div
-              class={`w-4 h-4 rounded-full flex items-center justify-center transition-colors duration-200 ${
-                item.isValid
-                  ? "bg-green-500 text-white"
+              class={`w-4 h-4 rounded-full flex items-center justify-center transition-colors duration-200 ${item.isValid
+                  ? "bg-sage-500 text-white"
                   : "bg-gray-200 dark:bg-gray-700 text-gray-400"
-              }`}
+                }`}
             >
               {item.isValid ? (
                 <svg
@@ -70,11 +69,10 @@ export function PasswordCriteria(props: PasswordCriteriaProps) {
               )}
             </div>
             <span
-              class={`text-xs transition-colors duration-200 ${
-                item.isValid
+              class={`text-xs transition-colors duration-200 ${item.isValid
                   ? "text-gray-700 dark:text-gray-200 font-medium"
                   : "text-gray-500 dark:text-gray-400"
-              }`}
+                }`}
             >
               {item.label}
             </span>

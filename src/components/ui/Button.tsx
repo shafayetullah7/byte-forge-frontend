@@ -2,7 +2,7 @@ import { JSX, splitProps } from "solid-js";
 
 export interface ButtonProps
   extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "outline" | "ghost";
+  variant?: "primary" | "secondary" | "accent" | "outline" | "ghost";
   size?: "sm" | "md" | "lg";
 }
 
@@ -19,7 +19,7 @@ export default function Button(props: ButtonProps) {
 
   // Base styles
   const baseStyles =
-    "font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
+    "inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed";
 
   // Size styles
   const sizeStyles = {
@@ -31,18 +31,19 @@ export default function Button(props: ButtonProps) {
   // Variant styles
   const variantStyles = {
     primary:
-      "bg-terracotta-500 hover:bg-terracotta-600 text-white shadow-sm focus:ring-terracotta-300 dark:bg-terracotta-600 dark:hover:bg-terracotta-700",
+      "bg-forest-600 hover:bg-forest-700 text-white shadow-sm focus:ring-forest-500 dark:bg-sage-500 dark:hover:bg-sage-600",
     secondary:
-      "bg-forest-600 hover:bg-forest-700 text-white shadow-sm focus:ring-forest-300 dark:bg-forest-700 dark:hover:bg-forest-800",
+      "bg-forest-50 hover:bg-forest-100 text-forest-700 focus:ring-forest-500 dark:bg-white/10 dark:text-white dark:hover:bg-white/20",
+    accent:
+      "bg-terracotta-500 hover:bg-terracotta-600 text-white shadow-sm focus:ring-terracotta-500",
     outline:
-      "bg-transparent border-2 border-forest-600 text-forest-600 hover:bg-forest-50 focus:ring-forest-300 dark:border-sage-400 dark:text-sage-400 dark:hover:bg-forest-800",
+      "bg-transparent border border-forest-200 text-forest-700 hover:bg-forest-50 focus:ring-forest-500 dark:border-gray-600 dark:text-gray-300",
     ghost:
-      "bg-sage-100 hover:bg-sage-200 text-sage-700 focus:ring-sage-300 dark:bg-sage-800 dark:hover:bg-sage-700 dark:text-sage-300",
+      "bg-transparent hover:bg-gray-100 text-gray-700 focus:ring-forest-500 dark:text-gray-300 dark:hover:bg-gray-800",
   };
 
-  const classes = `${baseStyles} ${sizeStyles[size]} ${
-    variantStyles[variant]
-  } ${local.class || ""}`;
+  const classes = `${baseStyles} ${sizeStyles[size]} ${variantStyles[variant]
+    } ${local.class || ""}`;
 
   return (
     <button class={classes} {...others}>

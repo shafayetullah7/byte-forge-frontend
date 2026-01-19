@@ -1,12 +1,14 @@
 import { RouteSectionProps, useLocation } from "@solidjs/router";
+import { Show } from "solid-js";
 import { Navbar } from "~/components/layout/Navbar";
 
 export default function AppLayout(props: RouteSectionProps) {
   const location = useLocation();
   const isHome = () => location.pathname === "/";
+  const isApp = () => location.pathname.startsWith("/app");
 
   return (
-    <>
+    <Show when={!isApp()} fallback={props.children}>
       <Navbar />
       <main
         class="min-h-screen"
@@ -17,6 +19,6 @@ export default function AppLayout(props: RouteSectionProps) {
       >
         {props.children}
       </main>
-    </>
+    </Show>
   );
 }

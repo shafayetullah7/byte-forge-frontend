@@ -1,4 +1,8 @@
 import { useNavigate } from "@solidjs/router";
+import { DashboardLayout } from "~/components/layout/dashboard/DashboardLayout";
+import { RoleProvider } from "~/lib/context/role-context";
+
+
 import { Show, createEffect, ParentComponent } from "solid-js";
 import { useSession } from "~/lib/auth";
 
@@ -26,7 +30,11 @@ const ProtectedLayout: ParentComponent = (props) => {
     // We use user()?.emailVerified to safely handle the loading state (undefined) or null
     return (
         <Show when={user()?.emailVerified}>
-            {props.children}
+            <RoleProvider>
+                <DashboardLayout>
+                    {props.children}
+                </DashboardLayout>
+            </RoleProvider>
         </Show>
     );
 };

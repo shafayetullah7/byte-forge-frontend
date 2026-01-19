@@ -51,8 +51,9 @@
   --color-sage-200: #d1e1cb;
   --color-sage-300: #a8c5a0;
   --color-sage-400: #7fa876;
-  --color-sage-500: #5d8554;
-  --color-sage-600: #4a6a43;
+  /* Adjusted for better contrast */
+  --color-sage-500: #567c4d;
+  --color-sage-600: #46663f;
   --color-sage-700: #3a5335;
   --color-sage-800: #2d4129;
   --color-sage-900: #1f2d1c;
@@ -63,7 +64,8 @@
   --color-terracotta-200: #fbd1c1;
   --color-terracotta-300: #f7b49a;
   --color-terracotta-400: #e8967d;
-  --color-terracotta-500: #d97556;
+  /* Refined to be more earthen/vibrant */
+  --color-terracotta-500: #d06d48;
   --color-terracotta-600: #b85a3d;
   --color-terracotta-700: #954731;
   --color-terracotta-800: #733829;
@@ -76,6 +78,10 @@
   --color-cream-300: #d9c9a8;
   --color-cream-400: #c9b387;
   --color-cream-500: #b89d66;
+  --color-cream-600: #a8895d;
+  --color-cream-700: #8a7049;
+  --color-cream-800: #6b5738;
+  --color-cream-900: #4d3f28;
 }
 
 /* * {
@@ -119,4 +125,3 @@ body {
   -webkit-background-clip: text;
   color: transparent;
 }
-

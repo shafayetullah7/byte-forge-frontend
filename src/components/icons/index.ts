@@ -7,3 +7,8 @@ export { Squares2x2Icon } from "./Squares2x2Icon";
 export { UserIcon } from "./UserIcon";
 export { Cog6ToothIcon } from "./Cog6ToothIcon";
 export { ArrowRightOnRectangleIcon } from "./ArrowRightOnRectangleIcon";
+export { ChevronRightIcon } from "./ChevronRightIcon";
+
+export * from './TagIcon';
+export * from './ArrowsRightLeftIcon';
+export * from './GlobeAltIcon';

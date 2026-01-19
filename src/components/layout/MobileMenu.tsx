@@ -118,7 +118,7 @@ export function MobileMenu(props: MobileMenuProps) {
 
                                 <Show when={userData().emailVerified}>
                                     <A
-                                        href="/dashboard"
+                                        href="/app"
                                         class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                                         onClick={props.onClose}
                                     >
@@ -126,7 +126,7 @@ export function MobileMenu(props: MobileMenuProps) {
                                         {t("common.dashboard")}
                                     </A>
                                     <A
-                                        href="/profile"
+                                        href="/app/profile"
                                         class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                                         onClick={props.onClose}
                                     >
@@ -134,7 +134,7 @@ export function MobileMenu(props: MobileMenuProps) {
                                         {t("common.profile")}
                                     </A>
                                     <A
-                                        href="/settings"
+                                        href="/app/settings"
                                         class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                                         onClick={props.onClose}
                                     >

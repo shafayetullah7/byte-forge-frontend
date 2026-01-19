@@ -39,7 +39,7 @@ export function Hero() {
                     <A href="/plants" class="w-full sm:w-auto">
                         <Button
                             size="lg"
-                            class="w-full bg-forest-600 hover:bg-forest-500 text-white font-semibold px-8 py-6 text-lg rounded-xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border-none"
+                            class="w-full font-semibold px-8 py-6 text-lg rounded-xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
                         >
                             {t("common.hero.shopNow")}
                         </Button>
