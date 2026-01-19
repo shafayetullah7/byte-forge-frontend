@@ -10,6 +10,7 @@ import {
 // Mock Role Context (Will replace with actual context later)
 // For now, we assume Buyer mode default
 import { useRole } from "~/lib/context/role-context";
+import { useBusinessAccount } from "~/lib/context/business-account-context";
 
 interface SidebarProps {
     isOpen: boolean;
@@ -21,6 +22,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
     const location = useLocation();
     const { t } = useI18n();
     const { isSeller } = useRole();
+    const { hasBusinessAccount, isLoading } = useBusinessAccount();
 
     const isActive = (path: string) => {
         // Exact match for root, startsWith for others
@@ -80,8 +82,18 @@ export const Sidebar: Component<SidebarProps> = (props) => {
                                         <div class="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
                                             {t("common.sellerWorkspace")}
                                         </div>
-                                        <NavItem href="/app/seller" icon={Squares2x2Icon} label={t("common.dashboard")} />
-                                        <NavItem href="/app/seller/shops" icon={ShoppingBagIcon} label={t("common.shops")} />
+                                        <Show
+                                            when={!isLoading() && hasBusinessAccount()}
+                                            fallback={
+                                                <NavItem
+                                                    href="/app/seller/setup-business"
+                                                    icon={Squares2x2Icon}
+                                                    label="Setup Business Account"
+                                                />
+                                            }
+                                        >
+                                            <NavItem href="/app/seller/shops" icon={ShoppingBagIcon} label={t("common.shops")} />
+                                        </Show>
                                     </>
                                 }
                             >

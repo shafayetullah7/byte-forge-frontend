@@ -1,29 +1,33 @@
 /**
- * Business Account structure
+ * Business Account structure (matches backend schema)
  */
 export interface BusinessAccount {
   id: string;
-  userId: string;
-  businessName: string;
-  businessEmail: string;
-  businessPhone: string;
+  ownerId: string;
+  name: string;
   address: string;
-  country: string;
-  city: string;
+  verificationStatus: 'UNVERIFIED' | 'PENDING' | 'VERIFIED' | 'REJECTED';
+  logoId?: string | null;
   createdAt: string;
   updatedAt: string;
+  logo?: {
+    id: string;
+    url: string;
+    mimeType: string;
+    fileName: string;
+    size: number;
+  } | null;
 }
 
 /**
- * Setup Business Account Request
+ * Setup Business Account Request (matches backend DTO)
  */
 export interface CreateBusinessAccountRequest {
-  businessName: string;
-  businessEmail: string;
-  businessPhone: string;
-  address: string;
-  country: string;
-  city: string;
+  basicInfo: {
+    name: string;
+    address: string;
+    logoId?: string;
+  };
 }
 
 /**

@@ -1,7 +1,7 @@
 import { useNavigate } from "@solidjs/router";
 import { DashboardLayout } from "~/components/layout/dashboard/DashboardLayout";
 import { RoleProvider } from "~/lib/context/role-context";
-
+import { BusinessAccountProvider } from "~/lib/context/business-account-context";
 
 import { Show, createEffect, ParentComponent } from "solid-js";
 import { useSession } from "~/lib/auth";
@@ -31,9 +31,11 @@ const ProtectedLayout: ParentComponent = (props) => {
     return (
         <Show when={user()?.emailVerified}>
             <RoleProvider>
-                <DashboardLayout>
-                    {props.children}
-                </DashboardLayout>
+                <BusinessAccountProvider>
+                    <DashboardLayout>
+                        {props.children}
+                    </DashboardLayout>
+                </BusinessAccountProvider>
             </RoleProvider>
         </Show>
     );

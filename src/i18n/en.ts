@@ -216,4 +216,17 @@ export const dict = {
       },
     },
   },
+  seller: {
+    businessAccount: {
+      setupTitle: "Setup Your Business Account",
+      setupDescription: "Before you can create shops and sell products, you need to setup your business account.",
+      nameLabel: "Business Name",
+      namePlaceholder: "Enter your business name",
+      addressLabel: "Business Address",
+      addressPlaceholder: "Enter your complete business address",
+      createButton: "Create Business Account",
+      created: "Business account created successfully!",
+      createFailed: "Failed to create business account",
+    },
+  },
 };
