@@ -1,4 +1,4 @@
-import { createSignal } from "solid-js";
+import { createSignal, createEffect } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { Button, Input, ImageUpload } from "~/components/ui";
 import { sellerApi } from "~/lib/api";
@@ -10,12 +10,26 @@ import { useImageUpload } from "~/lib/hooks/useImageUpload";
 export default function SetupBusiness() {
     const navigate = useNavigate();
     const { t } = useI18n();
-    const { refetch } = useBusinessAccount();
+    const { businessAccount, isLoading, refetch } = useBusinessAccount();
     const [isSubmitting, setIsSubmitting] = createSignal(false);
     const [formData, setFormData] = createSignal({
         name: "",
         address: "",
         logoId: undefined as string | undefined,
+    });
+
+    // Redirect users who already have a business account
+    createEffect(() => {
+        const account = businessAccount();
+        const loading = isLoading();
+
+        // Wait for loading to complete
+        if (loading) return;
+
+        // If business account exists, redirect to shops
+        if (account !== null && account !== undefined) {
+            navigate("/app/seller/shops", { replace: true });
+        }
     });
 
     // Use the reusable image upload hook

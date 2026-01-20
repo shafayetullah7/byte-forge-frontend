@@ -1,5 +1,5 @@
 import { useNavigate } from "@solidjs/router";
-import { RoleProvider } from "~/lib/context/role-context";
+
 import { BusinessAccountProvider } from "~/lib/context/business-account-context";
 import { Show, createEffect, ParentComponent, ErrorBoundary } from "solid-js";
 import { useSession } from "~/lib/auth";
@@ -39,6 +39,11 @@ const ProtectedLayout: ParentComponent = (props) => {
     return (
         <ErrorBoundary
             fallback={(error, reset) => {
+                // Log error for debugging
+                console.error("[ProtectedLayout ErrorBoundary] Caught error:", error);
+                console.error("[ProtectedLayout ErrorBoundary] Error type:", error?.constructor?.name);
+                console.error("[ProtectedLayout ErrorBoundary] Error stack:", error?.stack);
+
                 // Fix #3: Don't catch Response objects (SSR redirects)
                 if (error instanceof Response) {
                     throw error;
@@ -51,15 +56,26 @@ const ProtectedLayout: ParentComponent = (props) => {
                 }
 
                 // Show error screen for other errors
+                const errorMessage = error instanceof Error
+                    ? error.message
+                    : typeof error === "string"
+                        ? error
+                        : "An unexpected error occurred";
+
                 return (
                     <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-                        <div class="text-center p-8">
+                        <div class="text-center p-8 max-w-lg">
                             <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
                                 Something went wrong
                             </h1>
                             <p class="text-gray-600 dark:text-gray-400 mb-6">
-                                {error instanceof Error ? error.message : "An unexpected error occurred"}
+                                {errorMessage}
                             </p>
+                            <div class="mb-6 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-left overflow-auto max-h-64">
+                                <p class="text-xs font-mono text-gray-700 dark:text-gray-300 break-all whitespace-pre-wrap">
+                                    {error?.stack || JSON.stringify(error, null, 2)}
+                                </p>
+                            </div>
                             <button
                                 onClick={reset}
                                 class="px-4 py-2 bg-terracotta-600 text-white rounded-lg hover:bg-terracotta-700 transition-colors"
@@ -72,9 +88,7 @@ const ProtectedLayout: ParentComponent = (props) => {
             }}
         >
             <Show when={user()?.emailVerified}>
-                <RoleProvider>
-                    <BusinessAccountProvider>{props.children}</BusinessAccountProvider>
-                </RoleProvider>
+                <BusinessAccountProvider>{props.children}</BusinessAccountProvider>
             </Show>
         </ErrorBoundary>
     );

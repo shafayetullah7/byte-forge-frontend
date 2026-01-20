@@ -10,7 +10,7 @@ import {
 import { useI18n } from "~/i18n";
 import { UserMenu } from "../UserMenu";
 import { useSession } from "~/lib/auth";
-import { useRole } from "~/lib/context/role-context";
+import { A, useLocation } from "@solidjs/router";
 import Input from "~/components/ui/Input";
 // Removed SegmentedControl import as it's no longer used in this file
 
@@ -20,7 +20,8 @@ interface TopbarProps {
 
 export const Topbar: Component<TopbarProps> = (props) => {
     const { locale, toggleLocale } = useI18n();
-    const { isSeller, toggleRole } = useRole();
+    const location = useLocation();
+    const isSeller = () => location.pathname.startsWith("/app/seller");
     const { t } = useI18n();
     const session = useSession();
 
@@ -50,30 +51,31 @@ export const Topbar: Component<TopbarProps> = (props) => {
 
             {/* Right Side: Actions */}
             <div class="flex items-center gap-4">
-                {/* Role Switcher - Context Capsule */}
-                <button
-                    onClick={toggleRole}
-                    class="hidden md:flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-full border transition-all duration-200 group relative overflow-hidden"
+                {/* Dashboard Links */}
+                <A
+                    href="/app"
+                    class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all duration-200"
                     classList={{
-                        "bg-forest-50 border-forest-100 text-forest-700 hover:border-forest-200 hover:bg-forest-100": !isSeller(),
-                        "bg-terracotta-50 border-terracotta-100 text-terracotta-700 hover:border-terracotta-200 hover:bg-terracotta-100": isSeller()
+                        "bg-forest-100 border-forest-200 text-forest-800": !isSeller(),
+                        "bg-forest-50 border-forest-100 text-forest-700 hover:border-forest-200 hover:bg-forest-100": isSeller()
                     }}
-                    title="Switch Account Type"
+                    title="Buyer Dashboard"
                 >
-                    <div class="flex items-center gap-2 z-10">
-                        <Show when={!isSeller()} fallback={<TagIcon class="w-4 h-4" />}>
-                            <ShoppingBagIcon class="w-4 h-4" />
-                        </Show>
-                        <span class="text-xs font-semibold uppercase tracking-wide">
-                            {isSeller() ? "Seller" : "Buyer"}
-                        </span>
-                    </div>
-
-                    {/* Switch Indicator */}
-                    <div class="flex items-center justify-center w-5 h-5 rounded-full bg-white/50 group-hover:bg-white text-current transition-colors ml-1">
-                        <ArrowsRightLeftIcon class="w-3 h-3" />
-                    </div>
-                </button>
+                    <ShoppingBagIcon class="w-4 h-4" />
+                    <span class="text-xs font-semibold uppercase tracking-wide">Buyer</span>
+                </A>
+                <A
+                    href="/app/seller/shops"
+                    class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all duration-200"
+                    classList={{
+                        "bg-terracotta-100 border-terracotta-200 text-terracotta-800": isSeller(),
+                        "bg-terracotta-50 border-terracotta-100 text-terracotta-700 hover:border-terracotta-200 hover:bg-terracotta-100": !isSeller()
+                    }}
+                    title="Seller Dashboard"
+                >
+                    <TagIcon class="w-4 h-4" />
+                    <span class="text-xs font-semibold uppercase tracking-wide">Seller</span>
+                </A>
 
                 <div class="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-1"></div>
 

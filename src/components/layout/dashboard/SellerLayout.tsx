@@ -27,13 +27,7 @@ export const SellerLayout: ParentComponent = (props) => {
                     label: t("common.shops"),
                 },
             ]
-            : [
-                {
-                    href: "/app/seller/setup-business",
-                    icon: Squares2x2Icon,
-                    label: "Setup Business Account",
-                },
-            ],
+            : [], // No sidebar links when business account doesn't exist
     };
 
     return <DashboardLayout sidebarConfig={sidebarConfig}>{props.children}</DashboardLayout>;

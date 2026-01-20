@@ -20,9 +20,10 @@ const SellerProtectedLayout: ParentComponent = (props) => {
         }
     });
 
-    // Only render content if business account exists
+    // Only render content if business account exists and is truthy
+    // This prevents rendering when businessAccount is null or undefined
     return (
-        <Show when={!isLoading() && businessAccount() !== null}>
+        <Show when={!isLoading() && businessAccount()}>
             {props.children}
         </Show>
     );

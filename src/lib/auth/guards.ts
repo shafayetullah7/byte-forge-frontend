@@ -45,7 +45,12 @@ export const requireAuth = query(async () => {
 export const requireVerifiedEmail = query(async () => {
   "use server";
   
-  const user = await requireAuth();
+  // Call getSession directly instead of requireAuth to avoid nesting query functions
+  const user = await getSession();
+  
+  if (!user) {
+    throw redirect("/login");
+  }
   
   if (!user.emailVerified) {
     throw redirect("/verify-account");
