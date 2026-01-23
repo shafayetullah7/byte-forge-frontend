@@ -26,7 +26,7 @@ export const Topbar: Component<TopbarProps> = (props) => {
     const session = useSession();
 
     return (
-        <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 shadow-sm z-10 sticky top-0">
+        <header class="bg-white dark:bg-forest-800 border-b border-gray-200 dark:border-forest-700 h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 shadow-sm z-10 sticky top-0">
             {/* Left Side: Mobile Menu Trigger & Search */}
             <div class="flex items-center flex-1 gap-4">
                 <button
@@ -44,7 +44,7 @@ export const Topbar: Component<TopbarProps> = (props) => {
                     <Input
                         type="text"
                         placeholder="Search..."
-                        class="pl-10 bg-gray-50 dark:bg-gray-700 focus:bg-white dark:focus:bg-gray-800"
+                        class="pl-10 bg-gray-50 dark:bg-forest-700 focus:bg-white dark:focus:bg-forest-800"
                     />
                 </div>
             </div>
@@ -77,7 +77,7 @@ export const Topbar: Component<TopbarProps> = (props) => {
                     <span class="text-xs font-semibold uppercase tracking-wide">Seller</span>
                 </A>
 
-                <div class="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-1"></div>
+                <div class="h-6 w-px bg-gray-200 dark:bg-forest-700 mx-1"></div>
 
                 {/* Language Switcher - Minimalist Globe */}
                 <button

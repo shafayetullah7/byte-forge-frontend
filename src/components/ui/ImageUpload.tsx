@@ -54,7 +54,7 @@ export const ImageUpload: Component<ImageUploadProps> = (props) => {
                 {/* Preview with Delete Button */}
                 <Show when={props.preview}>
                     <div class="relative group">
-                        <div class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-forest-900/50 rounded-lg border border-gray-200 dark:border-forest-700">
                             <div class="relative">
                                 <img
                                     src={props.preview!}

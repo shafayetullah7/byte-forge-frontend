@@ -39,7 +39,7 @@ export const StatusBadge: Component<StatusBadgeProps> = (inputProps) => {
                 // Error/Stop -> Red (Standard)
                 return "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300 border-red-200 dark:border-red-800";
             default:
-                return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-700";
+                return "bg-gray-100 text-gray-800 dark:bg-forest-800 dark:text-gray-300 border-gray-200 dark:border-forest-700";
         }
     };
 

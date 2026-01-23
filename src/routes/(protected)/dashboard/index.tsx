@@ -14,7 +14,7 @@ const Dashboard: Component = () => {
                     <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
                         Welcome back, <span class="font-semibold text-forest-600 dark:text-sage-400">{user()?.userName}</span>!
                     </p>
-                    <div class="mt-8 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+                    <div class="mt-8 p-6 bg-white dark:bg-forest-800 rounded-xl shadow-lg border border-gray-200 dark:border-forest-700">
                         <p class="text-gray-500 dark:text-gray-300">
                             This is a protected area. You can only see this if you are logged in and verified.
                         </p>

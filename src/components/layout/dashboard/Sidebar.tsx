@@ -48,7 +48,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
             href={itemProps.href}
             class={`group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors mb-1 ${isActive(itemProps.href)
                 ? getActiveStyles()
-                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-forest-700"
                 }`}
             onClick={props.onClose}
         >
@@ -74,12 +74,12 @@ export const Sidebar: Component<SidebarProps> = (props) => {
 
             {/* Sidebar Container */}
             <div
-                class={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transform transition-transform duration-300 ease-in-out md:translate-x-0 md:relative md:inset-0 ${props.isOpen ? "translate-x-0" : "-translate-x-full"
+                class={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-forest-800 border-r border-gray-200 dark:border-forest-700 transform transition-transform duration-300 ease-in-out md:translate-x-0 md:relative md:inset-0 ${props.isOpen ? "translate-x-0" : "-translate-x-full"
                     }`}
             >
                 <div class="h-full flex flex-col">
                     {/* Logo Area */}
-                    <div class="flex items-center h-16 flex-shrink-0 px-4 border-b border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center h-16 flex-shrink-0 px-4 border-b border-gray-200 dark:border-forest-700">
                         <A
                             href="/"
                             class="text-xl font-bold text-forest-800 dark:text-sage-400 flex items-center gap-2"

@@ -17,15 +17,15 @@ const SellerDashboard: Component = () => {
 
             {/* Placeholder Content */}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div class="bg-white dark:bg-forest-800 p-6 rounded-xl border border-gray-200 dark:border-forest-700 shadow-sm">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Total Sales</h3>
                     <p class="text-3xl font-bold text-forest-600 dark:text-sage-400">$0.00</p>
                 </div>
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div class="bg-white dark:bg-forest-800 p-6 rounded-xl border border-gray-200 dark:border-forest-700 shadow-sm">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Active Shops</h3>
                     <p class="text-3xl font-bold text-forest-600 dark:text-sage-400">0</p>
                 </div>
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div class="bg-white dark:bg-forest-800 p-6 rounded-xl border border-gray-200 dark:border-forest-700 shadow-sm">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Pending Orders</h3>
                     <p class="text-3xl font-bold text-forest-600 dark:text-sage-400">0</p>
                 </div>

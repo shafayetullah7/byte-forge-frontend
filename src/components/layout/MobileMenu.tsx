@@ -40,7 +40,7 @@ export function MobileMenu(props: MobileMenuProps) {
 
     return (
         <Show when={props.isOpen}>
-            <div class="absolute right-4 top-20 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-2 animate-in fade-in slide-in-from-top-2 duration-200 mobile-menu-container">
+            <div class="absolute right-4 top-20 w-64 bg-white dark:bg-forest-800 rounded-xl shadow-xl border border-gray-200 dark:border-forest-700 py-2 animate-in fade-in slide-in-from-top-2 duration-200 mobile-menu-container">
                 <div class="py-2 flex flex-col">
                     <A
                         href="/"
@@ -77,7 +77,7 @@ export function MobileMenu(props: MobileMenuProps) {
                         class="px-4 py-2 text-sm font-medium text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-between"
                     >
                         <span>{t("common.language")}</span>
-                        <span class="px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 font-bold text-xs uppercase text-forest-600 dark:text-sage-400">
+                        <span class="px-2 py-0.5 rounded bg-gray-100 dark:bg-forest-700 font-bold text-xs uppercase text-forest-600 dark:text-sage-400">
                             {locale() === "en" ? "English" : "বাংলা"}
                         </span>
                     </button>

@@ -1,6 +1,6 @@
 export default function AboutPage() {
   return (
-    <div class="min-h-screen bg-cream-50 dark:bg-forest-900 py-12">
+    <main class="min-h-screen bg-cream-50 dark:bg-forest-900">
       <div class="max-w-4xl mx-auto px-4">
         <h1 class="text-5xl font-bold text-gradient-brand mb-6">
           About ByteForge
@@ -43,6 +43,6 @@ export default function AboutPage() {
           </section>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

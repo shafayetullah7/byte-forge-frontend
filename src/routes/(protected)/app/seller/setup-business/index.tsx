@@ -74,7 +74,7 @@ export default function SetupBusiness() {
                 </div>
 
                 {/* Form Card */}
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div class="bg-white dark:bg-forest-800 rounded-2xl shadow-lg border border-gray-200 dark:border-forest-700 overflow-hidden">
                     <div class="px-8 py-10">
                         <form onSubmit={handleSubmit} class="space-y-6">
                             {/* Business Name */}
@@ -111,7 +111,7 @@ export default function SetupBusiness() {
                                         setFormData({ ...formData(), address: e.currentTarget.value })
                                     }
                                     placeholder={t("seller.businessAccount.addressPlaceholder")}
-                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors resize-none"
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-forest-600 bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors resize-none"
                                     rows={4}
                                 />
                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">

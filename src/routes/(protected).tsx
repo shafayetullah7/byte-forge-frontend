@@ -63,7 +63,7 @@ const ProtectedLayout: ParentComponent = (props) => {
                         : "An unexpected error occurred";
 
                 return (
-                    <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+                    <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-forest-900">
                         <div class="text-center p-8 max-w-lg">
                             <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
                                 Something went wrong
@@ -71,7 +71,7 @@ const ProtectedLayout: ParentComponent = (props) => {
                             <p class="text-gray-600 dark:text-gray-400 mb-6">
                                 {errorMessage}
                             </p>
-                            <div class="mb-6 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-left overflow-auto max-h-64">
+                            <div class="mb-6 p-4 bg-gray-100 dark:bg-forest-800 rounded-lg text-left overflow-auto max-h-64">
                                 <p class="text-xs font-mono text-gray-700 dark:text-gray-300 break-all whitespace-pre-wrap">
                                     {error?.stack || JSON.stringify(error, null, 2)}
                                 </p>

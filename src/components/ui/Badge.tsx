@@ -21,12 +21,11 @@ export default function Badge(props: BadgeProps) {
     terracotta:
       "bg-terracotta-100 text-terracotta-700 dark:bg-terracotta-700 dark:text-terracotta-100",
     cream: "bg-cream-200 text-cream-600 dark:bg-cream-600 dark:text-cream-100",
-    default: "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-100",
+    default: "bg-gray-100 text-gray-700 dark:bg-forest-700 dark:text-gray-100",
   };
 
-  const classes = `${baseStyles} ${variantStyles[variant]} ${
-    local.class || ""
-  }`;
+  const classes = `${baseStyles} ${variantStyles[variant]} ${local.class || ""
+    }`;
 
   return (
     <span class={classes} {...others}>

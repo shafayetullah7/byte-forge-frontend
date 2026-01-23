@@ -297,7 +297,7 @@ export default function Register() {
                 {...props}
                 type="checkbox"
                 checked={field.value || false}
-                class="mt-0.5 rounded border-gray-300 text-forest-600 focus:ring-forest-500 dark:border-gray-600 dark:bg-gray-700"
+                class="mt-0.5 rounded border-gray-300 text-forest-600 focus:ring-forest-500 dark:border-forest-600 dark:bg-forest-700"
                 required
                 disabled={registerForm.submitting}
               />

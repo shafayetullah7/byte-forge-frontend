@@ -6,7 +6,7 @@ export function Hero() {
     const { t } = useI18n();
 
     return (
-        <div class="relative w-full min-h-screen flex items-center justify-center overflow-hidden pt-16">
+        <div class="relative w-full min-h-screen flex items-center justify-center overflow-hidden">
             {/* Background Image with Overlay */}
             <div
                 class="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
@@ -20,9 +20,9 @@ export function Hero() {
             <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center animate-in fade-in slide-in-from-bottom-8 duration-700">
 
                 {/* Tagline / Welcome Text */}
-                <span class="inline-block py-1 px-3 rounded-full bg-white/20 backdrop-blur-sm text-white text-sm font-medium tracking-wider mb-6 border border-white/30 uppercase">
+                {/* <span class="inline-block py-1 px-3 rounded-full bg-white/20 backdrop-blur-sm text-white text-sm font-medium tracking-wider mb-6 border border-white/30 uppercase">
                     Welcome to GreenHaven
-                </span>
+                </span> */}
 
                 {/* Main Heading */}
                 <h1 class="text-4xl sm:text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight leading-tight drop-shadow-lg">

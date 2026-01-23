@@ -2,7 +2,7 @@ import { Button } from "~/components/ui";
 
 export default function ShopsPage() {
   return (
-    <div class="min-h-screen bg-cream-50 dark:bg-forest-900 py-12">
+    <main class="min-h-screen bg-cream-50 dark:bg-forest-900">
       <div class="max-w-7xl mx-auto px-4">
         <h1 class="text-5xl font-bold text-gradient-brand mb-4">Our Shops</h1>
         <p class="text-xl text-gray-700 dark:text-gray-300 mb-8">
@@ -25,6 +25,6 @@ export default function ShopsPage() {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

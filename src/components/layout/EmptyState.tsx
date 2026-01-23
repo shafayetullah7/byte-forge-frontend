@@ -11,7 +11,7 @@ interface EmptyStateProps {
 export const EmptyState: Component<EmptyStateProps> = (props) => {
     return (
         <div class={`flex flex-col items-center justify-center py-12 px-4 text-center ${props.class || ""}`}>
-            <div class="bg-gray-50 dark:bg-gray-800 rounded-full p-4 mb-4">
+            <div class="bg-gray-50 dark:bg-forest-800 rounded-full p-4 mb-4">
                 <Show
                     when={props.icon}
                     fallback={

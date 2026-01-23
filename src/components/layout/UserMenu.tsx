@@ -76,7 +76,7 @@ export const UserMenu: Component<UserMenuProps> = (props) => {
 
             <Show when={isOpen()}>
                 {/* Dropdown Menu */}
-                <div class="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-2 animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+                <div class="absolute right-0 mt-2 w-64 bg-white dark:bg-forest-800 rounded-xl shadow-xl border border-gray-100 dark:border-forest-700 py-2 animate-in fade-in slide-in-from-top-2 duration-200 z-50">
                     {/* User Info Header */}
                     <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-white/5 mx-2 rounded-lg mb-2">
                         <p class="text-sm font-semibold text-gray-900 dark:text-white">
