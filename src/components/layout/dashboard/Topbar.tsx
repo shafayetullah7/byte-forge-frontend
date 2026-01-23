@@ -65,7 +65,7 @@ export const Topbar: Component<TopbarProps> = (props) => {
                     <span class="text-xs font-semibold uppercase tracking-wide">Buyer</span>
                 </A>
                 <A
-                    href="/app/seller/shops"
+                    href="/app/seller"
                     class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all duration-200"
                     classList={{
                         "bg-terracotta-100 border-terracotta-200 text-terracotta-800": isSeller(),

@@ -215,6 +215,9 @@ export const dict = {
         message: "Keep your account secure by using a strong password and enabling two-factor authentication.",
       },
     },
+    favorites: {
+      title: "Favorites",
+    },
   },
   seller: {
     businessAccount: {

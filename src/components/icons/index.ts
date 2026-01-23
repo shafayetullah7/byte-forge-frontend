@@ -8,6 +8,7 @@ export { UserIcon } from "./UserIcon";
 export { Cog6ToothIcon } from "./Cog6ToothIcon";
 export { ArrowRightOnRectangleIcon } from "./ArrowRightOnRectangleIcon";
 export { ChevronRightIcon } from "./ChevronRightIcon";
+export { HeartIcon } from "./HeartIcon";
 
 export * from './TagIcon';
 export * from './ArrowsRightLeftIcon';

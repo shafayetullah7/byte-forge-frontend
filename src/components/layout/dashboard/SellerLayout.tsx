@@ -1,4 +1,4 @@
-import { ParentComponent } from "solid-js";
+import { ParentComponent, createMemo } from "solid-js";
 import { DashboardLayout } from "~/components/layout/dashboard/DashboardLayout";
 import { SidebarConfig } from "~/components/layout/dashboard/Sidebar";
 import { Squares2x2Icon, ShoppingBagIcon } from "~/components/icons";
@@ -15,12 +15,17 @@ export const SellerLayout: ParentComponent = (props) => {
         return account !== null && account !== undefined;
     };
 
-    const sidebarConfig: SidebarConfig = {
+    const sidebarConfig = createMemo<SidebarConfig>(() => ({
         mode: "seller",
         brandColor: "terracotta",
         workspaceTitle: t("common.sellerWorkspace"),
         links: !isLoading() && hasBusinessAccount()
             ? [
+                {
+                    href: "/app/seller",
+                    icon: Squares2x2Icon,
+                    label: t("common.dashboard"),
+                },
                 {
                     href: "/app/seller/shops",
                     icon: ShoppingBagIcon,
@@ -28,7 +33,7 @@ export const SellerLayout: ParentComponent = (props) => {
                 },
             ]
             : [], // No sidebar links when business account doesn't exist
-    };
+    }));
 
-    return <DashboardLayout sidebarConfig={sidebarConfig}>{props.children}</DashboardLayout>;
+    return <DashboardLayout sidebarConfig={sidebarConfig()}>{props.children}</DashboardLayout>;
 };

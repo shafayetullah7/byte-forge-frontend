@@ -21,6 +21,9 @@ const ProtectedLayout: ParentComponent = (props) => {
     createEffect(() => {
         const userData = user();
 
+        // Don't do anything while loading (undefined state)
+        if (userData === undefined) return;
+
         // If userData is explicitly null, user is not logged in → Redirect to login
         if (userData === null) {
             navigate("/login", { replace: true });
@@ -87,7 +90,7 @@ const ProtectedLayout: ParentComponent = (props) => {
                 );
             }}
         >
-            <Show when={user()?.emailVerified}>
+            <Show when={user() !== null} fallback={null}>
                 <BusinessAccountProvider>{props.children}</BusinessAccountProvider>
             </Show>
         </ErrorBoundary>
