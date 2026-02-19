@@ -3,6 +3,7 @@ import { createSignal, onMount, onCleanup, Show } from "solid-js";
 import { MagnifyingGlassIcon, ShoppingBagIcon, Bars3Icon } from "../icons";
 import { AuthSection } from "./AuthSection";
 import { MobileMenu } from "./MobileMenu";
+import { ThemeToggle } from "./ThemeToggle";
 import { useSession } from "~/lib/auth";
 import { getInitials } from "~/lib/utils/string.utils";
 import { useI18n } from "~/i18n";
@@ -98,6 +99,9 @@ export function Navbar() {
                 <ShoppingBagIcon class="w-5 h-5" />
                 {/* Optional cart badge could go here */}
               </button>
+
+              {/* Theme Toggle */}
+              <ThemeToggle />
 
               <button
                 class="p-2.5 text-gray-500 dark:text-gray-400 hover:text-forest-600 dark:hover:text-forest-300 transition-colors duration-200 text-sm font-medium"

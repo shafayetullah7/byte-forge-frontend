@@ -5,6 +5,8 @@ export { ShoppingBagIcon } from "./ShoppingBagIcon";
 export { Bars3Icon } from "./Bars3Icon";
 export { Squares2x2Icon } from "./Squares2x2Icon";
 export { UserIcon } from "./UserIcon";
+export { SunIcon } from "./SunIcon";
+export { MoonIcon } from "./MoonIcon";
 export { Cog6ToothIcon } from "./Cog6ToothIcon";
 export { ArrowRightOnRectangleIcon } from "./ArrowRightOnRectangleIcon";
 export { ChevronRightIcon } from "./ChevronRightIcon";

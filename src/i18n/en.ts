@@ -4,6 +4,12 @@ export const dict = {
     welcome: "Welcome to ByteForge",
     language: "Language",
     toggle: "Switch Language",
+    appearance: "Appearance",
+    theme: {
+      light: "Light",
+      dark: "Dark",
+      system: "System"
+    },
     signIn: "Sign In",
     signUp: "Sign Up",
     signOut: "Sign Out",

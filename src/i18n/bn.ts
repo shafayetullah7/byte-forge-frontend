@@ -4,6 +4,12 @@ export const dict = {
     welcome: "বাইটফোর্জে স্বাগতম",
     language: "ভাষা",
     toggle: "ভাষা পরিবর্তন করুন",
+    appearance: "চেহারা",
+    theme: {
+      light: "হালকা",
+      dark: "গাঢ়",
+      system: "সিস্টেম"
+    },
     signIn: "লগ ইন",
     signUp: "নিবন্ধন করুন",
     signOut: "লগ আউট",

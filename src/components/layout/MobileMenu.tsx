@@ -10,6 +10,7 @@ import {
 import { type Accessor } from "solid-js";
 import { type AuthUser } from "~/lib/api/types/auth.types";
 import { useI18n } from "~/i18n";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface MobileMenuProps {
     isOpen: boolean;
@@ -70,6 +71,12 @@ export function MobileMenu(props: MobileMenuProps) {
                     >
                         {t("common.about")}
                     </A>
+
+                    {/* Mobile Theme Toggle */}
+                    <div class="px-4 py-3 text-sm font-medium text-left text-forest-700 dark:text-gray-300 flex items-center justify-between transition-colors duration-200">
+                        <span>{t("common.appearance") || "Appearance"}</span>
+                        <ThemeToggle />
+                    </div>
 
                     {/* Mobile Language Toggle */}
                     <button

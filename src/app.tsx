@@ -5,6 +5,7 @@ import { Toaster } from "~/components/ui/Toast";
 import "@fontsource-variable/plus-jakarta-sans";
 import "./app.css";
 import { I18nContext, createI18n, type Locale } from "~/i18n";
+import { ThemeProvider, Theme } from "~/lib/context/theme-context";
 import { getRequestEvent, isServer } from "solid-js/web";
 // import { parseCookies } from "vinxi/http";
 
@@ -26,8 +27,26 @@ function getInitialLocale(): Locale {
   return "en";
 }
 
+function getInitialTheme(): Theme {
+  if (isServer) {
+    const event = getRequestEvent();
+    if (event) {
+      const cookieHeader = event.request.headers.get("cookie") || "";
+      const match = cookieHeader.match(new RegExp("(^| )theme=([^;]+)"));
+      return (match ? match[2] : "system") as Theme;
+    }
+  } else {
+    // Client-side: parse document.cookie
+    const match = document.cookie.match(new RegExp("(^| )theme=([^;]+)"));
+    const cookieTheme = match ? match[2] : null;
+    return (cookieTheme as Theme) || "system";
+  }
+  return "system";
+}
+
 export default function App() {
   const initialLocale = getInitialLocale();
+  const initialTheme = getInitialTheme();
   const i18n = createI18n(initialLocale);
 
   // Sync cookie when locale changes
@@ -40,16 +59,18 @@ export default function App() {
 
   return (
     <I18nContext.Provider value={i18n}>
-      <Router
-        root={(props) => (
-          <Suspense>
-            {props.children}
-            <Toaster />
-          </Suspense>
-        )}
-      >
-        <FileRoutes />
-      </Router>
+      <ThemeProvider initialTheme={initialTheme}>
+        <Router
+          root={(props) => (
+            <Suspense>
+              {props.children}
+              <Toaster />
+            </Suspense>
+          )}
+        >
+          <FileRoutes />
+        </Router>
+      </ThemeProvider>
     </I18nContext.Provider>
   );
 }
