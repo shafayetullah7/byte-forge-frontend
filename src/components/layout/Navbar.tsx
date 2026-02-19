@@ -7,6 +7,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { useSession } from "~/lib/auth";
 import { getInitials } from "~/lib/utils/string.utils";
 import { useI18n } from "~/i18n";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 export function Navbar() {
   const user = useSession();
@@ -100,16 +101,11 @@ export function Navbar() {
                 {/* Optional cart badge could go here */}
               </button>
 
-              {/* Theme Toggle */}
-              <ThemeToggle />
-
-              <button
-                class="p-2.5 text-gray-500 dark:text-gray-400 hover:text-forest-600 dark:hover:text-forest-300 transition-colors duration-200 text-sm font-medium"
-                onClick={toggleLocale}
-                aria-label="Switch Language"
-              >
-                {locale() === "en" ? "BN" : "EN"}
-              </button>
+              {/* Theme & Language - Hidden on mobile, accessible in menu */}
+              <div class="hidden md:flex items-center gap-4">
+                <ThemeToggle />
+                <LanguageSwitcher variant="compact" />
+              </div>
 
               {/* Auth Section */}
               <div class="hidden md:block">

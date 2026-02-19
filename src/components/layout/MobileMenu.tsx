@@ -11,6 +11,7 @@ import { type Accessor } from "solid-js";
 import { type AuthUser } from "~/lib/api/types/auth.types";
 import { useI18n } from "~/i18n";
 import { ThemeToggle } from "./ThemeToggle";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 interface MobileMenuProps {
     isOpen: boolean;
@@ -79,15 +80,10 @@ export function MobileMenu(props: MobileMenuProps) {
                     </div>
 
                     {/* Mobile Language Toggle */}
-                    <button
-                        onClick={toggleLocale}
-                        class="px-4 py-3 text-sm font-medium text-left text-forest-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-700 flex items-center justify-between transition-colors duration-200"
-                    >
+                    <div class="px-4 py-3 text-sm font-medium text-left text-forest-700 dark:text-gray-300 flex items-center justify-between transition-colors duration-200">
                         <span>{t("common.language")}</span>
-                        <span class="px-2 py-0.5 rounded bg-cream-100 dark:bg-forest-700 font-bold text-xs uppercase text-forest-600 dark:text-forest-300">
-                            {locale() === "en" ? "English" : "বাংলা"}
-                        </span>
-                    </button>
+                        <LanguageSwitcher variant="full" />
+                    </div>
 
                     <div class="border-t border-cream-200 dark:border-forest-700 my-2"></div>
 
