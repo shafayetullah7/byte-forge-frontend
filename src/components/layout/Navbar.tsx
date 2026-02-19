@@ -18,6 +18,9 @@ export function Navbar() {
   // Close mobile menu when clicking outside
   const handleClickOutside = (e: MouseEvent) => {
     const target = e.target as HTMLElement;
+    // If the element was removed from DOM (e.g. toggled icon), ignore the click
+    if (!document.contains(target)) return;
+
     if (!target.closest(".mobile-menu-container")) {
       setMobileMenuOpen(false);
     }
