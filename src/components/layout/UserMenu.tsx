@@ -69,17 +69,17 @@ export const UserMenu: Component<UserMenuProps> = (props) => {
                 <span class="text-sm font-medium text-gray-800 dark:text-gray-200 block hidden md:block">
                     {props.user.userName}
                 </span>
-                <div class="w-8 h-8 rounded-full bg-forest-600 dark:bg-sage-500 text-white flex items-center justify-center font-semibold text-xs ring-2 ring-white dark:ring-gray-800 shadow-sm">
+                <div class="w-8 h-8 rounded-full bg-forest-600 dark:bg-forest-500 text-white flex items-center justify-center font-semibold text-xs ring-2 ring-white dark:ring-forest-800 shadow-sm">
                     {getInitials(props.user.userName)}
                 </div>
             </button>
 
             <Show when={isOpen()}>
                 {/* Dropdown Menu */}
-                <div class="absolute right-0 mt-2 w-64 bg-white dark:bg-forest-800 rounded-xl shadow-xl border border-gray-100 dark:border-forest-700 py-2 animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+                <div class="absolute right-0 mt-2 w-64 bg-white dark:bg-forest-800 rounded-xl shadow-xl border border-cream-200 dark:border-forest-700 py-2 animate-in fade-in slide-in-from-top-2 duration-200 z-20">
                     {/* User Info Header */}
-                    <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-white/5 mx-2 rounded-lg mb-2">
-                        <p class="text-sm font-semibold text-gray-900 dark:text-white">
+                    <div class="px-4 py-3 border-b border-cream-200 dark:border-forest-700/50 bg-cream-50/50 dark:bg-white/5 mx-2 rounded-lg mb-2">
+                        <p class="text-sm font-semibold text-forest-800 dark:text-cream-50">
                             {props.user.userName}
                         </p>
                         <p class="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
@@ -92,7 +92,7 @@ export const UserMenu: Component<UserMenuProps> = (props) => {
                         <Show when={props.showDashboardLink}>
                             <A
                                 href="/app"
-                                class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-900/30 hover:text-forest-700 dark:hover:text-sage-400 rounded-lg transition-colors"
+                                class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-forest-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-900/30 hover:text-forest-700 dark:hover:text-forest-300 rounded-lg transition-colors duration-200"
                                 onClick={() => setIsOpen(false)}
                             >
                                 <Squares2x2Icon class="w-4.5 h-4.5" />
@@ -102,7 +102,7 @@ export const UserMenu: Component<UserMenuProps> = (props) => {
 
                         <A
                             href="/app/profile"
-                            class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-900/30 hover:text-forest-700 dark:hover:text-sage-400 rounded-lg transition-colors"
+                            class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-forest-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-900/30 hover:text-forest-700 dark:hover:text-forest-300 rounded-lg transition-colors duration-200"
                             onClick={() => setIsOpen(false)}
                         >
                             <UserIcon class="w-4.5 h-4.5" />
@@ -111,7 +111,7 @@ export const UserMenu: Component<UserMenuProps> = (props) => {
 
                         <A
                             href="/app/settings"
-                            class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-900/30 hover:text-forest-700 dark:hover:text-sage-400 rounded-lg transition-colors"
+                            class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-forest-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-900/30 hover:text-forest-700 dark:hover:text-forest-300 rounded-lg transition-colors duration-200"
                             onClick={() => setIsOpen(false)}
                         >
                             <Cog6ToothIcon class="w-4.5 h-4.5" />
@@ -120,11 +120,11 @@ export const UserMenu: Component<UserMenuProps> = (props) => {
                     </div>
 
                     {/* Logout Button */}
-                    <div class="border-t border-gray-100 dark:border-gray-700 mt-2 pt-2 px-2">
+                    <div class="border-t border-cream-200 dark:border-forest-700 mt-2 pt-2 px-2">
                         <button
                             onClick={handleLogout}
                             disabled={isLoggingOut()}
-                            class="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50"
+                            class="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-200 disabled:opacity-50"
                         >
                             <ArrowRightOnRectangleIcon class="w-4.5 h-4.5" />
                             {isLoggingOut() ? t("common.loading") : t("common.signOut")}

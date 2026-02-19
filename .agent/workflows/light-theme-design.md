@@ -158,17 +158,7 @@ Use a maximum of **4 text levels** to create clear visual hierarchy.
 
 ---
 
-## Spacing & Layout Rhythm
-
-| Use | Spacing |
-|---|---|
-| **Between page sections** | `space-y-8` or `gap-8` |
-| **Between cards in a grid** | `gap-6` |
-| **Between form fields** | `space-y-4` or `gap-4` |
-| **Between text blocks** | `space-y-2` |
-| **Padding inside cards** | `p-6` |
-| **Padding inside page container** | `px-4 sm:px-6 lg:px-8` |
-| **Max page width** | `max-w-7xl mx-auto` |
+> **Spacing & layout rules:** See `/style-guide` §3 (Density & Breathing Room) and `/layout-rules` §2 (Fixed Dimensions).
 
 ---
 

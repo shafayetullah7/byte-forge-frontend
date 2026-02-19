@@ -2,6 +2,7 @@ import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { Suspense, createEffect } from "solid-js";
 import { Toaster } from "~/components/ui/Toast";
+import "@fontsource-variable/plus-jakarta-sans";
 import "./app.css";
 import { I18nContext, createI18n, type Locale } from "~/i18n";
 import { getRequestEvent, isServer } from "solid-js/web";

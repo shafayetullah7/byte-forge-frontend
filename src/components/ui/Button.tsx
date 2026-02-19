@@ -19,7 +19,7 @@ export default function Button(props: ButtonProps) {
 
   // Base styles
   const baseStyles =
-    "inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed";
+    "inline-flex items-center justify-center font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed";
 
   // Size styles
   const sizeStyles = {
@@ -31,15 +31,15 @@ export default function Button(props: ButtonProps) {
   // Variant styles
   const variantStyles = {
     primary:
-      "bg-forest-600 hover:bg-forest-700 text-white shadow-sm focus:ring-forest-500 dark:bg-sage-500 dark:hover:bg-sage-600",
+      "bg-forest-600 hover:bg-forest-700 text-white shadow-sm focus:ring-forest-500/30 dark:bg-forest-500 dark:hover:bg-forest-400",
     secondary:
-      "bg-forest-50 hover:bg-forest-100 text-forest-700 focus:ring-forest-500 dark:bg-white/10 dark:text-white dark:hover:bg-white/20",
+      "bg-forest-50 hover:bg-forest-100 text-forest-700 focus:ring-forest-500/30 dark:bg-white/10 dark:text-white dark:hover:bg-white/20",
     accent:
-      "bg-terracotta-500 hover:bg-terracotta-600 text-white shadow-sm focus:ring-terracotta-500",
+      "bg-terracotta-500 hover:bg-terracotta-600 text-white shadow-sm focus:ring-terracotta-500/30",
     outline:
-      "bg-transparent border border-forest-200 text-forest-700 hover:bg-forest-50 focus:ring-forest-500 dark:border-gray-600 dark:text-gray-300",
+      "bg-transparent border border-cream-300 text-forest-700 hover:bg-forest-50 focus:ring-forest-500/30 dark:border-forest-700 dark:text-gray-300",
     ghost:
-      "bg-transparent hover:bg-gray-100 text-gray-700 focus:ring-forest-500 dark:text-gray-300 dark:hover:bg-gray-800",
+      "bg-transparent hover:bg-forest-50 text-forest-700 focus:ring-forest-500/30 dark:text-gray-300 dark:hover:bg-forest-700",
   };
 
   const classes = `${baseStyles} ${sizeStyles[size]} ${variantStyles[variant]

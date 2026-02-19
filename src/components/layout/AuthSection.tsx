@@ -16,13 +16,13 @@ export function AuthSection() {
                 <div class="hidden md:flex items-center gap-3">
                     <A
                         href="/login"
-                        class="text-gray-800 dark:text-gray-200 font-semibold text-sm px-4 py-2 hover:text-forest-600 dark:hover:text-sage-400 transition-colors"
+                        class="text-forest-700 dark:text-gray-200 font-semibold text-sm px-4 py-2 hover:text-forest-600 dark:hover:text-forest-300 transition-colors duration-200"
                     >
                         {t("common.signIn")}
                     </A>
                     <A
                         href="/register"
-                        class="bg-forest-600 dark:bg-sage-500 text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:bg-forest-700 dark:hover:bg-sage-600 hover:shadow-lg transition-all"
+                        class="bg-forest-600 dark:bg-forest-500 text-white font-semibold text-sm px-6 py-2.5 rounded-lg hover:bg-forest-700 dark:hover:bg-forest-400 transition-colors duration-200"
                     >
                         {t("common.signUp")}
                     </A>
@@ -30,7 +30,7 @@ export function AuthSection() {
             }
         >
             {(userData) => (
-                <div class="hidden lg:block relative z-50">
+                <div class="hidden lg:block relative z-20">
                     <UserMenu user={userData()} showDashboardLink={true} />
                 </div>
             )}

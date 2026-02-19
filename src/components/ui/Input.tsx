@@ -10,19 +10,19 @@ export default function Input(props: InputProps) {
 
   // Base styles
   const baseStyles =
-    "w-full px-4 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed";
+    "w-full px-4 py-2 rounded-lg border transition-colors duration-200 focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed";
 
   // State styles
   const stateStyles = local.error
     ? "border-red-500 focus:border-red-500 focus:ring-red-200 dark:border-red-400 dark:focus:ring-red-900"
-    : "border-gray-300 focus:border-forest-500 focus:ring-forest-200 dark:border-gray-600 dark:focus:border-sage-400 dark:focus:ring-sage-900";
+    : "border-cream-300 focus:border-forest-500 focus:ring-forest-200/50 dark:border-forest-700 dark:focus:border-forest-400 dark:focus:ring-forest-700/50";
 
   const classes = `${baseStyles} ${stateStyles} ${local.class || ""}`;
 
   return (
     <div class="w-full">
       <Show when={local.label}>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label class="block text-sm font-medium text-forest-700 dark:text-gray-300 mb-2">
           {local.label}
         </label>
       </Show>

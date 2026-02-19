@@ -34,15 +34,15 @@ export function Navbar() {
   });
 
   return (
-    <header class="sticky top-0 z-50 transition-all duration-300">
-      <nav class="w-full bg-white dark:bg-forest-900 border-b border-gray-100 dark:border-forest-800 transition-all duration-300">
+    <header class="sticky top-0 z-30">
+      <nav class="w-full bg-white dark:bg-forest-800 border-b border-cream-200 dark:border-forest-700 transition-colors duration-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex items-center justify-between h-16 md:h-20">
+          <div class="flex items-center justify-between h-16">
             {/* Logo Section */}
             <div class="flex-shrink-0">
               <A
                 href="/"
-                class="text-xl md:text-2xl font-bold text-forest-800 dark:text-sage-400 flex items-center gap-2 hover:opacity-80 transition-opacity"
+                class="text-xl md:text-2xl font-bold text-forest-800 dark:text-cream-100 flex items-center gap-2 hover:text-forest-600 dark:hover:text-forest-300 transition-colors duration-200"
               >
                 GreenHaven
                 <span class="w-2 h-2 bg-forest-500 rounded-full"></span>
@@ -53,30 +53,30 @@ export function Navbar() {
             <div class="hidden md:flex items-center gap-8">
               <A
                 href="/"
-                class="text-gray-600 dark:text-gray-300 font-medium text-sm hover:text-forest-600 dark:hover:text-sage-400 transition-colors"
-                activeClass="text-forest-600 dark:text-sage-400 font-semibold"
+                class="text-forest-700 dark:text-gray-300 font-medium text-sm hover:text-forest-600 dark:hover:text-forest-300 transition-colors duration-200"
+                activeClass="text-forest-600 dark:text-forest-300 font-semibold"
                 end
               >
                 {t("common.home")}
               </A>
               <A
                 href="/plants"
-                class="text-gray-600 dark:text-gray-300 font-medium text-sm hover:text-forest-600 dark:hover:text-sage-400 transition-colors"
-                activeClass="text-forest-600 dark:text-sage-400 font-semibold"
+                class="text-forest-700 dark:text-gray-300 font-medium text-sm hover:text-forest-600 dark:hover:text-forest-300 transition-colors duration-200"
+                activeClass="text-forest-600 dark:text-forest-300 font-semibold"
               >
                 {t("common.plants")}
               </A>
               <A
                 href="/shops"
-                class="text-gray-600 dark:text-gray-300 font-medium text-sm hover:text-forest-600 dark:hover:text-sage-400 transition-colors"
-                activeClass="text-forest-600 dark:text-sage-400 font-semibold"
+                class="text-forest-700 dark:text-gray-300 font-medium text-sm hover:text-forest-600 dark:hover:text-forest-300 transition-colors duration-200"
+                activeClass="text-forest-600 dark:text-forest-300 font-semibold"
               >
                 {t("common.shops")}
               </A>
               <A
                 href="/about"
-                class="text-gray-600 dark:text-gray-300 font-medium text-sm hover:text-forest-600 dark:hover:text-sage-400 transition-colors"
-                activeClass="text-forest-600 dark:text-sage-400 font-semibold"
+                class="text-forest-700 dark:text-gray-300 font-medium text-sm hover:text-forest-600 dark:hover:text-forest-300 transition-colors duration-200"
+                activeClass="text-forest-600 dark:text-forest-300 font-semibold"
               >
                 {t("common.about")}
               </A>
@@ -85,22 +85,22 @@ export function Navbar() {
             {/* Right Actions */}
             <div class="flex items-center gap-4">
               <button
-                class="p-2 text-gray-500 hover:text-forest-600 transition-colors"
+                class="p-2.5 text-gray-500 dark:text-gray-400 hover:text-forest-600 dark:hover:text-forest-300 transition-colors duration-200"
                 aria-label="Search"
               >
                 <MagnifyingGlassIcon class="w-5 h-5" />
               </button>
 
               <button
-                class="p-2 text-gray-500 hover:text-forest-600 transition-colors relative"
+                class="p-2.5 text-gray-500 dark:text-gray-400 hover:text-forest-600 dark:hover:text-forest-300 transition-colors duration-200 relative"
                 aria-label="Cart"
               >
                 <ShoppingBagIcon class="w-5 h-5" />
-                {/* Optional cart badger could go here */}
+                {/* Optional cart badge could go here */}
               </button>
 
               <button
-                class="p-2 text-gray-500 hover:text-forest-600 transition-colors text-sm font-medium"
+                class="p-2.5 text-gray-500 dark:text-gray-400 hover:text-forest-600 dark:hover:text-forest-300 transition-colors duration-200 text-sm font-medium"
                 onClick={toggleLocale}
                 aria-label="Switch Language"
               >
@@ -117,7 +117,7 @@ export function Navbar() {
               <div class="md:hidden mobile-menu-container">
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen())}
-                  class="p-2 text-gray-600 hover:text-forest-600 transition-colors"
+                  class="p-2.5 text-forest-700 dark:text-gray-300 hover:text-forest-600 dark:hover:text-forest-300 transition-colors duration-200"
                   aria-label="Toggle menu"
                 >
                   <Bars3Icon class="w-6 h-6" />

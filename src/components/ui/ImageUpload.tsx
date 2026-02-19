@@ -54,7 +54,7 @@ export const ImageUpload: Component<ImageUploadProps> = (props) => {
                 {/* Preview with Delete Button */}
                 <Show when={props.preview}>
                     <div class="relative group">
-                        <div class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-forest-900/50 rounded-lg border border-gray-200 dark:border-forest-700">
+                        <div class="flex items-center gap-4 p-4 bg-cream-50/50 dark:bg-forest-900/50 rounded-lg border border-cream-200 dark:border-forest-700">
                             <div class="relative">
                                 <img
                                     src={props.preview!}
@@ -97,7 +97,7 @@ export const ImageUpload: Component<ImageUploadProps> = (props) => {
                         disabled={props.disabled || props.isUploading}
                         class="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
                     />
-                    <div class="flex items-center justify-center px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-terracotta-500 dark:hover:border-terracotta-400 transition-colors">
+                    <div class="flex items-center justify-center px-4 py-3 border-2 border-dashed border-cream-200 dark:border-forest-700 rounded-lg hover:border-terracotta-500 dark:hover:border-terracotta-400 transition-colors duration-200">
                         <div class="text-center">
                             <Show
                                 when={!props.isUploading}

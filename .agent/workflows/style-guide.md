@@ -7,7 +7,8 @@ description: ByteForge component style guide — typography, shape, spacing, ele
 > **Theme:** Modern Nursery Marketplace — warm, organic, trustworthy  
 > **Audience:** Nursery owners + plant enthusiasts  
 > **Device:** Balanced mobile and desktop  
-> **Color rules:** `/color-palette-rules` · `/light-theme-design` · `/dark-theme-design`
+> **Color rules:** `/color-palette-rules` · `/light-theme-design` · `/dark-theme-design`  
+> **Precedence:** Theme files override this guide for color. `/layout-rules` overrides for spatial decisions. This guide is the default.
 
 ---
 
@@ -295,3 +296,18 @@ Every component must pass:
 | ☐ Dark mode | `dark:` variant for every visual property? |
 | ☐ Responsive | Works at `sm`, `md`, and `lg` breakpoints? |
 | ☐ Weight | Follows 60-30-10 distribution? |
+
+---
+
+## File Companion Matrix
+
+| Building... | Read |
+|---|---|
+| Card / list item | This guide + theme file §Card |
+| Page layout | `/layout-rules` §1–2 |
+| Modal | `/layout-rules` §6 + theme file §Card |
+| Form | `/layout-rules` §7 + theme file §Input |
+| Table | `/layout-rules` §8 + theme file §Card |
+| Navigation | `/layout-rules` §4 + theme file §Nav |
+| Badge / status | Theme file §Badges only |
+| Color decision | `/color-palette-rules` → theme file |

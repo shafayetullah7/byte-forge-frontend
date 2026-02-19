@@ -85,36 +85,31 @@ Every color choice must reinforce this identity. If a color doesn't feel like it
 
 ---
 
-## Dark Mode Mapping Rules
+## Light ↔ Dark Class Mapping
 
-Dark mode is NOT just "invert everything." Follow this specific mapping:
+Quick lookup for converting any light-mode class to its dark equivalent. For full component rules, see `/dark-theme-design`.
 
-### Surfaces
-| Light Mode | Dark Mode | Notes |
-|---|---|---|
-| `cream-50` (page bg) | `forest-900` | Deep brand-colored base |
-| `white` (card bg) | `forest-800` | Slightly elevated surface |
-| `cream-100` (secondary bg) | `forest-800/80` | Subtle differentiation |
-
-### Text
-| Light Mode | Dark Mode | Notes |
-|---|---|---|
-| `forest-800` / `gray-800` | `gray-100` / `cream-100` | High contrast text |
-| `gray-600` (secondary) | `gray-400` | Muted secondary text |
-| `forest-600` (links) | `forest-300` | Same palette, lighter shade — NOT sage |
-
-### Borders
-| Light Mode | Dark Mode | Notes |
-|---|---|---|
-| `cream-200` / `gray-200` | `forest-700` | Consistent brand border |
-| Never mix `gray-*` and `forest-*` borders in dark mode | Pick ONE and stick with it |
-
-### Accents / Interactive
-| Light Mode | Dark Mode | Notes |
-|---|---|---|
-| `forest-600` (primary btn) | `forest-500` | Same color, adjusted for dark bg contrast |
-| `terracotta-500` (CTA) | `terracotta-400` | Slightly lighter for dark bg readability |
-| `sage-500` (success) | `sage-400` | Slightly lighter |
+| Light | Dark |
+|---|---|
+| `bg-cream-50` | `dark:bg-forest-900` |
+| `bg-white` | `dark:bg-forest-800` |
+| `bg-cream-100` | `dark:bg-forest-900/60` |
+| `bg-forest-50` | `dark:bg-forest-700` |
+| `text-forest-800` | `dark:text-cream-50` |
+| `text-forest-700` | `dark:text-gray-300` |
+| `text-gray-600` | `dark:text-gray-400` |
+| `text-gray-500` | `dark:text-gray-500` |
+| `text-forest-600` | `dark:text-forest-300` |
+| `text-terracotta-600` | `dark:text-terracotta-400` |
+| `border-cream-200` | `dark:border-forest-700` |
+| `border-cream-300` | `dark:border-forest-600` |
+| `border-forest-500` | `dark:border-forest-400` |
+| `bg-forest-600` (btn) | `dark:bg-forest-500` |
+| `bg-terracotta-500` (btn) | `dark:bg-terracotta-500` (same) |
+| `shadow-sm` | `dark:shadow-none` |
+| `shadow-md` | `dark:shadow-md dark:shadow-black/30` |
+| `hover:bg-forest-50` | `dark:hover:bg-forest-700` |
+| `hover:bg-forest-100` | `dark:hover:bg-forest-600` |
 
 ---
 

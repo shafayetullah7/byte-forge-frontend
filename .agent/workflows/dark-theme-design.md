@@ -219,30 +219,5 @@ What is the element?
    └─ Interactive → dark:text-forest-400 dark:hover:text-forest-300
 ```
 
----
 
-## Light ↔ Dark Full Mapping Reference
-
-Quick lookup for converting any light-mode class to its dark equivalent:
-
-| Light | Dark |
-|---|---|
-| `bg-cream-50` | `dark:bg-forest-900` |
-| `bg-white` | `dark:bg-forest-800` |
-| `bg-cream-100` | `dark:bg-forest-900/60` |
-| `bg-forest-50` | `dark:bg-forest-700` |
-| `text-forest-800` | `dark:text-cream-50` |
-| `text-forest-700` | `dark:text-gray-300` |
-| `text-gray-600` | `dark:text-gray-400` |
-| `text-gray-500` | `dark:text-gray-500` |
-| `text-forest-600` | `dark:text-forest-300` |
-| `text-terracotta-600` | `dark:text-terracotta-400` |
-| `border-cream-200` | `dark:border-forest-700` |
-| `border-cream-300` | `dark:border-forest-600` |
-| `border-forest-500` | `dark:border-forest-400` |
-| `bg-forest-600` (btn) | `dark:bg-forest-500` |
-| `bg-terracotta-500` (btn) | `dark:bg-terracotta-500` (same) |
-| `shadow-sm` | `dark:shadow-none` |
-| `shadow-md` | `dark:shadow-md dark:shadow-black/30` |
-| `hover:bg-forest-50` | `dark:hover:bg-forest-700` |
-| `hover:bg-forest-100` | `dark:hover:bg-forest-600` |
+> **Quick mapping table:** See `/color-palette-rules` §Light ↔ Dark Mapping for the full class conversion reference.
