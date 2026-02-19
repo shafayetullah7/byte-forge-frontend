@@ -9,11 +9,11 @@ export function Hero() {
         <div class="relative w-full min-h-screen flex items-center justify-center overflow-hidden">
             {/* Background Image with Overlay */}
             <div
-                class="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+                class="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-all duration-200 dark:opacity-70 dark:brightness-[0.8]"
                 style={{ "background-image": "url('/bg-2.webp')" }}
             >
-                {/* Subtle overlay to ensure text contrast without killing the vibe */}
-                <div class="absolute inset-0 bg-black/20"></div>
+                {/* Brand-tinted overlay for better text contrast */}
+                <div class="absolute inset-0 bg-forest-900/30 dark:bg-forest-950/60 transition-colors duration-200"></div>
             </div>
 
             {/* Content Container */}
@@ -25,12 +25,12 @@ export function Hero() {
                 </span> */}
 
                 {/* Main Heading */}
-                <h1 class="text-4xl sm:text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight leading-tight drop-shadow-lg">
+                <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight leading-tight">
                     {t("common.hero.title")}
                 </h1>
 
                 {/* Subtitle */}
-                <p class="text-lg md:text-xl text-cream-100 mb-10 max-w-2xl mx-auto leading-relaxed font-medium drop-shadow-md">
+                <p class="text-lg md:text-xl text-cream-100 mb-8 max-w-2xl mx-auto leading-relaxed font-normal">
                     {t("common.hero.subtitle")}
                 </p>
 
@@ -39,7 +39,7 @@ export function Hero() {
                     <A href="/plants" class="w-full sm:w-auto">
                         <Button
                             size="lg"
-                            class="w-full font-semibold px-8 hover:shadow-md"
+                            class="w-full font-medium hover:shadow-md"
                         >
                             {t("common.hero.shopNow")}
                         </Button>
@@ -48,7 +48,7 @@ export function Hero() {
                         <Button
                             variant="secondary"
                             size="lg"
-                            class="w-full font-bold px-8 hover:shadow-md border-none"
+                            class="w-full font-medium hover:shadow-md border border-white/20 bg-white/5 backdrop-blur-sm text-white hover:bg-white/10"
                         >
                             {t("common.hero.learnMore")}
                         </Button>
@@ -59,19 +59,19 @@ export function Hero() {
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 border-t border-white/20 pt-8 w-full max-w-4xl">
                     <div class="text-center">
                         <div class="text-3xl font-bold text-white mb-1">500+</div>
-                        <div class="text-sm text-gray-200 font-medium">Plant Species</div>
+                        <div class="text-sm text-cream-200 font-medium">Plant Species</div>
                     </div>
                     <div class="text-center">
                         <div class="text-3xl font-bold text-white mb-1">10k+</div>
-                        <div class="text-sm text-gray-200 font-medium">Happy Customers</div>
+                        <div class="text-sm text-cream-200 font-medium">Happy Customers</div>
                     </div>
                     <div class="text-center">
                         <div class="text-3xl font-bold text-white mb-1">4.9/5</div>
-                        <div class="text-sm text-gray-200 font-medium">Average Rating</div>
+                        <div class="text-sm text-cream-200 font-medium">Average Rating</div>
                     </div>
                     <div class="text-center">
                         <div class="text-3xl font-bold text-white mb-1">24/7</div>
-                        <div class="text-sm text-gray-200 font-medium">Expert Support</div>
+                        <div class="text-sm text-cream-200 font-medium">Expert Support</div>
                     </div>
                 </div>
             </div>
