@@ -1,14 +1,15 @@
-import { api } from "../api-client";
+import { fetcher } from "../api-client";
 import type {
   TreeCategory,
   CategoryFilter,
   CreateCategoryRequest,
   UpdateCategoryRequest,
 } from "../types/library.types";
-import type { ApiResponse } from "../types";
 
 /**
  * Admin API endpoints
+ * 
+ * Refactored to use the functional fetcher with unwrapped responses.
  */
 export const adminApi = {
   /**
@@ -18,56 +19,46 @@ export const adminApi = {
     /**
      * Create a new category
      */
-    create: async (
-      data: CreateCategoryRequest
-    ): Promise<ApiResponse<TreeCategory>> => {
-      return api.post<ApiResponse<TreeCategory>>(
-        "/api/v1/admin/tree-categories",
-        data
-      );
+    create: async (data: CreateCategoryRequest): Promise<TreeCategory> => {
+      return fetcher<TreeCategory>("/api/v1/admin/tree-categories", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
     },
 
     /**
      * Get all categories with filtering
      */
-    getAll: async (
-      filter?: CategoryFilter
-    ): Promise<ApiResponse<TreeCategory[]>> => {
-      return api.get<ApiResponse<TreeCategory[]>>(
-        "/api/v1/admin/tree-categories",
-        {
-          params: filter as any,
-        }
-      );
+    getAll: async (filter?: CategoryFilter): Promise<TreeCategory[]> => {
+      return fetcher<TreeCategory[]>("/api/v1/admin/tree-categories", {
+        params: filter as any,
+      });
     },
 
     /**
      * Get category by ID
      */
-    getById: async (id: string): Promise<ApiResponse<TreeCategory>> => {
-      return api.get<ApiResponse<TreeCategory>>(
-        `/api/v1/admin/tree-categories/${id}`
-      );
+    getById: async (id: string): Promise<TreeCategory> => {
+      return fetcher<TreeCategory>(`/api/v1/admin/tree-categories/${id}`);
     },
 
     /**
      * Update category
      */
-    update: async (
-      id: string,
-      data: UpdateCategoryRequest
-    ): Promise<ApiResponse<TreeCategory>> => {
-      return api.put<ApiResponse<TreeCategory>>(
-        `/api/v1/admin/tree-categories/${id}`,
-        data
-      );
+    update: async (id: string, data: UpdateCategoryRequest): Promise<TreeCategory> => {
+      return fetcher<TreeCategory>(`/api/v1/admin/tree-categories/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
     },
 
     /**
      * Delete (soft delete) category
      */
     delete: async (id: string): Promise<void> => {
-      return api.delete(`/api/v1/admin/tree-categories/${id}`);
+      return fetcher<void>(`/api/v1/admin/tree-categories/${id}`, {
+        method: "DELETE",
+      });
     },
   },
 };

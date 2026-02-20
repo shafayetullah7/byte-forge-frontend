@@ -1,54 +1,42 @@
-import { createContext, useContext, ParentComponent, createResource, createSignal, onMount } from "solid-js";
-import { sellerApi, ApiError } from "~/lib/api";
+import { createContext, useContext, ParentComponent } from "solid-js";
+import { query, createAsync, revalidate } from "@solidjs/router";
+import { fetcher } from "~/lib/api/api-client";
+import { ApiError } from "~/lib/api/types";
 import type { BusinessAccount } from "~/lib/api/types/seller.types";
+
+/**
+ * Business Account Data Loader
+ * 
+ * Uses the new fetcher strategy.
+ * Handles 404 (no account) gracefully by returning null.
+ */
+export const getBusinessAccount = query(async () => {
+    "use server";
+    try {
+        return await fetcher<BusinessAccount>("/api/seller/business-account");
+    } catch (error) {
+        if (error instanceof ApiError && error.statusCode === 404) {
+            return null;
+        }
+        throw error;
+    }
+}, "business-account");
 
 interface BusinessAccountContextValue {
     businessAccount: () => BusinessAccount | null | undefined;
-    refetch: () => void;
+    refetch: () => Promise<void>;
     isLoading: () => boolean;
 }
 
 const BusinessAccountContext = createContext<BusinessAccountContextValue>();
 
 export const BusinessAccountProvider: ParentComponent = (props) => {
-    // Use a source signal to control when fetching happens
-    // This ensures we only fetch on the client, never during SSR
-    const [shouldFetch, setShouldFetch] = createSignal(false);
-
-    // Enable fetching only on client-side after mount
-    onMount(() => {
-        setShouldFetch(true);
-    });
-
-    const [businessAccount, { refetch }] = createResource(
-        shouldFetch,
-        async () => {
-            try {
-                const response = await sellerApi.businessAccount.get();
-                return response.data;
-            } catch (error) {
-                // Check for 404 - no business account exists
-                if (error instanceof ApiError && error.statusCode === 404) {
-                    return null;
-                }
-
-                // Also check statusCode directly in case instanceof fails
-                if (error && typeof error === "object" && "statusCode" in error && error.statusCode === 404) {
-                    return null;
-                }
-
-                // Let all other errors propagate (including 401)
-                // The API client will handle 401 automatically
-                // The error boundary will catch other errors
-                throw error;
-            }
-        }
-    );
+    const data = createAsync(() => getBusinessAccount());
 
     const value: BusinessAccountContextValue = {
-        businessAccount,
-        refetch,
-        isLoading: () => businessAccount.loading,
+        businessAccount: () => data(),
+        refetch: () => revalidate("business-account"),
+        isLoading: () => data() === undefined,
     };
 
     return (

@@ -42,19 +42,17 @@ export default function Login() {
         password: values.password,
       });
 
-      if (response.success) {
-        toaster.success(t("auth.login.success"));
-        // Keep the form in 'submitting' state during the delay to prevent double-clicks
-        await new Promise((resolve) => setTimeout(resolve, 1200));
+      toaster.success(t("auth.login.success"));
+      // Keep the form in 'submitting' state during the delay to prevent double-clicks
+      await new Promise((resolve) => setTimeout(resolve, 1200));
 
-        // Revalidate session to update UI immediately
-        await revalidate("user-session");
+      // Revalidate session to update UI immediately
+      await revalidate("user-session");
 
-        if (response.data && response.data.user && !response.data.user.emailVerified) {
-          navigate("/verify-account");
-        } else {
-          navigate("/");
-        }
+      if (response.user && !response.user.emailVerified) {
+        navigate("/verify-account");
+      } else {
+        navigate("/");
       }
     } catch (error) {
       if (error instanceof ApiError && error.response) {

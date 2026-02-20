@@ -1,9 +1,10 @@
-import { api } from "../api-client";
+import { fetcher } from "../api-client";
 import type { MediaRecord, UploadMediaResponse } from "../types/media.types";
-import type { ApiResponse } from "../types";
 
 /**
  * Media API endpoints
+ * 
+ * Refactored to use the functional fetcher with unwrapped responses.
  */
 export const mediaApi = {
   /**
@@ -18,20 +19,25 @@ export const mediaApi = {
       formData.append("folder", folder);
     }
 
-    return api.post<UploadMediaResponse>("/api/v1/media/upload", formData);
+    return fetcher<UploadMediaResponse>("/api/v1/media/upload", {
+      method: "POST",
+      body: formData,
+    });
   },
 
   /**
    * Get all user media
    */
-  getAll: async (): Promise<ApiResponse<MediaRecord[]>> => {
-    return api.get<ApiResponse<MediaRecord[]>>("/api/v1/media");
+  getAll: async (): Promise<MediaRecord[]> => {
+    return fetcher<MediaRecord[]>("/api/v1/media");
   },
 
   /**
    * Delete a media file by ID
    */
   delete: async (id: string): Promise<void> => {
-    return api.delete(`/api/v1/media/${id}`);
+    return fetcher<void>(`/api/v1/media/${id}`, {
+      method: "DELETE",
+    });
   },
 };

@@ -105,23 +105,21 @@ export default function VerifyReset() {
                 otp: values.otp
             });
 
-            if (response.success) {
-                const sessionData = {
-                    token: response.data?.token,
-                    expiresAt: response.data?.expiresAt
-                };
+            const sessionData = {
+                token: response.token,
+                expiresAt: response.expiresAt
+            };
 
-                // Clear previous stage
-                localStorage.removeItem("byteforge_reset_verify");
-                // Set next stage
-                localStorage.setItem("byteforge_reset_confirm", JSON.stringify(sessionData));
+            // Clear previous stage
+            localStorage.removeItem("byteforge_reset_verify");
+            // Set next stage
+            localStorage.setItem("byteforge_reset_confirm", JSON.stringify(sessionData));
 
-                toaster.success(t("auth.verifyReset.success") || "Code verified! Set your new password.");
-                navigate("/reset-password", {
-                    state: sessionData,
-                    replace: true
-                });
-            }
+            toaster.success(t("auth.verifyReset.success") || "Code verified! Set your new password.");
+            navigate("/reset-password", {
+                state: sessionData,
+                replace: true
+            });
         } catch (error) {
             if (error instanceof ApiError) {
                 setErrorMessage(error.message);
@@ -140,14 +138,12 @@ export default function VerifyReset() {
 
         try {
             const response = await authApi.resendResetOtp({ token: currentToken });
-            if (response.success && response.data) {
-                setToken(response.data.token); // Update request token
-                setExpiresAt(new Date(response.data.expiresAt));
-                setCanResend(false);
-                setResendStatus("sent");
-                toaster.success(t("auth.verifyAccount.resendSent"));
-                setTimeout(() => setResendStatus(null), 3000);
-            }
+            setToken(response.token); // Update request token
+            setExpiresAt(new Date(response.expiresAt));
+            setCanResend(false);
+            setResendStatus("sent");
+            toaster.success(t("auth.verifyAccount.resendSent"));
+            setTimeout(() => setResendStatus(null), 3000);
         } catch (error) {
             setResendStatus(null);
             if (error instanceof ApiError) {

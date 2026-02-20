@@ -45,7 +45,7 @@ export default function Register() {
     setErrorMessage(null);
 
     try {
-      const response = await authApi.register({
+      await authApi.register({
         firstName: values.firstName,
         lastName: values.lastName,
         userName: values.userName,
@@ -53,12 +53,10 @@ export default function Register() {
         password: values.password,
       });
 
-      if (response.success) {
-        toaster.success(t("auth.register.success"));
-        // Keep the form in 'submitting' state during the delay to prevent double-clicks
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-        navigate("/login");
-      }
+      toaster.success(t("auth.register.success"));
+      // Keep the form in 'submitting' state during the delay to prevent double-clicks
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      navigate("/login");
     } catch (error) {
       if (error instanceof ApiError && error.response) {
         const errorData = error.response;

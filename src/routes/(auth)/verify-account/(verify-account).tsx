@@ -81,8 +81,8 @@ export default function VerifyAccount() {
     setResendStatus("sending");
     try {
       const response = await authApi.sendVerificationEmail();
-      if (response.success && response.data?.expiresAt) {
-        setExpiresAt(new Date(response.data.expiresAt));
+      if (response.expiresAt) {
+        setExpiresAt(new Date(response.expiresAt));
         setCooldown(60); // 60s cooldown
         setResendStatus("sent");
         setTimeout(() => setResendStatus(null), 5000);
@@ -127,16 +127,14 @@ export default function VerifyAccount() {
     setErrorMessage(null);
 
     try {
-      const response = await authApi.verifyEmail({
+      await authApi.verifyEmail({
         otp: values.otp,
       });
 
-      if (response.success) {
-        // Successful verification
-        // Revalidate session to ensure UI updates immediately
-        revalidate("user-session");
-        navigate("/", { replace: true });
-      }
+      // Successful verification
+      // Revalidate session to ensure UI updates immediately
+      revalidate("user-session");
+      navigate("/", { replace: true });
     } catch (error) {
       if (error instanceof ApiError) {
         if (error.statusCode === 409) {

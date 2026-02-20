@@ -109,17 +109,15 @@ export default function ResetPassword() {
     setErrorMessage(null);
 
     try {
-      const response = await authApi.resetPassword({
+      await authApi.resetPassword({
         token: currentToken,
         password: values.password
       });
 
-      if (response.success) {
-        // Clear session on success
-        localStorage.removeItem("byteforge_reset_confirm");
-        toaster.success(t("auth.resetPassword.success"));
-        navigate("/login", { replace: true });
-      }
+      // Clear session on success
+      localStorage.removeItem("byteforge_reset_confirm");
+      toaster.success(t("auth.resetPassword.success"));
+      navigate("/login", { replace: true });
     } catch (error) {
       if (error instanceof ApiError) {
         setErrorMessage(error.message);

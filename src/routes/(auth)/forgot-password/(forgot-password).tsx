@@ -39,22 +39,20 @@ export default function ForgotPassword() {
 
     try {
       const response = await authApi.forgotPassword({ email: values.email });
-      if (response.success) {
-        const sessionData = {
-          token: response.data?.token,
-          expiresAt: response.data?.expiresAt,
-          email: values.email
-        };
+      const sessionData = {
+        token: response.token,
+        expiresAt: response.expiresAt,
+        email: values.email
+      };
 
-        // Persist to localStorage for page reloads
-        localStorage.setItem("byteforge_reset_verify", JSON.stringify(sessionData));
+      // Persist to localStorage for page reloads
+      localStorage.setItem("byteforge_reset_verify", JSON.stringify(sessionData));
 
-        toaster.success(response.message || t("auth.forgotPassword.success"));
-        // Navigate to verify page with state (optional now, but good for immediate transition)
-        navigate("/verify-reset", {
-          state: sessionData
-        });
-      }
+      toaster.success(t("auth.forgotPassword.success"));
+      // Navigate to verify page with state (optional now, but good for immediate transition)
+      navigate("/verify-reset", {
+        state: sessionData
+      });
     } catch (error) {
       if (error instanceof ApiError) {
         setErrorMessage(error.message);

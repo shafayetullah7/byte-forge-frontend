@@ -71,9 +71,9 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
       // Direct API call - 401 handled by API client
       const response = await mediaApi.upload(file);
 
-      // Backend returns media directly in data
-      const uploadedMediaId = response.data.id;
-      const mediaUrl = response.data.url;
+      // Backend returns media directly in response now (unwrapped)
+      const uploadedMediaId = response.id;
+      const mediaUrl = response.url;
 
       setMediaId(uploadedMediaId);
       setPreview(mediaUrl);

@@ -1,5 +1,5 @@
 // Re-export API client
-export { api } from "./api-client";
+export { api, fetcher, type FetchOptions } from "./api-client";
 
 // Re-export common types
 export * from "./types";
