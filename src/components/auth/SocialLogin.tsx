@@ -24,11 +24,12 @@ export default function SocialLogin() {
           type="button"
           class="flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-forest-800 border border-cream-200 dark:border-forest-700 rounded-lg shadow-sm hover:shadow-md hover:bg-terracotta-50/30 dark:hover:bg-forest-700 hover:border-terracotta-200 dark:hover:border-forest-600 transition-all duration-300 group"
           title={`${t("common.create")} ${t("auth.social.google")}`}
+          onClick={() => { }} // Placeholder for specific action
         >
           <img
             src="/google-brands-solid-full.svg"
             alt="Google"
-            class="w-5 h-5 transition-transform group-hover:scale-110"
+            class="w-5 h-5 dark:invert transition-transform group-hover:scale-110"
           />
           <span class="text-sm font-semibold text-forest-800 dark:text-cream-100 hidden sm:inline">
             {t("auth.social.google")}
@@ -40,11 +41,12 @@ export default function SocialLogin() {
           type="button"
           class="flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-forest-800 border border-cream-200 dark:border-forest-700 rounded-lg shadow-sm hover:shadow-md hover:bg-terracotta-50/30 dark:hover:bg-forest-700 hover:border-terracotta-200 dark:hover:border-forest-600 transition-all duration-300 group"
           title={t("auth.social.facebook")}
+          onClick={() => { }} // Placeholder for specific action
         >
           <img
             src="/facebook-brands-solid-full.svg"
             alt="Facebook"
-            class="w-5 h-5 transition-transform group-hover:scale-110"
+            class="w-5 h-5 dark:invert transition-transform group-hover:scale-110"
           />
           <span class="text-sm font-semibold text-forest-800 dark:text-cream-100 hidden sm:inline">
             {t("auth.social.facebook")}
@@ -56,6 +58,7 @@ export default function SocialLogin() {
           type="button"
           class="flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-forest-800 border border-cream-200 dark:border-forest-700 rounded-lg shadow-sm hover:shadow-md hover:bg-terracotta-50/30 dark:hover:bg-forest-700 hover:border-terracotta-200 dark:hover:border-forest-600 transition-all duration-300 group"
           title={t("auth.social.x")}
+          onClick={() => { }} // Placeholder for specific action
         >
           <img
             src="/x-twitter-brands-solid-full.svg"
