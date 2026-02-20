@@ -49,8 +49,8 @@ export function Navbar() {
                 href="/"
                 class="text-xl md:text-2xl font-bold text-forest-800 dark:text-cream-100 flex items-center gap-2 hover:text-forest-600 dark:hover:text-forest-300 transition-colors duration-200"
               >
-                GreenHaven
-                <span class="w-2 h-2 bg-forest-500 rounded-full"></span>
+                ByteForge
+                <span class="w-1.5 h-1.5 bg-terracotta-500 rounded-full"></span>
               </A>
             </div>
 
@@ -58,30 +58,30 @@ export function Navbar() {
             <div class="hidden md:flex items-center gap-8">
               <A
                 href="/"
-                class="text-forest-700 dark:text-gray-300 font-medium text-sm hover:text-forest-600 dark:hover:text-forest-300 transition-colors duration-200"
-                activeClass="text-forest-600 dark:text-forest-300 font-semibold"
+                class="text-forest-700 dark:text-gray-300 font-medium text-sm hover:text-terracotta-500 dark:hover:text-terracotta-300 transition-colors duration-200"
+                activeClass="text-terracotta-600 dark:text-terracotta-400 font-semibold"
                 end
               >
                 {t("common.home")}
               </A>
               <A
                 href="/plants"
-                class="text-forest-700 dark:text-gray-300 font-medium text-sm hover:text-forest-600 dark:hover:text-forest-300 transition-colors duration-200"
-                activeClass="text-forest-600 dark:text-forest-300 font-semibold"
+                class="text-forest-700 dark:text-gray-300 font-medium text-sm hover:text-terracotta-500 dark:hover:text-terracotta-300 transition-colors duration-200"
+                activeClass="text-terracotta-600 dark:text-terracotta-400 font-semibold"
               >
                 {t("common.plants")}
               </A>
               <A
                 href="/shops"
-                class="text-forest-700 dark:text-gray-300 font-medium text-sm hover:text-forest-600 dark:hover:text-forest-300 transition-colors duration-200"
-                activeClass="text-forest-600 dark:text-forest-300 font-semibold"
+                class="text-forest-700 dark:text-gray-300 font-medium text-sm hover:text-terracotta-500 dark:hover:text-terracotta-300 transition-colors duration-200"
+                activeClass="text-terracotta-600 dark:text-terracotta-400 font-semibold"
               >
                 {t("common.shops")}
               </A>
               <A
                 href="/about"
-                class="text-forest-700 dark:text-gray-300 font-medium text-sm hover:text-forest-600 dark:hover:text-forest-300 transition-colors duration-200"
-                activeClass="text-forest-600 dark:text-forest-300 font-semibold"
+                class="text-forest-700 dark:text-gray-300 font-medium text-sm hover:text-terracotta-500 dark:hover:text-terracotta-300 transition-colors duration-200"
+                activeClass="text-terracotta-600 dark:text-terracotta-400 font-semibold"
               >
                 {t("common.about")}
               </A>
@@ -90,14 +90,14 @@ export function Navbar() {
             {/* Right Actions */}
             <div class="flex items-center gap-4">
               <button
-                class="p-2.5 text-gray-500 dark:text-gray-400 hover:text-forest-600 dark:hover:text-forest-300 transition-colors duration-200"
+                class="p-2.5 text-gray-500 dark:text-gray-400 hover:text-terracotta-500 dark:hover:text-terracotta-400 transition-colors duration-200"
                 aria-label="Search"
               >
                 <MagnifyingGlassIcon class="w-5 h-5" />
               </button>
 
               <button
-                class="p-2.5 text-gray-500 dark:text-gray-400 hover:text-forest-600 dark:hover:text-forest-300 transition-colors duration-200 relative"
+                class="p-2.5 text-gray-500 dark:text-gray-400 hover:text-terracotta-500 dark:hover:text-terracotta-400 transition-colors duration-200 relative"
                 aria-label="Cart"
               >
                 <ShoppingBagIcon class="w-5 h-5" />
@@ -120,7 +120,7 @@ export function Navbar() {
               <div class="md:hidden mobile-menu-container">
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen())}
-                  class="p-2.5 text-forest-700 dark:text-gray-300 hover:text-forest-600 dark:hover:text-forest-300 transition-colors duration-200"
+                  class="p-2.5 text-forest-700 dark:text-gray-300 hover:text-terracotta-500 dark:hover:text-terracotta-400 transition-colors duration-200"
                   aria-label="Toggle menu"
                 >
                   <Bars3Icon class="w-6 h-6" />

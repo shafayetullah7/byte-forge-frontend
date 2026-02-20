@@ -8,9 +8,9 @@ description: Rules for styling, choosing colors, and designing UI components for
 
 ---
 
-## Core Principle: "Evening Garden"
+## Core Principle: "Moonlit Nursery"
 
-Dark mode is NOT "invert all the colors." It's a **mood shift** — from a sun-drenched greenhouse (light) to an evening garden under moonlight (dark). The forest palette replaces cream as the dominant surface color, and lighter shades of your brand colors provide contrast.
+Dark mode is NOT "invert all the colors." It's a **mood shift** — from a sun-drenched nursery (light) to an open field under moonlight (dark). The forest palette replaces cream as the dominant surface color, and earthy Terracotta accents provide warmth.
 
 ---
 
@@ -42,8 +42,8 @@ Dark surfaces use the **forest palette**, creating a branded dark mode instead o
 | **Secondary** | Labels, subtitles | `dark:text-gray-300` | `text-forest-700` |
 | **Tertiary** | Captions, hints | `dark:text-gray-400` | `text-gray-500` |
 | **Disabled** | Inactive text | `dark:text-gray-500` | `text-gray-400` |
-| **Brand** | Links, active nav | `dark:text-forest-300` | `text-forest-600` |
-| **CTA** | Action text | `dark:text-terracotta-400` | `text-terracotta-600` |
+| **Brand** | Links, active nav | `dark:text-terracotta-400` | `text-terracotta-600` |
+| **Secondary** | Non-primary actions | `dark:text-terracotta-300` | `text-terracotta-700` |
 
 ### Rules:
 1. **Primary text: `dark:text-cream-50` or `dark:text-gray-100`** — Off-white is easier on the eyes than pure white
@@ -75,8 +75,8 @@ Dark surfaces use the **forest palette**, creating a branded dark mode instead o
 | Variant | Dark Classes | Light Equivalent |
 |---|---|---|
 | **Primary** | `dark:bg-forest-500 dark:hover:bg-forest-400 dark:text-white` | `bg-forest-600` |
-| **CTA** | `dark:bg-terracotta-500 dark:hover:bg-terracotta-400 dark:text-white` | `bg-terracotta-500` |
-| **Secondary** | `dark:bg-forest-700 dark:hover:bg-forest-600 dark:text-gray-200` | `bg-forest-50` |
+| **Secondary** | `dark:bg-terracotta-600 dark:hover:bg-terracotta-500 dark:text-white` | `bg-terracotta-50` (soft clay) |
+| **Accent/CTA** | `dark:bg-terracotta-500 dark:hover:bg-terracotta-400 dark:text-white shadow-sm` | `bg-terracotta-500` |
 | **Outline** | `dark:border-forest-600 dark:text-gray-300 dark:hover:bg-forest-700` | `border-cream-300` |
 | **Ghost** | `dark:text-forest-300 dark:hover:bg-forest-700` | `text-forest-600` |
 | **Danger** | `dark:bg-red-700 dark:hover:bg-red-600 dark:text-white` | `bg-red-600` |
@@ -204,8 +204,8 @@ What is the element?
 │
 ├─ Button?
 │  └─ Primary → dark:bg-forest-500
-│  └─ CTA → dark:bg-terracotta-500
-│  └─ Secondary → dark:bg-forest-700
+│  └─ Secondary → dark:bg-terracotta-600
+│  └─ Accent/CTA → dark:bg-terracotta-500
 │  └─ Danger → dark:bg-red-700
 │
 ├─ Badge?

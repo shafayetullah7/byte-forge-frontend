@@ -1,8 +1,9 @@
-import { A, useNavigate } from "@solidjs/router";
-import { Show, createSignal } from "solid-js";
+import { useNavigate } from "@solidjs/router";
+import { Show } from "solid-js";
 import { useSession } from "~/lib/auth";
 import { UserMenu } from "./UserMenu";
 import { useI18n } from "~/i18n";
+import LinkButton from "../ui/LinkButton";
 
 export function AuthSection() {
     const user = useSession();
@@ -14,18 +15,20 @@ export function AuthSection() {
             when={user()}
             fallback={
                 <div class="hidden md:flex items-center gap-3">
-                    <A
+                    <LinkButton
                         href="/login"
-                        class="text-forest-700 dark:text-gray-200 font-semibold text-sm px-4 py-2 hover:text-forest-600 dark:hover:text-forest-300 transition-colors duration-200"
+                        variant="secondary"
+                        class="font-semibold"
                     >
                         {t("common.signIn")}
-                    </A>
-                    <A
+                    </LinkButton>
+                    <LinkButton
                         href="/register"
-                        class="bg-forest-600 dark:bg-forest-500 text-white font-semibold text-sm px-6 py-2.5 rounded-lg hover:bg-forest-700 dark:hover:bg-forest-400 transition-colors duration-200"
+                        variant="primary"
+                        class="font-semibold"
                     >
                         {t("common.signUp")}
-                    </A>
+                    </LinkButton>
                 </div>
             }
         >

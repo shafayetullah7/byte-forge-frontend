@@ -4,8 +4,8 @@ description: ByteForge component style guide — typography, shape, spacing, ele
 
 # ByteForge Component Style Guide
 
-> **Theme:** Modern Nursery Marketplace — warm, organic, trustworthy  
-> **Audience:** Nursery owners + plant enthusiasts  
+> **Theme:** Open Field Nursery — grounded, material, trustworthy  
+> **Audience:** Nursery owners + plant enthusiasts in Bangladesh  
 > **Device:** Balanced mobile and desktop  
 > **Color rules:** `/color-palette-rules` · `/light-theme-design` · `/dark-theme-design`  
 > **Precedence:** Theme files override this guide for color. `/layout-rules` overrides for spatial decisions. This guide is the default.
@@ -23,8 +23,10 @@ Rounded letterforms — organic, professional, distinctive. Load via Google Font
 | Element | Size | Weight | Color (Light) | Color (Dark) |
 |---|---|---|---|---|
 | Page title (h1) | `text-2xl md:text-3xl` | `font-bold` (700) | `text-forest-800` | `dark:text-cream-50` |
+| Hero title | `text-4xl md:text-6xl` | `font-bold` (700) | `text-white` | `text-white` |
 | Section title (h2) | `text-xl md:text-2xl` | `font-bold` (700) | `text-forest-800` | `dark:text-cream-100` |
 | Card title (h3) | `text-lg` | `font-semibold` (600) | `text-forest-700` | `dark:text-cream-100` |
+| Hero subtitle | `text-lg md:text-xl` | `font-normal` (400) | `text-cream-100` | `text-cream-100` |
 | Subtitle | `text-base` | `font-normal` (400) | `text-gray-600` | `dark:text-gray-400` |
 | Body | `text-base` | `font-normal` (400) | `text-forest-800` | `dark:text-gray-200` |
 | Body small | `text-sm` | `font-normal` (400) | `text-forest-700` | `dark:text-gray-300` |
@@ -261,15 +263,17 @@ grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6
 
 ---
 
-## 10. Visual Weight — 60-30-10
+### Visual Weight — 60-30-10
 
 Every screen must feel balanced.
 
 ```
-  60% ──────────────────────── Neutral (cream, white, gray text)
-  30% ───────────── Forest (nav, buttons, links, borders)
-  10% ──── Terracotta + Sage (CTAs, badges, status)
+  60% ──────────────────────── Neutral (Cream background, gray text)
+  30% ───────────── Forest (Primary identity, main nav, primary buttons)
+  10% ──── Terracotta (Secondary warmth, accent buttons, active nav)
 ```
+
+> **Note:** Sage is reserved strictly for status (1-2% of the UI).
 
 ### Self-Check:
 1. Mostly cream/white with forest accents? → ✅

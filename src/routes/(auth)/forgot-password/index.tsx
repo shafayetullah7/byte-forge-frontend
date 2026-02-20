@@ -98,17 +98,18 @@ export default function ForgotPassword() {
 
         <Button
           variant="primary"
-          class="w-full"
+          size="lg"
+          class="w-full shadow-sm"
           type="submit"
           disabled={forgotForm.submitting}
         >
           {forgotForm.submitting ? t("auth.forgotPassword.submitting") : t("auth.forgotPassword.submit")}
         </Button>
 
-        <p class="text-center text-sm text-gray-600 dark:text-gray-400 pt-4 border-t border-gray-100 dark:border-gray-800">
+        <p class="text-center text-sm text-gray-600 dark:text-gray-400 pt-6 border-t border-gray-100 dark:border-forest-800">
           <A
             href="/login"
-            class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+            class="text-terracotta-600 dark:text-terracotta-400 hover:text-terracotta-700 dark:hover:text-terracotta-300 font-bold transition-colors underline-offset-4 hover:underline"
           >
             {t("auth.forgotPassword.backToLogin")}
           </A>

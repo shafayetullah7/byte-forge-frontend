@@ -19,16 +19,15 @@ export const registerSchema = z
     userName: z
       .string()
       .min(3, "auth.validation.userNameMin")
-      .max(50, "auth.validation.userNameMax")
+      .max(16, "auth.validation.userNameMax")
       .regex(
         /^[a-z0-9_]+$/,
         "auth.validation.userNameRegex"
       ),
 
     email: z
-      .string()
-      .min(1, "auth.validation.emailRequired")
       .email("auth.validation.invalidEmail")
+      .min(1, "auth.validation.emailRequired")
       .max(255, "auth.validation.emailTooLong"),
 
     password: passwordSchema,

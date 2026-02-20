@@ -21,9 +21,10 @@ Light mode uses a **layered surface system** to create depth. Higher layers sit 
 | **Overlay** | Modals backdrop | `bg-black/40` | Modal dimming |
 
 ### Rules:
-1. **Never use `bg-gray-50` or `bg-gray-100`** — Use `bg-cream-100` or `bg-forest-50` for warm recessed areas
-2. **Cards should be `bg-white` on `bg-cream-50` base** — The slight contrast creates visual separation without heavy borders
-3. **Avoid stacking more than 3 surface layers** — Base → Surface → Elevated is enough. More creates visual noise
+1. **Never use `bg-gray-50` or `bg-gray-100`** — Use `bg-cream-100` or `bg-forest-50` for warm recessed areas.
+2. **Cards should be `bg-white` on `bg-cream-50` base** — The slight contrast creates visual separation.
+3. **Avoid stacking more than 3 surface layers** — Base → Surface → Elevated is enough.
+4. **No Digital Transparency** — Avoid backdrop-blur. If content needs to stand out against a background, use a solid color overlay or a higher-contrast border.
 
 ---
 
@@ -70,10 +71,9 @@ Use a maximum of **4 text levels** to create clear visual hierarchy.
 
 | Variant | Classes | Use For |
 |---|---|---|
-| **Primary** | `bg-forest-600 hover:bg-forest-700 text-white` | Main actions: Save, Submit, Confirm |
-| **CTA** | `bg-terracotta-500 hover:bg-terracotta-600 text-white` | High-impact: Buy, Sign Up, Start |
-| **Secondary** | `bg-forest-50 hover:bg-forest-100 text-forest-700` | Secondary actions: Cancel, Back |
-| **Outline** | `border border-cream-300 text-forest-700 hover:bg-cream-50` | Tertiary: Filter, Sort |
+| **Primary** | `bg-forest-600 hover:bg-forest-700 text-white` | Main global actions: Save, Submit |
+| **Secondary** | `bg-terracotta-50 hover:bg-terracotta-100 text-terracotta-700` | Refined actions: Learn More, View Details |
+| **CTA** | `bg-terracotta-500 hover:bg-terracotta-600 text-white` | High-conversion: Buy, Sign Up |
 | **Ghost** | `text-forest-600 hover:bg-forest-50` | Minimal: Close, Edit inline |
 | **Danger** | `bg-red-600 hover:bg-red-700 text-white` | Destructive: Delete, Remove |
 

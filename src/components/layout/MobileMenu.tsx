@@ -12,6 +12,7 @@ import { type AuthUser } from "~/lib/api/types/auth.types";
 import { useI18n } from "~/i18n";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import LinkButton from "../ui/LinkButton";
 
 interface MobileMenuProps {
     isOpen: boolean;
@@ -46,28 +47,33 @@ export function MobileMenu(props: MobileMenuProps) {
                 <div class="py-2 flex flex-col">
                     <A
                         href="/"
-                        class="px-4 py-3 text-sm font-medium text-forest-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-700 transition-colors duration-200"
+                        class="px-4 py-3 text-sm font-medium text-forest-700 dark:text-gray-300 hover:bg-terracotta-50/50 dark:hover:bg-terracotta-900/30 transition-colors duration-200"
+                        activeClass="text-terracotta-600 dark:text-terracotta-400 font-semibold bg-terracotta-50/30 dark:bg-terracotta-900/40"
                         onClick={props.onClose}
+                        end
                     >
                         {t("common.home")}
                     </A>
                     <A
                         href="/plants"
-                        class="px-4 py-3 text-sm font-medium text-forest-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-700 transition-colors duration-200"
+                        class="px-4 py-3 text-sm font-medium text-forest-700 dark:text-gray-300 hover:bg-terracotta-50/50 dark:hover:bg-terracotta-900/30 transition-colors duration-200"
+                        activeClass="text-terracotta-600 dark:text-terracotta-400 font-semibold bg-terracotta-50/30 dark:bg-terracotta-900/40"
                         onClick={props.onClose}
                     >
                         {t("common.plants")}
                     </A>
                     <A
                         href="/shops"
-                        class="px-4 py-3 text-sm font-medium text-forest-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-700 transition-colors duration-200"
+                        class="px-4 py-3 text-sm font-medium text-forest-700 dark:text-gray-300 hover:bg-terracotta-50/50 dark:hover:bg-terracotta-900/30 transition-colors duration-200"
+                        activeClass="text-terracotta-600 dark:text-terracotta-400 font-semibold bg-terracotta-50/30 dark:bg-terracotta-900/40"
                         onClick={props.onClose}
                     >
                         {t("common.shops")}
                     </A>
                     <A
                         href="/about"
-                        class="px-4 py-3 text-sm font-medium text-forest-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-700 transition-colors duration-200"
+                        class="px-4 py-3 text-sm font-medium text-forest-700 dark:text-gray-300 hover:bg-terracotta-50/50 dark:hover:bg-terracotta-900/30 transition-colors duration-200"
+                        activeClass="text-terracotta-600 dark:text-terracotta-400 font-semibold bg-terracotta-50/30 dark:bg-terracotta-900/40"
                         onClick={props.onClose}
                     >
                         {t("common.about")}
@@ -91,20 +97,22 @@ export function MobileMenu(props: MobileMenuProps) {
                         when={props.user()}
                         fallback={
                             <div class="px-4 flex flex-col gap-2">
-                                <A
+                                <LinkButton
                                     href="/login"
-                                    class="text-center text-forest-700 dark:text-gray-200 font-semibold text-sm px-4 py-2.5 rounded-lg hover:bg-forest-50 dark:hover:bg-forest-700 transition-colors duration-200"
+                                    variant="secondary"
+                                    class="w-full font-semibold"
                                     onClick={props.onClose}
                                 >
                                     {t("common.signIn")}
-                                </A>
-                                <A
+                                </LinkButton>
+                                <LinkButton
                                     href="/register"
-                                    class="text-center bg-forest-600 dark:bg-forest-500 text-white font-semibold text-sm px-4 py-2.5 rounded-lg hover:bg-forest-700 dark:hover:bg-forest-400 transition-colors duration-200"
+                                    variant="primary"
+                                    class="w-full font-semibold"
                                     onClick={props.onClose}
                                 >
                                     {t("common.signUp")}
-                                </A>
+                                </LinkButton>
                             </div>
                         }
                     >

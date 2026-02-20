@@ -189,9 +189,9 @@ description: Fully assembled component examples with annotated rule sources — 
         justify-end gap-3 pt-4
       ">
         <button class="
-          bg-forest-50 dark:bg-forest-700  <!-- /light+dark §Button: secondary -->
-          text-forest-700 dark:text-gray-200
-          hover:bg-forest-100 dark:hover:bg-forest-600
+          bg-terracotta-50 dark:bg-terracotta-600  <!-- /light+dark §Button: secondary -->
+          text-terracotta-700 dark:text-white
+          hover:bg-terracotta-100 dark:hover:bg-terracotta-500
           rounded-lg px-4 py-2.5
           transition-colors duration-200
           min-h-[44px]                     <!-- /layout-rules §4: touch target -->

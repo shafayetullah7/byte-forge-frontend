@@ -181,13 +181,18 @@ export default function Register() {
           <div>
             <Input
               {...props}
-              label={t("auth.register.userNameLabel")} // Need key
+              label={t("auth.register.userNameLabel")}
               type="text"
               placeholder={t("auth.register.userNamePlaceholder")}
               value={field.value || ""}
               required
               disabled={registerForm.submitting}
             />
+            {!field.error && (
+              <p class="mt-1.5 text-[10px] text-gray-500 dark:text-gray-400 font-medium tracking-wide px-1">
+                {t("auth.register.userNameHint")}
+              </p>
+            )}
             {field.error && (
               <p class="mt-1 text-sm text-red-600 dark:text-red-400">
                 {t(field.error)}
@@ -316,21 +321,24 @@ export default function Register() {
       </Field>
 
       {/* Create Account Button - Disabled if form is invalid or submitting */}
-      <Button
-        variant="primary"
-        class="w-full"
-        type="submit"
-        disabled={registerForm.submitting || registerForm.invalid}
-      >
-        {registerForm.submitting ? t("auth.register.submitting") : t("auth.register.submit")}
-      </Button>
+      <div class="pt-2">
+        <Button
+          variant="primary"
+          size="lg"
+          class="w-full shadow-sm"
+          type="submit"
+          disabled={registerForm.submitting || registerForm.invalid}
+        >
+          {registerForm.submitting ? t("auth.register.submitting") : t("auth.register.submit")}
+        </Button>
+      </div>
 
       {/* Sign In Link */}
       <p class="text-center text-sm text-gray-600 dark:text-gray-400">
         {t("auth.register.hasAccount")}{" "}
         <A
           href="/login"
-          class="text-forest-600 dark:text-sage-400 hover:text-forest-700 dark:hover:text-sage-300 font-medium transition-colors underline-offset-2 hover:underline"
+          class="text-terracotta-600 dark:text-terracotta-400 hover:text-terracotta-700 dark:hover:text-terracotta-300 font-bold transition-colors underline-offset-4 hover:underline"
         >
           {t("auth.register.signIn")}
         </A>

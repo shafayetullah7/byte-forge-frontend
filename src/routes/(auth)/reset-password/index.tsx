@@ -133,9 +133,9 @@ export default function ResetPassword() {
     <div class="space-y-6">
       <div class="text-center -mt-4 mb-2">
         {timeLeft() && (
-          <p class={`text-sm font-medium py-1 px-3 rounded-full inline-block ${isSessionExpired()
-            ? "text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-900/20"
-            : "text-forest-600 dark:text-sage-400 bg-forest-50 dark:bg-forest-900/20"
+          <p class={`text-[11px] font-bold uppercase tracking-wider py-1.5 px-4 rounded-full inline-block transition-colors ${isSessionExpired()
+            ? "text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30"
+            : "text-terracotta-700 bg-terracotta-50 dark:text-terracotta-400 dark:bg-terracotta-900/20 border border-terracotta-100 dark:border-terracotta-900/30"
             }`}>
             {isSessionExpired() ? t("auth.resetPassword.sessionExpired") : `${t("auth.resetPassword.sessionExpiresIn")} ${timeLeft()}`}
           </p>
@@ -156,7 +156,7 @@ export default function ResetPassword() {
             </p>
             <A
               href="/forgot-password"
-              class="text-forest-600 hover:text-forest-700 dark:text-sage-400 dark:hover:text-sage-300 font-medium"
+              class="text-terracotta-600 hover:text-terracotta-700 dark:text-terracotta-400 dark:hover:text-terracotta-300 font-bold transition-colors underline-offset-4 hover:underline"
             >
               {t("auth.resetPassword.startOver")}
             </A>
@@ -231,7 +231,8 @@ export default function ResetPassword() {
 
           <Button
             variant="primary"
-            class="w-full"
+            size="lg"
+            class="w-full shadow-sm"
             type="submit"
             disabled={resetForm.submitting || isSessionExpired()}
           >

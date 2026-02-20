@@ -77,16 +77,16 @@ export default function AuthLayout(props: RouteSectionProps) {
   });
 
   return (
-    <main class="min-h-screen bg-cream-50 dark:bg-forest-900 flex items-center justify-center p-4">
+    <main class="min-h-screen bg-cream-50 dark:bg-forest-950 flex items-center justify-center p-4 transition-colors duration-200">
       <div class="w-full max-w-md">
         {/* Header */}
         <div class="flex items-center justify-between mb-8">
           <A
             href="/"
-            class="text-sm text-gray-600 dark:text-gray-400 hover:text-forest-600 dark:hover:text-sage-400 flex items-center gap-2"
+            class="text-sm font-medium text-forest-700 dark:text-cream-200 hover:text-terracotta-500 dark:hover:text-terracotta-400 flex items-center gap-2 transition-colors group"
           >
             <svg
-              class="w-4 h-4"
+              class="w-4 h-4 transition-transform group-hover:-translate-x-1"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -102,17 +102,17 @@ export default function AuthLayout(props: RouteSectionProps) {
           </A>
           <A
             href="/"
-            class="text-2xl font-bold bg-linear-to-r from-forest-600 to-sage-500 bg-clip-text text-transparent"
+            class="text-2xl font-bold text-forest-800 dark:text-cream-50 flex items-center"
           >
-            ByteForge
+            ByteForge<span class="text-terracotta-500">.</span>
           </A>
         </div>
 
         {/* Card Container */}
-        <div class="bg-white dark:bg-forest-800 rounded-xl shadow-lg p-8">
+        <div class="bg-white dark:bg-forest-900 rounded-xl shadow-sm border border-gray-100 dark:border-forest-800 p-8 transition-colors">
           {/* Title Section */}
-          <div class="mb-6">
-            <h1 class="text-3xl font-bold text-forest-700 dark:text-sage-300 mb-2">
+          <div class="mb-8">
+            <h1 class="text-2xl md:text-3xl font-bold text-forest-800 dark:text-cream-50 mb-2">
               {metadata().title}
             </h1>
             <p class="text-gray-600 dark:text-gray-400">

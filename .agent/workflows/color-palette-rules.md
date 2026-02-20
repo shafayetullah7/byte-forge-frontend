@@ -4,14 +4,14 @@ description: ByteForge color palette philosophy, selection rationale, role assig
 
 # ByteForge Color Palette Design Rules
 
-## Theme Identity: "Modern Nursery Marketplace"
+## Theme Identity: "Open Field Nursery & Garden"
 
-ByteForge serves nursery owners and plant buyers. The color palette is inspired by a **physical plant nursery** — the feeling of walking into a greenhouse or garden center. The theme has two moods:
+ByteForge serves nursery owners and plant buyers in Bangladesh. The design is inspired by the **familiar, grounded reality of local nurseries** — open fields, rows of clay pots (mati), and the vibrant, organic growth of sub-tropical plants.
 
-- **Light mode** → Sun-drenched greenhouse: bright, warm, with green accents
-- **Dark mode** → Evening garden: deep forest canopy, soft moonlit highlights
+- **Light mode** → High-noon garden: Clear, bright, and organic with earthy accents.
+- **Dark mode** → Moonlit nursery: Deep shadows, soft silhouettes, and sturdy foliage.
 
-Every color choice must reinforce this identity. If a color doesn't feel like it belongs in a nursery, it doesn't belong in the app.
+Every color choice must reinforce this local identity. If a color or effect (like glassmorphism) feels "digital-first" rather than "material-first," it doesn't belong.
 
 ---
 
@@ -34,37 +34,36 @@ Every color choice must reinforce this identity. If a color doesn't feel like it
 
 ---
 
-### 🌿 Sage Green — Secondary Accent
-
-| Property | Value |
-|---|---|
-| **Real-world source** | Sage plant leaves, dried herbs, soft greenery |
-| **Emotion** | Calm, approachable, organic |
-| **Role** | Secondary elements — success states, subtle badges, selected states, card borders |
-| **Distribution** | ~10% of the UI (subtle, supportive) |
-
-**Rules:**
-1. Sage is **never** a substitute for forest — it complements, it doesn't replace
-2. Sage should NOT be used for primary buttons, primary links, or brand identity
-3. Use sage for states that communicate "positive/complete/active" (e.g., verified badges, success toasts)
-4. In dark mode, sage can be used for subtle surface tints (`bg-sage-900/20`) but NOT as the primary accent
-
----
-
-### 🏺 Terracotta — Call-to-Action
+### 🏺 Terracotta — Secondary Brand (The Mati)
 
 | Property | Value |
 |---|---|
 | **Real-world source** | Clay pots, terracotta planters, warm earth |
-| **Emotion** | Energy, urgency, warmth (without aggression) |
-| **Role** | CTAs, attention-grabbers — "Buy Now", "Sign Up", important notifications |
-| **Distribution** | ~5% of the UI (rare, high-impact) |
+| **Emotion** | Warmth, energy, artisanal, grounded |
+| **Role** | Secondary actions, active highlights, sidebar icons, prominent badges |
+| **Distribution** | ~20% of the UI |
 
 **Rules:**
-1. Terracotta is **reserved for actions that need the most attention** — primary CTAs, promotional buttons
-2. Terracotta must NOT be used as a general "secondary" color — its power comes from scarcity
-3. Do NOT use terracotta for destructive actions (delete, cancel) — use a dedicated danger/red color for that
-4. Terracotta can differentiate seller-specific features from buyer features, but this should be consistent
+1. Terracotta is the **default secondary color** for buttons and interactive highlights.
+2. Use Terracotta to provide warmth and contrast against Forest Green.
+3. In dark mode, use `terracotta-400` for borders and text highlights on deep forest surfaces.
+4. Terracotta represents the "Material" in our material-first aesthetic.
+
+---
+
+### 🌿 Sage Green — Status & Verification
+
+| Property | Value |
+|---|---|
+| **Real-world source** | Fresh leaves, healthy growth, clear sky |
+| **Emotion** | Calm, success, safety, verified |
+| **Role** | Purely functional states — success messages, verified badges, active "online" status |
+| **Distribution** | ~5% of the UI (utility-specific) |
+
+**Rules:**
+1. Sage is **strictly functional**. It communicates "Success" or "Correct."
+2. Do NOT use Sage for brand accents or general UI navigation.
+3. Sage should always feel supportive, never dominant.
 
 ---
 
@@ -132,9 +131,11 @@ When generating or fixing palette shades (50–900), follow these rules:
 1. **❌ Swapping brand color in dark mode** — `forest-600 dark:sage-500` is forbidden. Use `forest-600 dark:forest-400` instead.
 2. **❌ Using `gray-*` for borders when dark surfaces use `forest-*`** — Pick one neutral system per mode.
 3. **❌ Pure `white` backgrounds in light mode** — Use `cream-50` for warmth. Reserve `white` only for card surfaces or inputs.
-4. **❌ Using terracotta for non-CTA elements** — Don't dilute its urgency.
-5. **❌ Defining colors outside `@theme`** — All palette colors belong in Tailwind's `@theme`. Avoid separate `:root` color variables for the same purpose.
+4. **❌ Using Terracotta for destructive actions** — Use red for danger.
+5. **❌ Diluting Terracotta too much** — While secondary, keeps its warmth; don't use it for inert layout borders.
+5. **❌ Defining colors outside @theme** — All palette colors belong in Tailwind's @theme.
 6. **❌ Ad-hoc hex colors in components** — Every color used must trace back to a named palette token.
+7. **❌ Digital-first effects** — Avoid backdrop-blur, glassmorphism, or high transparency. Use solid material colors for legibility.
 
 ---
 

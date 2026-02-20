@@ -164,21 +164,23 @@ export default function Login() {
       <div class="flex items-center justify-between">
         <Field name="rememberMe" type="boolean">
           {(field, props) => (
-            <label class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+            <label class="flex items-start gap-2 text-sm text-forest-800 dark:text-cream-200 cursor-pointer group">
               <input
                 {...props}
                 type="checkbox"
                 checked={field.value || false}
-                class="mt-0.5 rounded border-gray-300 text-forest-600 focus:ring-forest-500"
+                class="mt-1 rounded border-gray-300 dark:border-forest-700 text-terracotta-600 focus:ring-terracotta-500 transition-colors"
                 disabled={loginForm.submitting}
               />
-              {t("auth.login.rememberMe")}
+              <span class="group-hover:text-forest-600 dark:group-hover:text-cream-100 transition-colors">
+                {t("auth.login.rememberMe")}
+              </span>
             </label>
           )}
         </Field>
         <A
           href="/forgot-password"
-          class="text-sm text-forest-600 dark:text-sage-400 hover:text-forest-700 dark:hover:text-sage-300 transition-colors underline-offset-2 hover:underline"
+          class="text-sm font-medium text-terracotta-600 dark:text-terracotta-400 hover:text-terracotta-700 dark:hover:text-terracotta-300 transition-colors underline-offset-4 hover:underline"
         >
           {t("auth.login.forgotPassword")}
         </A>
@@ -187,7 +189,8 @@ export default function Login() {
       {/* Sign In Button */}
       <Button
         variant="primary"
-        class="w-full"
+        size="lg"
+        class="w-full shadow-sm"
         type="submit"
         disabled={loginForm.submitting || loginForm.invalid}
       >
@@ -195,11 +198,11 @@ export default function Login() {
       </Button>
 
       {/* Sign Up Link */}
-      <p class="text-center text-sm text-gray-600 dark:text-gray-400">
+      <p class="text-center text-sm text-gray-600 dark:text-gray-400 pt-2">
         {t("auth.login.noAccount")}{" "}
         <A
           href="/register"
-          class="text-forest-600 dark:text-sage-400 hover:text-forest-700 dark:hover:text-sage-300 font-medium transition-colors underline-offset-2 hover:underline"
+          class="text-terracotta-600 dark:text-terracotta-400 hover:text-terracotta-700 dark:hover:text-terracotta-300 font-bold transition-colors underline-offset-4 hover:underline"
         >
           {t("auth.login.createAccount")}
         </A>
