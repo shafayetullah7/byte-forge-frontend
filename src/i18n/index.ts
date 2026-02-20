@@ -1,4 +1,4 @@
-import { createSignal, createContext, useContext, Accessor, createMemo, FlowProps } from "solid-js";
+import { createSignal, createContext, useContext, Accessor, createMemo, Context } from "solid-js";
 import * as en from "./en";
 import * as bn from "./bn";
 import { translator, resolveTemplate, Flatten, flatten } from "@solid-primitives/i18n";
@@ -20,7 +20,21 @@ export interface I18nContextInterface {
   toggleLocale: () => void;
 }
 
-export const I18nContext = createContext<I18nContextInterface>();
+const CONTEXT_ID = "byteforge_i18n_context";
+
+function getContext(): Context<I18nContextInterface | undefined> {
+  if (import.meta.env.DEV) {
+    const globalContext = (globalThis as any)[CONTEXT_ID];
+    if (globalContext) return globalContext;
+    
+    const newContext = createContext<I18nContextInterface>();
+    (globalThis as any)[CONTEXT_ID] = newContext;
+    return newContext;
+  }
+  return createContext<I18nContextInterface>();
+}
+
+export const I18nContext = getContext();
 
 // Helper to create the i18n implementation (state + translator)
 export function createI18n(initialLocale: Locale = "en"): I18nContextInterface {

@@ -65,9 +65,7 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div class="space-y-6">
-
-
+    <div class="w-full sm:min-w-[360px] max-w-md mx-auto space-y-6">
       <Form onSubmit={handleSubmit} class="space-y-6">
         {errorMessage() && (
           <div class="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">

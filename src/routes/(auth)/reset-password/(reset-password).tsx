@@ -130,7 +130,7 @@ export default function ResetPassword() {
   };
 
   return (
-    <div class="space-y-6">
+    <div class="w-full sm:min-w-[400px] max-w-md mx-auto">
       <div class="text-center -mt-4 mb-2">
         {timeLeft() && (
           <p class={`text-[11px] font-bold uppercase tracking-wider py-1.5 px-4 rounded-full inline-block transition-colors ${isSessionExpired()

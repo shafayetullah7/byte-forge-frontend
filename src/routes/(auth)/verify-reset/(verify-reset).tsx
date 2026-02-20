@@ -4,6 +4,7 @@ import { createForm } from "@modular-forms/solid";
 import { Button, Input } from "~/components/ui";
 import { authApi, ApiError } from "~/lib/api";
 import { toaster } from "~/components/ui/Toast";
+import { useI18n } from "~/i18n";
 import { z } from "zod";
 
 const verifyResetSchema = z.object({
@@ -15,6 +16,7 @@ type VerifyResetForm = z.infer<typeof verifyResetSchema>;
 export default function VerifyReset() {
     const navigate = useNavigate();
     const location = useLocation();
+    const { t } = useI18n();
     const getInitialState = () => {
         const locState = location.state as { token?: string; expiresAt?: string; email?: string } | undefined;
         if (locState?.token) return locState;
@@ -45,7 +47,7 @@ export default function VerifyReset() {
     // Redirect if no token state
     onMount(() => {
         if (!token()) {
-            toaster.error("Session invalid. Please start over.");
+            toaster.error(t("auth.verifyReset.invalidSession") || "Session invalid. Please start over.");
             navigate("/forgot-password", { replace: true });
         }
     });
@@ -59,7 +61,7 @@ export default function VerifyReset() {
         const diff = expiry.getTime() - now.getTime();
 
         if (diff <= 0) {
-            setTimeLeft("Expired");
+            setTimeLeft(t("auth.verifyAccount.expired"));
             setCanResend(true);
             return;
         }
@@ -114,7 +116,7 @@ export default function VerifyReset() {
                 // Set next stage
                 localStorage.setItem("byteforge_reset_confirm", JSON.stringify(sessionData));
 
-                toaster.success("Code verified! Set your new password.");
+                toaster.success(t("auth.verifyReset.success") || "Code verified! Set your new password.");
                 navigate("/reset-password", {
                     state: sessionData,
                     replace: true
@@ -143,7 +145,7 @@ export default function VerifyReset() {
                 setExpiresAt(new Date(response.data.expiresAt));
                 setCanResend(false);
                 setResendStatus("sent");
-                toaster.success("New code sent!");
+                toaster.success(t("auth.verifyAccount.resendSent"));
                 setTimeout(() => setResendStatus(null), 3000);
             }
         } catch (error) {
@@ -159,10 +161,10 @@ export default function VerifyReset() {
     };
 
     return (
-        <div class="space-y-6">
+        <div class="w-full sm:min-w-[360px] max-w-md mx-auto space-y-6">
             <div class="text-center -mt-4 mb-6">
                 <p class="text-sm text-gray-600 dark:text-gray-400">
-                    We sent a code to <span class="font-medium text-gray-900 dark:text-gray-200">{email}</span>
+                    {t("auth.verifyReset.sentTo")} <span class="font-medium text-gray-900 dark:text-gray-200">{email}</span>
                 </p>
             </div>
 
@@ -177,7 +179,7 @@ export default function VerifyReset() {
                 <div class="text-center space-y-2">
                     {timeLeft() && (
                         <p class="text-sm font-medium text-forest-600 dark:text-sage-400 bg-forest-50 dark:bg-forest-900/20 py-1 px-3 rounded-full inline-block">
-                            Code expires in {timeLeft()}
+                            {t("auth.verifyAccount.expiresIn")} {timeLeft()}
                         </p>
                     )}
                 </div>
@@ -187,9 +189,9 @@ export default function VerifyReset() {
                         <div>
                             <Input
                                 {...props}
-                                label="Verification Code"
+                                label={t("auth.verifyAccount.otpLabel")}
                                 type="text"
-                                placeholder="Enter 6-digit code"
+                                placeholder={t("auth.verifyAccount.otpPlaceholder")}
                                 maxlength={6}
                                 value={field.value || ""}
                                 required
@@ -211,7 +213,7 @@ export default function VerifyReset() {
                     type="submit"
                     disabled={verifyForm.submitting}
                 >
-                    {verifyForm.submitting ? "Verifying..." : "Verify Code"}
+                    {verifyForm.submitting ? t("auth.verifyAccount.submitting") : t("auth.verifyAccount.submit")}
                 </Button>
 
                 <div class="text-center">
@@ -226,7 +228,7 @@ export default function VerifyReset() {
                         // For now, let's just make it clickable.
                         class="text-sm text-forest-600 dark:text-sage-400 hover:text-forest-700 dark:hover:text-sage-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {resendStatus() === "sending" ? "Sending..." : "Resend Code"}
+                        {resendStatus() === "sending" ? t("auth.verifyAccount.resending") : t("auth.verifyAccount.resend")}
                     </button>
                 </div>
             </Form>

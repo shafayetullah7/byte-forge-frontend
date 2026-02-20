@@ -5,10 +5,12 @@ import { Button, Input } from "~/components/ui";
 import { verifySchema, type VerifyFormData } from "~/schemas/verify.schema";
 import { authApi, ApiError } from "~/lib/api";
 import { useSession } from "~/lib/auth";
+import { useI18n } from "~/i18n";
 
 export default function VerifyAccount() {
   const navigate = useNavigate();
   const user = useSession();
+  const { t } = useI18n();
 
   const [isSubmitting, setIsSubmitting] = createSignal(false);
   const [resendStatus, setResendStatus] = createSignal<string | null>(null);
@@ -35,7 +37,7 @@ export default function VerifyAccount() {
     const diff = expiry.getTime() - now.getTime();
 
     if (diff <= 0) {
-      setTimeLeft("Expired");
+      setTimeLeft(t("auth.verifyAccount.expired"));
       setCanResend(true);
       return;
     }
@@ -142,10 +144,10 @@ export default function VerifyAccount() {
           return;
         }
         setErrorMessage(
-          error.message || "Verification failed. Please check the code."
+          error.message || t("auth.verifyAccount.errorVerify")
         );
       } else {
-        setErrorMessage("An unexpected error occurred. Please try again.");
+        setErrorMessage(t("auth.verifyAccount.errorUnexpected"));
       }
     } finally {
       setIsSubmitting(false);
@@ -158,85 +160,83 @@ export default function VerifyAccount() {
   };
 
   return (
-    <Form onSubmit={handleSubmit} class="space-y-6">
-      {/* Error Message Display */}
-      {errorMessage() && (
-        <div class="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-          <p class="text-sm text-red-600 dark:text-red-400">{errorMessage()}</p>
-        </div>
-      )}
-
-      {/* Success/Info Message */}
-      <div class="text-center space-y-2">
-        {timeLeft() && (
-          <p class="text-sm font-medium text-forest-600 dark:text-sage-400 bg-forest-50 dark:bg-forest-900/20 py-1 px-3 rounded-full inline-block">
-            Code expires in {timeLeft()}
-          </p>
-        )}
-        {resendStatus() === "sent" && (
-          <p class="text-sm text-green-600 dark:text-green-400 animate-fade-in">
-            New code sent!
-          </p>
-        )}
-      </div>
-
-      {/* Verification Code Field */}
-      <Field name="otp">
-        {(field, props) => (
-          <div>
-            <Input
-              {...props}
-              label="Verification Code"
-              type="text"
-              placeholder="Enter 6-digit code"
-              maxlength={6}
-              value={field.value || ""}
-              required
-              disabled={isSubmitting()}
-              autocomplete="one-time-code"
-            />
-            {field.error && (
-              <p class="mt-1 text-sm text-red-600 dark:text-red-400">
-                {field.error}
-              </p>
-            )}
+    <div class="w-full sm:min-w-[400px] max-w-md mx-auto">
+      <Form onSubmit={handleSubmit} class="space-y-6">
+        {/* Error Message Display */}
+        {errorMessage() && (
+          <div class="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+            <p class="text-sm text-red-600 dark:text-red-400">{errorMessage()}</p>
           </div>
         )}
-      </Field>
 
-      {/* Verify Button */}
-      <Button
-        variant="primary"
-        class="w-full"
-        type="submit"
-        disabled={isSubmitting()}
-      >
-        {isSubmitting() ? "Verifying..." : "Verify Account"}
-      </Button>
+        {/* Success/Info Message */}
+        <div class="text-center space-y-2">
+          {timeLeft() && (
+            <p class="text-sm font-medium text-forest-600 dark:text-sage-400 bg-forest-50 dark:bg-forest-900/20 py-1 px-3 rounded-full inline-block">
+              {t("auth.verifyAccount.expiresIn")} {timeLeft()}
+            </p>
+          )}
+          {resendStatus() === "sent" && (
+            <p class="text-sm text-green-600 dark:text-green-400 animate-fade-in">
+              {t("auth.verifyAccount.resendSent")}
+            </p>
+          )}
+        </div>
 
-      {/* Resend Code Link */}
-      <div class="text-center space-y-2">
-        <p class="text-sm text-gray-600 dark:text-gray-400">
-          Didn't receive the code?
-        </p>
-        <button
-          type="button"
-          onClick={handleResend}
-          disabled={isSubmitting() || resendStatus() === "sending" || cooldown() > 0}
-          class="text-forest-600 dark:text-sage-400 hover:text-forest-700 dark:hover:text-sage-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+        {/* Verification Code Field */}
+        <Field name="otp">
+          {(field, props) => (
+            <div>
+              <Input
+                {...props}
+                label={t("auth.verifyAccount.otpLabel")}
+                type="text"
+                placeholder={t("auth.verifyAccount.otpPlaceholder")}
+                maxlength={6}
+                value={field.value || ""}
+                required
+                disabled={isSubmitting()}
+                autocomplete="one-time-code"
+              />
+              {field.error && (
+                <p class="mt-1 text-sm text-red-600 dark:text-red-400">
+                  {field.error}
+                </p>
+              )}
+            </div>
+          )}
+        </Field>
+
+        {/* Verify Button */}
+        <Button
+          variant="primary"
+          class="w-full"
+          type="submit"
+          disabled={isSubmitting()}
         >
-          {resendStatus() === "sending"
-            ? "Sending..."
-            : cooldown() > 0
-              ? `Resend available in ${cooldown()}s`
-              : "Resend Code"}
-        </button>
-      </div>
+          {isSubmitting() ? t("auth.verifyAccount.submitting") : t("auth.verifyAccount.submit")}
+        </Button>
 
-      {/* Back to Login */}
-      <p class="text-center text-sm text-gray-600 dark:text-gray-400 pt-4 border-t border-gray-100 dark:border-gray-800">
-        {/* Logout Option */}
-        <p class="text-center text-sm text-gray-600 dark:text-gray-400 pt-4 border-t border-gray-100 dark:border-gray-800">
+        {/* Resend Code Link */}
+        <div class="text-center space-y-2">
+          <p class="text-sm text-gray-600 dark:text-gray-400">
+            {t("auth.verifyAccount.notReceived")}
+          </p>
+          <button
+            type="button"
+            onClick={handleResend}
+            disabled={isSubmitting() || resendStatus() === "sending" || cooldown() > 0}
+            class="text-forest-600 dark:text-sage-400 hover:text-forest-700 dark:hover:text-sage-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+          >
+            {resendStatus() === "sending"
+              ? t("auth.verifyAccount.resending")
+              : cooldown() > 0
+                ? `${t("auth.verifyAccount.resendAvailable")} ${cooldown()}s`
+                : t("auth.verifyAccount.resend")}
+          </button>
+        </div>
+
+        <div class="text-center pt-4 border-t border-gray-100 dark:border-gray-800">
           <button
             type="button"
             onClick={async () => {
@@ -244,12 +244,12 @@ export default function VerifyAccount() {
               await performLogout();
               navigate("/login");
             }}
-            class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+            class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
           >
-            Not you? Logout
+            {t("auth.verifyAccount.notYou")}
           </button>
-        </p>
-      </p>
-    </Form>
+        </div>
+      </Form>
+    </div>
   );
 }

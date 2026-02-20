@@ -6,31 +6,31 @@ export default function SocialLogin() {
   return (
     <div class="mt-8">
       {/* Divider */}
-      <div class="relative my-6">
+      <div class="relative my-8">
         <div class="absolute inset-0 flex items-center">
-          <div class="w-full border-t border-gray-200 dark:border-gray-700"></div>
+          <div class="w-full border-t border-cream-200 dark:border-forest-800"></div>
         </div>
-        <div class="relative flex justify-center text-xs uppercase">
-          <span class="px-4 bg-white dark:bg-forest-800 text-gray-500 dark:text-gray-400 font-medium tracking-wider">
+        <div class="relative flex justify-center text-[11px] uppercase tracking-[0.1em] font-bold">
+          <span class="px-4 bg-white dark:bg-forest-900 text-forest-600/60 dark:text-cream-200/40">
             {t("auth.social.orContinueWith")}
           </span>
         </div>
       </div>
 
       {/* Social Buttons */}
-      <div class="grid grid-cols-3 gap-3">
+      <div class="grid grid-cols-3 gap-4">
         {/* Google */}
         <button
           type="button"
-          class="flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-forest-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-forest-600 hover:border-gray-300 dark:hover:border-gray-500 transition-all duration-200"
-          title={`${t("common.create")} ${t("auth.social.google")}`} // Best effort reuse or just "Google"
+          class="flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-forest-800 border border-cream-200 dark:border-forest-700 rounded-lg shadow-sm hover:shadow-md hover:bg-terracotta-50/30 dark:hover:bg-forest-700 hover:border-terracotta-200 dark:hover:border-forest-600 transition-all duration-300 group"
+          title={`${t("common.create")} ${t("auth.social.google")}`}
         >
           <img
             src="/google-brands-solid-full.svg"
             alt="Google"
-            class="w-5 h-5"
+            class="w-5 h-5 transition-transform group-hover:scale-110"
           />
-          <span class="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">
+          <span class="text-sm font-semibold text-forest-800 dark:text-cream-100 hidden sm:inline">
             {t("auth.social.google")}
           </span>
         </button>
@@ -38,15 +38,15 @@ export default function SocialLogin() {
         {/* Facebook */}
         <button
           type="button"
-          class="flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-forest-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-forest-600 hover:border-gray-300 dark:hover:border-gray-500 transition-all duration-200"
+          class="flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-forest-800 border border-cream-200 dark:border-forest-700 rounded-lg shadow-sm hover:shadow-md hover:bg-terracotta-50/30 dark:hover:bg-forest-700 hover:border-terracotta-200 dark:hover:border-forest-600 transition-all duration-300 group"
           title={t("auth.social.facebook")}
         >
           <img
             src="/facebook-brands-solid-full.svg"
             alt="Facebook"
-            class="w-5 h-5"
+            class="w-5 h-5 transition-transform group-hover:scale-110"
           />
-          <span class="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">
+          <span class="text-sm font-semibold text-forest-800 dark:text-cream-100 hidden sm:inline">
             {t("auth.social.facebook")}
           </span>
         </button>
@@ -54,15 +54,15 @@ export default function SocialLogin() {
         {/* X (Twitter) */}
         <button
           type="button"
-          class="flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-forest-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-forest-600 hover:border-gray-300 dark:hover:border-gray-500 transition-all duration-200"
+          class="flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-forest-800 border border-cream-200 dark:border-forest-700 rounded-lg shadow-sm hover:shadow-md hover:bg-terracotta-50/30 dark:hover:bg-forest-700 hover:border-terracotta-200 dark:hover:border-forest-600 transition-all duration-300 group"
           title={t("auth.social.x")}
         >
           <img
             src="/x-twitter-brands-solid-full.svg"
             alt="X"
-            class="w-5 h-5 dark:invert"
+            class="w-5 h-5 dark:invert transition-transform group-hover:scale-110"
           />
-          <span class="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">
+          <span class="text-sm font-semibold text-forest-800 dark:text-cream-100 hidden sm:inline">
             {t("auth.social.x")}
           </span>
         </button>

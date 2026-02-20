@@ -77,8 +77,8 @@ export default function AuthLayout(props: RouteSectionProps) {
   });
 
   return (
-    <main class="min-h-screen bg-cream-50 dark:bg-forest-950 flex items-center justify-center p-4 transition-colors duration-200">
-      <div class="w-full max-w-md">
+    <main class="min-h-screen flex items-center justify-center p-4 transition-colors duration-200">
+      <div class="w-full max-w-fit mx-auto transition-all duration-300 ease-in-out">
         {/* Header */}
         <div class="flex items-center justify-between mb-8">
           <A
@@ -109,7 +109,7 @@ export default function AuthLayout(props: RouteSectionProps) {
         </div>
 
         {/* Card Container */}
-        <div class="bg-white dark:bg-forest-900 rounded-xl shadow-sm border border-gray-100 dark:border-forest-800 p-8 transition-colors">
+        <div class="bg-white dark:bg-forest-900 rounded-xl shadow-sm border border-cream-100 dark:border-forest-800 p-8 transition-colors">
           {/* Title Section */}
           <div class="mb-8">
             <h1 class="text-2xl md:text-3xl font-bold text-forest-800 dark:text-cream-50 mb-2">
