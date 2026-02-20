@@ -39,7 +39,7 @@ export function Navbar() {
   });
 
   return (
-    <header class="sticky top-0 z-30">
+    <header class="sticky top-0 z-50 pointer-events-auto">
       <nav class="w-full bg-white dark:bg-forest-800 border-b border-cream-200 dark:border-forest-700 transition-colors duration-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex items-center justify-between h-16">

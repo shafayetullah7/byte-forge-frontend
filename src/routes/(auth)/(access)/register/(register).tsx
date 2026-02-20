@@ -144,6 +144,7 @@ export default function Register() {
                   value={field.value || ""}
                   required
                   disabled={registerForm.submitting}
+                  autocomplete="given-name"
                 />
                 {field.error && (
                   <p class="mt-1 text-sm text-red-600 dark:text-red-400">
@@ -165,6 +166,7 @@ export default function Register() {
                   value={field.value || ""}
                   required
                   disabled={registerForm.submitting}
+                  autocomplete="family-name"
                 />
                 {field.error && (
                   <p class="mt-1 text-sm text-red-600 dark:text-red-400">
@@ -188,6 +190,7 @@ export default function Register() {
                 value={field.value || ""}
                 required
                 disabled={registerForm.submitting}
+                autocomplete="username"
               />
               {!field.error && (
                 <p class="mt-1.5 text-[10px] text-gray-500 dark:text-gray-400 font-medium tracking-wide px-1">
@@ -215,6 +218,7 @@ export default function Register() {
                 value={field.value || ""}
                 required
                 disabled={registerForm.submitting}
+                autocomplete="email"
               />
               {field.error && (
                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">
@@ -238,6 +242,7 @@ export default function Register() {
                 required
                 disabled={registerForm.submitting}
                 onInput={props.onInput}
+                autocomplete="new-password"
               />
               <button
                 type="button"
@@ -273,6 +278,7 @@ export default function Register() {
                 value={field.value || ""}
                 required
                 disabled={registerForm.submitting}
+                autocomplete="new-password"
               />
               <button
                 type="button"

@@ -177,6 +177,7 @@ export default function ResetPassword() {
                   required
                   // disabled={resetForm.submitting} -> handled by fieldset
                   onInput={props.onInput}
+                  autocomplete="new-password"
                 />
                 <button
                   type="button"
@@ -209,7 +210,8 @@ export default function ResetPassword() {
                   placeholder={t("auth.register.confirmPasswordPlaceholder")}
                   value={field.value || ""}
                   required
-                // disabled={resetForm.submitting}
+                  // disabled={resetForm.submitting}
+                  autocomplete="new-password"
                 />
                 <button
                   type="button"

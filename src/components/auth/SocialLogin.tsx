@@ -1,5 +1,10 @@
 import { useI18n } from "~/i18n";
 
+// Asset Imports for Optimization & Cache-busting
+import googleIcon from "~/assets/icons/google-brands-solid-full.svg";
+import facebookIcon from "~/assets/icons/facebook-brands-solid-full.svg";
+import xIcon from "~/assets/icons/x-twitter-brands-solid-full.svg";
+
 export default function SocialLogin() {
   const { t } = useI18n();
 
@@ -27,7 +32,7 @@ export default function SocialLogin() {
           onClick={() => { }} // Placeholder for specific action
         >
           <img
-            src="/google-brands-solid-full.svg"
+            src={googleIcon}
             alt="Google"
             class="w-5 h-5 dark:invert transition-transform group-hover:scale-110"
           />
@@ -44,7 +49,7 @@ export default function SocialLogin() {
           onClick={() => { }} // Placeholder for specific action
         >
           <img
-            src="/facebook-brands-solid-full.svg"
+            src={facebookIcon}
             alt="Facebook"
             class="w-5 h-5 dark:invert transition-transform group-hover:scale-110"
           />
@@ -61,7 +66,7 @@ export default function SocialLogin() {
           onClick={() => { }} // Placeholder for specific action
         >
           <img
-            src="/x-twitter-brands-solid-full.svg"
+            src={xIcon}
             alt="X"
             class="w-5 h-5 dark:invert transition-transform group-hover:scale-110"
           />

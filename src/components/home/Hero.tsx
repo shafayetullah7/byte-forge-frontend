@@ -5,7 +5,7 @@ export function Hero() {
     const { t } = useI18n();
 
     return (
-        <div class="relative w-full min-h-screen flex items-center justify-center overflow-hidden">
+        <div class="relative w-full h-[100dvh] flex items-center justify-center overflow-hidden">
             {/* ... background remains same ... */}
             <div
                 class="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-all duration-200 dark:opacity-70 dark:brightness-[0.8]"
@@ -15,8 +15,8 @@ export function Hero() {
                 <div class="absolute inset-0 bg-forest-900/30 dark:bg-forest-950/60 transition-colors duration-200"></div>
             </div>
 
-            {/* Content Container */}
-            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
+            {/* Content Container - pt-16 accounts for overlapping Navbar layer */}
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center pt-16">
                 {/* ... headline/subtitle remain same ... */}
                 <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight leading-tight">
                     {t("common.hero.title")}
