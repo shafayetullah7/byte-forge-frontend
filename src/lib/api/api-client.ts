@@ -60,11 +60,11 @@ export async function fetcher<T>(
   const headers = { ...getDefaultHeaders(), ...fetchOptions.headers } as Record<string, string>;
 
   // 1. Defensive SSR Cookie Handling
+  let event: any;
   if (typeof window === "undefined") {
     const { getRequestEvent } = await import("solid-js/web");
     try {
-      const event = getRequestEvent();
-      // Guard against undefined events in edge runtimes
+      event = getRequestEvent();
       if (event) {
         const cookie = event.request.headers.get("cookie");
         if (cookie) {
@@ -85,6 +85,7 @@ export async function fetcher<T>(
     const response = await fetch(url, {
       ...fetchOptions,
       headers,
+      // Audit tip: redundant during SSR but harmless; kept for browser consistency
       credentials: "include",
     });
 
@@ -110,6 +111,22 @@ export async function fetcher<T>(
       );
     }
 
+    // 4. Propagate Cookies from Backend to Browser (SSR only)
+    if (event) {
+      try {
+        const { appendResponseHeader } = await import("vinxi/http");
+        // Audit tip: Using getSetCookie() is safer than manual splitting
+        const setCookies = (response.headers as any).getSetCookie?.() || 
+                           response.headers.get("set-cookie")?.split(", ") || [];
+        
+        setCookies.forEach((cookie: string) => {
+          appendResponseHeader(event.nativeEvent, "Set-Cookie", cookie);
+        });
+      } catch (e) {
+        console.warn("[API] Failed to propagate cookies during SSR", e);
+      }
+    }
+
     // Handle 204 No Content
     if (response.status === 204) {
       return {} as T;
@@ -128,42 +145,12 @@ export async function fetcher<T>(
     }
 
     // Handle network errors or other unexpected failures
+    // Audit tip: Use status 0 for transport/network failures
     throw new ApiError(
       error instanceof Error ? error.message : "Network request failed",
-      500
+      0
     );
   }
 }
 
-/**
- * Legacy support / Convenience wrappers
- */
-export const api = {
-  get: <T>(endpoint: string, options?: Omit<FetchOptions, "method" | "body">) => 
-    fetcher<T>(endpoint, { ...options, method: "GET" }),
-  
-  post: <T>(endpoint: string, body?: any, options?: Omit<FetchOptions, "method" | "body">) => 
-    fetcher<T>(endpoint, { 
-      ...options, 
-      method: "POST", 
-      body: body instanceof FormData ? body : JSON.stringify(body) 
-    }),
-  
-  put: <T>(endpoint: string, body?: any, options?: Omit<FetchOptions, "method" | "body">) => 
-    fetcher<T>(endpoint, { 
-      ...options, 
-      method: "PUT", 
-      body: body instanceof FormData ? body : JSON.stringify(body) 
-    }),
-  
-  patch: <T>(endpoint: string, body?: any, options?: Omit<FetchOptions, "method" | "body">) => 
-    fetcher<T>(endpoint, { 
-      ...options, 
-      method: "PATCH", 
-      body: body instanceof FormData ? body : JSON.stringify(body) 
-    }),
-  
-  delete: <T>(endpoint: string, options?: Omit<FetchOptions, "method" | "body">) => 
-    fetcher<T>(endpoint, { ...options, method: "DELETE" }),
-};
 

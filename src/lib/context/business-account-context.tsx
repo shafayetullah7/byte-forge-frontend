@@ -1,19 +1,19 @@
 import { createContext, useContext, ParentComponent } from "solid-js";
 import { query, createAsync, revalidate } from "@solidjs/router";
-import { fetcher } from "~/lib/api/api-client";
 import { ApiError } from "~/lib/api/types";
 import type { BusinessAccount } from "~/lib/api/types/seller.types";
+import { sellerApi } from "~/lib/api/endpoints/seller.api";
 
 /**
  * Business Account Data Loader
  * 
- * Uses the new fetcher strategy.
+ * Uses the sellerApi strategy.
  * Handles 404 (no account) gracefully by returning null.
  */
 export const getBusinessAccount = query(async () => {
     "use server";
     try {
-        return await fetcher<BusinessAccount>("/api/seller/business-account");
+        return await sellerApi.businessAccount.get();
     } catch (error) {
         if (error instanceof ApiError && error.statusCode === 404) {
             return null;

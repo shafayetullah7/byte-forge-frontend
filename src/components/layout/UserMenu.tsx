@@ -62,14 +62,14 @@ export const UserMenu: Component<UserMenuProps> = (props) => {
             {/* Profile Capsule Button */}
             <button
                 onClick={() => setIsOpen(!isOpen())}
-                class="flex items-center gap-3 px-3 py-1 pr-1 rounded-full bg-forest-50/50 dark:bg-white/10 hover:bg-forest-100 dark:hover:bg-white/15 border border-transparent hover:border-forest-200 dark:hover:border-white/20 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-forest-500"
+                class="flex items-center gap-3 px-3.5 py-1.5 pr-1.5 rounded-full bg-forest-50/80 dark:bg-forest-900/40 hover:bg-forest-100 dark:hover:bg-forest-700/50 border border-forest-100 dark:border-forest-700/50 transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-forest-500/20 group"
                 aria-label="User menu"
                 aria-expanded={isOpen()}
             >
-                <span class="text-sm font-medium text-gray-800 dark:text-gray-200 block hidden md:block">
+                <span class="text-sm font-medium text-forest-800 dark:text-cream-100 hidden sm:block">
                     {props.user.userName}
                 </span>
-                <div class="w-8 h-8 rounded-full bg-forest-600 dark:bg-forest-500 text-white flex items-center justify-center font-semibold text-xs ring-2 ring-white dark:ring-forest-800 shadow-sm">
+                <div class="w-8 h-8 rounded-full bg-forest-600 dark:bg-forest-500 text-white dark:text-cream-50 flex items-center justify-center font-bold text-xs ring-2 ring-white dark:ring-forest-800 shadow-sm transition-transform group-hover:scale-105">
                     {getInitials(props.user.userName)}
                 </div>
             </button>

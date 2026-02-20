@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from "@solidjs/router";
+import { useNavigate, useLocation, action, useSubmission, useAction } from "@solidjs/router";
 import { createSignal, createEffect, onMount, onCleanup, Show } from "solid-js";
 import { createForm } from "@modular-forms/solid";
 import { Button, Input } from "~/components/ui";
@@ -8,15 +8,38 @@ import { useI18n } from "~/i18n";
 import { z } from "zod";
 
 const verifyResetSchema = z.object({
-    otp: z.string().length(6, "Code must be 6 digits").regex(/^\d+$/, "Code must contain only digits"),
+    otp: z.string().length(6, "auth.validation.otpLength").regex(/^\d+$/, "auth.validation.otpDigits"),
 });
 
 type VerifyResetForm = z.infer<typeof verifyResetSchema>;
+
+/**
+ * Verify Reset OTP Action
+ */
+const verifyResetAction = action(async (data: { token: string; otp: string }) => {
+    "use server";
+    return await authApi.verifyResetOtp(data);
+}, "verify-reset-action");
+
+/**
+ * Resend Reset OTP Action
+ */
+const resendResetAction = action(async (data: { token: string }) => {
+    "use server";
+    return await authApi.resendResetOtp(data);
+}, "resend-reset-action");
 
 export default function VerifyReset() {
     const navigate = useNavigate();
     const location = useLocation();
     const { t } = useI18n();
+
+    const verifyResetTrigger = useAction(verifyResetAction);
+    const resendResetTrigger = useAction(resendResetAction);
+
+    const verifySubmission = useSubmission(verifyResetAction);
+    const resendSubmission = useSubmission(resendResetAction);
+
     const getInitialState = () => {
         const locState = location.state as { token?: string; expiresAt?: string; email?: string } | undefined;
         if (locState?.token) return locState;
@@ -34,13 +57,12 @@ export default function VerifyReset() {
     const initialState = getInitialState();
     const [token, setToken] = createSignal<string | null>(initialState?.token || null);
     const [expiresAt, setExpiresAt] = createSignal<Date | null>(initialState?.expiresAt ? new Date(initialState.expiresAt) : null);
-    const email = initialState?.email; // Derived signal not needed if just for display
+    const email = initialState?.email;
 
     // Timer State
     const [timeLeft, setTimeLeft] = createSignal<string>("");
     const [canResend, setCanResend] = createSignal(false);
     const [resendStatus, setResendStatus] = createSignal<string | null>(null);
-    const [isResending, setIsResending] = createSignal(false);
 
     const [errorMessage, setErrorMessage] = createSignal<string | null>(null);
 
@@ -79,6 +101,74 @@ export default function VerifyReset() {
         }
     });
 
+    // Handle Verify Success
+    createEffect(() => {
+        if (verifySubmission.result) {
+            const response = verifySubmission.result;
+            const sessionData = {
+                token: response.token,
+                expiresAt: response.expiresAt
+            };
+
+            // Clear previous stage
+            localStorage.removeItem("byteforge_reset_verify");
+            // Set next stage
+            localStorage.setItem("byteforge_reset_confirm", JSON.stringify(sessionData));
+
+            toaster.success(t("auth.verifyReset.success") || "Code verified! Set your new password.");
+            navigate("/reset-password", {
+                state: sessionData,
+                replace: true
+            });
+        }
+    });
+
+    // Handle Resend Success
+    createEffect(() => {
+        if (resendSubmission.result) {
+            const response = resendSubmission.result;
+            setToken(response.token);
+            setExpiresAt(new Date(response.expiresAt));
+            setCanResend(false);
+            setResendStatus("sent");
+            toaster.success(t("auth.verifyAccount.resendSent"));
+            setTimeout(() => setResendStatus(null), 3000);
+        }
+    });
+
+    // Handle Resend Error
+    createEffect(() => {
+        if (resendSubmission.error) {
+            console.log("Resend reset OTP error caught:", resendSubmission.error);
+            const error = resendSubmission.error;
+            const errorData = (error as any).response;
+            const msg = errorData?.message || (error as any).message || "Failed to resend code.";
+            toaster.error(msg.includes(".") ? t(msg) : msg);
+        }
+    });
+
+    // Handle Verify Error
+    createEffect(() => {
+        if (verifySubmission.error) {
+            console.log("Verify reset OTP error caught:", verifySubmission.error);
+            const error = verifySubmission.error;
+            const errorData = (error as any).response;
+
+            if (errorData) {
+                console.log("Error details from API:", errorData);
+                if (errorData.statusCode === 401 || errorData.statusCode === 404) {
+                    setErrorMessage(t("auth.verifyReset.invalidSession"));
+                    return;
+                }
+                const msg = errorData.message || (error as any).message || "auth.verifyAccount.errorVerify";
+                setErrorMessage(msg.includes(".") ? t(msg) : msg);
+            } else {
+                const msg = (error as any).message || "Invalid code. Please try again.";
+                setErrorMessage(msg.includes(".") ? t(msg) : msg);
+            }
+        }
+    });
+
     const [verifyForm, { Form, Field }] = createForm<VerifyResetForm>({
         validate: (values) => {
             const result = verifyResetSchema.safeParse(values);
@@ -95,65 +185,21 @@ export default function VerifyReset() {
         },
     });
 
-    const handleSubmit = async (values: VerifyResetForm) => {
+    const handleSubmit = (values: VerifyResetForm) => {
         const currentToken = token();
         if (!currentToken) return;
-
-        try {
-            const response = await authApi.verifyResetOtp({
-                token: currentToken,
-                otp: values.otp
-            });
-
-            const sessionData = {
-                token: response.token,
-                expiresAt: response.expiresAt
-            };
-
-            // Clear previous stage
-            localStorage.removeItem("byteforge_reset_verify");
-            // Set next stage
-            localStorage.setItem("byteforge_reset_confirm", JSON.stringify(sessionData));
-
-            toaster.success(t("auth.verifyReset.success") || "Code verified! Set your new password.");
-            navigate("/reset-password", {
-                state: sessionData,
-                replace: true
-            });
-        } catch (error) {
-            if (error instanceof ApiError) {
-                setErrorMessage(error.message);
-            } else {
-                setErrorMessage("Invalid code. Please try again.");
-            }
-        }
+        setErrorMessage(null);
+        verifyResetTrigger({
+            token: currentToken,
+            otp: values.otp
+        });
     };
 
-    const handleResend = async () => {
+    const handleResend = () => {
         const currentToken = token();
         if (!currentToken) return;
-
-        setIsResending(true);
-        setResendStatus("sending");
-
-        try {
-            const response = await authApi.resendResetOtp({ token: currentToken });
-            setToken(response.token); // Update request token
-            setExpiresAt(new Date(response.expiresAt));
-            setCanResend(false);
-            setResendStatus("sent");
-            toaster.success(t("auth.verifyAccount.resendSent"));
-            setTimeout(() => setResendStatus(null), 3000);
-        } catch (error) {
-            setResendStatus(null);
-            if (error instanceof ApiError) {
-                toaster.error(error.message);
-            } else {
-                toaster.error("Failed to resend code.");
-            }
-        } finally {
-            setIsResending(false);
-        }
+        setErrorMessage(null);
+        resendResetTrigger({ token: currentToken });
     };
 
     return (
@@ -191,12 +237,12 @@ export default function VerifyReset() {
                                 maxlength={6}
                                 value={field.value || ""}
                                 required
-                                disabled={verifyForm.submitting}
+                                disabled={verifySubmission.pending}
                                 autocomplete="one-time-code"
                             />
                             {field.error && (
                                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">
-                                    {field.error}
+                                    {field.error.includes(".") ? t(field.error) : field.error}
                                 </p>
                             )}
                         </div>
@@ -207,24 +253,19 @@ export default function VerifyReset() {
                     variant="primary"
                     class="w-full"
                     type="submit"
-                    disabled={verifyForm.submitting}
+                    disabled={verifySubmission.pending}
                 >
-                    {verifyForm.submitting ? t("auth.verifyAccount.submitting") : t("auth.verifyAccount.submit")}
+                    {verifySubmission.pending ? t("auth.verifyAccount.submitting") : t("auth.verifyAccount.submit")}
                 </Button>
 
                 <div class="text-center">
                     <button
                         type="button"
                         onClick={handleResend}
-                        disabled={isResending() || (!canResend() && !timeLeft()?.includes("Expired"))}
-                        // Simple logic: disable if resending. Enable if expired OR standard resend link logic.
-                        // Actually, let's allow resend anytime? Or follow similar logic to verify-account.
-                        // Let's just use canResend signal which is true when expired? 
-                        // Or better: Always allow resend but maybe with cooldown? 
-                        // For now, let's just make it clickable.
+                        disabled={verifySubmission.pending || resendSubmission.pending || (!canResend() && !timeLeft()?.includes("Expired"))}
                         class="text-sm text-forest-600 dark:text-sage-400 hover:text-forest-700 dark:hover:text-sage-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {resendStatus() === "sending" ? t("auth.verifyAccount.resending") : t("auth.verifyAccount.resend")}
+                        {resendSubmission.pending ? t("auth.verifyAccount.resending") : t("auth.verifyAccount.resend")}
                     </button>
                 </div>
             </Form>

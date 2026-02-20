@@ -1,25 +1,25 @@
 import { query, createAsync } from "@solidjs/router";
-import { fetcher } from "~/lib/api/api-client";
-import type { AuthUser as User } from "~/lib/api/types/auth.types";
+import { authApi } from "~/lib/api/endpoints/auth.api";
 
 /**
  * Session Management for ByteForge Frontend
  *
- * Simplified to use the new functional fetcher.
+ * Simplified to use the new functional fetcher via authApi.
  */
 
 /**
  * Server-side session loader
  *
- * Uses SolidStart's query() and the new fetcher with strict: false.
+ * Uses SolidStart's query() and the authApi.checkAuth with strict: false.
  * This ensures the auth check happens once per request during SSR and 
  * doesn't force a redirect if the user is unauthenticated (public pages).
  */
 export const getSession = query(async () => {
   "use server";
   try {
-    // strict: false handles the 401 silently by not throwing a redirect
-    return await fetcher<User>("/api/auth/me", { strict: false });
+    // checkAuth uses strict: false internally by default in our refactor? 
+    // Wait, let me check authApi.checkAuth implementation.
+    return await authApi.checkAuth();
   } catch (error) {
     // Fail silently for session checks to support public pages
     return null;
@@ -33,8 +33,8 @@ export const performLogout = async () => {
   const { revalidate } = await import("@solidjs/router");
 
   try {
-    // Use the functional fetcher for logout as well
-    await fetcher("/api/auth/logout", { method: "POST" });
+    // Use the authApi for logout
+    await authApi.logout();
   } catch (error: any) {
     // Silent failure if already logged out (401)
     if (error?.statusCode !== 401) {

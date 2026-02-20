@@ -42,7 +42,7 @@ export function requireAuth(redirectTo: string = "/login") {
  * ```typescript
  * export const route = {
  *   load: protectedLoader(async () => {
- *     const data = await api.get("/api/v1/user/profile");
+ *     const data = await fetcher<Profile>("/api/v1/user/profile");
  *     return data;
  *   })
  * };

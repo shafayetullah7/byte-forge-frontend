@@ -1,5 +1,5 @@
-import { A, useNavigate } from "@solidjs/router";
-import { createSignal } from "solid-js";
+import { A, useNavigate, action, useSubmission, useAction } from "@solidjs/router";
+import { createSignal, createEffect } from "solid-js";
 import { createForm } from "@modular-forms/solid";
 import { Button, Input } from "~/components/ui";
 import { authApi, ApiError } from "~/lib/api";
@@ -13,9 +13,19 @@ const forgotPasswordSchema = z.object({
 
 type ForgotPasswordForm = z.infer<typeof forgotPasswordSchema>;
 
+/**
+ * Forgot Password Action
+ */
+const forgotPasswordAction = action(async (data: { email: string }) => {
+  "use server";
+  return await authApi.forgotPassword({ email: data.email });
+}, "forgot-password-action");
+
 export default function ForgotPassword() {
   const navigate = useNavigate();
   const { t } = useI18n();
+  const forgotPasswordTrigger = useAction(forgotPasswordAction);
+  const submission = useSubmission(forgotPasswordAction);
   const [errorMessage, setErrorMessage] = createSignal<string | null>(null);
 
   const [forgotForm, { Form, Field }] = createForm<ForgotPasswordForm>({
@@ -34,33 +44,50 @@ export default function ForgotPassword() {
     },
   });
 
-  const handleSubmit = async (values: ForgotPasswordForm) => {
+  const handleSubmit = (values: ForgotPasswordForm) => {
     setErrorMessage(null);
+    forgotPasswordTrigger(values);
+  };
 
-    try {
-      const response = await authApi.forgotPassword({ email: values.email });
+  // Handle successful submission result (client-side persistence)
+  createEffect(() => {
+    if (submission.result) {
+      const response = submission.result;
+
       const sessionData = {
         token: response.token,
         expiresAt: response.expiresAt,
-        email: values.email
+        email: submission.input?.[0]?.email || ""
       };
 
       // Persist to localStorage for page reloads
       localStorage.setItem("byteforge_reset_verify", JSON.stringify(sessionData));
 
       toaster.success(t("auth.forgotPassword.success"));
-      // Navigate to verify page with state (optional now, but good for immediate transition)
+      // Navigate to verify page with state
       navigate("/verify-reset", {
         state: sessionData
       });
-    } catch (error) {
-      if (error instanceof ApiError) {
-        setErrorMessage(error.message);
-      } else {
-        setErrorMessage(t("common.error"));
-      }
     }
-  };
+  });
+
+  // Handle action errors
+  createEffect(() => {
+    if (submission.error) {
+      const error = submission.error;
+      const errorData = (error as any).response;
+
+      if (errorData) {
+        console.log("Error details from API:", errorData);
+        const msg = errorData.message || (error as any).message || "auth.forgotPassword.failed";
+        setErrorMessage(msg.includes(".") ? t(msg) : msg);
+      } else {
+        const msg = (error as any).message || "auth.forgotPassword.failed";
+        setErrorMessage(msg.includes(".") ? t(msg) : msg);
+      }
+      console.error("Forgot password action error:", submission.error);
+    }
+  });
 
   return (
     <div class="w-full sm:min-w-[360px] max-w-md mx-auto space-y-6">
@@ -81,11 +108,11 @@ export default function ForgotPassword() {
                 placeholder={t("auth.login.emailPlaceholder")}
                 value={field.value || ""}
                 required
-                disabled={forgotForm.submitting}
+                disabled={submission.pending}
               />
               {field.error && (
                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {t(field.error)}
+                  {field.error.includes(".") ? t(field.error) : field.error}
                 </p>
               )}
             </div>
@@ -97,9 +124,9 @@ export default function ForgotPassword() {
           size="lg"
           class="w-full shadow-sm"
           type="submit"
-          disabled={forgotForm.submitting}
+          disabled={submission.pending}
         >
-          {forgotForm.submitting ? t("auth.forgotPassword.submitting") : t("auth.forgotPassword.submit")}
+          {submission.pending ? t("auth.forgotPassword.submitting") : t("auth.forgotPassword.submit")}
         </Button>
 
         <p class="text-center text-sm text-gray-600 dark:text-gray-400 pt-6 border-t border-gray-100 dark:border-forest-800">

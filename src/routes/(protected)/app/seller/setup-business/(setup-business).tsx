@@ -1,12 +1,12 @@
 import { createSignal, createEffect, Show, Suspense } from "solid-js";
 import { useNavigate, action, useSubmission, type RouteDefinition, redirect } from "@solidjs/router";
 import { Button, Input, ImageUpload } from "~/components/ui";
-import { fetcher } from "~/lib/api/api-client";
 import { getBusinessAccount, useBusinessAccount } from "~/lib/context/business-account-context";
 import { toaster } from "~/components/ui/Toast";
 import { useI18n } from "~/i18n";
 import { useImageUpload } from "~/lib/hooks/useImageUpload";
 import type { CreateBusinessAccountRequest } from "~/lib/api/types/seller.types";
+import { sellerApi } from "~/lib/api/endpoints/seller.api";
 
 /**
  * Route Preload
@@ -21,12 +21,7 @@ export const route = {
  */
 const createBusinessAccountAction = action(async (formData: CreateBusinessAccountRequest) => {
     "use server";
-    await fetcher("/api/seller/business-account", {
-        method: "POST",
-        body: JSON.stringify(formData),
-    });
-    // Redirect on success
-    throw redirect("/app/seller/shops");
+    return await sellerApi.businessAccount.create(formData);
 }, "create-business-account");
 
 export default function SetupBusiness() {

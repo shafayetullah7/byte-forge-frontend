@@ -1,5 +1,5 @@
-import { A, useNavigate, revalidate } from "@solidjs/router";
-import { createSignal, onMount } from "solid-js";
+import { A, useNavigate, action, useSubmission, useAction, redirect } from "@solidjs/router";
+import { createSignal, createEffect } from "solid-js";
 import { createForm, setError } from "@modular-forms/solid";
 import { Button, Input } from "~/components/ui";
 import { EyeIcon, EyeSlashIcon } from "~/components/icons";
@@ -8,9 +8,29 @@ import { authApi, ApiError } from "~/lib/api";
 import { toaster } from "~/components/ui/Toast";
 import { useI18n } from "~/i18n";
 
+/**
+ * Login Action
+ * Handles server-side authentication and automatic session revalidation.
+ */
+const loginAction = action(async (data: LoginFormData) => {
+  "use server";
+  const result = await authApi.login({
+    email: data.email,
+    password: data.password,
+  });
+
+  if (result.user && !result.user.emailVerified) {
+    return { success: true, target: "/verify-account" };
+  }
+
+  return { success: true, target: "/" };
+}, "login-action");
+
 export default function Login() {
   const navigate = useNavigate();
   const { t } = useI18n();
+  const loginTrigger = useAction(loginAction);
+  const submission = useSubmission(loginAction);
   const [errorMessage, setErrorMessage] = createSignal<string | null>(null);
   const [showPassword, setShowPassword] = createSignal(false);
 
@@ -23,9 +43,6 @@ export default function Login() {
       const errors: Record<string, string> = {};
       result.error.issues.forEach((issue) => {
         if (issue.path.length > 0) {
-          // Map Zod errors to translation keys if possible, or use standard z.message
-          // For now we will rely on schema being updated to return keys, or just use what is there.
-          // In the next step I will update the schema to return keys like "auth.validation.emailRequired"
           errors[issue.path.join(".")] = issue.message;
         }
       });
@@ -33,38 +50,21 @@ export default function Login() {
     },
   });
 
-  const handleSubmit = async (values: LoginFormData) => {
-    setErrorMessage(null);
+  // Map server errors from the action back to the form fields
+  createEffect(() => {
+    if (submission.error) {
+      console.log("Submission error caught:", submission.error);
+      const error = submission.error;
+      const errorData = (error as any).response;
 
-    try {
-      const response = await authApi.login({
-        email: values.email,
-        password: values.password,
-      });
-
-      toaster.success(t("auth.login.success"));
-      // Keep the form in 'submitting' state during the delay to prevent double-clicks
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-
-      // Revalidate session to update UI immediately
-      await revalidate("user-session");
-
-      if (response.user && !response.user.emailVerified) {
-        navigate("/verify-account");
-      } else {
-        navigate("/");
-      }
-    } catch (error) {
-      if (error instanceof ApiError && error.response) {
-        const errorData = error.response;
+      if (errorData) {
+        console.log("Error details from API:", errorData);
         let handled = false;
 
-        // 1. Handle structured validation errors from backend
+        // 1. Handle structured validation errors
         if (Array.isArray(errorData.validationErrors)) {
-          errorData.validationErrors.forEach((err) => {
+          errorData.validationErrors.forEach((err: any) => {
             const field = err.field.toLowerCase();
-            // TODO: backend should return keys or we translate keys here.
-            // For Level 2, backend returns translated string or key.
             if (field === "email") {
               setError(loginForm, "email", err.message);
               handled = true;
@@ -75,25 +75,44 @@ export default function Login() {
           });
         }
 
-        // 2. Handle unauthorized/invalid credentials (401)
-        if (!handled && error.statusCode === 401) {
-          const msg = errorData.message || "Invalid email or password";
-          setErrorMessage(msg);
-          toaster.error(msg);
-          handled = true;
+        // 2. Handle 401/400 and other errors by checking the message
+        const message = errorData.message || (error as any).message;
+        if (!handled && message) {
+          const lowerMsg = message.toLowerCase();
+          if (lowerMsg.includes("password")) {
+            setError(loginForm, "password", message);
+            handled = true;
+          } else if (lowerMsg.includes("email") || lowerMsg.includes("user")) {
+            setError(loginForm, "email", message);
+            handled = true;
+          }
         }
 
         if (!handled) {
-          const msg = errorData.message || error.message || "Login failed";
-          setErrorMessage(msg);
-          toaster.error(msg);
+          const msg = errorData.message || (error as any).message || "auth.login.failed";
+          setErrorMessage(msg.includes(".") ? t(msg) : msg);
+          toaster.error(msg.includes(".") ? t(msg) : msg);
         }
       } else {
-        setErrorMessage(t("common.error"));
-        toaster.error("Network error or server unreachable");
+        const msg = (error as any).message || "auth.login.failed";
+        setErrorMessage(msg.includes(".") ? t(msg) : msg);
+        toaster.error(t("common.networkError"));
       }
-      console.error("Login error:", error);
     }
+  });
+
+  // Handle successful login
+  createEffect(() => {
+    if (submission.result?.success) {
+      toaster.success(t("auth.login.success"));
+      navigate(submission.result.target || "/", { replace: true });
+    }
+  });
+
+  const handleSubmit = (values: LoginFormData) => {
+    console.log("Submitting login form...");
+    setErrorMessage(null);
+    loginTrigger(values);
   };
 
   return (
@@ -117,12 +136,12 @@ export default function Login() {
                 placeholder={t("auth.login.emailPlaceholder")}
                 value={field.value || ""}
                 required
-                disabled={loginForm.submitting}
+                disabled={submission.pending}
                 autocomplete="username"
               />
               {field.error && (
                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {t(field.error) /* Try to translate error if it's a key */}
+                  {field.error.includes(".") ? t(field.error) : field.error}
                 </p>
               )}
             </div>
@@ -140,7 +159,7 @@ export default function Login() {
                 placeholder={t("auth.login.passwordPlaceholder")}
                 value={field.value || ""}
                 required
-                disabled={loginForm.submitting}
+                disabled={submission.pending}
                 autocomplete="current-password"
               />
               <button
@@ -148,13 +167,13 @@ export default function Login() {
                 onClick={() => setShowPassword(!showPassword())}
                 class="absolute right-3 top-9 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
                 aria-label={showPassword() ? "Hide password" : "Show password"}
-                disabled={loginForm.submitting}
+                disabled={submission.pending}
               >
                 {showPassword() ? <EyeSlashIcon /> : <EyeIcon />}
               </button>
               {field.error && (
                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {t(field.error)}
+                  {field.error.includes(".") ? t(field.error) : field.error}
                 </p>
               )}
             </div>
@@ -171,7 +190,7 @@ export default function Login() {
                   type="checkbox"
                   checked={field.value || false}
                   class="mt-1 rounded border-gray-300 dark:border-forest-700 text-terracotta-600 focus:ring-terracotta-500 transition-colors"
-                  disabled={loginForm.submitting}
+                  disabled={submission.pending}
                 />
                 <span class="group-hover:text-forest-600 dark:group-hover:text-cream-100 transition-colors">
                   {t("auth.login.rememberMe")}
@@ -193,9 +212,9 @@ export default function Login() {
           size="lg"
           class="w-full shadow-sm"
           type="submit"
-          disabled={loginForm.submitting || loginForm.invalid}
+          disabled={submission.pending}
         >
-          {loginForm.submitting ? t("auth.login.submitting") : t("auth.login.submit")}
+          {submission.pending ? t("auth.login.submitting") : t("auth.login.submit")}
         </Button>
 
         {/* Sign Up Link */}

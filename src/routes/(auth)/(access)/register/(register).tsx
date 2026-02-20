@@ -1,5 +1,5 @@
-import { A, useNavigate } from "@solidjs/router";
-import { createSignal } from "solid-js";
+import { A, useNavigate, action, useSubmission, useAction, redirect } from "@solidjs/router";
+import { createSignal, createEffect } from "solid-js";
 import { createForm, setError } from "@modular-forms/solid";
 import { Button, Input } from "~/components/ui";
 import { EyeIcon, EyeSlashIcon } from "~/components/icons";
@@ -18,9 +18,27 @@ interface ValidationErrors {
   code?: string;
 }
 
+/**
+ * Register Action
+ * Handles server-side registration.
+ */
+const registerAction = action(async (data: RegisterFormData) => {
+  "use server";
+  await authApi.register({
+    firstName: data.firstName,
+    lastName: data.lastName,
+    userName: data.userName,
+    email: data.email,
+    password: data.password,
+  });
+  return { success: true };
+}, "register-action");
+
 export default function Register() {
   const navigate = useNavigate();
   const { t } = useI18n();
+  const registerTrigger = useAction(registerAction);
+  const submission = useSubmission(registerAction);
   const [showPassword, setShowPassword] = createSignal(false);
   const [showConfirmPassword, setShowConfirmPassword] = createSignal(false);
   const [errorMessage, setErrorMessage] = createSignal<string | null>(null);
@@ -41,33 +59,22 @@ export default function Register() {
     },
   });
 
-  const handleSubmit = async (values: RegisterFormData) => {
-    setErrorMessage(null);
+  // Map server errors from the action back to the form fields
+  createEffect(() => {
+    if (submission.error) {
+      console.log("Registration error caught:", submission.error);
+      const error = submission.error;
+      const errorData = (error as any).response;
 
-    try {
-      await authApi.register({
-        firstName: values.firstName,
-        lastName: values.lastName,
-        userName: values.userName,
-        email: values.email,
-        password: values.password,
-      });
-
-      toaster.success(t("auth.register.success"));
-      // Keep the form in 'submitting' state during the delay to prevent double-clicks
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      navigate("/login");
-    } catch (error) {
-      if (error instanceof ApiError && error.response) {
-        const errorData = error.response;
+      if (errorData) {
+        console.log("Error details from API:", errorData);
         let handled = false;
 
-        // 1. Handle structured validation errors from backend (Zod/ClassValidator)
+        // 1. Handle structured validation errors from backend
         if (Array.isArray(errorData.validationErrors)) {
           errorData.validationErrors.forEach((err: ValidationErrors) => {
             const field = err.field.toLowerCase();
-            // TODO: Ensure backend uses keys or handle it
-            const msg = err.message; // Potentially translate here if needed
+            const msg = err.message;
             if (field === "username" || field === "user_name") {
               setError(registerForm, "userName", msg);
               handled = true;
@@ -87,36 +94,45 @@ export default function Register() {
           });
         }
 
-        // 2. Handle Conflict errors (Duplicate entry) where no structured validation error exists
-        if (!handled && errorData.statusCode === 409) {
-          const details = (errorData.details || "").toLowerCase();
-          const message = (errorData.message || "").toLowerCase();
-          const combined = `${message} ${details}`;
-
-          if (combined.includes("email")) {
-            setError(registerForm, "email", t("auth.register.emailTaken")); // Need to add this key
+        // 2. Handle Conflict errors (Duplicate entry) or other messages
+        const message = errorData.message || (error as any).message;
+        if (!handled && message) {
+          const lowerMsg = message.toLowerCase();
+          if (lowerMsg.includes("email")) {
+            setError(registerForm, "email", message);
             handled = true;
-          } else if (
-            combined.includes("username") ||
-            combined.includes("user_name")
-          ) {
-            setError(registerForm, "userName", t("auth.register.userNameTaken")); // Need to add this key
+          } else if (lowerMsg.includes("username") || lowerMsg.includes("user_name")) {
+            setError(registerForm, "userName", message);
             handled = true;
           }
         }
 
         if (!handled) {
           const msg =
-            errorData.message || error.message || t("auth.register.failed");
-          setErrorMessage(msg);
-          toaster.error(msg);
+            errorData.message || (error as any).message || "auth.register.failed";
+          setErrorMessage(msg.includes(".") ? t(msg) : msg);
+          toaster.error(msg.includes(".") ? t(msg) : msg);
         }
       } else {
-        setErrorMessage(t("common.error"));
+        const msg = (error as any).message || "auth.register.failed";
+        setErrorMessage(msg.includes(".") ? t(msg) : msg);
         toaster.error(t("common.networkError"));
       }
-      console.error("Registration error:", error);
     }
+  });
+
+  // Handle successful registration
+  createEffect(() => {
+    if (submission.result?.success) {
+      toaster.success(t("auth.register.success"));
+      navigate("/login");
+    }
+  });
+
+  const handleSubmit = (values: RegisterFormData) => {
+    console.log("Submitting registration...");
+    setErrorMessage(null);
+    registerTrigger(values);
   };
 
   return (
@@ -141,12 +157,12 @@ export default function Register() {
                   placeholder={t("auth.register.namePlaceholder")}
                   value={field.value || ""}
                   required
-                  disabled={registerForm.submitting}
+                  disabled={submission.pending}
                   autocomplete="given-name"
                 />
                 {field.error && (
                   <p class="mt-1 text-sm text-red-600 dark:text-red-400">
-                    {t(field.error)}
+                    {field.error.includes(".") ? t(field.error) : field.error}
                   </p>
                 )}
               </div>
@@ -163,12 +179,12 @@ export default function Register() {
                   placeholder={t("auth.register.lastNamePlaceholder")} // Need key
                   value={field.value || ""}
                   required
-                  disabled={registerForm.submitting}
+                  disabled={submission.pending}
                   autocomplete="family-name"
                 />
                 {field.error && (
                   <p class="mt-1 text-sm text-red-600 dark:text-red-400">
-                    {t(field.error)}
+                    {field.error.includes(".") ? t(field.error) : field.error}
                   </p>
                 )}
               </div>
@@ -187,7 +203,7 @@ export default function Register() {
                 placeholder={t("auth.register.userNamePlaceholder")}
                 value={field.value || ""}
                 required
-                disabled={registerForm.submitting}
+                disabled={submission.pending}
                 autocomplete="username"
               />
               {!field.error && (
@@ -197,7 +213,7 @@ export default function Register() {
               )}
               {field.error && (
                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {t(field.error)}
+                  {field.error.includes(".") ? t(field.error) : field.error}
                 </p>
               )}
             </div>
@@ -215,12 +231,12 @@ export default function Register() {
                 placeholder={t("auth.register.emailPlaceholder")}
                 value={field.value || ""}
                 required
-                disabled={registerForm.submitting}
+                disabled={submission.pending}
                 autocomplete="email"
               />
               {field.error && (
                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {t(field.error)}
+                  {field.error.includes(".") ? t(field.error) : field.error}
                 </p>
               )}
             </div>
@@ -238,7 +254,7 @@ export default function Register() {
                 placeholder={t("auth.register.passwordPlaceholder")}
                 value={field.value || ""}
                 required
-                disabled={registerForm.submitting}
+                disabled={submission.pending}
                 onInput={props.onInput}
                 autocomplete="new-password"
               />
@@ -247,7 +263,7 @@ export default function Register() {
                 onClick={() => setShowPassword(!showPassword())}
                 class="absolute right-3 top-9 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
                 aria-label={showPassword() ? "Hide password" : "Show password"}
-                disabled={registerForm.submitting}
+                disabled={submission.pending}
               >
                 {showPassword() ? <EyeSlashIcon /> : <EyeIcon />}
               </button>
@@ -257,7 +273,7 @@ export default function Register() {
 
               {field.error && (
                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {t(field.error)}
+                  {field.error.includes(".") ? t(field.error) : field.error}
                 </p>
               )}
             </div>
@@ -275,7 +291,7 @@ export default function Register() {
                 placeholder={t("auth.register.confirmPasswordPlaceholder")}
                 value={field.value || ""}
                 required
-                disabled={registerForm.submitting}
+                disabled={submission.pending}
                 autocomplete="new-password"
               />
               <button
@@ -285,13 +301,13 @@ export default function Register() {
                 aria-label={
                   showConfirmPassword() ? "Hide password" : "Show password"
                 }
-                disabled={registerForm.submitting}
+                disabled={submission.pending}
               >
                 {showConfirmPassword() ? <EyeSlashIcon /> : <EyeIcon />}
               </button>
               {field.error && (
                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {t(field.error)}
+                  {field.error.includes(".") ? t(field.error) : field.error}
                 </p>
               )}
             </div>
@@ -309,7 +325,7 @@ export default function Register() {
                   checked={field.value || false}
                   class="mt-0.5 rounded border-gray-300 text-forest-600 focus:ring-forest-500 dark:border-forest-600 dark:bg-forest-700"
                   required
-                  disabled={registerForm.submitting}
+                  disabled={submission.pending}
                 />
                 <span>
                   {t("auth.register.acceptTerms")}
@@ -318,7 +334,7 @@ export default function Register() {
               </label>
               {field.error && (
                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {t(field.error)}
+                  {field.error.includes(".") ? t(field.error) : field.error}
                 </p>
               )}
             </div>
@@ -332,9 +348,9 @@ export default function Register() {
             size="lg"
             class="w-full shadow-sm"
             type="submit"
-            disabled={registerForm.submitting || registerForm.invalid}
+            disabled={submission.pending}
           >
-            {registerForm.submitting ? t("auth.register.submitting") : t("auth.register.submit")}
+            {submission.pending ? t("auth.register.submitting") : t("auth.register.submit")}
           </Button>
         </div>
 

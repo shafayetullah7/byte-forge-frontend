@@ -1,4 +1,4 @@
-import { useNavigate, useLocation, A } from "@solidjs/router";
+import { useNavigate, useLocation, A, action, useSubmission, useAction } from "@solidjs/router";
 import { createSignal, onMount, createEffect, onCleanup } from "solid-js";
 import { createForm } from "@modular-forms/solid";
 import { Button, Input } from "~/components/ui";
@@ -20,32 +20,39 @@ const resetPasswordSchema = z.object({
 
 type ResetPasswordForm = z.infer<typeof resetPasswordSchema>;
 
+/**
+ * Reset Password Action
+ */
+const resetPasswordAction = action(async (data: { token: string; password: string }) => {
+  "use server";
+  await authApi.resetPassword(data);
+  return { success: true };
+}, "reset-password-action");
+
 export default function ResetPassword() {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useI18n();
+  const resetPasswordTrigger = useAction(resetPasswordAction);
+  const submission = useSubmission(resetPasswordAction);
 
   const getInitialState = () => {
     const locState = location.state as { token?: string; expiresAt?: string } | undefined;
     if (locState?.token) return locState;
 
-    // Try localStorage
-    try {
-      const stored = localStorage.getItem("byteforge_reset_confirm");
-      if (stored) return JSON.parse(stored);
-    } catch (e) {
-      console.error("Failed to parse stored session", e);
-    }
-    return {};
+    const saved = localStorage.getItem("byteforge_reset_confirm");
+    if (saved) return JSON.parse(saved);
+    return null;
   };
 
   const initialState = getInitialState();
-  const [token, setToken] = createSignal<string | null>(initialState?.token || null);
-  const [expiresAt, setExpiresAt] = createSignal<Date | null>(initialState?.expiresAt ? new Date(initialState.expiresAt) : null);
-  const [timeLeft, setTimeLeft] = createSignal<string>("");
+  const [token] = createSignal<string | null>(initialState?.token || null);
+  const [expiresAt] = createSignal<Date | null>(initialState?.expiresAt ? new Date(initialState.expiresAt) : null);
+
   const [errorMessage, setErrorMessage] = createSignal<string | null>(null);
   const [showPassword, setShowPassword] = createSignal(false);
   const [showConfirmPassword, setShowConfirmPassword] = createSignal(false);
+  const [timeLeft, setTimeLeft] = createSignal<string>("");
   const [isSessionExpired, setIsSessionExpired] = createSignal(false);
 
   // Redirect if no token state
@@ -67,8 +74,6 @@ export default function ResetPassword() {
       if (!isSessionExpired()) {
         setTimeLeft(t("auth.resetPassword.sessionExpired"));
         setIsSessionExpired(true);
-        // Optional: Auto redirect after few seconds?
-        // navigate("/login", { replace: true }); 
       }
       return;
     }
@@ -79,10 +84,35 @@ export default function ResetPassword() {
   };
 
   createEffect(() => {
-    if (expiresAt()) {
-      const timer = setInterval(updateTimer, 1000);
-      onCleanup(() => clearInterval(timer));
-      updateTimer();
+    const timer = setInterval(updateTimer, 1000);
+    updateTimer();
+    onCleanup(() => clearInterval(timer));
+  });
+
+  // Handle Success Flow
+  createEffect(() => {
+    if (submission.result?.success) {
+      localStorage.removeItem("byteforge_reset_confirm");
+      toaster.success(t("auth.resetPassword.success"));
+      navigate("/login", { replace: true });
+    }
+  });
+
+  // Handle Error Flow
+  createEffect(() => {
+    if (submission.error) {
+      console.log("Reset password error caught:", submission.error);
+      const error = submission.error;
+      const errorData = (error as any).response;
+
+      if (errorData) {
+        console.log("Error details from API:", errorData);
+        const msg = errorData.message || (error as any).message || "auth.resetPassword.failed";
+        setErrorMessage(msg.includes(".") ? t(msg) : msg);
+      } else {
+        const msg = (error as any).message || "auth.resetPassword.failed";
+        setErrorMessage(msg.includes(".") ? t(msg) : msg);
+      }
     }
   });
 
@@ -102,29 +132,14 @@ export default function ResetPassword() {
     },
   });
 
-  const handleSubmit = async (values: ResetPasswordForm) => {
+  const handleSubmit = (values: ResetPasswordForm) => {
     const currentToken = token();
     if (!currentToken) return;
-
     setErrorMessage(null);
-
-    try {
-      await authApi.resetPassword({
-        token: currentToken,
-        password: values.password
-      });
-
-      // Clear session on success
-      localStorage.removeItem("byteforge_reset_confirm");
-      toaster.success(t("auth.resetPassword.success"));
-      navigate("/login", { replace: true });
-    } catch (error) {
-      if (error instanceof ApiError) {
-        setErrorMessage(error.message);
-      } else {
-        setErrorMessage(t("common.error"));
-      }
-    }
+    resetPasswordTrigger({
+      token: currentToken,
+      password: values.password
+    });
   };
 
   return (
@@ -161,7 +176,7 @@ export default function ResetPassword() {
           </div>
         )}
 
-        <fieldset disabled={isSessionExpired() || resetForm.submitting} class="space-y-6 disabled:opacity-50">
+        <fieldset disabled={isSessionExpired() || submission.pending} class="space-y-6 disabled:opacity-50">
           {/* Wrap fields in fieldset to easily disable all */}
           <Field name="password">
             {(field, props) => (
@@ -173,7 +188,6 @@ export default function ResetPassword() {
                   placeholder={t("auth.register.passwordPlaceholder")}
                   value={field.value || ""}
                   required
-                  // disabled={resetForm.submitting} -> handled by fieldset
                   onInput={props.onInput}
                   autocomplete="new-password"
                 />
@@ -182,7 +196,6 @@ export default function ResetPassword() {
                   onClick={() => setShowPassword(!showPassword())}
                   class="absolute right-3 top-9 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
                   aria-label={showPassword() ? "Hide password" : "Show password"}
-                // disabled={resetForm.submitting} -> handled by fieldset
                 >
                   {showPassword() ? <EyeSlashIcon /> : <EyeIcon />}
                 </button>
@@ -191,7 +204,7 @@ export default function ResetPassword() {
 
                 {field.error && (
                   <p class="mt-1 text-sm text-red-600 dark:text-red-400">
-                    {t(field.error)}
+                    {field.error.includes(".") ? t(field.error) : field.error}
                   </p>
                 )}
               </div>
@@ -208,7 +221,6 @@ export default function ResetPassword() {
                   placeholder={t("auth.register.confirmPasswordPlaceholder")}
                   value={field.value || ""}
                   required
-                  // disabled={resetForm.submitting}
                   autocomplete="new-password"
                 />
                 <button
@@ -216,13 +228,12 @@ export default function ResetPassword() {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword())}
                   class="absolute right-3 top-9 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
                   aria-label={showConfirmPassword() ? "Hide password" : "Show password"}
-                // disabled={resetForm.submitting}
                 >
                   {showConfirmPassword() ? <EyeSlashIcon /> : <EyeIcon />}
                 </button>
                 {field.error && (
                   <p class="mt-1 text-sm text-red-600 dark:text-red-400">
-                    {t(field.error)}
+                    {field.error.includes(".") ? t(field.error) : field.error}
                   </p>
                 )}
               </div>
@@ -234,9 +245,9 @@ export default function ResetPassword() {
             size="lg"
             class="w-full shadow-sm"
             type="submit"
-            disabled={resetForm.submitting || isSessionExpired()}
+            disabled={submission.pending || isSessionExpired()}
           >
-            {resetForm.submitting ? t("auth.resetPassword.submitting") : t("auth.resetPassword.submit")}
+            {submission.pending ? t("auth.resetPassword.submitting") : t("auth.resetPassword.submit")}
           </Button>
         </fieldset>
       </Form>

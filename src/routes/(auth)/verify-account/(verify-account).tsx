@@ -1,18 +1,43 @@
-import { useNavigate, revalidate } from "@solidjs/router";
+import { useNavigate, action, useSubmission, useAction, redirect } from "@solidjs/router";
 import { createSignal, createEffect, onMount, onCleanup, Show } from "solid-js";
 import { createForm } from "@modular-forms/solid";
 import { Button, Input } from "~/components/ui";
 import { verifySchema, type VerifyFormData } from "~/schemas/verify.schema";
 import { authApi, ApiError } from "~/lib/api";
 import { useSession } from "~/lib/auth";
+import { toaster } from "~/components/ui/Toast";
 import { useI18n } from "~/i18n";
+
+/**
+ * Send Verification Email Action
+ */
+const sendVerificationAction = action(async () => {
+  "use server";
+  return await authApi.sendVerificationEmail();
+}, "send-verification-action");
+
+/**
+ * Verify Email Action
+ */
+const verifyEmailAction = action(async (data: VerifyFormData) => {
+  "use server";
+  await authApi.verifyEmail({
+    otp: data.otp,
+  });
+  return { success: true };
+}, "verify-email-action");
 
 export default function VerifyAccount() {
   const navigate = useNavigate();
   const user = useSession();
   const { t } = useI18n();
 
-  const [isSubmitting, setIsSubmitting] = createSignal(false);
+  const sendVerificationTrigger = useAction(sendVerificationAction);
+  const verifyEmailTrigger = useAction(verifyEmailAction);
+
+  const sendSubmission = useSubmission(sendVerificationAction);
+  const verifySubmission = useSubmission(verifyEmailAction);
+
   const [resendStatus, setResendStatus] = createSignal<string | null>(null);
   const [errorMessage, setErrorMessage] = createSignal<string | null>(null);
 
@@ -20,8 +45,9 @@ export default function VerifyAccount() {
   const [expiresAt, setExpiresAt] = createSignal<Date | null>(null);
   const [timeLeft, setTimeLeft] = createSignal<string>("");
   const [canResend, setCanResend] = createSignal(false);
+  const [cooldown, setCooldown] = createSignal(0);
 
-  // Auto-redirect if verified (Error-Driven State Sync)
+  // Auto-redirect if verified
   createEffect(() => {
     if (user()?.emailVerified) {
       navigate("/", { replace: true });
@@ -45,13 +71,7 @@ export default function VerifyAccount() {
     const minutes = Math.floor(diff / 60000);
     const seconds = Math.floor((diff % 60000) / 1000);
     setTimeLeft(`${minutes}:${seconds.toString().padStart(2, "0")}`);
-
-    // Allow resend if < 14 mins left (1 min cooldown from start) or if expired logic handled differently
-    // Actually, user requested 60s cooldown.
   };
-
-  // Cooldown Logic
-  const [cooldown, setCooldown] = createSignal(0);
 
   createEffect(() => {
     if (cooldown() > 0) {
@@ -68,41 +88,70 @@ export default function VerifyAccount() {
     }
   });
 
-  const handleConflict = () => {
-    // If we get a 409, it means we are already verified.
-    // Trigger a revalidation of the session.
-    // The createEffect above will catch 'user().emailVerified' and redirect.
-    console.log("Conflict detected (Already Verified). Revalidating session...");
-    revalidate("user-session");
-  };
-
-  const initVerification = async () => {
-    setErrorMessage(null);
-    setResendStatus("sending");
-    try {
-      const response = await authApi.sendVerificationEmail();
+  // Handle Send Verification Result
+  createEffect(() => {
+    if (sendSubmission.result) {
+      const response = sendSubmission.result;
       if (response.expiresAt) {
         setExpiresAt(new Date(response.expiresAt));
-        setCooldown(60); // 60s cooldown
+        setCooldown(60);
         setResendStatus("sent");
         setTimeout(() => setResendStatus(null), 5000);
       }
-    } catch (error) {
-      if (error instanceof ApiError) {
-        if (error.statusCode === 409) {
-          handleConflict();
+    }
+  });
+
+  // Handle Send Verification Error
+  createEffect(() => {
+    if (sendSubmission.error) {
+      console.log("Resend verification error caught:", sendSubmission.error);
+      const error = sendSubmission.error;
+      const errorData = (error as any).response;
+
+      if (errorData && errorData.statusCode === 409) {
+        // Already verified
+        navigate("/", { replace: true });
+        return;
+      }
+
+      const msg = errorData?.message || (error as any).message || "auth.verifyAccount.errorResend";
+      setErrorMessage(msg.includes(".") ? t(msg) : msg);
+    }
+  });
+
+  // Handle Verify Email Error
+  createEffect(() => {
+    if (verifySubmission.error) {
+      console.log("Verify email error caught:", verifySubmission.error);
+      const error = verifySubmission.error;
+      const errorData = (error as any).response;
+
+      if (errorData) {
+        if (errorData.statusCode === 409) {
+          navigate("/", { replace: true });
           return;
         }
-        setErrorMessage(error.message);
+        const msg = errorData.message || (error as any).message || "auth.verifyAccount.errorVerify";
+        setErrorMessage(msg.includes(".") ? t(msg) : msg);
+      } else {
+        const msg = (error as any).message || "auth.verifyAccount.errorUnexpected";
+        setErrorMessage(msg.includes(".") ? t(msg) : msg);
       }
-      setResendStatus(null);
     }
-  };
+  });
+
+  // Handle successful verification
+  createEffect(() => {
+    if (verifySubmission.result?.success) {
+      toaster.success(t("auth.verifyAccount.success") || "Account verified successfully!");
+      navigate("/", { replace: true });
+    }
+  });
 
   onMount(() => {
     // Auto-trigger on mount
-    if (user() && !user()?.emailVerified) {
-      initVerification();
+    if (user() && !user()?.emailVerified && !sendSubmission.pending) {
+      sendVerificationTrigger();
     }
   });
 
@@ -122,39 +171,15 @@ export default function VerifyAccount() {
     },
   });
 
-  const handleSubmit = async (values: VerifyFormData) => {
-    setIsSubmitting(true);
+  const handleSubmit = (values: VerifyFormData) => {
     setErrorMessage(null);
-
-    try {
-      await authApi.verifyEmail({
-        otp: values.otp,
-      });
-
-      // Successful verification
-      // Revalidate session to ensure UI updates immediately
-      revalidate("user-session");
-      navigate("/", { replace: true });
-    } catch (error) {
-      if (error instanceof ApiError) {
-        if (error.statusCode === 409) {
-          handleConflict();
-          return;
-        }
-        setErrorMessage(
-          error.message || t("auth.verifyAccount.errorVerify")
-        );
-      } else {
-        setErrorMessage(t("auth.verifyAccount.errorUnexpected"));
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+    verifyEmailTrigger(values);
   };
 
-  const handleResend = async () => {
+  const handleResend = () => {
     if (cooldown() > 0) return;
-    await initVerification();
+    setErrorMessage(null);
+    sendVerificationTrigger();
   };
 
   return (
@@ -193,12 +218,12 @@ export default function VerifyAccount() {
                 maxlength={6}
                 value={field.value || ""}
                 required
-                disabled={isSubmitting()}
+                disabled={verifySubmission.pending}
                 autocomplete="one-time-code"
               />
               {field.error && (
                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {field.error}
+                  {field.error.includes(".") ? t(field.error) : field.error}
                 </p>
               )}
             </div>
@@ -210,9 +235,9 @@ export default function VerifyAccount() {
           variant="primary"
           class="w-full"
           type="submit"
-          disabled={isSubmitting()}
+          disabled={verifySubmission.pending}
         >
-          {isSubmitting() ? t("auth.verifyAccount.submitting") : t("auth.verifyAccount.submit")}
+          {verifySubmission.pending ? t("auth.verifyAccount.submitting") : t("auth.verifyAccount.submit")}
         </Button>
 
         {/* Resend Code Link */}
@@ -223,10 +248,10 @@ export default function VerifyAccount() {
           <button
             type="button"
             onClick={handleResend}
-            disabled={isSubmitting() || resendStatus() === "sending" || cooldown() > 0}
+            disabled={verifySubmission.pending || sendSubmission.pending || cooldown() > 0}
             class="text-forest-600 dark:text-sage-400 hover:text-forest-700 dark:hover:text-sage-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
           >
-            {resendStatus() === "sending"
+            {sendSubmission.pending
               ? t("auth.verifyAccount.resending")
               : cooldown() > 0
                 ? `${t("auth.verifyAccount.resendAvailable")} ${cooldown()}s`
