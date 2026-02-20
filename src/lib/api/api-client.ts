@@ -132,7 +132,15 @@ export async function fetcher<T>(
       return {} as T;
     }
 
-    return (await response.json()) as T;
+    // 5. Unwrapped Response Handling
+    const result = await response.json();
+    
+    // If the response follows our standard ApiResponse wrapper, unwrap the data
+    if (result && typeof result === "object" && "success" in result && "data" in result) {
+      return result.data as T;
+    }
+
+    return result as T;
   } catch (error) {
     // Re-throw SolidStart redirects/responses
     if (error instanceof Response) {

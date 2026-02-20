@@ -66,11 +66,11 @@ export const UserMenu: Component<UserMenuProps> = (props) => {
                 aria-label="User menu"
                 aria-expanded={isOpen()}
             >
-                <span class="text-sm font-medium text-forest-800 dark:text-cream-100 hidden sm:block">
-                    {props.user.userName}
+                <span class="text-sm font-medium text-forest-800 dark:text-cream-100 hidden sm:inline-block">
+                    {props.user.userName || props.user.email?.split('@')[0] || "User"}
                 </span>
                 <div class="w-8 h-8 rounded-full bg-forest-600 dark:bg-forest-500 text-white dark:text-cream-50 flex items-center justify-center font-bold text-xs ring-2 ring-white dark:ring-forest-800 shadow-sm transition-transform group-hover:scale-105">
-                    {getInitials(props.user.userName)}
+                    {getInitials(props.user.userName || props.user.email || "U")}
                 </div>
             </button>
 
@@ -80,10 +80,10 @@ export const UserMenu: Component<UserMenuProps> = (props) => {
                     {/* User Info Header */}
                     <div class="px-4 py-3 border-b border-cream-200 dark:border-forest-700/50 bg-cream-50/50 dark:bg-white/5 mx-2 rounded-lg mb-2">
                         <p class="text-sm font-semibold text-forest-800 dark:text-cream-50">
-                            {props.user.userName}
+                            {props.user.userName || "User"}
                         </p>
                         <p class="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
-                            {props.user.email}
+                            {props.user.email || ""}
                         </p>
                     </div>
 

@@ -13,6 +13,7 @@ export function AuthSection() {
     return (
         <Show
             when={user()}
+            keyed
             fallback={
                 <div class="hidden md:flex items-center gap-3">
                     <LinkButton
@@ -33,8 +34,8 @@ export function AuthSection() {
             }
         >
             {(userData) => (
-                <div class="hidden lg:block relative z-20">
-                    <UserMenu user={userData()} showDashboardLink={true} />
+                <div class="relative z-20">
+                    <UserMenu user={userData} showDashboardLink={true} />
                 </div>
             )}
         </Show>

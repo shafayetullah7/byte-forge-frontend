@@ -43,7 +43,7 @@ export function MobileMenu(props: MobileMenuProps) {
 
     return (
         <Show when={props.isOpen}>
-            <div class="absolute right-4 top-16 w-64 bg-white dark:bg-forest-800 rounded-xl shadow-xl border border-cream-200 dark:border-forest-700 py-2 animate-in fade-in slide-in-from-top-2 duration-200 mobile-menu-container">
+            <div class="absolute right-4 top-16 w-64 bg-white/95 dark:bg-forest-800/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-cream-200 dark:border-forest-700/50 py-2 animate-in fade-in slide-in-from-top-2 duration-200 mobile-menu-container">
                 <div class="py-2 flex flex-col">
                     <A
                         href="/"

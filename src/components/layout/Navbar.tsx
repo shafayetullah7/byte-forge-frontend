@@ -105,7 +105,7 @@ export function Navbar() {
               </button>
 
               {/* Theme & Language - Hidden on mobile, accessible in menu */}
-              <div class="hidden md:flex items-center gap-4">
+              <div class="hidden md:flex items-center gap-2">
                 <ThemeToggle />
                 <LanguageSwitcher variant="compact" />
               </div>
