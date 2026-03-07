@@ -1,12 +1,26 @@
-import { ApiError, type ApiErrorResponse } from "./types";
+import { ApiError } from "./types";
 import { config } from "../config";
+import { defaultAuthErrorConfig } from "./config";
 
 /**
  * Request options for API calls
  */
 export interface FetchOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined>;
-  strict?: boolean; // If true, throws redirect("/login") on 401. Default: true
+  strict?: boolean; // If true, redirects to /login on 401. Default: true
+  responseType?: "json" | "blob" | "text";
+  unwrapData?: boolean; // If false, returns full response (with meta). Default: true
+  
+  // Callbacks for specialized error handling
+  /**
+   * Called on 401 Unauthorized. 
+   * Return false to prevent the default redirect behavior.
+   */
+  onAuthError?: (error: ApiError) => void | boolean;
+  /**
+   * Called on any non-2xx response.
+   */
+  onError?: (error: ApiError) => void;
 }
 
 /**
@@ -17,7 +31,6 @@ export const buildURL = (
   endpoint: string,
   params?: Record<string, string | number | boolean | undefined>
 ): string => {
-  // Handle absolute URLs or relative paths
   const base = baseURL.endsWith("/") ? baseURL : `${baseURL}/`;
   const path = endpoint.startsWith("/") ? endpoint.slice(1) : endpoint;
   const url = new URL(path, base);
@@ -34,126 +47,202 @@ export const buildURL = (
 };
 
 /**
- * Global header management
+ * Utility to extract a cookie from a cookie string
  */
-const getDefaultHeaders = () => ({
-  "Content-Type": "application/json",
-});
+function getCookieFromStr(cookieStr: string, name: string): string | undefined {
+  if (!cookieStr) return undefined;
+  const regex = new RegExp(`(?:^|;\\s*)${name}=([^;]*)`);
+  const match = cookieStr.match(regex);
+  return match ? match[1] : undefined;
+}
 
 /**
- * Robust functional fetcher
- * 
+ * Universal cookie getter (Works in Browser and during SSR)
+ */
+function getUniversalCookie(
+  name: string,
+  headers?: Headers
+): string | undefined {
+  if (typeof window !== "undefined") {
+    return getCookieFromStr(document.cookie, name);
+  }
+
+  if (headers) {
+    const cookieHeader = headers.get("cookie");
+    if (cookieHeader) return getCookieFromStr(cookieHeader, name);
+  }
+
+  return undefined;
+}
+
+/**
+ * Global functional fetcher
+ *
  * Features:
  * - SSR Cookie Handling: Automatically injects cookies from RequestEvent on server.
  * - 401 Rerouting: Idiomatic SolidStart redirect on unauthorized.
- * - Strict Type Safety: Typed response and safe param record.
- * - Consistent Error Handling: Throws ApiError for non-2xx with type narrowing support.
+ * - Multi-Locale Support: Automatically injects x-locale header.
+ * - Flexible Hooks: Supports request-level and global error callbacks.
  */
 export async function fetcher<T>(
   endpoint: string,
   options: FetchOptions = {}
 ): Promise<T> {
-  const { params, strict = true, ...fetchOptions } = options;
+  const { 
+    params, 
+    strict = true, 
+    responseType = "json",
+    unwrapData = true,
+    onAuthError,
+    onError,
+    ...fetchOptions 
+  } = options;
+  
   const baseURL = config.api.baseUrl;
   const url = buildURL(baseURL, endpoint, params);
 
-  const headers = { ...getDefaultHeaders(), ...fetchOptions.headers } as Record<string, string>;
+  const headers = new Headers(fetchOptions.headers || {});
+  
+  if (!headers.has("Content-Type") && !(fetchOptions.body instanceof FormData)) {
+    headers.set("Content-Type", "application/json");
+  }
 
-  // 1. Defensive SSR Cookie Handling
+  // 1. SSR Context & Cookie Injection
   let event: any;
-  if (typeof window === "undefined") {
+  if (import.meta.env.SSR) {
     const { getRequestEvent } = await import("solid-js/web");
     try {
       event = getRequestEvent();
-      if (event) {
+      if (event && !headers.has("cookie")) {
         const cookie = event.request.headers.get("cookie");
-        if (cookie) {
-          headers.cookie = cookie;
-        }
+        if (cookie) headers.set("cookie", cookie);
       }
     } catch (e) {
-      console.warn("[API] Failed to get request event for SSR cookie injection", e);
+      console.warn("[API] SSR event missing", e);
     }
   }
 
-  // Handle FormData (let browser set boundary)
-  if (fetchOptions.body instanceof FormData) {
-    delete headers["Content-Type"];
+  // 2. Automatic Locale Injection
+  const locale = getUniversalCookie("locale", headers) || "en";
+  headers.set("x-locale", locale);
+
+  // 3. CSRF Protection (if token exists)
+  const method = fetchOptions.method?.toUpperCase() || "GET";
+  const stateChangingMethods = ["POST", "PUT", "DELETE", "PATCH"];
+  if (stateChangingMethods.includes(method)) {
+    const xsrfToken = getUniversalCookie("xsrf-token", headers);
+    if (xsrfToken) headers.set("X-XSRF-TOKEN", xsrfToken);
   }
 
-  try {
-    const response = await fetch(url, {
-      ...fetchOptions,
-      headers,
-      // Audit tip: redundant during SSR but harmless; kept for browser consistency
+  const makeRequest = (opts: RequestInit, currentHeaders: Headers) =>
+    fetch(url, {
+      ...opts,
+      headers: currentHeaders,
       credentials: "include",
     });
 
-    // 2. Specialized 401 Handling (throws for router context)
-    if (response.status === 401 && strict) {
-      const { redirect } = await import("@solidjs/router");
-      throw redirect("/login");
-    }
+  try {
+    const response = await makeRequest(fetchOptions, headers);
 
-    // 3. Error Parsing with consistent ApiError narrowing
+    // 4. Hierarchical Error Handling
     if (!response.ok) {
-      let errorData: any;
-      try {
-        errorData = await response.json();
-      } catch {
-        errorData = { message: response.statusText || "Internal Server Error" };
-      }
-      
-      throw new ApiError(
-        errorData.message || `Request failed with status ${response.status}`,
+      const errorData = await response.json().catch(() => ({}));
+      const apiError = new ApiError(
+        errorData.message || `API Error: ${response.status}`,
         response.status,
         errorData
       );
+
+      // 4a. Specific 401 Unauthorized Handling
+      if (response.status === 401) {
+        const isExcluded = defaultAuthErrorConfig.excludedEndpoints?.some(e => 
+          endpoint.includes(e)
+        );
+
+        if (!isExcluded) {
+          // 1. Request-level hook
+          const preventDefault = onAuthError?.(apiError) === false;
+          
+          // 2. Global hook
+          defaultAuthErrorConfig.onAuthError?.(endpoint, apiError);
+
+          // 3. Storage Cleanup (if configured)
+          if (defaultAuthErrorConfig.clearStorageOnAuthError && typeof window !== "undefined") {
+            const keys = defaultAuthErrorConfig.storageKeysToClear || [];
+            keys.forEach(k => {
+              localStorage.removeItem(k);
+              sessionStorage.removeItem(k);
+            });
+          }
+
+          // 4. Default Action (Redirect)
+          if (strict && !preventDefault) {
+            if (import.meta.env.SSR) {
+              const { redirect } = await import("@solidjs/router");
+              throw redirect(defaultAuthErrorConfig.loginUrl || "/login");
+            }
+            
+            if (typeof window !== "undefined") {
+              window.location.href = defaultAuthErrorConfig.loginUrl || "/login";
+              return {} as T;
+            }
+          }
+        }
+      }
+
+      // 4b. General Error Hooks
+      onError?.(apiError);
+      throw apiError;
     }
 
-    // 4. Propagate Cookies from Backend to Browser (SSR only)
-    if (event) {
+    // 5. SSR Cookie Propagation (Safety First)
+    if (import.meta.env.SSR && event) {
       try {
         const { appendResponseHeader } = await import("vinxi/http");
-        // Audit tip: Using getSetCookie() is safer than manual splitting
-        const setCookies = (response.headers as any).getSetCookie?.() || 
+        const isResponseFinished =
+          event.nativeEvent.node.res.headersSent ||
+          event.nativeEvent.node.res.writableEnded;
+
+        if (!isResponseFinished) {
+          const headersAny = response.headers as any;
+          const setCookies = headersAny.getSetCookie?.() || 
                            response.headers.get("set-cookie")?.split(", ") || [];
-        
-        setCookies.forEach((cookie: string) => {
-          appendResponseHeader(event.nativeEvent, "Set-Cookie", cookie);
-        });
+          
+          setCookies.forEach((cookie: string) => {
+            appendResponseHeader(event.nativeEvent, "Set-Cookie", cookie);
+          });
+        }
       } catch (e) {
         console.warn("[API] Failed to propagate cookies during SSR", e);
       }
     }
 
-    // Handle 204 No Content
-    if (response.status === 204) {
-      return {} as T;
+    if (response.status === 204) return {} as T;
+
+    // 6. Polymorphic Body Parsing
+    if (responseType === "blob") {
+      return (await response.blob()) as unknown as T;
     }
 
-    // 5. Unwrapped Response Handling
-    const result = await response.json();
-    
-    // If the response follows our standard ApiResponse wrapper, unwrap the data
+    if (responseType === "text") {
+      return (await response.text()) as unknown as T;
+    }
+
+    // Default to JSON with automatic unwrapping
+    const result = await response.json().catch(() => ({}));
+
+    if (unwrapData === false) {
+      return result as T;
+    }
+
     if (result && typeof result === "object" && "success" in result && "data" in result) {
       return result.data as T;
     }
 
     return result as T;
   } catch (error) {
-    // Re-throw SolidStart redirects/responses
-    if (error instanceof Response) {
-      throw error;
-    }
+    if (error instanceof Response || error instanceof ApiError) throw error;
     
-    // Ensure all thrown errors are wrapped or re-thrown properly
-    if (error instanceof ApiError) {
-      throw error;
-    }
-
-    // Handle network errors or other unexpected failures
-    // Audit tip: Use status 0 for transport/network failures
     throw new ApiError(
       error instanceof Error ? error.message : "Network request failed",
       0
@@ -161,4 +250,4 @@ export async function fetcher<T>(
   }
 }
 
-
+export const api = fetcher;
