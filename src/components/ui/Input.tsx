@@ -10,25 +10,25 @@ export default function Input(props: InputProps) {
 
   // Base styles
   const baseStyles =
-    "w-full px-4 py-2 rounded-lg border transition-colors duration-200 focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed";
+    "w-full px-4 py-2.5 rounded-lg border-2 transition-standard focus-ring-flat disabled:opacity-50 disabled:cursor-not-allowed body-base bg-white dark:bg-forest-900/30";
 
   // State styles
   const stateStyles = local.error
-    ? "border-red-500 focus:border-red-500 focus:ring-red-200 dark:border-red-400 dark:focus:ring-red-900"
-    : "border-cream-300 focus:border-forest-500 focus:ring-forest-200/50 dark:border-forest-700 dark:focus:border-forest-400 dark:focus:ring-forest-700/50";
+    ? "border-red-500 active:border-red-600"
+    : "border-cream-200 dark:border-forest-700 hover:border-cream-300 dark:hover:border-forest-600 focus:border-forest-500 dark:focus:border-forest-400";
 
   const classes = `${baseStyles} ${stateStyles} ${local.class || ""}`;
 
   return (
     <div class="w-full">
       <Show when={local.label}>
-        <label class="block text-sm font-medium text-forest-700 dark:text-gray-300 mb-2">
+        <label class="block h6 mb-2">
           {local.label}
         </label>
       </Show>
       <input class={classes} {...others} />
       <Show when={local.error}>
-        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{local.error}</p>
+        <p class="mt-1 body-small text-red-600 dark:text-red-400 font-semibold">{local.error}</p>
       </Show>
     </div>
   );

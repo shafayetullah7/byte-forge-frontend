@@ -47,7 +47,7 @@ export function Navbar() {
             <div class="flex-shrink-0">
               <A
                 href="/"
-                class="text-xl md:text-2xl font-bold text-forest-800 dark:text-cream-100 flex items-center gap-2 hover:text-forest-600 dark:hover:text-forest-300 transition-colors duration-200"
+                class="h5 flex items-center gap-2 hover:text-forest-600 dark:hover:text-forest-300 transition-standard"
               >
                 ByteForge
                 <span class="w-1.5 h-1.5 bg-terracotta-500 rounded-full"></span>
@@ -58,30 +58,30 @@ export function Navbar() {
             <div class="hidden md:flex items-center gap-8">
               <A
                 href="/"
-                class="text-forest-700 dark:text-gray-300 font-medium text-sm hover:text-terracotta-500 dark:hover:text-terracotta-300 transition-colors duration-200"
-                activeClass="text-terracotta-600 dark:text-terracotta-400 font-semibold"
+                class="text-forest-700 dark:text-gray-300 font-semibold body-small hover:text-terracotta-500 dark:hover:text-terracotta-300 transition-standard"
+                activeClass="text-terracotta-600 dark:text-terracotta-400 font-bold"
                 end
               >
                 {t("common.home")}
               </A>
               <A
                 href="/plants"
-                class="text-forest-700 dark:text-gray-300 font-medium text-sm hover:text-terracotta-500 dark:hover:text-terracotta-300 transition-colors duration-200"
-                activeClass="text-terracotta-600 dark:text-terracotta-400 font-semibold"
+                class="text-forest-700 dark:text-gray-300 font-semibold body-small hover:text-terracotta-500 dark:hover:text-terracotta-300 transition-standard"
+                activeClass="text-terracotta-600 dark:text-terracotta-400 font-bold"
               >
                 {t("common.plants")}
               </A>
               <A
                 href="/shops"
-                class="text-forest-700 dark:text-gray-300 font-medium text-sm hover:text-terracotta-500 dark:hover:text-terracotta-300 transition-colors duration-200"
-                activeClass="text-terracotta-600 dark:text-terracotta-400 font-semibold"
+                class="text-forest-700 dark:text-gray-300 font-semibold body-small hover:text-terracotta-500 dark:hover:text-terracotta-300 transition-standard"
+                activeClass="text-terracotta-600 dark:text-terracotta-400 font-bold"
               >
                 {t("common.shops")}
               </A>
               <A
                 href="/about"
-                class="text-forest-700 dark:text-gray-300 font-medium text-sm hover:text-terracotta-500 dark:hover:text-terracotta-300 transition-colors duration-200"
-                activeClass="text-terracotta-600 dark:text-terracotta-400 font-semibold"
+                class="text-forest-700 dark:text-gray-300 font-semibold body-small hover:text-terracotta-500 dark:hover:text-terracotta-300 transition-standard"
+                activeClass="text-terracotta-600 dark:text-terracotta-400 font-bold"
               >
                 {t("common.about")}
               </A>

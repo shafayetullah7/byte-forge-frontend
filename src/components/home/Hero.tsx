@@ -17,52 +17,51 @@ export function Hero() {
 
             {/* Content Container - pt-16 accounts for overlapping Navbar layer */}
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center pt-16">
-                {/* ... headline/subtitle remain same ... */}
-                <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight leading-tight">
+                <h1 class="h1 text-white mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
                     {t("common.hero.title")}
                 </h1>
 
-                <p class="text-lg md:text-xl text-cream-100 mb-8 max-w-2xl mx-auto leading-relaxed font-normal">
+                <p class="body-large text-cream-100 mb-10 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100">
                     {t("common.hero.subtitle")}
                 </p>
 
                 {/* Buttons */}
-                <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mb-16">
+                <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mb-20 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
                     <LinkButton
                         href="/plants"
                         size="lg"
                         variant="primary"
-                        class="w-full sm:w-auto font-medium hover:shadow-md"
+                        class="w-full sm:w-auto"
                     >
                         {t("common.hero.shopNow")}
                     </LinkButton>
                     <LinkButton
                         href="/about"
-                        variant="secondary"
+                        variant="outline"
                         size="lg"
-                        class="w-full sm:w-auto font-medium"
+                        class="w-full sm:w-auto !border-white/30 !text-white hover:!bg-white/10 hover:!border-white/60"
                     >
                         {t("common.hero.learnMore")}
                     </LinkButton>
                 </div>
 
                 {/* Social Proof / Stats */}
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 border-t border-cream-100/30 pt-8 w-full max-w-4xl">
-                    <div class="text-center">
-                        <div class="text-3xl font-bold text-white mb-1">500+</div>
-                        <div class="text-sm text-cream-200 font-medium">Plant Species</div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 border-t border-white/10 pt-10 w-full max-w-4xl animate-in fade-in duration-1000 delay-300">
+                    <div class="text-center group">
+                        <div class="h3 text-white mb-1 group-hover:scale-110 transition-standard">500+</div>
+                        <div class="body-small text-cream-200 uppercase tracking-widest opacity-80">Plant Species</div>
                     </div>
-                    <div class="text-center">
-                        <div class="text-3xl font-bold text-white mb-1">10k+</div>
-                        <div class="text-sm text-cream-200 font-medium">Happy Customers</div>
+                    <div class="text-center group">
+                        <div class="h3 text-white mb-1 group-hover:scale-110 transition-standard">10k+</div>
+                        <div class="body-small text-cream-200 uppercase tracking-widest opacity-80">Happy Customers</div>
                     </div>
-                    <div class="text-center">
-                        <div class="text-3xl font-bold text-white mb-1">4.9/5</div>
-                        <div class="text-sm text-cream-200 font-medium">Average Rating</div>
+                    <div class="text-center group">
+                        <div class="h3 text-white mb-1 group-hover:scale-110 transition-standard">4.9/5</div>
+                        <div class="body-small text-cream-200 uppercase tracking-widest opacity-80">Average Rating</div>
                     </div>
-                    <div class="text-center">
-                        <div class="text-3xl font-bold text-white mb-1">24/7</div>
-                        <div class="text-sm text-cream-200 font-medium">Expert Support</div>
+                    <div class="text-center group">
+                        <div class="h3 text-white mb-1 group-hover:scale-110 transition-standard">24/7</div>
+                        <div class="body-small text-cream-200 uppercase tracking-widest opacity-80">Support</div>
                     </div>
                 </div>
             </div>
