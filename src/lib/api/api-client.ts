@@ -63,7 +63,7 @@ function getUniversalCookie(
   name: string,
   headers?: Headers
 ): string | undefined {
-  if (typeof window !== "undefined") {
+  if (!import.meta.env.SSR) {
     return getCookieFromStr(document.cookie, name);
   }
 
@@ -167,7 +167,7 @@ export async function fetcher<T>(
           defaultAuthErrorConfig.onAuthError?.(endpoint, apiError);
 
           // 3. Storage Cleanup (if configured)
-          if (defaultAuthErrorConfig.clearStorageOnAuthError && typeof window !== "undefined") {
+          if (defaultAuthErrorConfig.clearStorageOnAuthError && !import.meta.env.SSR) {
             const keys = defaultAuthErrorConfig.storageKeysToClear || [];
             keys.forEach(k => {
               localStorage.removeItem(k);
@@ -180,9 +180,7 @@ export async function fetcher<T>(
             if (import.meta.env.SSR) {
               const { redirect } = await import("@solidjs/router");
               throw redirect(defaultAuthErrorConfig.loginUrl || "/login");
-            }
-            
-            if (typeof window !== "undefined") {
+            } else {
               window.location.href = defaultAuthErrorConfig.loginUrl || "/login";
               return {} as T;
             }
