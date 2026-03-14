@@ -2,11 +2,11 @@ import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { Suspense, createEffect } from "solid-js";
 import { Toaster } from "~/components/ui/Toast";
-import "@fontsource-variable/plus-jakarta-sans";
-import "./app.css";
 import { I18nContext, createI18n, type Locale } from "~/i18n";
 import { ThemeProvider, Theme } from "~/lib/context/theme-context";
 import { getRequestEvent, isServer } from "solid-js/web";
+import { useAutoTokenRefresh } from "~/lib/hooks/useTokenRefresh";
+import "./app.css";
 // import { parseCookies } from "vinxi/http";
 
 function getInitialLocale(): Locale {
@@ -56,6 +56,10 @@ export default function App() {
       document.cookie = `locale=${loc}; path=/; max-age=31536000; SameSite=Lax`;
     }
   });
+
+  // Initialize automatic token refresh for JWT authentication
+  // This hook auto-manages token refresh based on session state (no return value needed)
+  useAutoTokenRefresh();
 
   return (
     <I18nContext.Provider value={i18n}>

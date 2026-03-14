@@ -10,11 +10,12 @@ import type {
   VerifyResetOtpRequest,
   ResendResetOtpRequest,
   ResetPasswordRequest,
+  RefreshTokenResponse,
 } from "../types/auth.types";
 
 /**
  * Authentication API endpoints
- * 
+ *
  * Refactored to use the functional fetcher with unwrapped responses.
  */
 export const authApi = {
@@ -62,9 +63,12 @@ export const authApi = {
    * Resend email verification code
    */
   sendVerificationEmail: async (): Promise<{ expiresAt: string }> => {
-    return fetcher<{ expiresAt: string }>("/api/v1/user/auth/send-verification-email", {
-      method: "POST",
-    });
+    return fetcher<{ expiresAt: string }>(
+      "/api/v1/user/auth/send-verification-email",
+      {
+        method: "POST",
+      }
+    );
   },
 
   /**
@@ -77,32 +81,58 @@ export const authApi = {
   },
 
   // === Password Reset ===
-  
-  forgotPassword: async (data: ForgotPasswordRequest): Promise<{ token: string; expiresAt: string }> => {
-    return fetcher<{ token: string; expiresAt: string }>("/api/v1/user/password-reset/forgot", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+
+  forgotPassword: async (
+    data: ForgotPasswordRequest
+  ): Promise<{ token: string; expiresAt: string }> => {
+    return fetcher<{ token: string; expiresAt: string }>(
+      "/api/v1/user/password-reset/forgot",
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      }
+    );
   },
 
-  verifyResetOtp: async (data: VerifyResetOtpRequest): Promise<{ token: string; expiresAt: string }> => {
-    return fetcher<{ token: string; expiresAt: string }>("/api/v1/user/password-reset/verify", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+  verifyResetOtp: async (
+    data: VerifyResetOtpRequest
+  ): Promise<{ token: string; expiresAt: string }> => {
+    return fetcher<{ token: string; expiresAt: string }>(
+      "/api/v1/user/password-reset/verify",
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      }
+    );
   },
 
-  resendResetOtp: async (data: ResendResetOtpRequest): Promise<{ token: string; expiresAt: string }> => {
-    return fetcher<{ token: string; expiresAt: string }>("/api/v1/user/password-reset/resend", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+  resendResetOtp: async (
+    data: ResendResetOtpRequest
+  ): Promise<{ token: string; expiresAt: string }> => {
+    return fetcher<{ token: string; expiresAt: string }>(
+      "/api/v1/user/password-reset/resend",
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      }
+    );
   },
 
   resetPassword: async (data: ResetPasswordRequest): Promise<void> => {
     return fetcher<void>("/api/v1/user/password-reset/reset", {
       method: "POST",
       body: JSON.stringify(data),
+    });
+  },
+
+  /**
+   * Refresh access and refresh tokens
+   * Uses the refresh token cookie to get new tokens.
+   * Old tokens are invalidated via session ID rotation.
+   */
+  refreshTokens: async (): Promise<RefreshTokenResponse> => {
+    return fetcher<RefreshTokenResponse>("/api/v1/user/auth/refresh", {
+      method: "POST",
     });
   },
 };
