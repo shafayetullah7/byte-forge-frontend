@@ -167,7 +167,7 @@ export function useTokenRefresh() {
  *
  * @example
  * ```typescript
- * // In app.tsx
+ * // In app.tsx or inside a Route component
  * useAutoTokenRefresh();
  * ```
  */
@@ -183,4 +183,30 @@ export function useAutoTokenRefresh() {
       stopRefreshCycle();
     }
   });
+}
+
+/**
+ * Provider component to automatically manage token refresh based on session state.
+ *
+ * This component wraps the useAutoTokenRefresh hook and can be used inside
+ * the Router's root component to enable automatic token refresh for all routes.
+ *
+ * @example
+ * ```typescript
+ * // In app.tsx, inside Router root
+ * <Router
+ *   root={(props) => (
+ *     <Suspense>
+ *       <AutoTokenRefreshProvider />
+ *       {props.children}
+ *     </Suspense>
+ *   )}
+ * >
+ *   <FileRoutes />
+ * </Router>
+ * ```
+ */
+export function AutoTokenRefreshProvider() {
+  useAutoTokenRefresh();
+  return null;
 }

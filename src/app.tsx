@@ -5,7 +5,7 @@ import { Toaster } from "~/components/ui/Toast";
 import { I18nContext, createI18n, type Locale } from "~/i18n";
 import { ThemeProvider, Theme } from "~/lib/context/theme-context";
 import { getRequestEvent, isServer } from "solid-js/web";
-import { useAutoTokenRefresh } from "~/lib/hooks/useTokenRefresh";
+import { AutoTokenRefreshProvider } from "~/lib/hooks/useTokenRefresh";
 import "./app.css";
 // import { parseCookies } from "vinxi/http";
 
@@ -57,16 +57,13 @@ export default function App() {
     }
   });
 
-  // Initialize automatic token refresh for JWT authentication
-  // This hook auto-manages token refresh based on session state (no return value needed)
-  useAutoTokenRefresh();
-
   return (
     <I18nContext.Provider value={i18n}>
       <ThemeProvider initialTheme={initialTheme}>
         <Router
           root={(props) => (
             <Suspense>
+              <AutoTokenRefreshProvider />
               {props.children}
               <Toaster />
             </Suspense>
