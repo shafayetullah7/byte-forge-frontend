@@ -6,9 +6,28 @@ import { performLogout } from "~/lib/auth/session";
 /**
  * Automatic token refresh hook for ByteForge JWT authentication.
  *
- * This hook manages the automatic refresh of JWT tokens before they expire.
- * It uses a proactive refresh strategy - refreshing tokens 5 minutes before
- * they expire to ensure seamless authentication.
+ * ## Architecture Decision: JWT Token Refresh
+ *
+ * This hook implements automatic JWT token refresh for the web frontend.
+ * The refresh mechanism is designed to work with the JWT-based authentication
+ * system that also supports mobile apps.
+ *
+ * ### How It Works
+ *
+ * - Access tokens have a limited lifetime (typically 15-60 minutes)
+ * - Refresh tokens are valid for 7 days
+ * - Tokens are refreshed 5 minutes before expiration (REFRESH_LEEWAY)
+ * - Refresh happens automatically via HTTP-only cookie exchange
+ *
+ * ### Mobile App Considerations
+ *
+ * For native mobile apps, the same refresh endpoint (`/api/v1/auth/refresh`)
+ * can be used with the Authorization header instead of cookies:
+ *
+ * ```
+ * POST /api/v1/auth/refresh
+ * Authorization: Bearer <refresh_token>
+ * ```
  *
  * @remarks
  * - Refresh tokens are valid for 7 days by default
@@ -210,3 +229,19 @@ export function AutoTokenRefreshProvider() {
   useAutoTokenRefresh();
   return null;
 }
+
+// TODO: Consider decoupling useTokenRefresh from router context
+// ---------------------------------------------------------------
+// Current: useTokenRefresh() calls useSession() which requires Router context,
+// forcing the AutoTokenRefreshProvider workaround in app.tsx.
+//
+// Option 1: Accept session as parameter instead of calling useSession() directly
+//   export function useTokenRefresh(session: () => AuthUser | null) { ... }
+//
+// Benefit: Removes need for AutoTokenRefreshProvider workaround
+// Cost: ~1 hour (refactor + testing)
+// Impact: No functional change, code clarity improvement only
+//
+// Decision: Keep current implementation - works correctly, documented,
+// and the workaround is minimal (3 lines). Revisit if refactoring auth system.
+// ---------------------------------------------------------------
