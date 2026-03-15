@@ -141,17 +141,6 @@ export interface ResetPasswordRequest {
 }
 
 /**
- * Token-based authentication response
- */
-export interface TokenAuthResponse {
-  tokens: {
-    accessToken: string;
-    refreshToken: string;
-  };
-  user: AuthUser;
-}
-
-/**
  * Refresh token response
  */
 export interface RefreshTokenResponse {
