@@ -10,10 +10,10 @@ export interface FetchOptions extends RequestInit {
   strict?: boolean; // If true, redirects to /login on 401. Default: true
   responseType?: "json" | "blob" | "text";
   unwrapData?: boolean; // If false, returns full response (with meta). Default: true
-  
+
   // Callbacks for specialized error handling
   /**
-   * Called on 401 Unauthorized. 
+   * Called on 401 Unauthorized.
    * Return false to prevent the default redirect behavior.
    */
   onAuthError?: (error: ApiError) => void | boolean;
@@ -88,22 +88,25 @@ export async function fetcher<T>(
   endpoint: string,
   options: FetchOptions = {}
 ): Promise<T> {
-  const { 
-    params, 
-    strict = true, 
+  const {
+    params,
+    strict = true,
     responseType = "json",
     unwrapData = true,
     onAuthError,
     onError,
-    ...fetchOptions 
+    ...fetchOptions
   } = options;
-  
+
   const baseURL = config.api.baseUrl;
   const url = buildURL(baseURL, endpoint, params);
 
   const headers = new Headers(fetchOptions.headers || {});
-  
-  if (!headers.has("Content-Type") && !(fetchOptions.body instanceof FormData)) {
+
+  if (
+    !headers.has("Content-Type") &&
+    !(fetchOptions.body instanceof FormData)
+  ) {
     headers.set("Content-Type", "application/json");
   }
 
@@ -124,7 +127,9 @@ export async function fetcher<T>(
 
   // 2. Automatic Locale Injection
   const locale = getUniversalCookie("locale", headers) || "en";
-  headers.set("x-locale", locale);
+  // Sanitize locale value to prevent invalid header characters
+  const sanitizedLocale = locale.replace(/[^a-zA-Z0-9-_]/g, "");
+  headers.set("x-locale", sanitizedLocale || "en");
 
   // 3. CSRF Protection (if token exists)
   const method = fetchOptions.method?.toUpperCase() || "GET";
@@ -155,21 +160,24 @@ export async function fetcher<T>(
 
       // 4a. Specific 401 Unauthorized Handling
       if (response.status === 401) {
-        const isExcluded = defaultAuthErrorConfig.excludedEndpoints?.some(e => 
+        const isExcluded = defaultAuthErrorConfig.excludedEndpoints?.some((e) =>
           endpoint.includes(e)
         );
 
         if (!isExcluded) {
           // 1. Request-level hook
           const preventDefault = onAuthError?.(apiError) === false;
-          
+
           // 2. Global hook
           defaultAuthErrorConfig.onAuthError?.(endpoint, apiError);
 
           // 3. Storage Cleanup (if configured)
-          if (defaultAuthErrorConfig.clearStorageOnAuthError && !import.meta.env.SSR) {
+          if (
+            defaultAuthErrorConfig.clearStorageOnAuthError &&
+            !import.meta.env.SSR
+          ) {
             const keys = defaultAuthErrorConfig.storageKeysToClear || [];
-            keys.forEach(k => {
+            keys.forEach((k) => {
               localStorage.removeItem(k);
               sessionStorage.removeItem(k);
             });
@@ -181,7 +189,8 @@ export async function fetcher<T>(
               const { redirect } = await import("@solidjs/router");
               throw redirect(defaultAuthErrorConfig.loginUrl || "/login");
             } else {
-              window.location.href = defaultAuthErrorConfig.loginUrl || "/login";
+              window.location.href =
+                defaultAuthErrorConfig.loginUrl || "/login";
               return {} as T;
             }
           }
@@ -203,9 +212,11 @@ export async function fetcher<T>(
 
         if (!isResponseFinished) {
           const headersAny = response.headers as any;
-          const setCookies = headersAny.getSetCookie?.() || 
-                           response.headers.get("set-cookie")?.split(", ") || [];
-          
+          const setCookies =
+            headersAny.getSetCookie?.() ||
+            response.headers.get("set-cookie")?.split(", ") ||
+            [];
+
           setCookies.forEach((cookie: string) => {
             appendResponseHeader(event.nativeEvent, "Set-Cookie", cookie);
           });
@@ -233,14 +244,19 @@ export async function fetcher<T>(
       return result as T;
     }
 
-    if (result && typeof result === "object" && "success" in result && "data" in result) {
+    if (
+      result &&
+      typeof result === "object" &&
+      "success" in result &&
+      "data" in result
+    ) {
       return result.data as T;
     }
 
     return result as T;
   } catch (error) {
     if (error instanceof Response || error instanceof ApiError) throw error;
-    
+
     throw new ApiError(
       error instanceof Error ? error.message : "Network request failed",
       0

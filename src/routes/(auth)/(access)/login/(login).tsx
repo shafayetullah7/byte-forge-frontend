@@ -1,6 +1,6 @@
-import { A, useNavigate, action, useSubmission, useAction, redirect } from "@solidjs/router";
+import { A, useNavigate, action, useSubmission, useAction } from "@solidjs/router";
 import { createSignal, createEffect } from "solid-js";
-import { createForm, setError } from "@modular-forms/solid";
+import { createForm } from "@modular-forms/solid";
 import { Button, Input } from "~/components/ui";
 import { EyeIcon, EyeSlashIcon } from "~/components/icons";
 import { loginSchema, type LoginFormData } from "~/schemas/login.schema";
@@ -14,16 +14,29 @@ import { useI18n } from "~/i18n";
  */
 const loginAction = action(async (data: LoginFormData) => {
   "use server";
-  const result = await authApi.login({
-    email: data.email,
-    password: data.password,
-  });
+  try {
+    const result = await authApi.login({
+      email: data.email,
+      password: data.password,
+    });
 
-  if (result.user && !result.user.emailVerified) {
-    return { success: true, target: "/verify-account" };
+    if (result.user && !result.user.emailVerified) {
+      return { success: true, target: "/verify-account" };
+    }
+
+    return { success: true, target: "/" };
+  } catch (error) {
+    // Return error as result instead of throwing to prevent h3 from setting invalid headers
+    const apiError = error as any;
+    return {
+      success: false,
+      error: {
+        message: apiError.message || "Login failed",
+        response: apiError.response,
+        statusCode: apiError.statusCode,
+      },
+    };
   }
-
-  return { success: true, target: "/" };
 }, "login-action");
 
 export default function Login() {
@@ -31,7 +44,6 @@ export default function Login() {
   const { t } = useI18n();
   const loginTrigger = useAction(loginAction);
   const submission = useSubmission(loginAction);
-  const [errorMessage, setErrorMessage] = createSignal<string | null>(null);
   const [showPassword, setShowPassword] = createSignal(false);
 
   const [loginForm, { Form, Field }] = createForm<LoginFormData>({
@@ -50,54 +62,16 @@ export default function Login() {
     },
   });
 
-  // Map server errors from the action back to the form fields
+  // Handle server errors from the action - show in toast only
   createEffect(() => {
-    if (submission.error) {
-      console.log("Submission error caught:", submission.error);
-      const error = submission.error;
-      const errorData = (error as any).response;
+    const result = submission.result as any;
+    if (result && result.success === false && result.error) {
+      const errorData = result.error;
+      const message = errorData.message || "auth.login.failed";
+      const displayMessage = message.includes(".") ? t(message) : message;
 
-      if (errorData) {
-        console.log("Error details from API:", errorData);
-        let handled = false;
-
-        // 1. Handle structured validation errors
-        if (Array.isArray(errorData.validationErrors)) {
-          errorData.validationErrors.forEach((err: any) => {
-            const field = err.field.toLowerCase();
-            if (field === "email") {
-              setError(loginForm, "email", err.message);
-              handled = true;
-            } else if (field === "password") {
-              setError(loginForm, "password", err.message);
-              handled = true;
-            }
-          });
-        }
-
-        // 2. Handle 401/400 and other errors by checking the message
-        const message = errorData.message || (error as any).message;
-        if (!handled && message) {
-          const lowerMsg = message.toLowerCase();
-          if (lowerMsg.includes("password")) {
-            setError(loginForm, "password", message);
-            handled = true;
-          } else if (lowerMsg.includes("email") || lowerMsg.includes("user")) {
-            setError(loginForm, "email", message);
-            handled = true;
-          }
-        }
-
-        if (!handled) {
-          const msg = errorData.message || (error as any).message || "auth.login.failed";
-          setErrorMessage(msg.includes(".") ? t(msg) : msg);
-          toaster.error(msg.includes(".") ? t(msg) : msg);
-        }
-      } else {
-        const msg = (error as any).message || "auth.login.failed";
-        setErrorMessage(msg.includes(".") ? t(msg) : msg);
-        toaster.error(t("common.networkError"));
-      }
+      // Show error in toast - simple and clean
+      toaster.error(displayMessage);
     }
   });
 
@@ -111,20 +85,12 @@ export default function Login() {
 
   const handleSubmit = (values: LoginFormData) => {
     console.log("Submitting login form...");
-    setErrorMessage(null);
     loginTrigger(values);
   };
 
   return (
     <div class="w-full sm:min-w-[360px] max-w-md">
       <Form onSubmit={handleSubmit} class="space-y-6">
-        {/* Error Message Display */}
-        {errorMessage() && (
-          <div class="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 animate-in fade-in slide-in-from-top-2">
-            <p class="text-sm text-red-600 dark:text-red-400">{errorMessage()}</p>
-          </div>
-        )}
-
         {/* Email Field */}
         <Field name="email">
           {(field, props) => (
