@@ -12,6 +12,7 @@ import { UserMenu } from "../UserMenu";
 import { useSession } from "~/lib/auth";
 import { A, useLocation } from "@solidjs/router";
 import Input from "~/components/ui/Input";
+import { ThemeToggle } from "../ThemeToggle";
 // Removed SegmentedControl import as it's no longer used in this file
 
 interface TopbarProps {
@@ -78,6 +79,9 @@ export const Topbar: Component<TopbarProps> = (props) => {
                 </A>
 
                 <div class="h-6 w-px bg-gray-200 dark:bg-forest-700 mx-1"></div>
+
+                {/* Theme Toggle */}
+                <ThemeToggle />
 
                 {/* Language Switcher - Minimalist Globe */}
                 <button

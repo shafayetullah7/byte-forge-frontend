@@ -7,6 +7,8 @@ import { loginSchema, type LoginFormData } from "~/schemas/login.schema";
 import { authApi, ApiError } from "~/lib/api";
 import { toaster } from "~/components/ui/Toast";
 import { useI18n } from "~/i18n";
+import { ThemeToggle } from "~/components/layout/ThemeToggle";
+import { LanguageSwitcher } from "~/components/layout/LanguageSwitcher";
 
 /**
  * Login Action
@@ -89,7 +91,15 @@ export default function Login() {
   };
 
   return (
-    <div class="w-full sm:min-w-[360px] max-w-md">
+    <div class="w-full sm:min-w-90 max-w-md">
+      {/* Theme & Language Toggle - Top Right */}
+      <div class="flex justify-end mb-4">
+        <div class="flex items-center gap-2">
+          <ThemeToggle />
+          <LanguageSwitcher variant="compact" />
+        </div>
+      </div>
+
       <Form onSubmit={handleSubmit} class="space-y-6">
         {/* Email Field */}
         <Field name="email">
