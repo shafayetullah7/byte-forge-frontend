@@ -1,6 +1,8 @@
 import { createSignal, createEffect, Show, For, ParentComponent } from "solid-js";
+import { createStore } from "solid-js/store";
+import { slugify } from "~/lib/utils/slugify";
 import { useNavigate, action, useSubmission, type RouteDefinition, redirect } from "@solidjs/router";
-import { Button, ImageUpload } from "~/components/ui";
+import { Button, ImageUpload, Card, SegmentedControl } from "~/components/ui";
 import { ValidatedInput } from "~/components/seller";
 import { getShop, useShop } from "~/lib/context/shop-context";
 import { toaster } from "~/components/ui/Toast";
@@ -8,6 +10,8 @@ import { useI18n } from "~/i18n";
 import { useImageUpload } from "~/lib/hooks/useImageUpload";
 import type { ApplyAsSellerRequest, ShopTranslationInput } from "~/lib/api/types/seller.types";
 import { sellerApi } from "~/lib/api/endpoints/seller.api";
+import type { Locale } from "~/i18n";
+import { GlobeAltIcon } from "~/components/icons";
 
 /**
  * Route Preload
@@ -33,10 +37,10 @@ const applyAsSellerAction = action(async (formData: ApplyAsSellerRequest) => {
  * Step configuration for the multi-step form
  */
 const STEPS = [
-    { id: 1, title: "Basic Info", description: "Shop name and description" },
-    { id: 2, title: "Branding", description: "Logo and banner" },
-    { id: 3, title: "Business Info", description: "Address and license" },
-    { id: 4, title: "Verification", description: "Upload documents" },
+    { id: 1, title: "seller.shop.steps.basicInfo", description: "seller.shop.steps.basicInfoDesc" },
+    { id: 2, title: "seller.shop.steps.branding", description: "seller.shop.steps.brandingDesc" },
+    { id: 3, title: "seller.shop.steps.businessInfo", description: "seller.shop.steps.businessInfoDesc" },
+    { id: 4, title: "seller.shop.steps.verification", description: "seller.shop.steps.verificationDesc" },
 ] as const;
 
 /**
@@ -45,13 +49,14 @@ const STEPS = [
  */
 interface StepProgressProps {
     currentStep: number;
+    t: (key: string) => string;
 }
 
 const StepProgress: ParentComponent<StepProgressProps> = (props) => (
     <div class="mb-8">
         <div class="flex items-center justify-between relative">
             {/* Progress Line */}
-            <div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-1 bg-gray-200 dark:bg-forest-700">
+            <div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-1 bg-cream-200 dark:bg-forest-700">
                 <div
                     class="h-full bg-terracotta-500 transition-all duration-300"
                     style={{ width: `${((props.currentStep - 1) / (STEPS.length - 1)) * 100}%` }}
@@ -67,7 +72,7 @@ const StepProgress: ParentComponent<StepProgressProps> = (props) => (
                                 ? "bg-terracotta-500 text-white"
                                 : props.currentStep === step.id
                                     ? "bg-terracotta-500 text-white ring-4 ring-terracotta-200 dark:ring-terracotta-800"
-                                    : "bg-gray-200 dark:bg-forest-700 text-gray-500 dark:text-gray-400"
+                                    : "bg-cream-200 dark:bg-forest-700 text-forest-700/60 dark:text-cream-100/60"
                                 }`}
                         >
                             {props.currentStep > step.id ? (
@@ -81,12 +86,12 @@ const StepProgress: ParentComponent<StepProgressProps> = (props) => (
                         <div class="mt-2 text-center">
                             <p class={`text-sm font-medium ${props.currentStep >= step.id
                                 ? "text-gray-900 dark:text-white"
-                                : "text-gray-500 dark:text-gray-400"
+                                : "text-forest-700/60 dark:text-cream-100/60"
                                 }`}>
-                                {step.title}
+                                {props.t(step.title)}
                             </p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
-                                {step.description}
+                            <p class="text-xs text-forest-700/60 dark:text-cream-100/60 hidden sm:block">
+                                {props.t(step.description)}
                             </p>
                         </div>
                     </div>
@@ -96,9 +101,12 @@ const StepProgress: ParentComponent<StepProgressProps> = (props) => (
     </div>
 );
 
+// Available locales for shop translations
+const AVAILABLE_LOCALES: Locale[] = ["en", "bn"];
+
 export default function SetupShop() {
     const navigate = useNavigate();
-    const { t, locale } = useI18n();
+    const { t, locale, setLocale } = useI18n();
     const { shop, isLoading } = useShop();
     const submission = useSubmission(applyAsSellerAction);
 
@@ -111,11 +119,18 @@ export default function SetupShop() {
     // Document upload errors for inline validation
     const [docErrors, setDocErrors] = createSignal<Record<string, string>>({});
 
-    // Form data state
-    const [formData, setFormData] = createSignal({
-        shopName: "",
-        about: "",
-        brandStory: "",
+    // Form data state - translations organized by locale using createStore for nested state
+    const [translations, setTranslations] = createStore<Record<Locale, {
+        shopName: string;
+        about: string;
+        brandStory: string;
+    }>>({
+        en: { shopName: "", about: "", brandStory: "" },
+        bn: { shopName: "", about: "", brandStory: "" },
+    });
+
+    // Business info (same across all locales)
+    const [businessInfo, setBusinessInfo] = createSignal({
         address: "",
         tradeLicenseNumber: "",
         tinNumber: "",
@@ -128,6 +143,23 @@ export default function SetupShop() {
         tradeLicenseDocumentId: undefined as string | undefined,
         tinDocumentId: undefined as string | undefined,
         utilityBillDocumentId: undefined as string | undefined,
+    });
+
+    // Currently selected locale for editing translations in Step 1
+    const [editingLocale, setEditingLocale] = createSignal<Locale>("en");
+
+    // Shop slug state
+    const [shopSlug, setShopSlug] = createSignal("");
+    const [isSlugManual, setIsSlugManual] = createSignal(false);
+
+    // Auto-generate slug when English shop name changes (if not manual)
+    createEffect(() => {
+        const englishName = translations.en.shopName;
+        if (!isSlugManual() && englishName) {
+            setShopSlug(slugify(englishName));
+        } else if (!isSlugManual() && !englishName) {
+            setShopSlug("");
+        }
     });
 
     // Redirect users who already have a shop
@@ -193,17 +225,20 @@ export default function SetupShop() {
     // Validate current step
     const validateCurrentStep = (): boolean => {
         const current = currentStep();
-        const data = formData();
+        const currentBusinessInfo = businessInfo();
         const newErrors: Record<string, string> = {};
         let isValid = true;
 
-        // Step 1: Basic Info validation
+        // Step 1: Basic Info validation - validate the currently editing locale
         if (current === 1) {
-            if (!data.shopName || data.shopName.trim().length < 2) {
+            const currentLocale = editingLocale();
+            const translation = translations[currentLocale];
+
+            if (translation.shopName.trim().length < 2) {
                 newErrors.shopName = t("seller.shop.nameRequired");
                 isValid = false;
             }
-            if (!data.about || data.about.trim().length < 10) {
+            if (translation.about.trim().length < 10) {
                 newErrors.about = t("seller.shop.aboutRequired");
                 isValid = false;
             }
@@ -211,11 +246,11 @@ export default function SetupShop() {
 
         // Step 3: Business Info validation
         if (current === 3) {
-            if (!data.address || data.address.trim().length < 5) {
+            if (!currentBusinessInfo.address || currentBusinessInfo.address.trim().length < 5) {
                 newErrors.address = t("seller.shop.addressRequired");
                 isValid = false;
             }
-            if (!data.tradeLicenseNumber || data.tradeLicenseNumber.trim().length === 0) {
+            if (!currentBusinessInfo.tradeLicenseNumber || currentBusinessInfo.tradeLicenseNumber.trim().length === 0) {
                 newErrors.tradeLicenseNumber = t("seller.shop.tradeLicenseRequired");
                 isValid = false;
             }
@@ -260,12 +295,12 @@ export default function SetupShop() {
             return;
         }
 
-        const data = formData();
+        const currentBusinessInfo = businessInfo();
         const media = mediaIds();
 
         // Final validation - TIN consistency (if TIN number provided, document is required)
         // Note: trade license document is already validated in validateCurrentStep() for step 4
-        if (data.tinNumber && !media.tinDocumentId) {
+        if (currentBusinessInfo.tinNumber && !media.tinDocumentId) {
             setDocErrors({ tin: t("seller.shop.tinDocumentRequired") });
             return;
         }
@@ -276,22 +311,30 @@ export default function SetupShop() {
             return;
         }
 
-        const translation: ShopTranslationInput = {
-            locale: locale(),
-            shopName: data.shopName.trim(),
-            about: data.about.trim(),
-            brandStory: data.brandStory.trim() || undefined,
-            featuredHighlight: undefined,
-        };
+        // Build translations array for all locales with complete data
+        const translationsPayload: ShopTranslationInput[] = AVAILABLE_LOCALES
+            .filter((loc) => {
+                const translation = translations[loc];
+                // Only include locales with both shopName (≥2 chars) AND about (≥10 chars)
+                return translation.shopName.trim().length >= 2 && translation.about.trim().length >= 10;
+            })
+            .map((loc) => ({
+                locale: loc,
+                shopName: translations[loc].shopName.trim(),
+                about: translations[loc].about.trim(),
+                brandStory: translations[loc].brandStory.trim() || undefined,
+                featuredHighlight: undefined,
+            }));
 
         const payload: ApplyAsSellerRequest = {
-            address: data.address.trim(),
+            address: currentBusinessInfo.address.trim(),
+            slug: shopSlug().trim() || undefined,
             logoId: media.logoId,
             bannerId: media.bannerId,
-            translations: [translation],
-            tradeLicenseNumber: data.tradeLicenseNumber.trim(),
+            translations: translationsPayload,
+            tradeLicenseNumber: currentBusinessInfo.tradeLicenseNumber.trim(),
             tradeLicenseDocumentId: media.tradeLicenseDocumentId,
-            tinNumber: data.tinNumber?.trim() || undefined,
+            tinNumber: currentBusinessInfo.tinNumber?.trim() || undefined,
             tinDocumentId: media.tinDocumentId,
             utilityBillDocumentId: media.utilityBillDocumentId,
         };
@@ -317,10 +360,10 @@ export default function SetupShop() {
                     <div class="bg-white dark:bg-forest-800 rounded-2xl shadow-lg border border-gray-200 dark:border-forest-700 overflow-hidden">
                         <div class="px-8 py-10">
                             {/* Progress Bar */}
-                            <StepProgress currentStep={currentStep()} />
+                            <StepProgress currentStep={currentStep()} t={t} />
 
                             <form onSubmit={handleSubmit} class="space-y-6">
-                                {/* Step 1: Basic Info */}
+                                {/* Step 1: Basic Info (with multi-language support) */}
                                 <Show when={currentStep() === 1}>
                                     <div class="space-y-6">
                                         <div class="text-center mb-6">
@@ -328,23 +371,123 @@ export default function SetupShop() {
                                                 {t("seller.shop.basicInfoTitle")}
                                             </h2>
                                             <p class="text-gray-600 dark:text-gray-400">
-                                                Tell us about your shop
+                                                {t("seller.shop.basicInfoSubtitle")}
                                             </p>
+                                        </div>
+
+                                        {/* Multi-language Info Banner */}
+                                        <Card variant="tinted" class="mb-6">
+                                            <div class="flex gap-3">
+                                                <svg class="w-5 h-5 text-forest-600 dark:text-forest-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                <div>
+                                                    <p class="h6 text-forest-700 dark:text-gray-300 mb-1">
+                                                        {t("seller.shop.multiLanguageTitle")}
+                                                    </p>
+                                                    <p class="body-small text-forest-700/70 dark:text-gray-400">
+                                                        {t("seller.shop.multiLanguageDescription")}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </Card>
+
+                                        {/* Language Selector with SegmentedControl */}
+                                        <div class="mb-6">
+                                            <div class="flex items-center justify-between mb-3">
+                                                <h6 class="text-forest-700 dark:text-gray-300">
+                                                    {t("seller.shop.selectLanguage")}
+                                                </h6>
+                                                <span class="body-small text-forest-700/70 dark:text-gray-400 font-semibold">
+                                                    {t("seller.shop.languageProgress", {
+                                                        completed: AVAILABLE_LOCALES.filter((loc) =>
+                                                            translations[loc].shopName.trim().length >= 2 && translations[loc].about.trim().length >= 10
+                                                        ).length,
+                                                        total: AVAILABLE_LOCALES.length
+                                                    })}
+                                                </span>
+                                            </div>
+                                            <SegmentedControl<Locale>
+                                                options={[
+                                                    { value: "en", label: t("seller.shop.englishLabel"), icon: GlobeAltIcon },
+                                                    { value: "bn", label: t("seller.shop.bengaliLabel"), icon: GlobeAltIcon }
+                                                ]}
+                                                value={editingLocale()}
+                                                onChange={setEditingLocale}
+                                                size="md"
+                                                fullWidth={false}
+                                            />
+                                            {/* Completion Status */}
+                                            <div class="grid grid-cols-2 gap-3 mt-3">
+                                                <For each={AVAILABLE_LOCALES}>
+                                                    {(loc) => {
+                                                        const isComplete = translations[loc].shopName.trim().length >= 2 && translations[loc].about.trim().length >= 10;
+                                                        return (
+                                                            <div class={`flex items-center gap-2 p-2 rounded-lg border ${isComplete
+                                                                    ? "border-forest-500 bg-forest-50 dark:bg-forest-900/30"
+                                                                    : "border-cream-200 dark:border-forest-700"
+                                                                }`}>
+                                                                <Show when={isComplete} fallback={
+                                                                    <div class="w-5 h-5 rounded-full border-2 border-cream-300 dark:border-forest-600" />
+                                                                }>
+                                                                    <svg class="w-5 h-5 text-forest-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                                    </svg>
+                                                                </Show>
+                                                                <span class={`body-small ${isComplete
+                                                                        ? "text-forest-700 dark:text-gray-300 font-semibold"
+                                                                        : "text-forest-700/60 dark:text-cream-100/60"
+                                                                    }`}>
+                                                                    {loc === "en" ? t("seller.shop.englishLabel") : t("seller.shop.bengaliLabel")}
+                                                                    {" "}
+                                                                    {isComplete ? t("seller.shop.languageComplete") : t("seller.shop.languageIncomplete")}
+                                                                </span>
+                                                            </div>
+                                                        );
+                                                    }}
+                                                </For>
+                                            </div>
                                         </div>
 
                                         {/* Shop Name */}
                                         <ValidatedInput
                                             label={t("seller.shop.nameLabel")}
                                             type="text"
-                                            value={formData().shopName}
-                                            onInput={(e) => setFormData({ ...formData(), shopName: (e.target as HTMLInputElement).value })}
+                                            value={translations[editingLocale()].shopName}
+                                            onInput={(e) => setTranslations(editingLocale(), "shopName", (e.target as HTMLInputElement).value)}
                                             placeholder={t("seller.shop.namePlaceholder")}
                                             required
                                             minLength={2}
                                             maxLength={255}
                                             error={errors().shopName}
-                                            hint="This will be displayed as your shop name on the platform."
+                                            hint={t("seller.shop.nameHint")}
                                         />
+
+                                        {/* Shop Slug (URL) */}
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                {t("seller.shop.slugLabel")}
+                                                <span class="text-gray-400 ml-1">({t("common.optional")})</span>
+                                            </label>
+                                            <div class="flex rounded-lg shadow-sm">
+                                                <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 dark:border-forest-600 bg-gray-50 dark:bg-forest-800 text-gray-500 dark:text-gray-400 text-sm">
+                                                    byteforge.com/shop/
+                                                </span>
+                                                <input
+                                                    type="text"
+                                                    value={shopSlug()}
+                                                    onInput={(e) => {
+                                                        setShopSlug((e.currentTarget as HTMLInputElement).value);
+                                                        setIsSlugManual(true);
+                                                    }}
+                                                    placeholder={t("seller.shop.slugPlaceholder")}
+                                                    class="flex-1 min-w-0 block w-full px-3 py-2 rounded-r-lg border border-gray-300 dark:border-forest-600 bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors sm:text-sm"
+                                                />
+                                            </div>
+                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                                {t("seller.shop.slugHint")}
+                                            </p>
+                                        </div>
 
                                         {/* About Shop */}
                                         <div>
@@ -356,8 +499,8 @@ export default function SetupShop() {
                                                 required
                                                 minLength={10}
                                                 maxLength={2000}
-                                                value={formData().about}
-                                                onInput={(e) => setFormData({ ...formData(), about: e.currentTarget.value })}
+                                                value={translations[editingLocale()].about}
+                                                onInput={(e) => setTranslations(editingLocale(), "about", e.currentTarget.value)}
                                                 placeholder={t("seller.shop.aboutPlaceholder")}
                                                 class={`w-full px-4 py-3 rounded-lg border bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors resize-none ${errors().about
                                                     ? "border-red-500 dark:border-red-400"
@@ -369,7 +512,7 @@ export default function SetupShop() {
                                                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{errors().about}</p>
                                             ) : (
                                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                                    Describe your shop (minimum 10 characters).
+                                                    {t("seller.shop.aboutHint")}
                                                 </p>
                                             )}
                                         </div>
@@ -378,19 +521,19 @@ export default function SetupShop() {
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                                 {t("seller.shop.brandStoryLabel")}
-                                                <span class="text-gray-400 ml-1">(Optional)</span>
+                                                <span class="text-gray-400 ml-1">({t("common.optional")})</span>
                                             </label>
                                             <textarea
                                                 minLength={5}
                                                 maxLength={2000}
-                                                value={formData().brandStory}
-                                                onInput={(e) => setFormData({ ...formData(), brandStory: e.currentTarget.value })}
+                                                value={translations[editingLocale()].brandStory}
+                                                onInput={(e) => setTranslations(editingLocale(), "brandStory", e.currentTarget.value)}
                                                 placeholder={t("seller.shop.brandStoryPlaceholder")}
                                                 class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-forest-600 bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors resize-none"
                                                 rows={3}
                                             />
                                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                                Share your brand story (optional).
+                                                {t("seller.shop.brandStoryHint")}
                                             </p>
                                         </div>
                                     </div>
@@ -404,7 +547,7 @@ export default function SetupShop() {
                                                 {t("seller.shop.brandingTitle")}
                                             </h2>
                                             <p class="text-gray-600 dark:text-gray-400">
-                                                Upload your shop's visual identity
+                                                {t("seller.shop.brandingSubtitle")}
                                             </p>
                                         </div>
 
@@ -440,7 +583,7 @@ export default function SetupShop() {
                                                 {t("seller.shop.businessInfoTitle")}
                                             </h2>
                                             <p class="text-gray-600 dark:text-gray-400">
-                                                Provide your business details
+                                                {t("seller.shop.businessInfoSubtitle")}
                                             </p>
                                         </div>
 
@@ -448,22 +591,22 @@ export default function SetupShop() {
                                         <ValidatedInput
                                             label={t("seller.shop.addressLabel")}
                                             type="text"
-                                            value={formData().address}
-                                            onInput={(e) => setFormData({ ...formData(), address: (e.target as HTMLInputElement).value })}
+                                            value={businessInfo().address}
+                                            onInput={(e) => setBusinessInfo({ ...businessInfo(), address: (e.target as HTMLInputElement).value })}
                                             placeholder={t("seller.shop.addressPlaceholder")}
                                             required
                                             minLength={5}
                                             maxLength={500}
                                             error={errors().address}
-                                            hint="Full business address."
+                                            hint={t("seller.shop.addressHint")}
                                         />
 
                                         {/* Trade License Number */}
                                         <ValidatedInput
                                             label={t("seller.shop.tradeLicenseNumberLabel")}
                                             type="text"
-                                            value={formData().tradeLicenseNumber}
-                                            onInput={(e) => setFormData({ ...formData(), tradeLicenseNumber: (e.target as HTMLInputElement).value })}
+                                            value={businessInfo().tradeLicenseNumber}
+                                            onInput={(e) => setBusinessInfo({ ...businessInfo(), tradeLicenseNumber: (e.target as HTMLInputElement).value })}
                                             placeholder={t("seller.shop.tradeLicenseNumberPlaceholder")}
                                             required
                                             error={errors().tradeLicenseNumber}
@@ -479,7 +622,7 @@ export default function SetupShop() {
                                                 {t("seller.shop.verificationTitle")}
                                             </h2>
                                             <p class="text-gray-600 dark:text-gray-400">
-                                                Upload verification documents
+                                                {t("seller.shop.verificationSubtitle")}
                                             </p>
                                         </div>
 
@@ -492,7 +635,7 @@ export default function SetupShop() {
                                                 onFileSelect={tradeLicenseUpload.upload}
                                                 onDelete={tradeLicenseUpload.deleteMedia}
                                                 label={t("seller.shop.tradeLicenseDocumentLabel")}
-                                                description="PDF or Image (max 5MB) - Required"
+                                                description={t("seller.shop.tradeLicenseDocumentDesc")}
                                             />
                                             {docErrors().tradeLicense && (
                                                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{docErrors().tradeLicense}</p>
@@ -508,7 +651,7 @@ export default function SetupShop() {
                                                 onFileSelect={tinUpload.upload}
                                                 onDelete={tinUpload.deleteMedia}
                                                 label={t("seller.shop.tinDocumentLabel")}
-                                                description="PDF or Image (max 5MB) - Optional"
+                                                description={t("seller.shop.tinDocumentDesc")}
                                             />
                                             {docErrors().tin && (
                                                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{docErrors().tin}</p>
@@ -523,7 +666,7 @@ export default function SetupShop() {
                                             onFileSelect={utilityBillUpload.upload}
                                             onDelete={utilityBillUpload.deleteMedia}
                                             label={t("seller.shop.utilityBillDocumentLabel")}
-                                            description="PDF or Image (max 5MB) - Optional"
+                                            description={t("seller.shop.utilityBillDocumentDesc")}
                                         />
                                     </div>
                                 </Show>
@@ -537,7 +680,7 @@ export default function SetupShop() {
                                         disabled={currentStep() === 1 || submission.pending}
                                         class={currentStep() === 1 ? "invisible" : ""}
                                     >
-                                        Previous
+                                        {t("seller.shop.previousButton")}
                                     </Button>
 
                                     {currentStep() < STEPS.length ? (
@@ -547,7 +690,7 @@ export default function SetupShop() {
                                             onClick={goToNextStep}
                                             disabled={submission.pending}
                                         >
-                                            Next
+                                            {t("seller.shop.nextButton")}
                                         </Button>
                                     ) : (
                                         <Button
@@ -555,7 +698,7 @@ export default function SetupShop() {
                                             variant="accent"
                                             disabled={submission.pending}
                                         >
-                                            {submission.pending ? t("common.loading") : t("seller.shop.createButton")}
+                                            {submission.pending ? t("seller.shop.creating") : t("seller.shop.createButton")}
                                         </Button>
                                     )}
                                 </div>
@@ -565,7 +708,7 @@ export default function SetupShop() {
                         {/* Footer Note */}
                         <div class="bg-terracotta-50 dark:bg-terracotta-900/20 px-8 py-4 border-t border-terracotta-100 dark:border-terracotta-800">
                             <p class="text-sm text-terracotta-800 dark:text-terracotta-200">
-                                💡 <strong>Note:</strong> You can update your shop information later from settings.
+                                💡 <strong>{t("common.note")}:</strong> {t("seller.shop.footerNote")}
                             </p>
                         </div>
                     </div>

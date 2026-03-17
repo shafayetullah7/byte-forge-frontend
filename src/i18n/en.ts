@@ -40,6 +40,8 @@ export const dict = {
     shops: "Shops",
     plants: "Plants",
     cart: "Cart",
+    optional: "Optional",
+    note: "Note",
     hero: {
       title: "Cultivate Your Digital Sanctuary",
       subtitle:
@@ -285,9 +287,83 @@ export const dict = {
       namePlaceholder: "Enter your shop name",
       descriptionLabel: "Shop Description",
       descriptionPlaceholder: "Tell customers about your shop",
-      createButton: "Create Shop",
       created: "Shop created successfully!",
       createFailed: "Failed to create shop",
+      // Step descriptions for progress bar
+      steps: {
+        basicInfo: "Basic Info",
+        basicInfoDesc: "Shop name and description",
+        branding: "Branding",
+        brandingDesc: "Logo and banner",
+        businessInfo: "Business Info",
+        businessInfoDesc: "Address and license",
+        verification: "Verification",
+        verificationDesc: "Upload documents",
+      },
+      // Step 1: Basic Info
+      basicInfoTitle: "Basic Info",
+      basicInfoSubtitle: "Tell us about your shop",
+      aboutLabel: "About Shop",
+      aboutPlaceholder: "Describe your shop",
+      brandStoryLabel: "Brand Story",
+      brandStoryPlaceholder: "Share your brand story (optional)",
+      brandStoryHint: "Share your brand story (optional).",
+      aboutHint: "Describe your shop (minimum 10 characters).",
+      nameHint: "This will be displayed as your shop name on the platform.",
+      slugLabel: "Shop URL Slug",
+      slugPlaceholder: "my-shop-name",
+      slugHint:
+        "Customize your shop's URL. Leave blank to auto-generate from shop name.",
+      // Step 2: Branding
+      brandingTitle: "Branding",
+      brandingSubtitle: "Upload your shop's visual identity",
+      logoLabel: "Shop Logo",
+      bannerLabel: "Shop Banner",
+      // Step 3: Business Info
+      businessInfoTitle: "Business Info",
+      businessInfoSubtitle: "Provide your business details",
+      addressLabel: "Business Address",
+      addressPlaceholder: "Enter your complete business address",
+      addressHint: "Full business address.",
+      tradeLicenseNumberLabel: "Trade License Number",
+      tradeLicenseNumberPlaceholder: "Enter your trade license number",
+      // Step 4: Verification
+      verificationTitle: "Verification",
+      verificationSubtitle: "Upload verification documents",
+      tradeLicenseDocumentLabel: "Trade License Document",
+      tradeLicenseDocumentDesc: "PDF or Image (max 5MB) - Required",
+      tinDocumentLabel: "TIN Document",
+      tinDocumentDesc: "PDF or Image (max 5MB) - Optional",
+      utilityBillDocumentLabel: "Utility Bill Document",
+      utilityBillDocumentDesc: "PDF or Image (max 5MB) - Optional",
+      // Navigation
+      previousButton: "Previous",
+      nextButton: "Next",
+      createButton: "Create Shop",
+      creating: "Creating...",
+      // Footer note
+      footerNote: "You can update your shop information later from settings.",
+      // Validation errors
+      nameRequired: "Shop name is required (minimum 2 characters)",
+      aboutRequired: "Shop description is required (minimum 10 characters)",
+      addressRequired: "Business address is required (minimum 5 characters)",
+      tradeLicenseRequired: "Trade license number is required",
+      tradeLicenseDocumentRequired: "Trade license document is required",
+      tinDocumentRequired:
+        "TIN document is required when TIN number is provided",
+      // Language selector
+      englishLabel: "English",
+      bengaliLabel: "বাংলা",
+      // Multi-language info
+      multiLanguageTitle: "Reach More Customers",
+      multiLanguageDescription:
+        "Your shop information will be displayed in both English and Bengali to help customers find and understand your products better. Please fill out the details in both languages for the best reach.",
+      // Language selection
+      selectLanguage: "Select Language to Edit",
+      languageComplete: "Complete",
+      languageIncomplete: "Needs completion",
+      languageProgress: (p: { completed: number; total: number }) =>
+        `${p.completed}/${p.total} languages completed`,
     },
   },
 };

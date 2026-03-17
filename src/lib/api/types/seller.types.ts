@@ -69,6 +69,7 @@ export interface ShopTranslationInput {
  */
 export interface ApplyAsSellerRequest {
   address: string;
+  slug?: string; // Optional - if not provided, will be generated from English shop name
   logoId?: string;
   bannerId?: string;
   translations: ShopTranslationInput[];

@@ -40,6 +40,8 @@ export const dict = {
     shops: "দোকান",
     plants: "গাছপালা",
     cart: "কার্ট",
+    optional: "ঐচ্ছিক",
+    note: "নোট",
     hero: {
       title: "আপনার ডিজিটাল বিশ্বে প্রকৃতিকে নিয়ে আসুন",
       subtitle:
@@ -287,9 +289,82 @@ export const dict = {
       namePlaceholder: "আপনার দোকানের নাম লিখুন",
       descriptionLabel: "দোকানের বিবরণ",
       descriptionPlaceholder: "গ্রাহকদের আপনার দোকান সম্পর্কে জানান",
-      createButton: "দোকান তৈরি করুন",
       created: "দোকান সফলভাবে তৈরি হয়েছে!",
       createFailed: "দোকান তৈরি করতে ব্যর্থ হয়েছে",
+      // Step descriptions for progress bar
+      steps: {
+        basicInfo: "মৌলিক তথ্য",
+        basicInfoDesc: "দোকানের নাম ও বিবরণ",
+        branding: "ব্র্যান্ডিং",
+        brandingDesc: "লোগো ও ব্যানার",
+        businessInfo: "ব্যবসায়িক তথ্য",
+        businessInfoDesc: "ঠিকানা ও লাইসেন্স",
+        verification: "যাচাইকরণ",
+        verificationDesc: "নথি আপলোড করুন",
+      },
+      // Step 1: Basic Info
+      basicInfoTitle: "মৌলিক তথ্য",
+      basicInfoSubtitle: "আপনার দোকান সম্পর্কে আমাদের জানান",
+      aboutLabel: "দোকান সম্পর্কে",
+      aboutPlaceholder: "আপনার দোকানের বর্ণনা দিন",
+      brandStoryLabel: "ব্র্যান্ড স্টোরি",
+      brandStoryPlaceholder: "আপনার ব্র্যান্ড স্টোরি শেয়ার করুন (ঐচ্ছিক)",
+      brandStoryHint: "আপনার ব্র্যান্ড স্টোরি শেয়ার করুন (ঐচ্ছিক)।",
+      aboutHint: "আপনার দোকানের বর্ণনা দিন (সর্বনিম্ন ১০ অক্ষর)।",
+      nameHint: "এটি প্ল্যাটফর্মে আপনার দোকানের নাম হিসেবে প্রদর্শিত হবে।",
+      slugLabel: "দোকানের URL স্লাগ",
+      slugPlaceholder: "আমার-দোকানের-নাম",
+      slugHint:
+        "আপনার দোকানের URL কাস্টমাইজ করুন। দোকানের নাম থেকে স্বয়ংক্রিয়ভাবে তৈরি করতে খালি রাখুন।",
+      // Step 2: Branding
+      brandingTitle: "ব্র্যান্ডিং",
+      brandingSubtitle: "আপনার দোকানের ভিজ্যুয়াল পরিচয় আপলোড করুন",
+      logoLabel: "দোকান লোগো",
+      bannerLabel: "দোকান ব্যানার",
+      // Step 3: Business Info
+      businessInfoTitle: "ব্যবসায়িক তথ্য",
+      businessInfoSubtitle: "আপনার ব্যবসায়িক বিবরণ প্রদান করুন",
+      addressLabel: "ব্যবসায়িক ঠিকানা",
+      addressPlaceholder: "আপনার সম্পূর্ণ ব্যবসায়িক ঠিকানা লিখুন",
+      addressHint: "সম্পূর্ণ ব্যবসায়িক ঠিকানা।",
+      tradeLicenseNumberLabel: "ট্রেড লাইসেন্স নম্বর",
+      tradeLicenseNumberPlaceholder: "আপনার ট্রেড লাইসেন্স নম্বর লিখুন",
+      // Step 4: Verification
+      verificationTitle: "যাচাইকরণ",
+      verificationSubtitle: "যাচাইকরণ নথি আপলোড করুন",
+      tradeLicenseDocumentLabel: "ট্রেড লাইসেন্স নথি",
+      tradeLicenseDocumentDesc: "PDF বা ছবি (সর্বোচ্চ ৫MB) - প্রয়োজনীয়",
+      tinDocumentLabel: "TIN নথি",
+      tinDocumentDesc: "PDF বা ছবি (সর্বোচ্চ ৫MB) - ঐচ্ছিক",
+      utilityBillDocumentLabel: "ইউটিলিটি বিল নথি",
+      utilityBillDocumentDesc: "PDF বা ছবি (সর্বোচ্চ ৫MB) - ঐচ্ছিক",
+      // Navigation
+      previousButton: "পূর্ববর্তী",
+      nextButton: "পরবর্তী",
+      createButton: "দোকান তৈরি করুন",
+      creating: "তৈরি হচ্ছে...",
+      // Footer note
+      footerNote: "আপনি পরে সেটিংস থেকে আপনার দোকানের তথ্য আপডেট করতে পারবেন।",
+      // Validation errors
+      nameRequired: "দোকানের নাম প্রয়োজন (সর্বনিম্ন ২ অক্ষর)",
+      aboutRequired: "দোকানের বিবরণ প্রয়োজন (সর্বনিম্ন ১০ অক্ষর)",
+      addressRequired: "ব্যবসায়িক ঠিকানা প্রয়োজন (সর্বনিম্ন ৫ অক্ষর)",
+      tradeLicenseRequired: "ট্রেড লাইসেন্স নম্বর প্রয়োজন",
+      tradeLicenseDocumentRequired: "ট্রেড লাইসেন্স নথি প্রয়োজন",
+      tinDocumentRequired: "TIN নম্বর প্রদান করলে TIN নথি প্রয়োজন",
+      // Language selector
+      englishLabel: "English",
+      bengaliLabel: "বাংলা",
+      // Multi-language info
+      multiLanguageTitle: "আরও বেশি গ্রাহকের কাছে পৌঁছান",
+      multiLanguageDescription:
+        "আপনার দোকানের তথ্য ইংরেজি এবং বাংলা উভয় ভাষায় প্রদর্শিত হবে যাতে গ্রাহকরা আপনার পণ্য সহজে খুঁজে পেতে এবং বুঝতে পারে। সর্বোত্তম নাগালের জন্য অনুগ্রহ করে উভয় ভাষায় বিবরণ পূরণ করুন।",
+      // Language selection
+      selectLanguage: "সম্পাদনার জন্য ভাষা নির্বাচন করুন",
+      languageComplete: "সম্পন্ন",
+      languageIncomplete: "সম্পাদনা প্রয়োজন",
+      languageProgress: (p: { completed: number; total: number }) =>
+        `${p.completed}/${p.total} ভাষা সম্পন্ন`,
     },
   },
 };
