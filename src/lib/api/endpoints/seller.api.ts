@@ -1,10 +1,9 @@
 import { fetcher } from "../api-client";
 import { ApiError } from "../types";
 import type {
-  BusinessAccount,
-  CreateBusinessAccountRequest,
   Shop,
-  CreateShopRequest,
+  ShopStatus,
+  ApplyAsSellerRequest,
   Plant,
   PlantFilter,
   CreatePlantRequest,
@@ -17,30 +16,6 @@ import type {
  * Refactored to use the functional fetcher with unwrapped responses.
  */
 export const sellerApi = {
-  /**
-   * Business Account management
-   */
-  businessAccount: {
-    /**
-     * Create/Setup a business account
-     */
-    create: async (
-      data: CreateBusinessAccountRequest
-    ): Promise<BusinessAccount> => {
-      return fetcher<BusinessAccount>("/api/v1/user/seller/business-account", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
-    },
-
-    /**
-     * Get current user's business account
-     */
-    get: async (): Promise<BusinessAccount> => {
-      return fetcher<BusinessAccount>("/api/v1/user/seller/business-account");
-    },
-  },
-
   /**
    * Shop management
    */
@@ -61,13 +36,35 @@ export const sellerApi = {
     },
 
     /**
-     * Create a new shop
+     * Get shop status for routing decisions
+     * Returns null if user has no shop (404 handled gracefully)
      */
-    create: async (data: CreateShopRequest): Promise<Shop> => {
-      return fetcher<Shop>("/api/v1/user/seller/shops/apply", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+    getMyShopStatus: async (): Promise<ShopStatus | null> => {
+      try {
+        return await fetcher<ShopStatus>(
+          "/api/v1/user/seller/shops/my-shop/status"
+        );
+      } catch (error: any) {
+        if (error instanceof ApiError && error.statusCode === 404) {
+          return null;
+        }
+        throw error;
+      }
+    },
+
+    /**
+     * Apply to create a new shop (become a seller)
+     */
+    create: async (data: ApplyAsSellerRequest): Promise<Shop> => {
+      try {
+        return await fetcher<Shop>("/api/v1/user/seller/shops/apply", {
+          method: "POST",
+          body: JSON.stringify(data),
+        });
+      } catch (error: any) {
+        // Re-throw to let the caller handle errors (e.g., display toast)
+        throw error;
+      }
     },
 
     /**

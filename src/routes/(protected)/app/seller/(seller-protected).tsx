@@ -3,27 +3,27 @@ import { Show, createEffect, ParentComponent } from "solid-js";
 import { useShop } from "~/lib/context/shop-context";
 
 const SellerProtectedLayout: ParentComponent = (props) => {
-    const { shop, isLoading } = useShop();
+    const { shopStatus, isStatusLoading } = useShop();
     const navigate = useNavigate();
 
     createEffect(() => {
-        const currentShop = shop();
-        const loading = isLoading();
+        const status = shopStatus();
+        const loading = isStatusLoading();
 
         // Wait for loading to complete
         if (loading) return;
 
-        // If no shop exists, redirect to setup
-        if (currentShop === null) {
+        // If no shop exists (status is null), redirect to setup
+        if (status === null) {
             navigate("/app/seller/setup-shop", { replace: true });
             return;
         }
     });
 
-    // Only render content if shop exists and is truthy
-    // This prevents rendering when shop is null or undefined
+    // Only render content if shop status exists and is truthy
+    // This prevents rendering when shop status is null or undefined
     return (
-        <Show when={!isLoading() && shop()}>
+        <Show when={!isStatusLoading() && shopStatus()}>
             {props.children}
         </Show>
     );

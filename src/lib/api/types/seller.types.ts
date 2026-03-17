@@ -1,60 +1,94 @@
 /**
- * Business Account structure (matches backend schema)
+ * Shop Translation structure (matches backend TShopTranslation)
  */
-export interface BusinessAccount {
+export interface ShopTranslation {
   id: string;
-  ownerId: string;
-  name: string;
-  address: string;
-  verificationStatus: 'UNVERIFIED' | 'PENDING' | 'VERIFIED' | 'REJECTED';
-  logoId?: string | null;
-  createdAt: string;
-  updatedAt: string;
-  logo?: {
-    id: string;
-    url: string;
-    mimeType: string;
-    fileName: string;
-    size: number;
-  } | null;
+  shopId: string;
+  locale: string;
+  shopName: string;
+  about: string | null;
+  brandStory: string | null;
+  featuredHighlight: string | null;
 }
 
 /**
- * Setup Business Account Request (matches backend DTO)
+ * Media structure for logo/banner
  */
-export interface CreateBusinessAccountRequest {
-  basicInfo: {
-    name: string;
-    address: string;
-    logoId?: string;
-  };
+export interface MediaAttachment {
+  id: string;
+  url: string;
+  mimeType: string;
+  fileName: string;
+  size: number;
 }
 
 /**
- * Shop structure
+ * Shop structure (matches backend LocalizedShopDetails)
  */
 export interface Shop {
   id: string;
-  businessAccountId: string;
-  name: string;
+  ownerId: string;
   slug: string;
-  description: string | null;
+  address: string | null;
   logoId: string | null;
   bannerId: string | null;
+  status: string;
   createdAt: string;
   updatedAt: string;
+  shopName: string;
+  about: string | null;
+  brandStory: string | null;
+  featuredHighlight: string | null;
+  logo: MediaAttachment | null;
+  banner: MediaAttachment | null;
+  translations: ShopTranslation[];
 }
 
 /**
- * Setup Shop Request
+ * Shop Status for routing decisions (matches backend ShopStatus)
  */
-export interface CreateShopRequest {
-  name: string;
-  slug: string;
-  description?: string;
+export interface ShopStatus {
+  id: string;
+  status: string;
+  hasTranslations: boolean;
+}
+
+/**
+ * Shop Translation Input for creation
+ */
+export interface ShopTranslationInput {
+  locale: string;
+  shopName: string;
+  about: string;
+  brandStory?: string;
+  featuredHighlight?: string;
+}
+
+/**
+ * Apply as Seller Request (matches backend ApplySellerDto)
+ */
+export interface ApplyAsSellerRequest {
+  address: string;
   logoId?: string;
   bannerId?: string;
+  translations: ShopTranslationInput[];
+  tradeLicenseNumber: string;
+  tradeLicenseDocumentId: string; // Required for shop application
+  tinNumber?: string;
+  tinDocumentId?: string;
+  utilityBillDocumentId?: string;
 }
+
+/**
+ * Plant status constants
+ */
+export const PLANT_STATUS = {
+  ACTIVE: "active",
+  INACTIVE: "inactive",
+  OUT_OF_STOCK: "out_of_stock",
+} as const;
+
+export type PlantStatus = (typeof PLANT_STATUS)[keyof typeof PLANT_STATUS];
 
 /**
  * Plant structure
@@ -70,7 +104,7 @@ export interface Plant {
   description: string | null;
   price: number;
   stock: number;
-  status: "active" | "inactive" | "out_of_stock";
+  status: PlantStatus;
   createdAt: string;
   updatedAt: string;
 }
