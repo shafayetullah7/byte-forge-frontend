@@ -1,5 +1,5 @@
 import { createSignal, createEffect, Show, For, ParentComponent } from "solid-js";
-import { useNavigate, action, useSubmission, type RouteDefinition } from "@solidjs/router";
+import { useNavigate, action, useSubmission, type RouteDefinition, redirect } from "@solidjs/router";
 import { Button, ImageUpload } from "~/components/ui";
 import { ValidatedInput } from "~/components/seller";
 import { getShop, useShop } from "~/lib/context/shop-context";
@@ -19,10 +19,14 @@ export const route = {
 
 /**
  * Apply as Seller Action
+ * Uses single-flight mutation pattern with automatic query revalidation
  */
 const applyAsSellerAction = action(async (formData: ApplyAsSellerRequest) => {
     "use server";
-    return await sellerApi.shops.create(formData);
+    await sellerApi.shops.create(formData);
+    // Revalidate shop query and redirect in a single flight
+    // This ensures the updated shop data is fetched immediately
+    throw redirect("/app/seller/shops", { revalidate: getShop.key });
 }, "apply-as-seller");
 
 /**
