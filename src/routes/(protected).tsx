@@ -1,6 +1,6 @@
 import { useNavigate } from "@solidjs/router";
 
-import { BusinessAccountProvider } from "~/lib/context/business-account-context";
+import { ShopProvider } from "~/lib/context/shop-context";
 import { Show, createEffect, ParentComponent, ErrorBoundary } from "solid-js";
 import { useSession } from "~/lib/auth";
 import { requireVerifiedEmail } from "~/lib/auth/guards";
@@ -91,7 +91,7 @@ const ProtectedLayout: ParentComponent = (props) => {
             }}
         >
             <Show when={user() !== null} fallback={null}>
-                <BusinessAccountProvider>{props.children}</BusinessAccountProvider>
+                <ShopProvider>{props.children}</ShopProvider>
             </Show>
         </ErrorBoundary>
     );

@@ -1,4 +1,5 @@
 import { fetcher } from "../api-client";
+import { ApiError } from "../types";
 import type {
   BusinessAccount,
   CreateBusinessAccountRequest,
@@ -12,7 +13,7 @@ import type {
 
 /**
  * Seller API endpoints
- * 
+ *
  * Refactored to use the functional fetcher with unwrapped responses.
  */
 export const sellerApi = {
@@ -23,7 +24,9 @@ export const sellerApi = {
     /**
      * Create/Setup a business account
      */
-    create: async (data: CreateBusinessAccountRequest): Promise<BusinessAccount> => {
+    create: async (
+      data: CreateBusinessAccountRequest
+    ): Promise<BusinessAccount> => {
       return fetcher<BusinessAccount>("/api/v1/user/seller/business-account", {
         method: "POST",
         body: JSON.stringify(data),
@@ -43,10 +46,25 @@ export const sellerApi = {
    */
   shops: {
     /**
+     * Get current user's shop
+     * Returns null if user has no shop (404 handled gracefully)
+     */
+    getMyShop: async (): Promise<Shop | null> => {
+      try {
+        return await fetcher<Shop>("/api/v1/user/seller/shops/my-shop");
+      } catch (error: any) {
+        if (error instanceof ApiError && error.statusCode === 404) {
+          return null;
+        }
+        throw error;
+      }
+    },
+
+    /**
      * Create a new shop
      */
     create: async (data: CreateShopRequest): Promise<Shop> => {
-      return fetcher<Shop>("/api/v1/user/seller/shops", {
+      return fetcher<Shop>("/api/v1/user/seller/shops/apply", {
         method: "POST",
         body: JSON.stringify(data),
       });

@@ -8,7 +8,7 @@ export const dict = {
     theme: {
       light: "Light",
       dark: "Dark",
-      system: "System"
+      system: "System",
     },
     signIn: "Sign In",
     signUp: "Sign Up",
@@ -42,7 +42,8 @@ export const dict = {
     cart: "Cart",
     hero: {
       title: "Cultivate Your Digital Sanctuary",
-      subtitle: "Discover the rarest indoor plants or open your own nursery in minutes.",
+      subtitle:
+        "Discover the rarest indoor plants or open your own nursery in minutes.",
       shopNow: "Shop Plants",
       learnMore: "Learn More",
     },
@@ -75,7 +76,8 @@ export const dict = {
       lastNamePlaceholder: "Doe",
       userNameLabel: "Username",
       userNamePlaceholder: "johndoe_123",
-      userNameHint: "Lowercase English letters, numbers, and underscores only (max 16 characters).",
+      userNameHint:
+        "Lowercase English letters, numbers, and underscores only (max 16 characters).",
       emailLabel: "Email",
       emailPlaceholder: "you@example.com",
       passwordLabel: "Password",
@@ -101,25 +103,25 @@ export const dict = {
       special: "One special character",
     },
     forgotPassword: {
-        title: "Forgot Password",
-        subtitle: "Enter your email to receive a reset code.",
-        submit: "Send Reset Code",
-        submitting: "Sending...",
-        backToLogin: "Back to Sign In",
-        success: "Reset code sent!",
+      title: "Forgot Password",
+      subtitle: "Enter your email to receive a reset code.",
+      submit: "Send Reset Code",
+      submitting: "Sending...",
+      backToLogin: "Back to Sign In",
+      success: "Reset code sent!",
     },
     resetPassword: {
-        title: "Reset Password",
-        subtitle: "Enter your new password.",
-        newPasswordLabel: "New Password",
-        confirmPasswordLabel: "Confirm Password",
-        submit: "Reset Password",
-        submitting: "Resetting...",
-        success: "Password reset successfully!",
-        sessionExpired: "Session Expired",
-        sessionExpiresIn: "Session expires in",
-        sessionTimeout: "Your session has timed out. Please request a new code.",
-        startOver: "Start Over",
+      title: "Reset Password",
+      subtitle: "Enter your new password.",
+      newPasswordLabel: "New Password",
+      confirmPasswordLabel: "Confirm Password",
+      submit: "Reset Password",
+      submitting: "Resetting...",
+      success: "Password reset successfully!",
+      sessionExpired: "Session Expired",
+      sessionExpiresIn: "Session expires in",
+      sessionTimeout: "Your session has timed out. Please request a new code.",
+      startOver: "Start Over",
     },
     verifyAccount: {
       title: "Verify Your Account",
@@ -168,7 +170,8 @@ export const dict = {
       lastNameAlpha: "Last name must contain only letters",
       userNameMin: "Username must be at least 3 characters",
       userNameMax: "Username must be 16 characters or less",
-      userNameRegex: "Username must contain only lowercase English letters, numbers, and underscores",
+      userNameRegex:
+        "Username must contain only lowercase English letters, numbers, and underscores",
       confirmPasswordRequired: "Please confirm your password",
       agreeToTermsRequired: "You must agree to the terms and conditions",
       otpLength: "Code must be exactly 6 digits",
@@ -217,7 +220,8 @@ export const dict = {
       subtitle: "Track and manage your purchases",
       empty: {
         title: "No orders yet",
-        description: "Looks like you haven't made any purchases yet. Start shopping to fill your sanctuary!",
+        description:
+          "Looks like you haven't made any purchases yet. Start shopping to fill your sanctuary!",
         action: "Browse Plants",
       },
       details: {
@@ -252,7 +256,8 @@ export const dict = {
       comingSoon: "Edit Profile and Change Password features coming soon",
       securityTip: {
         title: "Security Tip",
-        message: "Keep your account secure by using a strong password and enabling two-factor authentication.",
+        message:
+          "Keep your account secure by using a strong password and enabling two-factor authentication.",
       },
     },
     favorites: {
@@ -262,7 +267,8 @@ export const dict = {
   seller: {
     businessAccount: {
       setupTitle: "Setup Your Business Account",
-      setupDescription: "Before you can create shops and sell products, you need to setup your business account.",
+      setupDescription:
+        "Before you can create shops and sell products, you need to setup your business account.",
       nameLabel: "Business Name",
       namePlaceholder: "Enter your business name",
       addressLabel: "Business Address",
@@ -270,6 +276,18 @@ export const dict = {
       createButton: "Create Business Account",
       created: "Business account created successfully!",
       createFailed: "Failed to create business account",
+    },
+    shop: {
+      setupTitle: "Setup Your Shop",
+      setupDescription:
+        "Create your shop to start selling products on ByteForge.",
+      nameLabel: "Shop Name",
+      namePlaceholder: "Enter your shop name",
+      descriptionLabel: "Shop Description",
+      descriptionPlaceholder: "Tell customers about your shop",
+      createButton: "Create Shop",
+      created: "Shop created successfully!",
+      createFailed: "Failed to create shop",
     },
   },
 };
