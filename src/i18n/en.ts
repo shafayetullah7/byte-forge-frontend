@@ -354,11 +354,29 @@ export const dict = {
       // Language selector
       englishLabel: "English",
       bengaliLabel: "বাংলা",
-      // Multi-language info
+      // Redesigned UX - Section headers
+      shopIdentityTitle: "Your Shop Identity",
+      shopIdentityDescription:
+        "This information identifies your shop on the platform.",
+      customerFacingTitle: "What Customers Will See",
+      customerFacingDescription:
+        "Your shop will be displayed to customers in both English and Bengali. Fill out how your shop appears in each language.",
+      // Slug field
+      slugSectionTitle: "Shop URL",
+      slugIdentityHint:
+        "This is your shop's unique web address. It's auto-created from your English shop name, but you can customize it. This URL is the same for all languages.",
+      // Language column headers
+      englishColumnHeader: "For English-speaking customers",
+      bengaliColumnHeader: "For Bengali-speaking customers",
+      // Validation
+      bothLanguagesRequired: "Both languages are required to continue",
+      missingInEnglish: "Missing in English",
+      missingInBengali: "Missing in Bengali",
+      // Multi-language info (legacy - keeping for backward compatibility)
       multiLanguageTitle: "Reach More Customers",
       multiLanguageDescription:
         "Your shop information will be displayed in both English and Bengali to help customers find and understand your products better. Please fill out the details in both languages for the best reach.",
-      // Language selection
+      // Language selection (legacy - keeping for backward compatibility)
       selectLanguage: "Select Language to Edit",
       languageComplete: "Complete",
       languageIncomplete: "Needs completion",

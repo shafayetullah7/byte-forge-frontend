@@ -355,11 +355,29 @@ export const dict = {
       // Language selector
       englishLabel: "English",
       bengaliLabel: "বাংলা",
-      // Multi-language info
+      // Redesigned UX - Section headers
+      shopIdentityTitle: "আপনার দোকানের পরিচয়",
+      shopIdentityDescription:
+        "এই তথ্য প্ল্যাটফর্মে আপনার দোকানকে পরিচয় করিয়ে দেয়।",
+      customerFacingTitle: "গ্রাহকরা যা দেখতে পাবেন",
+      customerFacingDescription:
+        "আপনার দোকান ইংরেজি এবং বাংলা উভয় ভাষায় গ্রাহকদের কাছে প্রদর্শিত হবে। প্রতিটি ভাষায় আপনার দোকান কীভাবে দেখাবে তা পূরণ করুন।",
+      // Slug field
+      slugSectionTitle: "দোকানের URL",
+      slugIdentityHint:
+        "এটি আপনার দোকানের অনন্য ওয়েব ঠিকানা। এটি আপনার ইংরেজি দোকানের নাম থেকে স্বয়ংক্রিয়ভাবে তৈরি হয়, কিন্তু আপনি এটি কাস্টমাইজ করতে পারেন। এই URL সকল ভাষার জন্য একই।",
+      // Language column headers
+      englishColumnHeader: "ইংরেজি ভাষী গ্রাহকদের জন্য",
+      bengaliColumnHeader: "বাংলা ভাষী গ্রাহকদের জন্য",
+      // Validation
+      bothLanguagesRequired: "চালিয়ে যাওয়ার জন্য উভয় ভাষা প্রয়োজন",
+      missingInEnglish: "ইংরেজিতে অনুপস্থিত",
+      missingInBengali: "বাংলায় অনুপস্থিত",
+      // Multi-language info (legacy - keeping for backward compatibility)
       multiLanguageTitle: "আরও বেশি গ্রাহকের কাছে পৌঁছান",
       multiLanguageDescription:
         "আপনার দোকানের তথ্য ইংরেজি এবং বাংলা উভয় ভাষায় প্রদর্শিত হবে যাতে গ্রাহকরা আপনার পণ্য সহজে খুঁজে পেতে এবং বুঝতে পারে। সর্বোত্তম নাগালের জন্য অনুগ্রহ করে উভয় ভাষায় বিবরণ পূরণ করুন।",
-      // Language selection
+      // Language selection (legacy - keeping for backward compatibility)
       selectLanguage: "সম্পাদনার জন্য ভাষা নির্বাচন করুন",
       languageComplete: "সম্পন্ন",
       languageIncomplete: "সম্পাদনা প্রয়োজন",
