@@ -1,9 +1,6 @@
 import { Component } from "solid-js";
 import { useI18n } from "~/i18n";
 import { PageHeader } from "~/components/layout/PageHeader";
-import { EmptyState } from "~/components/layout/EmptyState";
-import { A } from "@solidjs/router";
-import { Squares2x2Icon } from "~/components/icons";
 
 const SellerDashboard: Component = () => {
     const { t } = useI18n();
@@ -31,19 +28,21 @@ const SellerDashboard: Component = () => {
                 </div>
             </div>
 
-            <EmptyState
-                title="No shops created yet"
-                description="Start your journey by creating your first plant nursery."
-                icon={<Squares2x2Icon class="w-12 h-12 text-forest-300" />}
-                action={
-                    <A
-                        href="/app/seller/shops/new"
-                        class="px-4 py-2 bg-forest-600 dark:bg-sage-600 text-white rounded-lg hover:bg-forest-700 dark:hover:bg-sage-700 transition-colors font-medium"
-                    >
-                        Create New Shop
-                    </A>
-                }
-            />
+            {/* Empty State - Inline HTML instead of EmptyState component */}
+            <div class="flex flex-col items-center justify-center py-12 px-4 text-center">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">
+                    No shops created yet
+                </h3>
+                <p class="text-gray-500 dark:text-gray-400 max-w-sm mb-6">
+                    Start your journey by creating your first plant nursery.
+                </p>
+                <a
+                    href="/app/seller/shops/new"
+                    class="px-4 py-2 bg-forest-600 dark:bg-sage-600 text-white rounded-lg hover:bg-forest-700 dark:hover:bg-sage-700 transition-colors font-medium"
+                >
+                    Create New Shop
+                </a>
+            </div>
         </div>
     );
 };

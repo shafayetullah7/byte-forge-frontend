@@ -1,10 +1,10 @@
-import { createSignal, createEffect, Show, For, ParentComponent } from "solid-js";
+import { createSignal, createEffect, Show, For, ParentComponent, Suspense } from "solid-js";
 import { createStore } from "solid-js/store";
 import { slugify } from "~/lib/utils/slugify";
-import { useNavigate, action, useSubmission, useAction, type RouteDefinition, redirect } from "@solidjs/router";
+import { useNavigate, action, useSubmission, useAction, createAsync, type RouteDefinition, redirect } from "@solidjs/router";
 import { Button, ImageUpload, Card, SegmentedControl } from "~/components/ui";
 import { ValidatedInput } from "~/components/seller";
-import { getShop, useShop } from "~/lib/context/shop-context";
+import { getShop } from "~/lib/context/shop-context";
 import { toaster } from "~/components/ui/Toast";
 import { useI18n } from "~/i18n";
 import { useImageUpload } from "~/lib/hooks/useImageUpload";
@@ -107,7 +107,7 @@ const AVAILABLE_LOCALES: Locale[] = ["en", "bn"];
 export default function SetupShop() {
     const navigate = useNavigate();
     const { t, locale, setLocale } = useI18n();
-    const { shop, isLoading } = useShop();
+    const shop = createAsync(() => getShop());
     const applyTrigger = useAction(applyAsSellerAction);
     const submission = useSubmission(applyAsSellerAction);
 
@@ -352,7 +352,7 @@ export default function SetupShop() {
     };
 
     return (
-        <Show when={!isLoading()} fallback={<div class="flex justify-center py-20">{t("common.loading")}</div>}>
+        <Suspense fallback={<div class="flex justify-center py-20">{t("common.loading")}</div>}>
             <div class="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
                 <div class="max-w-3xl w-full space-y-8">
                     {/* Header */}
@@ -801,6 +801,6 @@ export default function SetupShop() {
                     </div>
                 </div>
             </div>
-        </Show>
+        </Suspense>
     );
 }

@@ -3,7 +3,6 @@ import { A } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import { PageHeader } from "~/components/layout/PageHeader";
 import { StatusBadge } from "~/components/ui/StatusBadge";
-import { EmptyState } from "~/components/layout/EmptyState";
 
 // Mock data (replace with API later)
 const MOCK_ORDERS = [
@@ -97,19 +96,19 @@ const Orders: Component = () => {
                         </For>
                     </div>
                 ) : (
-                    <div class="mt-12">
-                        <EmptyState
-                            title={t("buyer.orders.empty.title")}
-                            description={t("buyer.orders.empty.description")}
-                            action={
-                                <A
-                                    href="/plants"
-                                    class="px-6 py-3 bg-forest-600 dark:bg-sage-600 text-white rounded-lg hover:bg-forest-700 dark:hover:bg-sage-700 transition-colors font-medium"
-                                >
-                                    {t("buyer.orders.empty.action")}
-                                </A>
-                            }
-                        />
+                    <div class="flex flex-col items-center justify-center py-12 px-4 text-center">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">
+                            {t("buyer.orders.empty.title")}
+                        </h3>
+                        <p class="text-gray-500 dark:text-gray-400 max-w-sm mb-6">
+                            {t("buyer.orders.empty.description")}
+                        </p>
+                        <A
+                            href="/plants"
+                            class="px-6 py-3 bg-forest-600 dark:bg-sage-600 text-white rounded-lg hover:bg-forest-700 dark:hover:bg-sage-700 transition-colors font-medium"
+                        >
+                            {t("buyer.orders.empty.action")}
+                        </A>
                     </div>
                 )}
             </div>
