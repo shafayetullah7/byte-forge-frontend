@@ -24,21 +24,20 @@ export const Sidebar: Component<SidebarProps> = (props) => {
     const location = useLocation();
 
     const isActive = (path: string) => {
-        // Exact match for root, startsWith for others
         if (path === "/app") return location.pathname === "/app";
         return location.pathname.startsWith(path);
     };
 
     const getActiveStyles = () => {
         if (props.config.brandColor === "terracotta") {
-            return "bg-terracotta-50 dark:bg-terracotta-900/40 text-terracotta-700 dark:text-terracotta-300";
+            return "bg-terracotta-100 dark:bg-terracotta-900/40 border-l-4 border-terracotta-500 text-terracotta-800 dark:text-terracotta-300";
         }
-        return "bg-forest-50 dark:bg-forest-900/40 text-forest-700 dark:text-sage-400";
+        return "bg-forest-100 dark:bg-forest-900/40 border-l-4 border-forest-500 text-forest-800 dark:text-sage-400";
     };
 
     const getActiveIconStyles = () => {
         if (props.config.brandColor === "terracotta") {
-            return "text-terracotta-600";
+            return "text-terracotta-600 dark:text-terracotta-400";
         }
         return "text-forest-600 dark:text-sage-500";
     };
@@ -46,16 +45,16 @@ export const Sidebar: Component<SidebarProps> = (props) => {
     const NavItem = (itemProps: NavLink) => (
         <A
             href={itemProps.href}
-            class={`group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors mb-1 ${isActive(itemProps.href)
+            class={`group flex items-center px-3 py-2.5 body-small font-semibold rounded-lg transition-standard mb-1 ${isActive(itemProps.href)
                 ? getActiveStyles()
-                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-forest-700"
+                : "text-forest-700/80 dark:text-cream-100/80 hover:bg-forest-50 dark:hover:bg-forest-900/30 hover:text-forest-800 dark:hover:text-cream-100"
                 }`}
             onClick={props.onClose}
         >
             <itemProps.icon
-                class={`mr-3 flex-shrink-0 h-5 w-5 ${isActive(itemProps.href)
+                class={`mr-3 flex-shrink-0 h-5 w-5 transition-colors ${isActive(itemProps.href)
                     ? getActiveIconStyles()
-                    : "text-gray-400 group-hover:text-gray-500"
+                    : "text-forest-600/60 dark:text-forest-400/60 group-hover:text-forest-600 dark:group-hover:text-forest-400"
                     }`}
             />
             {itemProps.label}
@@ -67,22 +66,22 @@ export const Sidebar: Component<SidebarProps> = (props) => {
             {/* Mobile Backdrop */}
             <Show when={props.isOpen}>
                 <div
-                    class="fixed inset-0 z-40 bg-gray-600 bg-opacity-75 md:hidden"
+                    class="fixed inset-0 z-40 bg-forest-900/60 backdrop-blur-sm md:hidden"
                     onClick={props.onClose}
                 ></div>
             </Show>
 
             {/* Sidebar Container */}
             <div
-                class={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-forest-800 border-r border-gray-200 dark:border-forest-700 transform transition-transform duration-300 ease-in-out md:translate-x-0 md:relative md:inset-0 ${props.isOpen ? "translate-x-0" : "-translate-x-full"
+                class={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-forest-800 border-r border-cream-200 dark:border-forest-700 transform transition-transform duration-300 ease-in-out md:translate-x-0 md:relative md:inset-0 ${props.isOpen ? "translate-x-0" : "-translate-x-full"
                     }`}
             >
                 <div class="h-full flex flex-col">
                     {/* Logo Area */}
-                    <div class="flex items-center h-16 flex-shrink-0 px-4 border-b border-gray-200 dark:border-forest-700">
+                    <div class="flex items-center h-16 flex-shrink-0 px-4 border-b border-cream-200 dark:border-forest-700">
                         <A
                             href="/"
-                            class="text-xl font-bold text-forest-800 dark:text-sage-400 flex items-center gap-2"
+                            class="text-xl font-bold text-forest-800 dark:text-sage-400 flex items-center gap-2 hover:text-forest-700 dark:hover:text-sage-300 transition-standard"
                         >
                             GreenHaven
                             <span class="w-2 h-2 bg-forest-500 rounded-full"></span>
@@ -93,7 +92,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
                     <div class="flex-1 flex flex-col overflow-y-auto pt-5 pb-4 px-3">
                         <nav class="flex-1 space-y-1">
                             {/* Workspace Title */}
-                            <div class="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                            <div class="px-3 mb-3 body-small font-semibold text-forest-700/60 dark:text-cream-100/50 uppercase tracking-wider">
                                 {props.config.workspaceTitle}
                             </div>
 

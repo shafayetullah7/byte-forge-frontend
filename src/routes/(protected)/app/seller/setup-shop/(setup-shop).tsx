@@ -84,13 +84,13 @@ const StepProgress: ParentComponent<StepProgressProps> = (props) => (
                             )}
                         </div>
                         <div class="mt-2 text-center">
-                            <p class={`text-sm font-medium ${props.currentStep >= step.id
-                                ? "text-gray-900 dark:text-white"
+                            <p class={`body-small font-medium ${props.currentStep >= step.id
+                                ? "text-forest-800 dark:text-cream-50"
                                 : "text-forest-700/60 dark:text-cream-100/60"
                                 }`}>
                                 {props.t(step.title)}
                             </p>
-                            <p class="text-xs text-forest-700/60 dark:text-cream-100/60 hidden sm:block">
+                            <p class="body-small text-forest-700/60 dark:text-cream-100/60 hidden sm:block">
                                 {props.t(step.description)}
                             </p>
                         </div>
@@ -357,16 +357,16 @@ export default function SetupShop() {
                 <div class="max-w-3xl w-full space-y-8">
                     {/* Header */}
                     <div class="text-center">
-                        <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-3">
+                        <h1 class="h1 mb-3">
                             {t("seller.shop.setupTitle")}
                         </h1>
-                        <p class="text-lg text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
+                        <p class="body-base text-forest-700/70 dark:text-gray-400 max-w-xl mx-auto">
                             {t("seller.shop.setupDescription")}
                         </p>
                     </div>
 
                     {/* Form Card */}
-                    <div class="bg-white dark:bg-forest-800 rounded-2xl shadow-lg border border-gray-200 dark:border-forest-700 overflow-hidden">
+                    <div class="flat-card bg-white dark:bg-forest-800 overflow-hidden">
                         <div class="px-8 py-10">
                             {/* Progress Bar */}
                             <StepProgress currentStep={currentStep()} t={t} />
@@ -378,10 +378,10 @@ export default function SetupShop() {
                                         {/* Section 1: Shop Identity */}
                                         <div class="space-y-4">
                                             <div>
-                                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                                                <h3 class="h5 mb-1">
                                                     {t("seller.shop.shopIdentityTitle")}
                                                 </h3>
-                                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                                <p class="body-small text-forest-700/70 dark:text-gray-400">
                                                     {t("seller.shop.shopIdentityDescription")}
                                                 </p>
                                             </div>
@@ -389,12 +389,12 @@ export default function SetupShop() {
                                             {/* Shop Slug (URL) - Global Identity Field */}
                                             <Card variant="tinted" class="p-4">
                                                 <div>
-                                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                    <label class="block h6 text-gray-700 dark:text-gray-300 mb-2">
                                                         {t("seller.shop.slugSectionTitle")}
                                                         <span class="text-gray-400 ml-1">({t("common.optional")})</span>
                                                     </label>
                                                     <div class="flex rounded-lg shadow-sm">
-                                                        <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 dark:border-forest-600 bg-gray-50 dark:bg-forest-800 text-gray-500 dark:text-gray-400 text-sm">
+                                                        <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-cream-200 dark:border-forest-600 bg-cream-50 dark:bg-forest-800 text-forest-700/70 dark:text-gray-400 body-small">
                                                             byteforge.com/shop/
                                                         </span>
                                                         <input
@@ -405,10 +405,10 @@ export default function SetupShop() {
                                                                 setIsSlugManual(true);
                                                             }}
                                                             placeholder={t("seller.shop.slugPlaceholder")}
-                                                            class="flex-1 min-w-0 block w-full px-3 py-2 rounded-r-lg border border-gray-300 dark:border-forest-600 bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors sm:text-sm"
+                                                            class="flex-1 min-w-0 block w-full px-3 py-2 rounded-r-lg border border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors body-small"
                                                         />
                                                     </div>
-                                                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                                    <p class="mt-2 body-small text-forest-700/70 dark:text-gray-400">
                                                         💡 {t("seller.shop.slugIdentityHint")}
                                                     </p>
                                                 </div>
@@ -418,10 +418,10 @@ export default function SetupShop() {
                                         {/* Section 2: Customer-Facing Content */}
                                         <div class="space-y-4">
                                             <div>
-                                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                                                <h3 class="h5 mb-1">
                                                     {t("seller.shop.customerFacingTitle")}
                                                 </h3>
-                                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                                <p class="body-small text-forest-700/70 dark:text-gray-400">
                                                     {t("seller.shop.customerFacingDescription")}
                                                 </p>
                                             </div>
@@ -438,10 +438,10 @@ export default function SetupShop() {
                                                     <div class="flex items-center gap-2 mb-4">
                                                         <span class="text-2xl">🇬🇧</span>
                                                         <div>
-                                                            <h4 class="font-semibold text-gray-900 dark:text-white">
+                                                            <h4 class="h6">
                                                                 {t("seller.shop.englishLabel")}
                                                             </h4>
-                                                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                                            <p class="body-small text-forest-700/70 dark:text-gray-400">
                                                                 {t("seller.shop.englishColumnHeader")}
                                                             </p>
                                                         </div>
@@ -459,7 +459,7 @@ export default function SetupShop() {
 
                                                     {/* English Shop Name */}
                                                     <div>
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                        <label class="block h6 mb-1">
                                                             {t("seller.shop.nameLabel")}
                                                             <span class="text-red-500 ml-1">*</span>
                                                         </label>
@@ -468,19 +468,19 @@ export default function SetupShop() {
                                                             value={translations.en.shopName}
                                                             onInput={(e) => setTranslations("en", "shopName", (e.target as HTMLInputElement).value)}
                                                             placeholder={t("seller.shop.namePlaceholder")}
-                                                            class={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors text-sm ${errors().shopName
+                                                            class={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors body-small ${errors().shopName
                                                                 ? "border-red-500 dark:border-red-400"
-                                                                : "border-gray-300 dark:border-forest-600"
+                                                                : "border-cream-200 dark:border-forest-600"
                                                                 }`}
                                                         />
                                                         <Show when={errors().shopName}>
-                                                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{errors().shopName}</p>
+                                                            <p class="mt-1 body-small text-red-600 dark:text-red-400">{errors().shopName}</p>
                                                         </Show>
                                                     </div>
 
                                                     {/* English About */}
                                                     <div>
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                        <label class="block h6 mb-1">
                                                             {t("seller.shop.aboutLabel")}
                                                             <span class="text-red-500 ml-1">*</span>
                                                         </label>
@@ -488,20 +488,20 @@ export default function SetupShop() {
                                                             value={translations.en.about}
                                                             onInput={(e) => setTranslations("en", "about", (e.target as HTMLTextAreaElement).value)}
                                                             placeholder={t("seller.shop.aboutPlaceholder")}
-                                                            class={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors resize-none text-sm ${errors().about
+                                                            class={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors resize-none body-small ${errors().about
                                                                 ? "border-red-500 dark:border-red-400"
-                                                                : "border-gray-300 dark:border-forest-600"
+                                                                : "border-cream-200 dark:border-forest-600"
                                                                 }`}
                                                             rows={4}
                                                         />
                                                         <Show when={errors().about}>
-                                                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{errors().about}</p>
+                                                            <p class="mt-1 body-small text-red-600 dark:text-red-400">{errors().about}</p>
                                                         </Show>
                                                     </div>
 
                                                     {/* English Brand Story */}
                                                     <div>
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                        <label class="block h6 mb-1">
                                                             {t("seller.shop.brandStoryLabel")}
                                                             <span class="text-gray-400 ml-1">({t("common.optional")})</span>
                                                         </label>
@@ -509,7 +509,7 @@ export default function SetupShop() {
                                                             value={translations.en.brandStory}
                                                             onInput={(e) => setTranslations("en", "brandStory", (e.target as HTMLTextAreaElement).value)}
                                                             placeholder={t("seller.shop.brandStoryPlaceholder")}
-                                                            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-forest-600 bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors resize-none text-sm"
+                                                            class="w-full px-3 py-2 rounded-lg border border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors resize-none body-small"
                                                             rows={3}
                                                         />
                                                     </div>
@@ -525,10 +525,10 @@ export default function SetupShop() {
                                                     <div class="flex items-center gap-2 mb-4">
                                                         <span class="text-2xl">🇧🇩</span>
                                                         <div>
-                                                            <h4 class="font-semibold text-gray-900 dark:text-white">
+                                                            <h4 class="h6">
                                                                 {t("seller.shop.bengaliLabel")}
                                                             </h4>
-                                                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                                            <p class="body-small text-forest-700/70 dark:text-gray-400">
                                                                 {t("seller.shop.bengaliColumnHeader")}
                                                             </p>
                                                         </div>
@@ -546,7 +546,7 @@ export default function SetupShop() {
 
                                                     {/* Bengali Shop Name */}
                                                     <div>
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                        <label class="block h6 mb-1">
                                                             {t("seller.shop.nameLabel")}
                                                             <span class="text-red-500 ml-1">*</span>
                                                         </label>
@@ -555,20 +555,20 @@ export default function SetupShop() {
                                                             value={translations.bn.shopName}
                                                             onInput={(e) => setTranslations("bn", "shopName", (e.target as HTMLInputElement).value)}
                                                             placeholder={t("seller.shop.namePlaceholder")}
-                                                            class={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors text-sm ${errors().shopName
+                                                            class={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors body-small ${errors().shopName
                                                                 ? "border-red-500 dark:border-red-400"
-                                                                : "border-gray-300 dark:border-forest-600"
+                                                                : "border-cream-200 dark:border-forest-600"
                                                                 }`}
                                                             dir="auto"
                                                         />
                                                         <Show when={errors().shopName}>
-                                                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{errors().shopName}</p>
+                                                            <p class="mt-1 body-small text-red-600 dark:text-red-400">{errors().shopName}</p>
                                                         </Show>
                                                     </div>
 
                                                     {/* Bengali About */}
                                                     <div>
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                        <label class="block h6 mb-1">
                                                             {t("seller.shop.aboutLabel")}
                                                             <span class="text-red-500 ml-1">*</span>
                                                         </label>
@@ -576,21 +576,21 @@ export default function SetupShop() {
                                                             value={translations.bn.about}
                                                             onInput={(e) => setTranslations("bn", "about", (e.target as HTMLTextAreaElement).value)}
                                                             placeholder={t("seller.shop.aboutPlaceholder")}
-                                                            class={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors resize-none text-sm ${errors().about
+                                                            class={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors resize-none body-small ${errors().about
                                                                 ? "border-red-500 dark:border-red-400"
-                                                                : "border-gray-300 dark:border-forest-600"
+                                                                : "border-cream-200 dark:border-forest-600"
                                                                 }`}
                                                             rows={4}
                                                             dir="auto"
                                                         />
                                                         <Show when={errors().about}>
-                                                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{errors().about}</p>
+                                                            <p class="mt-1 body-small text-red-600 dark:text-red-400">{errors().about}</p>
                                                         </Show>
                                                     </div>
 
                                                     {/* Bengali Brand Story */}
                                                     <div>
-                                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                        <label class="block h6 mb-1">
                                                             {t("seller.shop.brandStoryLabel")}
                                                             <span class="text-gray-400 ml-1">({t("common.optional")})</span>
                                                         </label>
@@ -598,7 +598,7 @@ export default function SetupShop() {
                                                             value={translations.bn.brandStory}
                                                             onInput={(e) => setTranslations("bn", "brandStory", (e.target as HTMLTextAreaElement).value)}
                                                             placeholder={t("seller.shop.brandStoryPlaceholder")}
-                                                            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-forest-600 bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors resize-none text-sm"
+                                                            class="w-full px-3 py-2 rounded-lg border border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors resize-none body-small"
                                                             rows={3}
                                                             dir="auto"
                                                         />
@@ -613,10 +613,10 @@ export default function SetupShop() {
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                                     </svg>
                                                     <div>
-                                                        <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                                                        <p class="h6 text-amber-800 dark:text-amber-300">
                                                             {t("seller.shop.bothLanguagesRequired")}
                                                         </p>
-                                                        <p class="text-xs text-amber-700 dark:text-amber-400 mt-1">
+                                                        <p class="body-small text-amber-700 dark:text-amber-400 mt-1">
                                                             {t("seller.shop.multiLanguageDescription")}
                                                         </p>
                                                     </div>
@@ -630,10 +630,10 @@ export default function SetupShop() {
                                 <Show when={currentStep() === 2}>
                                     <div class="space-y-6">
                                         <div class="text-center mb-6">
-                                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                                            <h2 class="h1">
                                                 {t("seller.shop.brandingTitle")}
                                             </h2>
-                                            <p class="text-gray-600 dark:text-gray-400">
+                                            <p class="body-base text-forest-700/70 dark:text-gray-400">
                                                 {t("seller.shop.brandingSubtitle")}
                                             </p>
                                         </div>
@@ -666,10 +666,10 @@ export default function SetupShop() {
                                 <Show when={currentStep() === 3}>
                                     <div class="space-y-6">
                                         <div class="text-center mb-6">
-                                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                                            <h2 class="h1">
                                                 {t("seller.shop.businessInfoTitle")}
                                             </h2>
-                                            <p class="text-gray-600 dark:text-gray-400">
+                                            <p class="body-base text-forest-700/70 dark:text-gray-400">
                                                 {t("seller.shop.businessInfoSubtitle")}
                                             </p>
                                         </div>
@@ -705,10 +705,10 @@ export default function SetupShop() {
                                 <Show when={currentStep() === 4}>
                                     <div class="space-y-6">
                                         <div class="text-center mb-6">
-                                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                                            <h2 class="h1">
                                                 {t("seller.shop.verificationTitle")}
                                             </h2>
-                                            <p class="text-gray-600 dark:text-gray-400">
+                                            <p class="body-base text-forest-700/70 dark:text-gray-400">
                                                 {t("seller.shop.verificationSubtitle")}
                                             </p>
                                         </div>
@@ -725,7 +725,7 @@ export default function SetupShop() {
                                                 description={t("seller.shop.tradeLicenseDocumentDesc")}
                                             />
                                             {docErrors().tradeLicense && (
-                                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{docErrors().tradeLicense}</p>
+                                                <p class="mt-1 body-small text-red-600 dark:text-red-400">{docErrors().tradeLicense}</p>
                                             )}
                                         </div>
 
@@ -741,7 +741,7 @@ export default function SetupShop() {
                                                 description={t("seller.shop.tinDocumentDesc")}
                                             />
                                             {docErrors().tin && (
-                                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{docErrors().tin}</p>
+                                                <p class="mt-1 body-small text-red-600 dark:text-red-400">{docErrors().tin}</p>
                                             )}
                                         </div>
 
@@ -759,7 +759,7 @@ export default function SetupShop() {
                                 </Show>
 
                                 {/* Navigation Buttons */}
-                                <div class="flex justify-between pt-6 border-t border-gray-200 dark:border-forest-700">
+                                <div class="flex justify-between pt-6 border-t border-cream-200 dark:border-forest-700">
                                     <Button
                                         type="button"
                                         variant="outline"
@@ -794,7 +794,7 @@ export default function SetupShop() {
 
                         {/* Footer Note */}
                         <div class="bg-terracotta-50 dark:bg-terracotta-900/20 px-8 py-4 border-t border-terracotta-100 dark:border-terracotta-800">
-                            <p class="text-sm text-terracotta-800 dark:text-terracotta-200">
+                            <p class="body-small text-terracotta-800 dark:text-terracotta-200">
                                 💡 <strong>{t("common.note")}:</strong> {t("seller.shop.footerNote")}
                             </p>
                         </div>
