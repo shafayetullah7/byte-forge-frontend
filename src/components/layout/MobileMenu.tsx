@@ -131,6 +131,8 @@ export function MobileMenu(props: MobileMenuProps) {
                                     <A
                                         href="/app"
                                         class="flex items-center gap-3 px-4 py-3 text-sm text-forest-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-700 transition-colors duration-200"
+                                        activeClass="bg-forest-100 dark:bg-forest-900/40 text-forest-800 dark:text-forest-300 font-semibold"
+                                        end
                                         onClick={props.onClose}
                                     >
                                         <Squares2x2Icon class="w-4 h-4" />
@@ -139,6 +141,8 @@ export function MobileMenu(props: MobileMenuProps) {
                                     <A
                                         href="/app/profile"
                                         class="flex items-center gap-3 px-4 py-3 text-sm text-forest-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-700 transition-colors duration-200"
+                                        activeClass="bg-forest-100 dark:bg-forest-900/40 text-forest-800 dark:text-forest-300 font-semibold"
+                                        end
                                         onClick={props.onClose}
                                     >
                                         <UserIcon class="w-4 h-4" />
@@ -147,6 +151,8 @@ export function MobileMenu(props: MobileMenuProps) {
                                     <A
                                         href="/app/settings"
                                         class="flex items-center gap-3 px-4 py-3 text-sm text-forest-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-700 transition-colors duration-200"
+                                        activeClass="bg-forest-100 dark:bg-forest-900/40 text-forest-800 dark:text-forest-300 font-semibold"
+                                        end
                                         onClick={props.onClose}
                                     >
                                         <Cog6ToothIcon class="w-4 h-4" />

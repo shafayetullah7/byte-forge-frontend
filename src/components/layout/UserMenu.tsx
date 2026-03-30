@@ -70,7 +70,7 @@ export const UserMenu: Component<UserMenuProps> = (props) => {
                 <span class="body-small font-semibold text-forest-800 dark:text-cream-100 hidden sm:inline-block">
                     {props.user.userName || props.user.email?.split('@')[0] || "User"}
                 </span>
-                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-forest-500 to-forest-600 dark:from-forest-400 dark:to-forest-500 text-white dark:text-cream-50 flex items-center justify-center font-bold text-xs ring-2 ring-white dark:ring-forest-800 shadow-sm transition-transform group-hover:scale-105 group-focus:scale-105">
+                <div class="w-8 h-8 rounded-full bg-linear-to-br from-forest-500 to-forest-600 dark:from-forest-400 dark:to-forest-500 text-white dark:text-cream-50 flex items-center justify-center font-bold text-xs ring-2 ring-white dark:ring-forest-800 shadow-sm transition-transform group-hover:scale-105 group-focus:scale-105">
                     {getInitials(props.user.userName || props.user.email || "U")}
                 </div>
             </button>
@@ -94,6 +94,8 @@ export const UserMenu: Component<UserMenuProps> = (props) => {
                             <A
                                 href="/app"
                                 class="flex items-center gap-3 px-3 py-2.5 body-small font-medium text-forest-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-900/40 hover:text-forest-800 dark:hover:text-forest-300 rounded-lg transition-standard"
+                                activeClass="bg-forest-100 dark:bg-forest-900/40 text-forest-800 dark:text-forest-300 font-semibold"
+                                end
                                 onClick={() => setIsOpen(false)}
                             >
                                 <Squares2x2Icon class="w-5 h-5 text-forest-600 dark:text-forest-400" />
@@ -104,6 +106,8 @@ export const UserMenu: Component<UserMenuProps> = (props) => {
                         <A
                             href="/app/profile"
                             class="flex items-center gap-3 px-3 py-2.5 body-small font-medium text-forest-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-900/40 hover:text-forest-800 dark:hover:text-forest-300 rounded-lg transition-standard"
+                            activeClass="bg-forest-100 dark:bg-forest-900/40 text-forest-800 dark:text-forest-300 font-semibold"
+                            end
                             onClick={() => setIsOpen(false)}
                         >
                             <UserIcon class="w-5 h-5 text-forest-600 dark:text-forest-400" />
@@ -113,6 +117,8 @@ export const UserMenu: Component<UserMenuProps> = (props) => {
                         <A
                             href="/app/settings"
                             class="flex items-center gap-3 px-3 py-2.5 body-small font-medium text-forest-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-900/40 hover:text-forest-800 dark:hover:text-forest-300 rounded-lg transition-standard"
+                            activeClass="bg-forest-100 dark:bg-forest-900/40 text-forest-800 dark:text-forest-300 font-semibold"
+                            end
                             onClick={() => setIsOpen(false)}
                         >
                             <Cog6ToothIcon class="w-5 h-5 text-forest-600 dark:text-forest-400" />

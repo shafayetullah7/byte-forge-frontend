@@ -383,5 +383,15 @@ export const dict = {
       languageProgress: (p: { completed: number; total: number }) =>
         `${p.completed}/${p.total} languages completed`,
     },
+    verification: {
+      title: "Verification",
+      subtitle: "Manage your shop verification documents",
+      status: {
+        pending: "Pending",
+        reviewing: "Reviewing",
+        approved: "Approved",
+        rejected: "Rejected",
+      },
+    },
   },
 };

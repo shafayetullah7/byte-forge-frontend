@@ -384,5 +384,15 @@ export const dict = {
       languageProgress: (p: { completed: number; total: number }) =>
         `${p.completed}/${p.total} ভাষা সম্পন্ন`,
     },
+    verification: {
+      title: "যাচাইকরণ",
+      subtitle: "আপনার দোকানের যাচাইকরণ নথি পরিচালনা করুন",
+      status: {
+        pending: "মুলতুবি",
+        reviewing: "পর্যালোচনাধীন",
+        approved: "অনুমোদিত",
+        rejected: "প্রত্যাখ্যাত",
+      },
+    },
   },
 };

@@ -148,3 +148,29 @@ export interface UpdatePlantRequest {
   stock?: number;
   status?: "active" | "inactive" | "out_of_stock";
 }
+
+/**
+ * Shop Verification Status (matches backend VerificationStatus)
+ */
+export interface VerificationStatus {
+  id: string;
+  shopId: string;
+  status: "PENDING" | "REVIEWING" | "APPROVED" | "REJECTED";
+  tradeLicenseNumber: string | null;
+  tinNumber: string | null;
+  rejectionReason: string | null;
+  verifiedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Update Verification Request (matches backend UpdateVerificationDto)
+ */
+export interface UpdateVerificationRequest {
+  tradeLicenseNumber?: string;
+  tinNumber?: string;
+  tradeLicenseDocumentId?: string;
+  tinDocumentId?: string;
+  utilityBillDocumentId?: string;
+}

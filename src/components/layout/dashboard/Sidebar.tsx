@@ -1,5 +1,5 @@
 import { Component, Show, For } from "solid-js";
-import { A, useLocation } from "@solidjs/router";
+import { A, useMatch } from "@solidjs/router";
 
 export interface NavLink {
     href: string;
@@ -21,13 +21,6 @@ interface SidebarProps {
 }
 
 export const Sidebar: Component<SidebarProps> = (props) => {
-    const location = useLocation();
-
-    const isActive = (path: string) => {
-        if (path === "/app") return location.pathname === "/app";
-        return location.pathname.startsWith(path);
-    };
-
     const getActiveStyles = () => {
         if (props.config.brandColor === "terracotta") {
             return "bg-terracotta-100 dark:bg-terracotta-900/40 border-l-4 border-terracotta-500 text-terracotta-800 dark:text-terracotta-300";
@@ -42,24 +35,30 @@ export const Sidebar: Component<SidebarProps> = (props) => {
         return "text-forest-600 dark:text-sage-500";
     };
 
-    const NavItem = (itemProps: NavLink) => (
-        <A
-            href={itemProps.href}
-            class={`group flex items-center px-3 py-2.5 body-small font-semibold rounded-lg transition-standard mb-1 ${isActive(itemProps.href)
-                ? getActiveStyles()
-                : "text-forest-700/80 dark:text-cream-100/80 hover:bg-forest-50 dark:hover:bg-forest-900/30 hover:text-forest-800 dark:hover:text-cream-100"
-                }`}
-            onClick={props.onClose}
-        >
-            <itemProps.icon
-                class={`mr-3 flex-shrink-0 h-5 w-5 transition-colors ${isActive(itemProps.href)
-                    ? getActiveIconStyles()
-                    : "text-forest-600/60 dark:text-forest-400/60 group-hover:text-forest-600 dark:group-hover:text-forest-400"
+    const NavItem = (itemProps: NavLink) => {
+        // useMatch with exact: true ensures only exact path matches are considered active
+        // This prevents /app/seller/shops from matching both /app/seller and /app/seller/shops
+        const match = useMatch(() => itemProps.href, { exact: true });
+
+        return (
+            <A
+                href={itemProps.href}
+                class={`group flex items-center px-3 py-2.5 body-small font-semibold rounded-lg transition-standard mb-1 ${match()
+                    ? getActiveStyles()
+                    : "text-forest-700/80 dark:text-cream-100/80 hover:bg-forest-50 dark:hover:bg-forest-900/30 hover:text-forest-800 dark:hover:text-cream-100"
                     }`}
-            />
-            {itemProps.label}
-        </A>
-    );
+                onClick={props.onClose}
+            >
+                <itemProps.icon
+                    class={`mr-3 shrink-0 h-5 w-5 transition-colors ${match()
+                        ? getActiveIconStyles()
+                        : "text-forest-600/60 dark:text-forest-400/60 group-hover:text-forest-600 dark:group-hover:text-forest-400"
+                        }`}
+                />
+                {itemProps.label}
+            </A>
+        );
+    };
 
     return (
         <>
