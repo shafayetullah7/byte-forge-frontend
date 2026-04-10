@@ -2,12 +2,12 @@ import { z } from "zod";
 
 export const passwordSchema = z
   .string()
-  .min(8, "Password must be at least 8 characters")
-  .max(255, "Password must be less than 255 characters")
-  .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-  .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-  .regex(/[0-9]/, "Password must contain at least one number")
+  .min(8, "auth.validation.passwordMin")
+  .max(255, "auth.validation.passwordMax")
+  .regex(/[a-z]/, "auth.validation.passwordLowercase")
+  .regex(/[A-Z]/, "auth.validation.passwordUppercase")
+  .regex(/[0-9]/, "auth.validation.passwordNumber")
   .regex(
     /[^A-Za-z0-9]/,
-    "Password must contain at least one special character"
+    "auth.validation.passwordSpecial"
   );

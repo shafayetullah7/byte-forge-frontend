@@ -1,65 +1,77 @@
+import { useI18n } from "~/i18n";
+
+// Asset Imports for Optimization & Cache-busting
+import googleIcon from "~/assets/icons/google-brands-solid-full.svg";
+import facebookIcon from "~/assets/icons/facebook-brands-solid-full.svg";
+import xIcon from "~/assets/icons/x-twitter-brands-solid-full.svg";
+
 export default function SocialLogin() {
+  const { t } = useI18n();
+
   return (
     <div class="mt-8">
       {/* Divider */}
-      <div class="relative my-6">
+      <div class="relative my-8">
         <div class="absolute inset-0 flex items-center">
-          <div class="w-full border-t border-gray-200 dark:border-gray-700"></div>
+          <div class="w-full border-t border-cream-200 dark:border-forest-800"></div>
         </div>
-        <div class="relative flex justify-center text-xs uppercase">
-          <span class="px-4 bg-white dark:bg-forest-800 text-gray-500 dark:text-gray-400 font-medium tracking-wider">
-            Or continue with
+        <div class="relative flex justify-center text-[11px] uppercase tracking-[0.1em] font-bold">
+          <span class="px-4 bg-white dark:bg-forest-900 text-forest-600/60 dark:text-cream-200/40">
+            {t("auth.social.orContinueWith")}
           </span>
         </div>
       </div>
 
       {/* Social Buttons */}
-      <div class="grid grid-cols-3 gap-3">
+      <div class="grid grid-cols-3 gap-4">
         {/* Google */}
         <button
           type="button"
-          class="flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-forest-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-forest-600 hover:border-gray-300 dark:hover:border-gray-500 transition-all duration-200"
-          title="Continue with Google"
+          class="flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-forest-800 border border-cream-200 dark:border-forest-700 rounded-lg shadow-sm hover:shadow-md hover:bg-terracotta-50/30 dark:hover:bg-forest-700 hover:border-terracotta-200 dark:hover:border-forest-600 transition-all duration-300 group"
+          title={`${t("common.create")} ${t("auth.social.google")}`}
+          onClick={() => { }} // Placeholder for specific action
         >
           <img
-            src="/google-brands-solid-full.svg"
+            src={googleIcon}
             alt="Google"
-            class="w-5 h-5"
+            class="w-5 h-5 dark:invert transition-transform group-hover:scale-110"
           />
-          <span class="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">
-            Google
+          <span class="text-sm font-semibold text-forest-800 dark:text-cream-100 hidden sm:inline">
+            {t("auth.social.google")}
           </span>
         </button>
 
         {/* Facebook */}
         <button
           type="button"
-          class="flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-forest-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-forest-600 hover:border-gray-300 dark:hover:border-gray-500 transition-all duration-200"
-          title="Continue with Facebook"
+          class="flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-forest-800 border border-cream-200 dark:border-forest-700 rounded-lg shadow-sm hover:shadow-md hover:bg-terracotta-50/30 dark:hover:bg-forest-700 hover:border-terracotta-200 dark:hover:border-forest-600 transition-all duration-300 group"
+          title={t("auth.social.facebook")}
+          onClick={() => { }} // Placeholder for specific action
         >
           <img
-            src="/facebook-brands-solid-full.svg"
+            src={facebookIcon}
             alt="Facebook"
-            class="w-5 h-5"
+            class="w-5 h-5 dark:invert transition-transform group-hover:scale-110"
           />
-          <span class="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">
-            Facebook
+          <span class="text-sm font-semibold text-forest-800 dark:text-cream-100 hidden sm:inline">
+            {t("auth.social.facebook")}
           </span>
         </button>
 
         {/* X (Twitter) */}
         <button
           type="button"
-          class="flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-forest-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-forest-600 hover:border-gray-300 dark:hover:border-gray-500 transition-all duration-200"
-          title="Continue with X"
+          class="flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-forest-800 border border-cream-200 dark:border-forest-700 rounded-lg shadow-sm hover:shadow-md hover:bg-terracotta-50/30 dark:hover:bg-forest-700 hover:border-terracotta-200 dark:hover:border-forest-600 transition-all duration-300 group"
+          title={t("auth.social.x")}
+          onClick={() => { }} // Placeholder for specific action
         >
           <img
-            src="/x-twitter-brands-solid-full.svg"
+            src={xIcon}
             alt="X"
-            class="w-5 h-5 dark:invert"
+            class="w-5 h-5 dark:invert transition-transform group-hover:scale-110"
           />
-          <span class="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">
-            X
+          <span class="text-sm font-semibold text-forest-800 dark:text-cream-100 hidden sm:inline">
+            {t("auth.social.x")}
           </span>
         </button>
       </div>

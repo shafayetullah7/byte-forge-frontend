@@ -3,23 +3,24 @@ import { createSignal, onMount, onCleanup, Show } from "solid-js";
 import { MagnifyingGlassIcon, ShoppingBagIcon, Bars3Icon } from "../icons";
 import { AuthSection } from "./AuthSection";
 import { MobileMenu } from "./MobileMenu";
+import { ThemeToggle } from "./ThemeToggle";
 import { useSession } from "~/lib/auth";
 import { getInitials } from "~/lib/utils/string.utils";
+import { useI18n } from "~/i18n";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 export function Navbar() {
-  const user = useSession(); // Hoist auth state
+  const user = useSession();
   const location = useLocation();
-  const [scrolled, setScrolled] = createSignal(false);
   const [mobileMenuOpen, setMobileMenuOpen] = createSignal(false);
-
-  // Handle scroll effect for navbar
-  const handleScroll = () => {
-    setScrolled(window.scrollY > 20);
-  };
+  const { t, locale, toggleLocale } = useI18n();
 
   // Close mobile menu when clicking outside
   const handleClickOutside = (e: MouseEvent) => {
     const target = e.target as HTMLElement;
+    // If the element was removed from DOM (e.g. toggled icon), ignore the click
+    if (!document.contains(target)) return;
+
     if (!target.closest(".mobile-menu-container")) {
       setMobileMenuOpen(false);
     }
@@ -27,124 +28,111 @@ export function Navbar() {
 
   onMount(() => {
     if (typeof window !== "undefined") {
-      window.addEventListener("scroll", handleScroll);
       document.addEventListener("click", handleClickOutside);
     }
   });
 
   onCleanup(() => {
     if (typeof window !== "undefined") {
-      window.removeEventListener("scroll", handleScroll);
       document.removeEventListener("click", handleClickOutside);
     }
   });
 
   return (
-    <header
-      class="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 md:px-8 transition-all duration-300 pointer-events-none"
-      style={{ height: "auto", "padding-top": "1rem" }}
-    >
-      <nav
-        class="w-full max-w-7xl h-16 flex items-center justify-between px-6 rounded-full border shadow-lg transition-all duration-300 pointer-events-auto"
-        classList={{
-          "bg-white/70 dark:bg-gray-900/70 backdrop-blur-md border-white/30 dark:border-white/10":
-            !scrolled(),
-          "bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg border-white/50 dark:border-white/20 shadow-xl":
-            scrolled(),
-          "mt-4": !scrolled(),
-          "mt-2": scrolled(),
-        }}
-      >
-        {/* Logo Section */}
-        <A
-          href="/"
-          class="text-xl md:text-2xl font-extrabold text-forest-600 dark:text-sage-400 flex items-center gap-2 hover:opacity-80 transition-opacity"
-        >
-          ByteForge
-          <span class="w-2 h-2 bg-amber-400 rounded-full"></span>
-        </A>
+    <header class="sticky top-0 z-50 pointer-events-auto">
+      <nav class="w-full bg-white dark:bg-forest-800 border-b border-cream-200 dark:border-forest-700 transition-colors duration-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex items-center justify-between h-16">
+            {/* Logo Section */}
+            <div class="flex-shrink-0">
+              <A
+                href="/"
+                class="h5 flex items-center gap-2 hover:text-forest-600 dark:hover:text-forest-300 transition-standard"
+              >
+                ByteForge
+                <span class="w-1.5 h-1.5 bg-terracotta-500 rounded-full"></span>
+              </A>
+            </div>
 
-        {/* Center Links - Hidden on mobile */}
-        <div class="hidden lg:flex items-center gap-8">
-          <A
-            href="/"
-            class="relative text-gray-600 dark:text-gray-300 font-medium text-sm hover:text-forest-600 dark:hover:text-sage-400 transition-colors"
-            activeClass="text-forest-600 dark:text-sage-400"
-            end
-          >
-            Home
-          </A>
-          <A
-            href="/plants"
-            class="relative text-gray-600 dark:text-gray-300 font-medium text-sm hover:text-forest-600 dark:hover:text-sage-400 transition-colors"
-            activeClass="text-forest-600 dark:text-sage-400"
-          >
-            Plants
-          </A>
-          <A
-            href="/shops"
-            class="relative text-gray-600 dark:text-gray-300 font-medium text-sm hover:text-forest-600 dark:hover:text-sage-400 transition-colors"
-            activeClass="text-forest-600 dark:text-sage-400"
-          >
-            Shops
-          </A>
-          <A
-            href="/about"
-            class="relative text-gray-600 dark:text-gray-300 font-medium text-sm hover:text-forest-600 dark:hover:text-sage-400 transition-colors"
-            activeClass="text-forest-600 dark:text-sage-400"
-          >
-            About
-          </A>
-        </div>
+            {/* Center Links - Hidden on mobile */}
+            <div class="hidden md:flex items-center gap-8">
+              <A
+                href="/"
+                class="text-forest-700 dark:text-gray-300 font-semibold body-small hover:text-terracotta-500 dark:hover:text-terracotta-300 transition-standard"
+                activeClass="text-terracotta-600 dark:text-terracotta-400 font-bold"
+                end
+              >
+                {t("common.home")}
+              </A>
+              <A
+                href="/plants"
+                class="text-forest-700 dark:text-gray-300 font-semibold body-small hover:text-terracotta-500 dark:hover:text-terracotta-300 transition-standard"
+                activeClass="text-terracotta-600 dark:text-terracotta-400 font-bold"
+              >
+                {t("common.plants")}
+              </A>
+              <A
+                href="/shops"
+                class="text-forest-700 dark:text-gray-300 font-semibold body-small hover:text-terracotta-500 dark:hover:text-terracotta-300 transition-standard"
+                activeClass="text-terracotta-600 dark:text-terracotta-400 font-bold"
+              >
+                {t("common.shops")}
+              </A>
+              <A
+                href="/about"
+                class="text-forest-700 dark:text-gray-300 font-semibold body-small hover:text-terracotta-500 dark:hover:text-terracotta-300 transition-standard"
+                activeClass="text-terracotta-600 dark:text-terracotta-400 font-bold"
+              >
+                {t("common.about")}
+              </A>
+            </div>
 
-        {/* Right Actions */}
-        <div class="flex items-center gap-4 md:gap-6">
-          {/* Icons Area */}
-          <button
-            class="flex p-2 text-gray-600 dark:text-gray-300 hover:text-forest-600 dark:hover:text-sage-400 hover:-translate-y-0.5 transition-all"
-            aria-label="Search"
-          >
-            <MagnifyingGlassIcon class="w-5 h-5" />
-          </button>
+            {/* Right Actions */}
+            <div class="flex items-center gap-4">
+              <button
+                class="p-2.5 text-gray-500 dark:text-gray-400 hover:text-terracotta-500 dark:hover:text-terracotta-400 transition-colors duration-200"
+                aria-label="Search"
+              >
+                <MagnifyingGlassIcon class="w-5 h-5" />
+              </button>
 
-          <button
-            class="flex p-2 text-gray-600 dark:text-gray-300 hover:text-forest-600 dark:hover:text-sage-400 hover:-translate-y-0.5 transition-all"
-            aria-label="Cart"
-          >
-            <ShoppingBagIcon class="w-5 h-5" />
-          </button>
+              <button
+                class="p-2.5 text-gray-500 dark:text-gray-400 hover:text-terracotta-500 dark:hover:text-terracotta-400 transition-colors duration-200 relative"
+                aria-label="Cart"
+              >
+                <ShoppingBagIcon class="w-5 h-5" />
+                {/* Optional cart badge could go here */}
+              </button>
 
-          {/* Auth Section (Desktop) */}
-          <AuthSection />
+              {/* Theme & Language - Hidden on mobile, accessible in menu */}
+              <div class="hidden md:flex items-center gap-2">
+                <ThemeToggle />
+                <LanguageSwitcher variant="compact" />
+              </div>
 
-          {/* Mobile Menu Trigger Pill */}
-          <div class="block lg:hidden mobile-menu-container">
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen())}
-              class="flex items-center gap-2 p-1 rounded-full transition-all group"
-              classList={{
-                "pl-1 pr-2 bg-gray-100 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700/50": !!user(),
-                "hover:bg-gray-200 dark:hover:bg-gray-700": !!user(),
-                "text-gray-600 dark:text-gray-300 hover:text-forest-600 dark:hover:text-sage-400": !user(),
-              }}
-              aria-label="Toggle menu"
-            >
-              <Show when={user()}>
-                {(userData) => (
-                  <div class="w-7 h-7 rounded-full bg-forest-600 dark:bg-sage-500 text-white flex items-center justify-center font-semibold text-[10px] ring-2 ring-white dark:ring-gray-800 shadow-sm">
-                    {getInitials(userData().userName)}
-                  </div>
-                )}
-              </Show>
-              <Bars3Icon class="w-6 h-6" />
-            </button>
+              {/* Auth Section */}
+              <div class="hidden md:block">
+                <AuthSection />
+              </div>
 
-            {/* Mobile Menu Dropdown */}
-            <MobileMenu
-              isOpen={mobileMenuOpen()}
-              onClose={() => setMobileMenuOpen(false)}
-              user={user}
-            />
+
+              {/* Mobile Menu Trigger */}
+              <div class="md:hidden mobile-menu-container">
+                <button
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen())}
+                  class="p-2.5 text-forest-700 dark:text-gray-300 hover:text-terracotta-500 dark:hover:text-terracotta-400 transition-colors duration-200"
+                  aria-label="Toggle menu"
+                >
+                  <Bars3Icon class="w-6 h-6" />
+                </button>
+
+                <MobileMenu
+                  isOpen={mobileMenuOpen()}
+                  onClose={() => setMobileMenuOpen(false)}
+                  user={user}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </nav>

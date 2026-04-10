@@ -6,8 +6,8 @@ import { z } from "zod";
 export const verifySchema = z.object({
   otp: z
     .string()
-    .length(6, "OTP must be exactly 6 digits")
-    .regex(/^\d+$/, "OTP must contain only digits"),
+    .length(6, "auth.validation.otpLength")
+    .regex(/^\d+$/, "auth.validation.otpDigits"),
 });
 
 /**

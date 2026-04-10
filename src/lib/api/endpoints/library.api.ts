@@ -1,9 +1,10 @@
-import { api } from "../api-client";
+import { fetcher } from "../api-client";
 import type { TreeCategory, CategoryFilter } from "../types/library.types";
-import type { ApiResponse } from "../types";
 
 /**
  * Library API endpoints
+ * 
+ * Refactored to use the functional fetcher with unwrapped responses.
  */
 export const libraryApi = {
   /**
@@ -13,10 +14,8 @@ export const libraryApi = {
     /**
      * Get all tree categories (public)
      */
-    getAll: async (
-      filter?: CategoryFilter
-    ): Promise<ApiResponse<TreeCategory[]>> => {
-      return api.get<ApiResponse<TreeCategory[]>>("/api/v1/tree-categories", {
+    getAll: async (filter?: CategoryFilter): Promise<TreeCategory[]> => {
+      return fetcher<TreeCategory[]>("/api/v1/tree-categories", {
         params: filter as any,
       });
     },
@@ -24,10 +23,8 @@ export const libraryApi = {
     /**
      * Get a single tree category by ID
      */
-    getById: async (id: string): Promise<ApiResponse<TreeCategory>> => {
-      return api.get<ApiResponse<TreeCategory>>(
-        `/api/v1/tree-categories/${id}`
-      );
+    getById: async (id: string): Promise<TreeCategory> => {
+      return fetcher<TreeCategory>(`/api/v1/tree-categories/${id}`);
     },
   },
 };

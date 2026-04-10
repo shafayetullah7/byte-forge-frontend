@@ -139,3 +139,14 @@ export interface ResetPasswordRequest {
   token: string;
   password: string;
 }
+
+/**
+ * Refresh token response
+ */
+export interface RefreshTokenResponse {
+  tokens: {
+    accessToken: string;
+    refreshToken: string;
+  };
+  user: AuthUser;
+}

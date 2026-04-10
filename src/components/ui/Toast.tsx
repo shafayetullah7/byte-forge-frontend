@@ -37,7 +37,7 @@ export const toaster = {
 export function Toaster() {
   return (
     <Portal>
-      <div class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
+      <div class="fixed top-4 right-4 z-[70] flex flex-col gap-2 pointer-events-none">
         <For each={toasts()}>
           {(toast) => (
             <div
@@ -47,7 +47,7 @@ export function Toaster() {
                   toast.type === "success",
                 "bg-white border-red-200 text-red-800 dark:bg-red-950 dark:border-red-900 dark:text-red-100":
                   toast.type === "error",
-                "bg-white border-blue-200 text-blue-800 dark:bg-blue-950 dark:border-blue-900 dark:text-blue-100":
+                "bg-white border-cream-300 text-cream-800 dark:bg-cream-900 dark:border-cream-700 dark:text-cream-100":
                   toast.type === "info",
               }}
             >

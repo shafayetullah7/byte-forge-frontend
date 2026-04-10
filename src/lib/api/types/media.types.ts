@@ -40,9 +40,7 @@ export interface MediaRecord {
 
 /**
  * Upload media response
+ * Refactored: Backend returns Media object directly.
  */
-export interface UploadMediaResponse {
-  status: number;
-  message: string;
-  data: MediaRecord;
-}
+export type UploadMediaResponse = Media;
+

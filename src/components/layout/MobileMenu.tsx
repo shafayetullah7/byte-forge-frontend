@@ -9,6 +9,10 @@ import {
 
 import { type Accessor } from "solid-js";
 import { type AuthUser } from "~/lib/api/types/auth.types";
+import { useI18n } from "~/i18n";
+import { ThemeToggle } from "./ThemeToggle";
+import { LanguageSwitcher } from "./LanguageSwitcher";
+import LinkButton from "../ui/LinkButton";
 
 interface MobileMenuProps {
     isOpen: boolean;
@@ -19,6 +23,7 @@ interface MobileMenuProps {
 export function MobileMenu(props: MobileMenuProps) {
     // const user = useSession(); // Removed local call
     const navigate = useNavigate();
+    const { t, locale, toggleLocale } = useI18n();
 
     const [isLoggingOut, setIsLoggingOut] = createSignal(false);
 
@@ -38,64 +43,83 @@ export function MobileMenu(props: MobileMenuProps) {
 
     return (
         <Show when={props.isOpen}>
-            <div class="absolute right-4 top-20 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-2 animate-in fade-in slide-in-from-top-2 duration-200 mobile-menu-container">
+            <div class="absolute right-4 top-16 w-64 bg-white/95 dark:bg-forest-800/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-cream-200 dark:border-forest-700/50 py-2 animate-in fade-in slide-in-from-top-2 duration-200 mobile-menu-container">
                 <div class="py-2 flex flex-col">
                     <A
                         href="/"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        class="px-4 py-3 text-sm font-medium text-forest-700 dark:text-gray-300 hover:bg-terracotta-50/50 dark:hover:bg-terracotta-900/30 transition-colors duration-200"
+                        activeClass="text-terracotta-600 dark:text-terracotta-400 font-semibold bg-terracotta-50/30 dark:bg-terracotta-900/40"
                         onClick={props.onClose}
+                        end
                     >
-                        Home
+                        {t("common.home")}
                     </A>
                     <A
                         href="/plants"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        class="px-4 py-3 text-sm font-medium text-forest-700 dark:text-gray-300 hover:bg-terracotta-50/50 dark:hover:bg-terracotta-900/30 transition-colors duration-200"
+                        activeClass="text-terracotta-600 dark:text-terracotta-400 font-semibold bg-terracotta-50/30 dark:bg-terracotta-900/40"
                         onClick={props.onClose}
                     >
-                        Plants
+                        {t("common.plants")}
                     </A>
                     <A
                         href="/shops"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        class="px-4 py-3 text-sm font-medium text-forest-700 dark:text-gray-300 hover:bg-terracotta-50/50 dark:hover:bg-terracotta-900/30 transition-colors duration-200"
+                        activeClass="text-terracotta-600 dark:text-terracotta-400 font-semibold bg-terracotta-50/30 dark:bg-terracotta-900/40"
                         onClick={props.onClose}
                     >
-                        Shops
+                        {t("common.shops")}
                     </A>
                     <A
                         href="/about"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        class="px-4 py-3 text-sm font-medium text-forest-700 dark:text-gray-300 hover:bg-terracotta-50/50 dark:hover:bg-terracotta-900/30 transition-colors duration-200"
+                        activeClass="text-terracotta-600 dark:text-terracotta-400 font-semibold bg-terracotta-50/30 dark:bg-terracotta-900/40"
                         onClick={props.onClose}
                     >
-                        About
+                        {t("common.about")}
                     </A>
 
-                    <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+                    {/* Mobile Theme Toggle */}
+                    <div class="px-4 py-3 text-sm font-medium text-left text-forest-700 dark:text-gray-300 flex items-center justify-between transition-colors duration-200">
+                        <span>{t("common.appearance") || "Appearance"}</span>
+                        <ThemeToggle />
+                    </div>
+
+                    {/* Mobile Language Toggle */}
+                    <div class="px-4 py-3 text-sm font-medium text-left text-forest-700 dark:text-gray-300 flex items-center justify-between transition-colors duration-200">
+                        <span>{t("common.language")}</span>
+                        <LanguageSwitcher variant="full" />
+                    </div>
+
+                    <div class="border-t border-cream-200 dark:border-forest-700 my-2"></div>
 
                     <Show
                         when={props.user()}
                         fallback={
                             <div class="px-4 flex flex-col gap-2">
-                                <A
+                                <LinkButton
                                     href="/login"
-                                    class="text-center text-gray-800 dark:text-gray-200 font-semibold text-sm px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    variant="secondary"
+                                    class="w-full font-semibold"
                                     onClick={props.onClose}
                                 >
-                                    Login
-                                </A>
-                                <A
+                                    {t("common.signIn")}
+                                </LinkButton>
+                                <LinkButton
                                     href="/register"
-                                    class="text-center bg-forest-600 dark:bg-sage-500 text-white font-semibold text-sm px-4 py-2 rounded-lg hover:bg-forest-700 dark:hover:bg-sage-600"
+                                    variant="primary"
+                                    class="w-full font-semibold"
                                     onClick={props.onClose}
                                 >
-                                    Join Now
-                                </A>
+                                    {t("common.signUp")}
+                                </LinkButton>
                             </div>
                         }
                     >
                         {(userData) => (
                             <>
                                 <div class="px-4 py-2">
-                                    <p class="text-sm font-semibold text-gray-900 dark:text-white">
+                                    <p class="text-sm font-semibold text-forest-800 dark:text-cream-50">
                                         {userData().userName}
                                     </p>
                                     <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
@@ -105,39 +129,45 @@ export function MobileMenu(props: MobileMenuProps) {
 
                                 <Show when={userData().emailVerified}>
                                     <A
-                                        href="/dashboard"
-                                        class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                        href="/app"
+                                        class="flex items-center gap-3 px-4 py-3 text-sm text-forest-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-700 transition-colors duration-200"
+                                        activeClass="bg-forest-100 dark:bg-forest-900/40 text-forest-800 dark:text-forest-300 font-semibold"
+                                        end
                                         onClick={props.onClose}
                                     >
                                         <Squares2x2Icon class="w-4 h-4" />
-                                        Dashboard
+                                        {t("common.dashboard")}
                                     </A>
                                     <A
-                                        href="/profile"
-                                        class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                        href="/app/profile"
+                                        class="flex items-center gap-3 px-4 py-3 text-sm text-forest-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-700 transition-colors duration-200"
+                                        activeClass="bg-forest-100 dark:bg-forest-900/40 text-forest-800 dark:text-forest-300 font-semibold"
+                                        end
                                         onClick={props.onClose}
                                     >
                                         <UserIcon class="w-4 h-4" />
-                                        Profile
+                                        {t("common.profile")}
                                     </A>
                                     <A
-                                        href="/settings"
-                                        class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                        href="/app/settings"
+                                        class="flex items-center gap-3 px-4 py-3 text-sm text-forest-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-700 transition-colors duration-200"
+                                        activeClass="bg-forest-100 dark:bg-forest-900/40 text-forest-800 dark:text-forest-300 font-semibold"
+                                        end
                                         onClick={props.onClose}
                                     >
                                         <Cog6ToothIcon class="w-4 h-4" />
-                                        Settings
+                                        {t("common.settings")}
                                     </A>
                                 </Show>
 
-                                <div class="border-t border-gray-200 dark:border-gray-700 mt-2 pt-2">
+                                <div class="border-t border-cream-200 dark:border-forest-700 mt-2 pt-2">
                                     <button
                                         onClick={handleLogout}
-                                        class="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                        class="flex items-center gap-3 w-full px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200"
                                         disabled={isLoggingOut()}
                                     >
                                         <ArrowRightOnRectangleIcon class="w-4 h-4" />
-                                        {isLoggingOut() ? "Logging out..." : "Logout"}
+                                        {isLoggingOut() ? t("common.loading") : t("common.signOut")}
                                     </button>
                                 </div>
                             </>
