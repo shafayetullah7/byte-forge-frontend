@@ -1,13 +1,13 @@
 import { createAsync } from "@solidjs/router";
 import { Suspense } from "solid-js";
-import { Card } from "~/components/ui/Card";
-import { Badge } from "~/components/ui/Badge";
-import { getVerificationStatus, getMyShop } from "~/lib/api/endpoints/seller-shop";
+import Card from "~/components/ui/Card";
+import Badge from "~/components/ui/Badge";
+import { sellerShopApi } from "~/lib/api/endpoints/seller-shop.api";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 
 export default function VerificationStatusPage() {
-  const verificationData = createAsync(() => getVerificationStatus());
-  const shopData = createAsync(() => getMyShop());
+  const verificationData = createAsync(() => sellerShopApi.getVerificationStatus());
+  const shopData = createAsync(() => sellerShopApi.getMyShop());
 
   return (
     <SafeErrorBoundary
@@ -42,11 +42,11 @@ export default function VerificationStatusPage() {
                 );
               }
 
-              const statusColors: Record<string, "success" | "warning" | "danger" | "neutral"> = {
-                PENDING: "warning",
-                APPROVED: "success",
-                REJECTED: "danger",
-                SUSPENDED: "danger",
+              const statusColors: Record<string, "default" | "forest" | "sage" | "terracotta" | "cream"> = {
+                PENDING: "sage",
+                APPROVED: "forest",
+                REJECTED: "terracotta",
+                SUSPENDED: "terracotta",
               };
 
               return (
@@ -57,7 +57,7 @@ export default function VerificationStatusPage() {
                       <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">
                         {shop.translations?.find(t => t.locale === "en")?.name || "Your Shop"}
                       </h3>
-                      <Badge variant={statusColors[verification.status] || "neutral"}>
+                      <Badge variant={statusColors[verification.status] || "default"}>
                         {verification.status}
                       </Badge>
                     </div>

@@ -1,4 +1,5 @@
-import { apiClient } from '../api-client';
+import { fetcher } from '../api-client';
+import { ApiError } from '../types';
 
 export interface ShopTranslation {
   locale: string;
@@ -41,58 +42,88 @@ export interface ShopVerificationStatus {
 }
 
 /**
- * Get seller's shop
+ * Seller Shop API endpoints
  */
-export const getMyShop = async () => {
-  return apiClient<Shop>('/seller/shop');
-};
-
-/**
- * Create shop
- */
-export const createShop = async (dto: CreateShopDto) => {
-  return apiClient.post<Shop>('/seller/shop', dto);
-};
-
-/**
- * Update shop (minor changes - immediate)
- */
-export const updateShop = async (dto: Partial<CreateShopDto>) => {
-  return apiClient.patch<Shop>('/seller/shop', dto);
-};
-
-/**
- * Submit shop for review (major changes)
- */
-export const submitShopForReview = async (dto: Partial<CreateShopDto>) => {
-  return apiClient.patch<Shop>('/seller/shop/submit-for-review', dto);
-};
-
-/**
- * Get shop verification status
- */
-export const getVerificationStatus = async () => {
-  return apiClient<ShopVerificationStatus>('/seller/shop/verification');
-};
-
-/**
- * Upload shop images
- */
-export const uploadShopImages = async (formData: FormData) => {
-  return apiClient.post<{ logoId?: string; bannerId?: string }>(
-    '/seller/shop/images',
-    formData,
-    {
-      headers: {}, // Content-Type will be set automatically for FormData
-    }
-  );
-};
-
 export const sellerShopApi = {
-  getMyShop,
-  createShop,
-  updateShop,
-  submitShopForReview,
-  getVerificationStatus,
-  uploadShopImages,
+  /**
+   * Get seller's shop
+   */
+  getMyShop: async (): Promise<Shop | null> => {
+    try {
+      return await fetcher<Shop>('/api/v1/user/seller/shops/my-shop');
+    } catch (error: any) {
+      if (error instanceof ApiError && error.statusCode === 404) {
+        return null;
+      }
+      throw error;
+    }
+  },
+
+  /**
+   * Create shop
+   */
+  create: async (dto: CreateShopDto): Promise<Shop> => {
+    return fetcher<Shop>('/api/v1/user/seller/shops/apply', {
+      method: 'POST',
+      body: JSON.stringify(dto),
+    });
+  },
+
+  /**
+   * Update shop (minor changes - immediate)
+   */
+  update: async (dto: Partial<CreateShopDto>): Promise<Shop> => {
+    return fetcher<Shop>('/api/v1/user/seller/shops/my-shop', {
+      method: 'PATCH',
+      body: JSON.stringify(dto),
+    });
+  },
+
+  /**
+   * Submit shop for review (major changes)
+   */
+  submitForReview: async (dto: Partial<CreateShopDto>): Promise<Shop> => {
+    return fetcher<Shop>('/api/v1/user/seller/shops/my-shop/submit-for-review', {
+      method: 'PATCH',
+      body: JSON.stringify(dto),
+    });
+  },
+
+  /**
+   * Get shop verification status
+   */
+  getVerificationStatus: async (): Promise<ShopVerificationStatus | null> => {
+    try {
+      return await fetcher<ShopVerificationStatus>(
+        '/api/v1/user/seller/shops/my-shop/verification'
+      );
+    } catch (error: any) {
+      if (error instanceof ApiError && error.statusCode === 404) {
+        return null;
+      }
+      throw error;
+    }
+  },
+
+  /**
+   * Upload shop images
+   */
+  uploadImages: async (formData: FormData): Promise<{ logoId?: string; bannerId?: string }> => {
+    return fetcher<{ logoId?: string; bannerId?: string }>(
+      '/api/v1/user/seller/shops/my-shop/images',
+      {
+        method: 'POST',
+        body: formData,
+      }
+    );
+  },
+
+  /**
+   * Delete shop
+   */
+  delete: async (): Promise<void> => {
+    return fetcher<void>('/api/v1/user/seller/shops/my-shop', {
+      method: 'DELETE',
+    });
+  },
 };

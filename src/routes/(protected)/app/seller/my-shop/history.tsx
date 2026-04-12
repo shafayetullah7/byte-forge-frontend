@@ -1,8 +1,8 @@
 import { createAsync } from "@solidjs/router";
 import { Suspense } from "solid-js";
-import { Card } from "~/components/ui/Card";
-import { Badge } from "~/components/ui/Badge";
-import { getMyShop } from "~/lib/api/endpoints/seller-shop";
+import Card from "~/components/ui/Card";
+import Badge from "~/components/ui/Badge";
+import { sellerShopApi } from "~/lib/api/endpoints/seller-shop.api";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 
 // Placeholder data - replace with actual API call when endpoint is ready
@@ -41,19 +41,19 @@ const actionLabels: Record<string, string> = {
   submitted_for_review: "Submitted for Review",
 };
 
-const statusColors: Record<string, "success" | "warning" | "danger" | "neutral"> = {
-  DRAFT: "neutral",
-  PENDING_VERIFICATION: "warning",
-  APPROVED: "success",
-  ACTIVE: "success",
-  INACTIVE: "neutral",
-  REJECTED: "danger",
-  SUSPENDED: "danger",
-  DELETED: "neutral",
+const statusColors: Record<string, "default" | "forest" | "sage" | "terracotta" | "cream"> = {
+  DRAFT: "default",
+  PENDING_VERIFICATION: "sage",
+  APPROVED: "forest",
+  ACTIVE: "forest",
+  INACTIVE: "default",
+  REJECTED: "terracotta",
+  SUSPENDED: "terracotta",
+  DELETED: "default",
 };
 
 export default function VerificationHistoryPage() {
-  const shopData = createAsync(() => getMyShop());
+  const shopData = createAsync(() => sellerShopApi.getMyShop());
   const history = mockHistory; // Replace with actual API call
 
   return (
@@ -87,7 +87,7 @@ export default function VerificationHistoryPage() {
                       {shopData()?.translations?.find(t => t.locale === "bn")?.name}
                     </p>
                   </div>
-                  <Badge variant={(statusColors[shopData()?.status || "DRAFT"] as any) || "neutral"}>
+                  <Badge variant={statusColors[shopData()?.status || "DRAFT"] || "default"}>
                     {shopData()?.status || "DRAFT"}
                   </Badge>
                 </div>

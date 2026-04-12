@@ -1,15 +1,15 @@
 import { useNavigate } from "@solidjs/router";
 import { createSignal } from "solid-js";
-import { Button } from "~/components/ui/Button";
-import { Card } from "~/components/ui/Card";
+import Button from "~/components/ui/Button";
+import Card from "~/components/ui/Card";
 import { Modal } from "~/components/ui/Modal";
-import { getMyShop, deleteShop } from "~/lib/api/endpoints/seller-shop";
+import { sellerShopApi } from "~/lib/api/endpoints/seller-shop.api";
 import { createAsync } from "@solidjs/router";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 
 export default function DeleteShopPage() {
   const navigate = useNavigate();
-  const shopData = createAsync(() => getMyShop());
+  const shopData = createAsync(() => sellerShopApi.getMyShop());
   const [isDeleting, setIsDeleting] = createSignal(false);
   const [showConfirm, setShowConfirm] = createSignal(false);
   const [confirmText, setConfirmText] = createSignal("");
@@ -30,7 +30,7 @@ export default function DeleteShopPage() {
       //   return;
       // }
 
-      await deleteShop();
+      await sellerShopApi.delete();
       navigate("/seller");
     } catch (error) {
       console.error("Failed to delete shop:", error);
@@ -114,7 +114,7 @@ export default function DeleteShopPage() {
                   Cancel
                 </Button>
                 <Button
-                  variant="danger"
+                  variant="secondary"
                   onClick={handleDelete}
                   loading={isDeleting()}
                   disabled={confirmText() !== "DELETE" || hasPendingOrders()}

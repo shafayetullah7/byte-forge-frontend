@@ -1,4 +1,4 @@
-import { apiClient } from '../api-client';
+import { fetcher } from '../api-client';
 
 export interface PublicShop {
   id: string;
@@ -48,15 +48,15 @@ export const getShops = async (params?: {
     if (params.limit) searchParams.set('limit', params.limit.toString());
   }
   const qs = searchParams.toString();
-  const url = qs ? `/shops?${qs}` : '/shops';
-  return apiClient<{ data: PublicShop[]; pagination: any }>(url);
+  const url = qs ? `/api/v1/shops?${qs}` : '/api/v1/shops';
+  return fetcher<{ data: PublicShop[]; pagination: any }>(url);
 };
 
 /**
  * Get single shop detail (public)
  */
 export const getShopById = async (id: string) => {
-  return apiClient<PublicShop>(`/shops/${id}`);
+  return fetcher<PublicShop>(`/api/v1/shops/${id}`);
 };
 
 /**
@@ -72,8 +72,8 @@ export const getShopProducts = async (shopId: string, params?: {
     if (params.limit) searchParams.set('limit', params.limit.toString());
   }
   const qs = searchParams.toString();
-  const url = qs ? `/shops/${shopId}/products?${qs}` : `/shops/${shopId}/products`;
-  return apiClient<{ data: PublicProduct[]; pagination: any }>(url);
+  const url = qs ? `/api/v1/shops/${shopId}/products?${qs}` : `/api/v1/shops/${shopId}/products`;
+  return fetcher<{ data: PublicProduct[]; pagination: any }>(url);
 };
 
 export const publicShopsApi = {

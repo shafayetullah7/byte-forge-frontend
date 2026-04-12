@@ -1,5 +1,5 @@
 import { createContext, useContext, createSignal, createEffect, onMount, type ParentComponent } from 'solid-js';
-import { apiClient } from '~/lib/api/api-client';
+import { fetcher } from '~/lib/api/api-client';
 
 export interface CartItem {
   id: string;
@@ -44,7 +44,7 @@ export const CartProvider: ParentComponent = (props) => {
   const refreshCart = async () => {
     try {
       setIsLoading(true);
-      const data = await apiClient.get<Cart>('/cart');
+      const data = await fetcher<Cart>('/api/v1/cart');
       setCart(data);
     } catch (error) {
       console.error('Failed to fetch cart:', error);
@@ -56,7 +56,10 @@ export const CartProvider: ParentComponent = (props) => {
 
   const addToCart = async (plantVariantId: string, quantity: number) => {
     try {
-      await apiClient.post('/cart/items', { plantVariantId, quantity });
+      await fetcher('/api/v1/cart/items', {
+        method: 'POST',
+        body: JSON.stringify({ plantVariantId, quantity }),
+      });
       await refreshCart();
     } catch (error) {
       console.error('Failed to add to cart:', error);
@@ -66,7 +69,10 @@ export const CartProvider: ParentComponent = (props) => {
 
   const updateQuantity = async (itemId: string, quantity: number) => {
     try {
-      await apiClient.patch(`/cart/items/${itemId}`, { quantity });
+      await fetcher(`/api/v1/cart/items/${itemId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ quantity }),
+      });
       await refreshCart();
     } catch (error) {
       console.error('Failed to update cart:', error);
@@ -76,7 +82,9 @@ export const CartProvider: ParentComponent = (props) => {
 
   const removeItem = async (itemId: string) => {
     try {
-      await apiClient.delete(`/cart/items/${itemId}`);
+      await fetcher(`/api/v1/cart/items/${itemId}`, {
+        method: 'DELETE',
+      });
       await refreshCart();
     } catch (error) {
       console.error('Failed to remove item:', error);
@@ -86,7 +94,9 @@ export const CartProvider: ParentComponent = (props) => {
 
   const clearCart = async () => {
     try {
-      await apiClient.delete('/cart');
+      await fetcher('/api/v1/cart', {
+        method: 'DELETE',
+      });
       setCart({ items: [], totalItems: 0 });
     } catch (error) {
       console.error('Failed to clear cart:', error);

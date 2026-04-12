@@ -1,46 +1,46 @@
 import { createAsync, A } from "@solidjs/router";
 import { Suspense, createMemo } from "solid-js";
-import { Button } from "~/components/ui/Button";
-import { Card } from "~/components/ui/Card";
-import { Badge } from "~/components/ui/Badge";
-import { getMyShop, getVerificationStatus } from "~/lib/api/endpoints/seller-shop";
+import Button from "~/components/ui/Button";
+import Card from "~/components/ui/Card";
+import Badge from "~/components/ui/Badge";
+import { sellerShopApi } from "~/lib/api/endpoints/seller-shop.api";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 
 export default function MyShopPage() {
-  const shopData = createAsync(() => getMyShop());
-  const verificationData = createAsync(() => getVerificationStatus());
+  const shopData = createAsync(() => sellerShopApi.getMyShop());
+  const verificationData = createAsync(() => sellerShopApi.getVerificationStatus());
 
   const statusConfig = createMemo(() => {
     const status = verificationData()?.status || shopData()?.status;
     
-    const configs: Record<string, { color: string; label: string; description: string }> = {
+    const configs: Record<string, { color: "default" | "forest" | "sage" | "terracotta" | "cream"; label: string; description: string }> = {
       DRAFT: {
-        color: "neutral",
+        color: "default",
         label: "Draft",
         description: "Shop not yet submitted for verification",
       },
       PENDING_VERIFICATION: {
-        color: "warning",
+        color: "sage",
         label: "Pending Verification",
         description: "Submitted for admin review",
       },
       APPROVED: {
-        color: "success",
+        color: "forest",
         label: "Approved",
         description: "Ready to activate",
       },
       ACTIVE: {
-        color: "success",
+        color: "forest",
         label: "Active",
         description: "Live and visible to customers",
       },
       REJECTED: {
-        color: "danger",
+        color: "terracotta",
         label: "Rejected",
         description: verificationData()?.rejectionReason || "Needs changes",
       },
       SUSPENDED: {
-        color: "danger",
+        color: "terracotta",
         label: "Suspended",
         description: "Contact admin for assistance",
       },
@@ -126,7 +126,7 @@ export default function MyShopPage() {
                           Slug: {shop.slug}
                         </p>
                       </div>
-                      <Badge variant={statusConfig().color as any}>
+                      <Badge variant={statusConfig().color}>
                         {statusConfig().label}
                       </Badge>
                     </div>

@@ -1,15 +1,15 @@
 import { createAsync, useNavigate } from "@solidjs/router";
 import { createSignal } from "solid-js";
-import { Button } from "~/components/ui/Button";
-import { Input } from "~/components/ui/Input";
-import { Card } from "~/components/ui/Card";
+import Button from "~/components/ui/Button";
+import Input from "~/components/ui/Input";
+import Card from "~/components/ui/Card";
 import { Modal } from "~/components/ui/Modal";
-import { getMyShop, updateShop, submitShopForReview } from "~/lib/api/endpoints/seller-shop";
+import { sellerShopApi } from "~/lib/api/endpoints/seller-shop.api";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 
 export default function EditShopPage() {
   const navigate = useNavigate();
-  const shopData = createAsync(() => getMyShop());
+  const shopData = createAsync(() => sellerShopApi.getMyShop());
   const [isSubmitting, setIsSubmitting] = createSignal(false);
   const [showConfirmModal, setShowConfirmModal] = createSignal(false);
   const [isMajorChange, setIsMajorChange] = createSignal(false);
@@ -55,9 +55,9 @@ export default function EditShopPage() {
       };
 
       if (isMajorChange()) {
-        await submitShopForReview(dto);
+        await sellerShopApi.submitForReview(dto);
       } else {
-        await updateShop(dto);
+        await sellerShopApi.update(dto);
       }
 
       navigate("/seller/my-shop");

@@ -1,7 +1,7 @@
 import { useParams, A } from "@solidjs/router";
 import { createAsync } from "@solidjs/router";
 import { Suspense } from "solid-js";
-import { Button } from "~/components/ui/Button";
+import Button from "~/components/ui/Button";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 
 // Placeholder data - replace with actual API call

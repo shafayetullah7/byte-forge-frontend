@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
 import { useCart } from "~/lib/context/cart-context";
-import { Button } from "~/components/ui/Button";
+import Button from "~/components/ui/Button";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 
 export default function CartPage() {
@@ -87,7 +87,7 @@ export default function CartPage() {
                             +
                           </Button>
                           <Button
-                            variant="danger"
+                            variant="secondary"
                             size="sm"
                             onClick={() => removeItem(item.id)}
                             class="ml-auto"

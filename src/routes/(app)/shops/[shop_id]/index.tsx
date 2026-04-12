@@ -1,8 +1,8 @@
 import { useParams, A, createAsync } from "@solidjs/router";
 import { Suspense } from "solid-js";
-import { publicShopsApi, type PublicShop } from "~/lib/api/endpoints/public-shops";
+import { publicShopsApi, type PublicShop } from "~/lib/api/endpoints/public-shops.api";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
-import { Button } from "~/components/ui/Button";
+import Button from "~/components/ui/Button";
 
 export default function ShopDetailPage() {
   const params = useParams();
