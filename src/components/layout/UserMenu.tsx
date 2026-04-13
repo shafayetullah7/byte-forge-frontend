@@ -1,4 +1,5 @@
 import { Component, createSignal, Show, onMount, onCleanup } from "solid-js";
+import { isServer } from "solid-js/web";
 import { A, useNavigate } from "@solidjs/router";
 import { performLogout } from "~/lib/auth";
 import { useI18n } from "~/i18n";
@@ -33,13 +34,13 @@ export const UserMenu: Component<UserMenuProps> = (props) => {
     };
 
     onMount(() => {
-        if (typeof window !== "undefined") {
+        if (!isServer) {
             document.addEventListener("click", handleClickOutside);
         }
     });
 
     onCleanup(() => {
-        if (typeof window !== "undefined") {
+        if (!isServer) {
             document.removeEventListener("click", handleClickOutside);
         }
     });

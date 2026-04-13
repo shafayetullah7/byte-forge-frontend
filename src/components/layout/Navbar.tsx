@@ -1,5 +1,6 @@
 import { A, useLocation } from "@solidjs/router";
 import { createSignal, onMount, onCleanup, Show } from "solid-js";
+import { isServer } from "solid-js/web";
 import { MagnifyingGlassIcon, ShoppingBagIcon, Bars3Icon } from "../icons";
 import { AuthSection } from "./AuthSection";
 import { MobileMenu } from "./MobileMenu";
@@ -27,13 +28,13 @@ export function Navbar() {
   };
 
   onMount(() => {
-    if (typeof window !== "undefined") {
+    if (!isServer) {
       document.addEventListener("click", handleClickOutside);
     }
   });
 
   onCleanup(() => {
-    if (typeof window !== "undefined") {
+    if (!isServer) {
       document.removeEventListener("click", handleClickOutside);
     }
   });

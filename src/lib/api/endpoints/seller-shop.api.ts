@@ -16,6 +16,10 @@ export interface CreateShopDto {
   address: string;
   division: string;
   city: string;
+  tradeLicenseNumber: string;
+  tradeLicenseDocumentId: string;
+  tinNumber?: string;
+  tinDocumentId?: string;
 }
 
 export interface Shop {

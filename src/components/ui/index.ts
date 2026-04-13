@@ -6,6 +6,8 @@ export { default as Input } from "./Input";
 export { default as SegmentedControl } from "./SegmentedControl";
 export { FileUpload } from "./FileUpload";
 export { ImageUpload } from "./ImageUpload";
+export { Select } from "./Select";
+export { AdvancedSelect } from "./AdvancedSelect";
 
 export type { ButtonProps } from "./Button";
 export type { BadgeProps } from "./Badge";
@@ -14,3 +16,5 @@ export type { InputProps } from "./Input";
 export type { SegmentedControlOption } from "./SegmentedControl";
 export type { FileUploadProps } from "./FileUpload";
 export type { ImageUploadProps } from "./ImageUpload";
+export type { SelectProps, SelectOption } from "./Select";
+export type { AdvancedSelectProps, AdvancedSelectOption } from "./AdvancedSelect";
