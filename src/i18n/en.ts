@@ -289,6 +289,16 @@ export const dict = {
       descriptionPlaceholder: "Tell customers about your shop",
       created: "Shop created successfully!",
       createFailed: "Failed to create shop",
+      errors: {
+        alreadyExists: "You already own a shop. Please manage your existing shop instead.",
+        nameTaken: "This shop name is already taken. Please choose another name.",
+        slugTaken: "This shop URL is already taken. Please choose another URL.",
+        mediaNotOwned: "You don't own the uploaded images. Please upload your own images.",
+        mediaNotFound: "One or more uploaded images were not found.",
+        validationFailed: "Please check your input and try again.",
+        englishTranslationRequired: "English translation is required.",
+        networkError: "Connection failed. Please check your internet and try again.",
+      },
       // Step descriptions for progress bar
       steps: {
         basicInfo: "Basic Info",

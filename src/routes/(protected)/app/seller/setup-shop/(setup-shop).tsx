@@ -102,10 +102,44 @@ export default function SetupShop() {
         },
     });
 
-    // Handle submission error automatically via toaster or inline UI
+    // Handle submission error with specific error code handling
     createEffect(() => {
         if (submission.error) {
-            toaster.error(submission.error.message || t("seller.shop.createFailed"));
+            const error = submission.error as any;
+            const errorData = error.response;
+            const errorCode = errorData?.error;
+            
+            // Handle network errors (no response from server)
+            if (error.statusCode === 0) {
+                toaster.error(t("seller.shop.errors.networkError"));
+                return;
+            }
+            
+            // Handle specific error codes based on backend response
+            if (errorCode === 'DUPLICATE_ENTRY') {
+                // User already owns a shop
+                toaster.error(t("seller.shop.errors.alreadyExists"));
+            } else if (errorCode === 'VALIDATION_ERROR') {
+                // Extract first validation error message
+                const validationMsg = errorData.validationErrors?.[0]?.message 
+                    || errorData.message 
+                    || t("seller.shop.errors.validationFailed");
+                // Check if it's a translation key
+                toaster.error(validationMsg.includes('.') ? t(validationMsg) : validationMsg);
+            } else if (errorCode === 'FORBIDDEN') {
+                // Media not owned by user
+                toaster.error(t("seller.shop.errors.mediaNotOwned"));
+            } else if (errorCode === 'NOT_FOUND') {
+                // Media not found
+                toaster.error(t("seller.shop.errors.mediaNotFound"));
+            } else {
+                // Fallback to generic message
+                const message = errorData?.message || error.message;
+                const displayMessage = message?.includes('.') 
+                    ? t(message) 
+                    : message || t("seller.shop.createFailed");
+                toaster.error(displayMessage);
+            }
         }
     });
 

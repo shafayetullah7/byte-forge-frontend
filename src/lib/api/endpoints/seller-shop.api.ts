@@ -8,18 +8,47 @@ export interface ShopTranslation {
   businessHours?: string;
 }
 
+export interface ShopContact {
+  businessEmail: string | null;
+  phone: string | null;
+  alternativePhone: string | null;
+  whatsapp: string | null;
+  telegram: string | null;
+  facebook: string | null;
+  instagram: string | null;
+  x: string | null;
+}
+
+export interface ShopAddressTranslation {
+  locale: string;
+  country: string;
+  division: string;
+  district: string;
+  street: string;
+}
+
+export interface ShopAddress {
+  postalCode: string | null;
+  latitude: string | null;
+  longitude: string | null;
+  googleMapsLink: string | null;
+  isVerified: boolean;
+  translations: ShopAddressTranslation[];
+}
+
+export interface ShopMedia {
+  id: string;
+  url: string;
+  mimeType: string;
+  fileName: string;
+  size: number;
+}
+
 export interface CreateShopDto {
   translations: ShopTranslation[];
   slug?: string;
   logoId?: string;
   bannerId?: string;
-  address: string;
-  division: string;
-  city: string;
-  tradeLicenseNumber: string;
-  tradeLicenseDocumentId: string;
-  tinNumber?: string;
-  tinDocumentId?: string;
 }
 
 export interface Shop {
@@ -27,12 +56,18 @@ export interface Shop {
   ownerId: string;
   slug: string;
   status: string;
-  address: string | null;
   logoId: string | null;
   bannerId: string | null;
   createdAt: string;
   updatedAt: string;
+  name: string;
+  description: string | null;
+  businessHours: string | null;
+  logo: ShopMedia | null;
+  banner: ShopMedia | null;
   translations: ShopTranslation[];
+  contact: ShopContact | null;
+  address: ShopAddress | null;
 }
 
 export interface ShopVerificationStatus {
