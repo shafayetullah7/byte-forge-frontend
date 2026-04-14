@@ -11,20 +11,19 @@ export const SellerLayout: ParentComponent = (props) => {
     const sidebarConfig: SidebarConfig = {
         mode: "seller",
         brandColor: "terracotta",
-        workspaceTitle: t("common.sellerWorkspace"),
         links: [
             {
-                href: "/app/seller",
+                href: "/app/seller/my-shop",
                 icon: Squares2x2Icon,
                 label: t("common.dashboard"),
             },
             {
-                href: "/app/seller/shops",
+                href: "/app/seller/my-shop/edit",
                 icon: ShoppingBagIcon,
-                label: t("common.shops"),
+                label: t("seller.shop.editShop"),
             },
             {
-                href: "/app/seller/setup-shop/verification",
+                href: "/app/seller/my-shop/verification",
                 icon: TagIcon,
                 label: t("seller.verification.title"),
             },

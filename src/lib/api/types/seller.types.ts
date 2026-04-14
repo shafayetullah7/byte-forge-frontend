@@ -58,10 +58,9 @@ export interface ShopStatus {
  */
 export interface ShopTranslationInput {
   locale: string;
-  shopName: string;
-  about: string;
-  brandStory?: string;
-  featuredHighlight?: string;
+  name: string;
+  description: string;
+  businessHours?: string;
 }
 
 /**
@@ -69,15 +68,10 @@ export interface ShopTranslationInput {
  */
 export interface ApplyAsSellerRequest {
   address: string;
-  slug?: string; // Optional - if not provided, will be generated from English shop name
+  slug?: string;
   logoId?: string;
   bannerId?: string;
   translations: ShopTranslationInput[];
-  tradeLicenseNumber: string;
-  tradeLicenseDocumentId: string; // Required for shop application
-  tinNumber?: string;
-  tinDocumentId?: string;
-  utilityBillDocumentId?: string;
 }
 
 /**

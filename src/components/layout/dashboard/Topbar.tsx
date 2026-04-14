@@ -32,8 +32,17 @@ export const Topbar: Component<TopbarProps> = (props) => {
 
     return (
         <header class="bg-white dark:bg-forest-800 border-b border-cream-200 dark:border-forest-700 h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 shadow-sm z-10 sticky top-0">
-            {/* Left Side: Mobile Menu Trigger & Search */}
-            <div class="flex items-center flex-1 gap-4">
+            {/* Left Side: Logo & Mobile Menu */}
+            <div class="flex items-center gap-2">
+                {/* Site Logo */}
+                <A
+                    href="/"
+                    class="text-xl font-bold text-forest-800 dark:text-sage-400 flex items-center gap-2 hover:text-forest-700 dark:hover:text-sage-300 transition-standard shrink-0"
+                >
+                    GreenHaven
+                    <span class="w-2 h-2 bg-forest-500 rounded-full"></span>
+                </A>
+
                 {/* Mobile Menu Button */}
                 <button
                     onClick={props.onMenuClick}
@@ -42,9 +51,11 @@ export const Topbar: Component<TopbarProps> = (props) => {
                 >
                     <Bars3Icon class="h-6 w-6" />
                 </button>
+            </div>
 
-                {/* Global Search */}
-                <div class="relative max-w-md w-full hidden sm:block">
+            {/* Center: Global Search */}
+            <div class="flex-1 max-w-md mx-4 hidden sm:block">
+                <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
                         <MagnifyingGlassIcon class="h-5 w-5 text-forest-600/70 dark:text-forest-400" />
                     </div>

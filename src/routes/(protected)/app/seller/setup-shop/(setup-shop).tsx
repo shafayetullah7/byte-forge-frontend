@@ -30,17 +30,15 @@ const applyAsSellerAction = action(async (formData: ApplyAsSellerRequest) => {
     await sellerApi.shops.create(formData);
     // Revalidate shop query and redirect in a single flight
     // This ensures the updated shop data is fetched immediately
-    throw redirect("/app/seller/shops", { revalidate: getShop.key });
+    throw redirect("/app/seller/my-shop", { revalidate: getShop.key });
 }, "apply-as-seller");
 
 /**
- * Step configuration for the multi-step form
+ * Step configuration for the multi-step form (Simplified 2-step)
  */
 const STEPS = [
     { id: 1, title: "seller.shop.steps.basicInfo", description: "seller.shop.steps.basicInfoDesc" },
     { id: 2, title: "seller.shop.steps.branding", description: "seller.shop.steps.brandingDesc" },
-    { id: 3, title: "seller.shop.steps.businessInfo", description: "seller.shop.steps.businessInfoDesc" },
-    { id: 4, title: "seller.shop.steps.verification", description: "seller.shop.steps.verificationDesc" },
 ] as const;
 
 /**
@@ -122,28 +120,23 @@ export default function SetupShop() {
 
     // Form data state - translations organized by locale using createStore for nested state
     const [translations, setTranslations] = createStore<Record<Locale, {
-        shopName: string;
-        about: string;
-        brandStory: string;
+        name: string;
+        description: string;
+        businessHours: string;
     }>>({
-        en: { shopName: "", about: "", brandStory: "" },
-        bn: { shopName: "", about: "", brandStory: "" },
+        en: { name: "", description: "", businessHours: "" },
+        bn: { name: "", description: "", businessHours: "" },
     });
 
     // Business info (same across all locales)
     const [businessInfo, setBusinessInfo] = createSignal({
         address: "",
-        tradeLicenseNumber: "",
-        tinNumber: "",
     });
 
     // Media IDs stored separately
     const [mediaIds, setMediaIds] = createSignal({
         logoId: undefined as string | undefined,
         bannerId: undefined as string | undefined,
-        tradeLicenseDocumentId: undefined as string | undefined,
-        tinDocumentId: undefined as string | undefined,
-        utilityBillDocumentId: undefined as string | undefined,
     });
 
     // Currently selected locale for editing translations in Step 1
@@ -155,7 +148,7 @@ export default function SetupShop() {
 
     // Auto-generate slug when English shop name changes (if not manual)
     createEffect(() => {
-        const englishName = translations.en.shopName;
+        const englishName = translations.en.name;
         if (!isSlugManual() && englishName) {
             setShopSlug(slugify(englishName));
         } else if (!isSlugManual() && !englishName) {
@@ -192,30 +185,6 @@ export default function SetupShop() {
         },
     });
 
-    const tradeLicenseUpload = useImageUpload({
-        maxSizeMB: 5,
-        allowedTypes: ["image/jpeg", "image/png", "image/webp", "application/pdf"],
-        onSuccess: (mediaId) => {
-            setMediaIds({ ...mediaIds(), tradeLicenseDocumentId: mediaId });
-        },
-    });
-
-    const tinUpload = useImageUpload({
-        maxSizeMB: 5,
-        allowedTypes: ["image/jpeg", "image/png", "image/webp", "application/pdf"],
-        onSuccess: (mediaId) => {
-            setMediaIds({ ...mediaIds(), tinDocumentId: mediaId });
-        },
-    });
-
-    const utilityBillUpload = useImageUpload({
-        maxSizeMB: 5,
-        allowedTypes: ["image/jpeg", "image/png", "image/webp", "application/pdf"],
-        onSuccess: (mediaId) => {
-            setMediaIds({ ...mediaIds(), utilityBillDocumentId: mediaId });
-        },
-    });
-
     // Handle submission error automatically via toaster or inline UI
     createEffect(() => {
         if (submission.error) {
@@ -233,42 +202,28 @@ export default function SetupShop() {
         // Step 1: Basic Info validation - validate BOTH locales
         if (current === 1) {
             // Validate English
-            if (translations.en.shopName.trim().length < 2) {
-                newErrors.shopName = t("seller.shop.nameRequired");
+            if (translations.en.name.trim().length < 1) {
+                newErrors.name = t("seller.shop.nameRequired");
                 isValid = false;
             }
-            if (translations.en.about.trim().length < 10) {
-                newErrors.about = t("seller.shop.aboutRequired");
+            if (translations.en.description.trim().length < 10) {
+                newErrors.description = t("seller.shop.aboutRequired");
                 isValid = false;
             }
 
             // Validate Bengali
-            if (translations.bn.shopName.trim().length < 2) {
-                newErrors.shopName = t("seller.shop.nameRequired");
+            if (translations.bn.name.trim().length < 1) {
+                newErrors.name = t("seller.shop.nameRequired");
                 isValid = false;
             }
-            if (translations.bn.about.trim().length < 10) {
-                newErrors.about = t("seller.shop.aboutRequired");
+            if (translations.bn.description.trim().length < 10) {
+                newErrors.description = t("seller.shop.aboutRequired");
                 isValid = false;
             }
-        }
 
-        // Step 3: Business Info validation
-        if (current === 3) {
+            // Validate address
             if (!currentBusinessInfo.address || currentBusinessInfo.address.trim().length < 5) {
                 newErrors.address = t("seller.shop.addressRequired");
-                isValid = false;
-            }
-            if (!currentBusinessInfo.tradeLicenseNumber || currentBusinessInfo.tradeLicenseNumber.trim().length === 0) {
-                newErrors.tradeLicenseNumber = t("seller.shop.tradeLicenseRequired");
-                isValid = false;
-            }
-        }
-
-        // Step 4: Check if trade license document is uploaded
-        if (current === 4) {
-            if (!mediaIds().tradeLicenseDocumentId) {
-                setDocErrors({ tradeLicense: t("seller.shop.tradeLicenseDocumentRequired") });
                 isValid = false;
             }
         }
@@ -299,7 +254,7 @@ export default function SetupShop() {
     const handleSubmit = (e: Event) => {
         e.preventDefault();
 
-        // Validate current step (step 4 when submitting)
+        // Validate current step
         if (!validateCurrentStep()) {
             return;
         }
@@ -307,32 +262,18 @@ export default function SetupShop() {
         const currentBusinessInfo = businessInfo();
         const media = mediaIds();
 
-        // Final validation - TIN consistency (if TIN number provided, document is required)
-        // Note: trade license document is already validated in validateCurrentStep() for step 4
-        if (currentBusinessInfo.tinNumber && !media.tinDocumentId) {
-            setDocErrors({ tin: t("seller.shop.tinDocumentRequired") });
-            return;
-        }
-
-        // Safety check: tradeLicenseDocumentId should be set after validation
-        if (!media.tradeLicenseDocumentId) {
-            setDocErrors({ tradeLicense: t("seller.shop.tradeLicenseDocumentRequired") });
-            return;
-        }
-
         // Build translations array for all locales with complete data
         const translationsPayload: ShopTranslationInput[] = AVAILABLE_LOCALES
             .filter((loc) => {
                 const translation = translations[loc];
-                // Only include locales with both shopName (≥2 chars) AND about (≥10 chars)
-                return translation.shopName.trim().length >= 2 && translation.about.trim().length >= 10;
+                // Only include locales with both name (≥1 char) AND description (≥10 chars)
+                return translation.name.trim().length >= 1 && translation.description.trim().length >= 10;
             })
             .map((loc) => ({
                 locale: loc,
-                shopName: translations[loc].shopName.trim(),
-                about: translations[loc].about.trim(),
-                brandStory: translations[loc].brandStory.trim() || undefined,
-                featuredHighlight: undefined,
+                name: translations[loc].name.trim(),
+                description: translations[loc].description.trim(),
+                businessHours: translations[loc].businessHours.trim() || undefined,
             }));
 
         const payload: ApplyAsSellerRequest = {
@@ -341,11 +282,6 @@ export default function SetupShop() {
             logoId: media.logoId,
             bannerId: media.bannerId,
             translations: translationsPayload,
-            tradeLicenseNumber: currentBusinessInfo.tradeLicenseNumber.trim(),
-            tradeLicenseDocumentId: media.tradeLicenseDocumentId,
-            tinNumber: currentBusinessInfo.tinNumber?.trim() || undefined,
-            tinDocumentId: media.tinDocumentId,
-            utilityBillDocumentId: media.utilityBillDocumentId,
         };
 
         applyTrigger(payload);
@@ -372,7 +308,7 @@ export default function SetupShop() {
                             <StepProgress currentStep={currentStep()} t={t} />
 
                             <form onSubmit={handleSubmit} class="space-y-6">
-                                {/* Step 1: Basic Info (Redesigned) */}
+                                {/* Step 1: Basic Info */}
                                 <Show when={currentStep() === 1}>
                                     <div class="space-y-8">
                                         {/* Section 1: Shop Identity */}
@@ -429,9 +365,9 @@ export default function SetupShop() {
                                             {/* Side-by-Side Language Columns */}
                                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                                 {/* English Column */}
-                                                <div class={`rounded-xl border-2 p-4 space-y-4 ${errors().shopName || errors().about
+                                                <div class={`rounded-xl border-2 p-4 space-y-4 ${errors().name || errors().description
                                                     ? "border-red-300 dark:border-red-700"
-                                                    : translations.en.shopName.trim().length >= 2 && translations.en.about.trim().length >= 10
+                                                    : translations.en.name.trim().length >= 1 && translations.en.description.trim().length >= 10
                                                         ? "border-forest-500 bg-forest-50 dark:bg-forest-900/20"
                                                         : "border-cream-200 dark:border-forest-700"
                                                     }`}>
@@ -446,12 +382,12 @@ export default function SetupShop() {
                                                             </p>
                                                         </div>
                                                         <div class="ml-auto">
-                                                            <Show when={translations.en.shopName.trim().length >= 2 && translations.en.about.trim().length >= 10} keyed>
+                                                            <Show when={translations.en.name.trim().length >= 1 && translations.en.description.trim().length >= 10} keyed>
                                                                 <svg class="w-6 h-6 text-forest-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                                 </svg>
                                                             </Show>
-                                                            <Show when={!(translations.en.shopName.trim().length >= 2 && translations.en.about.trim().length >= 10)} keyed>
+                                                            <Show when={!(translations.en.name.trim().length >= 1 && translations.en.description.trim().length >= 10)} keyed>
                                                                 <div class="w-6 h-6 rounded-full border-2 border-cream-300 dark:border-forest-600" />
                                                             </Show>
                                                         </div>
@@ -465,49 +401,49 @@ export default function SetupShop() {
                                                         </label>
                                                         <input
                                                             type="text"
-                                                            value={translations.en.shopName}
-                                                            onInput={(e) => setTranslations("en", "shopName", (e.target as HTMLInputElement).value)}
+                                                            value={translations.en.name}
+                                                            onInput={(e) => setTranslations("en", "name", (e.target as HTMLInputElement).value)}
                                                             placeholder={t("seller.shop.namePlaceholder")}
-                                                            class={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors body-small ${errors().shopName
+                                                            class={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors body-small ${errors().name
                                                                 ? "border-red-500 dark:border-red-400"
                                                                 : "border-cream-200 dark:border-forest-600"
                                                                 }`}
                                                         />
-                                                        <Show when={errors().shopName}>
-                                                            <p class="mt-1 body-small text-red-600 dark:text-red-400">{errors().shopName}</p>
+                                                        <Show when={errors().name}>
+                                                            <p class="mt-1 body-small text-red-600 dark:text-red-400">{errors().name}</p>
                                                         </Show>
                                                     </div>
 
-                                                    {/* English About */}
+                                                    {/* English Description */}
                                                     <div>
                                                         <label class="block h6 mb-1">
                                                             {t("seller.shop.aboutLabel")}
                                                             <span class="text-red-500 ml-1">*</span>
                                                         </label>
                                                         <textarea
-                                                            value={translations.en.about}
-                                                            onInput={(e) => setTranslations("en", "about", (e.target as HTMLTextAreaElement).value)}
+                                                            value={translations.en.description}
+                                                            onInput={(e) => setTranslations("en", "description", (e.target as HTMLTextAreaElement).value)}
                                                             placeholder={t("seller.shop.aboutPlaceholder")}
-                                                            class={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors resize-none body-small ${errors().about
+                                                            class={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors resize-none body-small ${errors().description
                                                                 ? "border-red-500 dark:border-red-400"
                                                                 : "border-cream-200 dark:border-forest-600"
                                                                 }`}
                                                             rows={4}
                                                         />
-                                                        <Show when={errors().about}>
-                                                            <p class="mt-1 body-small text-red-600 dark:text-red-400">{errors().about}</p>
+                                                        <Show when={errors().description}>
+                                                            <p class="mt-1 body-small text-red-600 dark:text-red-400">{errors().description}</p>
                                                         </Show>
                                                     </div>
 
-                                                    {/* English Brand Story */}
+                                                    {/* English Business Hours */}
                                                     <div>
                                                         <label class="block h6 mb-1">
                                                             {t("seller.shop.brandStoryLabel")}
                                                             <span class="text-gray-400 ml-1">({t("common.optional")})</span>
                                                         </label>
                                                         <textarea
-                                                            value={translations.en.brandStory}
-                                                            onInput={(e) => setTranslations("en", "brandStory", (e.target as HTMLTextAreaElement).value)}
+                                                            value={translations.en.businessHours}
+                                                            onInput={(e) => setTranslations("en", "businessHours", (e.target as HTMLTextAreaElement).value)}
                                                             placeholder={t("seller.shop.brandStoryPlaceholder")}
                                                             class="w-full px-3 py-2 rounded-lg border border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors resize-none body-small"
                                                             rows={3}
@@ -516,9 +452,9 @@ export default function SetupShop() {
                                                 </div>
 
                                                 {/* Bengali Column */}
-                                                <div class={`rounded-xl border-2 p-4 space-y-4 ${errors().shopName || errors().about
+                                                <div class={`rounded-xl border-2 p-4 space-y-4 ${errors().name || errors().description
                                                     ? "border-red-300 dark:border-red-700"
-                                                    : translations.bn.shopName.trim().length >= 2 && translations.bn.about.trim().length >= 10
+                                                    : translations.bn.name.trim().length >= 1 && translations.bn.description.trim().length >= 10
                                                         ? "border-forest-500 bg-forest-50 dark:bg-forest-900/20"
                                                         : "border-cream-200 dark:border-forest-700"
                                                     }`}>
@@ -533,12 +469,12 @@ export default function SetupShop() {
                                                             </p>
                                                         </div>
                                                         <div class="ml-auto">
-                                                            <Show when={translations.bn.shopName.trim().length >= 2 && translations.bn.about.trim().length >= 10} keyed>
+                                                            <Show when={translations.bn.name.trim().length >= 1 && translations.bn.description.trim().length >= 10} keyed>
                                                                 <svg class="w-6 h-6 text-forest-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                                 </svg>
                                                             </Show>
-                                                            <Show when={!(translations.bn.shopName.trim().length >= 2 && translations.bn.about.trim().length >= 10)} keyed>
+                                                            <Show when={!(translations.bn.name.trim().length >= 1 && translations.bn.description.trim().length >= 10)} keyed>
                                                                 <div class="w-6 h-6 rounded-full border-2 border-cream-300 dark:border-forest-600" />
                                                             </Show>
                                                         </div>
@@ -552,51 +488,51 @@ export default function SetupShop() {
                                                         </label>
                                                         <input
                                                             type="text"
-                                                            value={translations.bn.shopName}
-                                                            onInput={(e) => setTranslations("bn", "shopName", (e.target as HTMLInputElement).value)}
+                                                            value={translations.bn.name}
+                                                            onInput={(e) => setTranslations("bn", "name", (e.target as HTMLInputElement).value)}
                                                             placeholder={t("seller.shop.namePlaceholder")}
-                                                            class={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors body-small ${errors().shopName
+                                                            class={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors body-small ${errors().name
                                                                 ? "border-red-500 dark:border-red-400"
                                                                 : "border-cream-200 dark:border-forest-600"
                                                                 }`}
                                                             dir="auto"
                                                         />
-                                                        <Show when={errors().shopName}>
-                                                            <p class="mt-1 body-small text-red-600 dark:text-red-400">{errors().shopName}</p>
+                                                        <Show when={errors().name}>
+                                                            <p class="mt-1 body-small text-red-600 dark:text-red-400">{errors().name}</p>
                                                         </Show>
                                                     </div>
 
-                                                    {/* Bengali About */}
+                                                    {/* Bengali Description */}
                                                     <div>
                                                         <label class="block h6 mb-1">
                                                             {t("seller.shop.aboutLabel")}
                                                             <span class="text-red-500 ml-1">*</span>
                                                         </label>
                                                         <textarea
-                                                            value={translations.bn.about}
-                                                            onInput={(e) => setTranslations("bn", "about", (e.target as HTMLTextAreaElement).value)}
+                                                            value={translations.bn.description}
+                                                            onInput={(e) => setTranslations("bn", "description", (e.target as HTMLTextAreaElement).value)}
                                                             placeholder={t("seller.shop.aboutPlaceholder")}
-                                                            class={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors resize-none body-small ${errors().about
+                                                            class={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors resize-none body-small ${errors().description
                                                                 ? "border-red-500 dark:border-red-400"
                                                                 : "border-cream-200 dark:border-forest-600"
                                                                 }`}
                                                             rows={4}
                                                             dir="auto"
                                                         />
-                                                        <Show when={errors().about}>
-                                                            <p class="mt-1 body-small text-red-600 dark:text-red-400">{errors().about}</p>
+                                                        <Show when={errors().description}>
+                                                            <p class="mt-1 body-small text-red-600 dark:text-red-400">{errors().description}</p>
                                                         </Show>
                                                     </div>
 
-                                                    {/* Bengali Brand Story */}
+                                                    {/* Bengali Business Hours */}
                                                     <div>
                                                         <label class="block h6 mb-1">
                                                             {t("seller.shop.brandStoryLabel")}
                                                             <span class="text-gray-400 ml-1">({t("common.optional")})</span>
                                                         </label>
                                                         <textarea
-                                                            value={translations.bn.brandStory}
-                                                            onInput={(e) => setTranslations("bn", "brandStory", (e.target as HTMLTextAreaElement).value)}
+                                                            value={translations.bn.businessHours}
+                                                            onInput={(e) => setTranslations("bn", "businessHours", (e.target as HTMLTextAreaElement).value)}
                                                             placeholder={t("seller.shop.brandStoryPlaceholder")}
                                                             class="w-full px-3 py-2 rounded-lg border border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors resize-none body-small"
                                                             rows={3}
@@ -623,10 +559,35 @@ export default function SetupShop() {
                                                 </div>
                                             </Card>
                                         </div>
+
+                                        {/* Section 3: Address */}
+                                        <div class="space-y-4">
+                                            <div>
+                                                <h3 class="h5 mb-1">
+                                                    {t("seller.shop.addressSectionTitle")}
+                                                </h3>
+                                                <p class="body-small text-forest-700/70 dark:text-gray-400">
+                                                    {t("seller.shop.addressSectionDescription")}
+                                                </p>
+                                            </div>
+
+                                            <ValidatedInput
+                                                label={t("seller.shop.addressLabel")}
+                                                type="text"
+                                                value={businessInfo().address}
+                                                onInput={(e) => setBusinessInfo({ ...businessInfo(), address: (e.target as HTMLInputElement).value })}
+                                                placeholder={t("seller.shop.addressPlaceholder")}
+                                                required
+                                                minLength={5}
+                                                maxLength={500}
+                                                error={errors().address}
+                                                hint={t("seller.shop.addressHint")}
+                                            />
+                                        </div>
                                     </div>
                                 </Show>
 
-                                {/* Step 2: Branding */}
+                                {/* Step 2: Branding (Optional) */}
                                 <Show when={currentStep() === 2}>
                                     <div class="space-y-6">
                                         <div class="text-center mb-6">
@@ -638,7 +599,7 @@ export default function SetupShop() {
                                             </p>
                                         </div>
 
-                                        {/* Logo Upload */}
+                                        {/* Logo Upload (Optional) */}
                                         <ImageUpload
                                             preview={logoUpload.preview()}
                                             isUploading={logoUpload.isUploading()}
@@ -646,10 +607,10 @@ export default function SetupShop() {
                                             onFileSelect={logoUpload.upload}
                                             onDelete={logoUpload.deleteMedia}
                                             label={t("seller.shop.logoLabel")}
-                                            description="JPEG, PNG, WEBP, or GIF (max 3MB)"
+                                            description="JPEG, PNG, WEBP, or GIF (max 3MB) - Optional"
                                         />
 
-                                        {/* Banner Upload */}
+                                        {/* Banner Upload (Optional) */}
                                         <ImageUpload
                                             preview={bannerUpload.preview()}
                                             isUploading={bannerUpload.isUploading()}
@@ -657,104 +618,15 @@ export default function SetupShop() {
                                             onFileSelect={bannerUpload.upload}
                                             onDelete={bannerUpload.deleteMedia}
                                             label={t("seller.shop.bannerLabel")}
-                                            description="JPEG, PNG, WEBP, or GIF (max 3MB)"
+                                            description="JPEG, PNG, WEBP, or GIF (max 3MB) - Optional"
                                         />
-                                    </div>
-                                </Show>
 
-                                {/* Step 3: Business Info */}
-                                <Show when={currentStep() === 3}>
-                                    <div class="space-y-6">
-                                        <div class="text-center mb-6">
-                                            <h2 class="h1">
-                                                {t("seller.shop.businessInfoTitle")}
-                                            </h2>
-                                            <p class="body-base text-forest-700/70 dark:text-gray-400">
-                                                {t("seller.shop.businessInfoSubtitle")}
+                                        {/* Skip Note */}
+                                        <Card variant="tinted" class="p-4">
+                                            <p class="body-small text-forest-700/70 dark:text-gray-400">
+                                                💡 You can add branding later. Click "Create Shop" to finish setup now.
                                             </p>
-                                        </div>
-
-                                        {/* Address */}
-                                        <ValidatedInput
-                                            label={t("seller.shop.addressLabel")}
-                                            type="text"
-                                            value={businessInfo().address}
-                                            onInput={(e) => setBusinessInfo({ ...businessInfo(), address: (e.target as HTMLInputElement).value })}
-                                            placeholder={t("seller.shop.addressPlaceholder")}
-                                            required
-                                            minLength={5}
-                                            maxLength={500}
-                                            error={errors().address}
-                                            hint={t("seller.shop.addressHint")}
-                                        />
-
-                                        {/* Trade License Number */}
-                                        <ValidatedInput
-                                            label={t("seller.shop.tradeLicenseNumberLabel")}
-                                            type="text"
-                                            value={businessInfo().tradeLicenseNumber}
-                                            onInput={(e) => setBusinessInfo({ ...businessInfo(), tradeLicenseNumber: (e.target as HTMLInputElement).value })}
-                                            placeholder={t("seller.shop.tradeLicenseNumberPlaceholder")}
-                                            required
-                                            error={errors().tradeLicenseNumber}
-                                        />
-                                    </div>
-                                </Show>
-
-                                {/* Step 4: Verification Documents */}
-                                <Show when={currentStep() === 4}>
-                                    <div class="space-y-6">
-                                        <div class="text-center mb-6">
-                                            <h2 class="h1">
-                                                {t("seller.shop.verificationTitle")}
-                                            </h2>
-                                            <p class="body-base text-forest-700/70 dark:text-gray-400">
-                                                {t("seller.shop.verificationSubtitle")}
-                                            </p>
-                                        </div>
-
-                                        {/* Trade License Document */}
-                                        <div>
-                                            <ImageUpload
-                                                preview={tradeLicenseUpload.preview()}
-                                                isUploading={tradeLicenseUpload.isUploading()}
-                                                isDeleting={tradeLicenseUpload.isDeleting()}
-                                                onFileSelect={tradeLicenseUpload.upload}
-                                                onDelete={tradeLicenseUpload.deleteMedia}
-                                                label={t("seller.shop.tradeLicenseDocumentLabel")}
-                                                description={t("seller.shop.tradeLicenseDocumentDesc")}
-                                            />
-                                            {docErrors().tradeLicense && (
-                                                <p class="mt-1 body-small text-red-600 dark:text-red-400">{docErrors().tradeLicense}</p>
-                                            )}
-                                        </div>
-
-                                        {/* TIN Document (Optional) */}
-                                        <div>
-                                            <ImageUpload
-                                                preview={tinUpload.preview()}
-                                                isUploading={tinUpload.isUploading()}
-                                                isDeleting={tinUpload.isDeleting()}
-                                                onFileSelect={tinUpload.upload}
-                                                onDelete={tinUpload.deleteMedia}
-                                                label={t("seller.shop.tinDocumentLabel")}
-                                                description={t("seller.shop.tinDocumentDesc")}
-                                            />
-                                            {docErrors().tin && (
-                                                <p class="mt-1 body-small text-red-600 dark:text-red-400">{docErrors().tin}</p>
-                                            )}
-                                        </div>
-
-                                        {/* Utility Bill (Optional) */}
-                                        <ImageUpload
-                                            preview={utilityBillUpload.preview()}
-                                            isUploading={utilityBillUpload.isUploading()}
-                                            isDeleting={utilityBillUpload.isDeleting()}
-                                            onFileSelect={utilityBillUpload.upload}
-                                            onDelete={utilityBillUpload.deleteMedia}
-                                            label={t("seller.shop.utilityBillDocumentLabel")}
-                                            description={t("seller.shop.utilityBillDocumentDesc")}
-                                        />
+                                        </Card>
                                     </div>
                                 </Show>
 

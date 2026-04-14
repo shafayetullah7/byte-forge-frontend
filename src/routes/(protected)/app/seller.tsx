@@ -1,8 +1,12 @@
 import { ParentComponent } from "solid-js";
-import { SellerLayout } from "~/components/layout/dashboard/SellerLayout";
+import { TopbarLayout } from "~/components/layout/dashboard/TopbarLayout";
 
 const SellerRouteLayout: ParentComponent = (props) => {
-    return <SellerLayout>{props.children}</SellerLayout>;
+    return (
+        <TopbarLayout>
+            {props.children}
+        </TopbarLayout>
+    );
 };
 
 export default SellerRouteLayout;

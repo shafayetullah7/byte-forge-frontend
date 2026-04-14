@@ -1,6 +1,7 @@
 import { useNavigate, createAsync, Navigate } from "@solidjs/router";
 import { Suspense, Show, ErrorBoundary, ParentComponent } from "solid-js";
 import { getShopStatus } from "~/lib/context/shop-context";
+import { SellerLayout } from "~/components/layout/dashboard/SellerLayout";
 
 const SellerProtectedLayout: ParentComponent = (props) => {
     const shopStatus = createAsync(() => getShopStatus());
@@ -12,7 +13,10 @@ const SellerProtectedLayout: ParentComponent = (props) => {
                     when={shopStatus() !== null}
                     fallback={<Navigate href="/app/seller/setup-shop" />}
                 >
-                    {props.children}
+                    {/* Apply SellerLayout only after shop status is confirmed */}
+                    <SellerLayout>
+                        {props.children}
+                    </SellerLayout>
                 </Show>
             </Suspense>
         </ErrorBoundary>

@@ -10,7 +10,6 @@ export interface NavLink {
 export interface SidebarConfig {
     mode: "buyer" | "seller";
     brandColor: "forest" | "terracotta";
-    workspaceTitle: string;
     links: NavLink[];
 }
 
@@ -76,25 +75,9 @@ export const Sidebar: Component<SidebarProps> = (props) => {
                     }`}
             >
                 <div class="h-full flex flex-col">
-                    {/* Logo Area */}
-                    <div class="flex items-center h-16 flex-shrink-0 px-4 border-b border-cream-200 dark:border-forest-700">
-                        <A
-                            href="/"
-                            class="text-xl font-bold text-forest-800 dark:text-sage-400 flex items-center gap-2 hover:text-forest-700 dark:hover:text-sage-300 transition-standard"
-                        >
-                            GreenHaven
-                            <span class="w-2 h-2 bg-forest-500 rounded-full"></span>
-                        </A>
-                    </div>
-
                     {/* Navigation Links */}
                     <div class="flex-1 flex flex-col overflow-y-auto pt-5 pb-4 px-3">
                         <nav class="flex-1 space-y-1">
-                            {/* Workspace Title */}
-                            <div class="px-3 mb-3 body-small font-semibold text-forest-700/60 dark:text-cream-100/50 uppercase tracking-wider">
-                                {props.config.workspaceTitle}
-                            </div>
-
                             {/* Navigation Links */}
                             <For each={props.config.links}>
                                 {(link) => <NavItem {...link} />}

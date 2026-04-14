@@ -10,7 +10,6 @@ export const BuyerLayout: ParentComponent = (props) => {
     const sidebarConfig = createMemo<SidebarConfig>(() => ({
         mode: "buyer",
         brandColor: "forest",
-        workspaceTitle: t("common.dashboard"),
         links: [
             {
                 href: "/app",
