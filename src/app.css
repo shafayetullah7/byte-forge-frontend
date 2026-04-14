@@ -201,3 +201,29 @@ body {
 @utility focus-ring-flat {
   @apply focus:outline-none focus:border-forest-500 focus:ring-0;
 }
+
+/* Custom Scrollbar for Modal Content */
+@utility custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-forest-300);
+    border-radius: 3px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--color-forest-400);
+  }
+}
+
+.dark .custom-scrollbar {
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-forest-500);
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--color-forest-400);
+  }
+}

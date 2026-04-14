@@ -80,6 +80,23 @@ export interface ShopVerificationStatus {
   updatedAt: string;
 }
 
+export interface UpdateAddressDto {
+  postalCode?: string;
+  latitude?: number;
+  longitude?: number;
+  googleMapsLink?: string;
+  country?: string;
+  division?: string;
+  district?: string;
+  street?: string;
+  translations?: {
+    country?: string;
+    division?: string;
+    district?: string;
+    street?: string;
+  };
+}
+
 /**
  * Seller Shop API endpoints
  */
@@ -163,6 +180,16 @@ export const sellerShopApi = {
   delete: async (): Promise<void> => {
     return fetcher<void>('/api/v1/user/seller/shops/my-shop', {
       method: 'DELETE',
+    });
+  },
+
+  /**
+   * Update shop address
+   */
+  updateAddress: async (dto: UpdateAddressDto): Promise<Shop> => {
+    return fetcher<Shop>('/api/v1/user/seller/shops/my-shop/address', {
+      method: 'PATCH',
+      body: JSON.stringify(dto),
     });
   },
 };

@@ -18,12 +18,12 @@ export default function Card(props: CardProps) {
   const variant = local.variant || "default";
 
   // Base styles
-  const baseStyles = "flat-card transition-standard bg-white dark:bg-forest-800 rounded-xl shadow-lg";
+  const baseStyles = "flat-card transition-standard bg-white dark:bg-forest-800 rounded-2xl shadow-sm";
 
   // Variant styles
   const variantStyles = {
-    default: "",
-    bordered: "border-2 border-cream-200 dark:border-forest-600 hover:border-forest-300",
+    default: "border border-gray-200 dark:border-gray-700",
+    bordered: "border-2 border-gray-200 dark:border-gray-700 hover:border-forest-300",
     tinted: "bg-forest-50 dark:bg-forest-900/50 border-transparent",
   };
 

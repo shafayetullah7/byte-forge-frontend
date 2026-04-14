@@ -1,5 +1,4 @@
 import { A } from "@solidjs/router";
-import Button from "~/components/ui/Button";
 import type { ShopMedia } from "~/lib/api/endpoints/seller-shop.api";
 
 interface ShopHeaderProps {
@@ -9,8 +8,13 @@ interface ShopHeaderProps {
 }
 
 export default function ShopHeader(props: ShopHeaderProps) {
+  const copyUrl = () => {
+    const url = `${window.location.origin}/shop/${props.slug}`;
+    navigator.clipboard.writeText(url);
+  };
+
   return (
-    <div class="mb-10">
+    <div class="mb-8">
       {/* Banner with Gradient Overlay */}
       <div class="relative h-56 md:h-72 rounded-2xl overflow-hidden mb-8 group">
         {props.banner ? (
@@ -36,7 +40,7 @@ export default function ShopHeader(props: ShopHeaderProps) {
             </div>
             <div class="flex items-center justify-center h-full">
               <div class="text-center px-4">
-                <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
                   <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
@@ -89,40 +93,22 @@ export default function ShopHeader(props: ShopHeaderProps) {
           </div>
 
           <div class="pb-2">
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-              My Shop
-            </h1>
             <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
               </svg>
-              <span class="font-mono">byteforge.com/shop/{props.slug}</span>
-              <button class="hover:text-terracotta-500 transition-colors" title="Copy URL">
+              <span class="font-mono truncate max-w-[200px] sm:max-w-md">byteforge.com/shop/{props.slug}</span>
+              <button 
+                onClick={copyUrl} 
+                class="p-1.5 hover:text-terracotta-500 hover:bg-terracotta-50 dark:hover:bg-terracotta-900/20 rounded-lg transition-all" 
+                title="Copy URL"
+              >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
               </button>
             </div>
           </div>
-        </div>
-
-        <div class="flex gap-3 pb-2">
-          <A href="/seller/my-shop/verification">
-            <Button variant="outline" size="md">
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Verification
-            </Button>
-          </A>
-          <A href="/seller/my-shop/edit">
-            <Button variant="primary" size="md">
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
-              Edit Shop
-            </Button>
-          </A>
         </div>
       </div>
     </div>

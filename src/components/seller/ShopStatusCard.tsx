@@ -1,4 +1,4 @@
-import Badge from "~/components/ui/Badge";
+import { useI18n } from "~/i18n";
 
 interface StatusConfig {
   color: "default" | "forest" | "sage" | "terracotta" | "cream";
@@ -15,6 +15,8 @@ interface ShopStatusCardProps {
 }
 
 export default function ShopStatusCard(props: ShopStatusCardProps) {
+  const { t } = useI18n();
+  
   const statusColors: Record<string, string> = {
     default: "from-gray-400 to-gray-500",
     forest: "from-forest-500 to-forest-600",
@@ -31,50 +33,52 @@ export default function ShopStatusCard(props: ShopStatusCardProps) {
     cream: "bg-cream-50 dark:bg-cream-900/30",
   };
 
+  const statusIcons: Record<string, string> = {
+    default: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+    forest: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
+    sage: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
+    terracotta: "M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+    cream: "M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+  };
+
   const gradientColor = statusColors[props.statusConfig.color] || statusColors.default;
   const bgColor = bgColors[props.statusConfig.color] || bgColors.default;
+  const statusIcon = statusIcons[props.statusConfig.color] || statusIcons.default;
 
   return (
     <div class={`${bgColor} rounded-2xl p-6 sm:p-8 mb-8 border border-gray-200 dark:border-gray-700`}>
       <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
         <div class="flex-1">
           {/* Shop Names */}
-          <div class="mb-4">
-            <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-              {props.shopName || "Unnamed Shop"}
+          <div class="mb-3">
+            <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1 truncate max-w-full">
+              {props.shopName || t("seller.shop.myShop.noShopYet.title")}
             </h2>
             {props.bengaliName && (
-              <p class="text-xl text-gray-600 dark:text-gray-400" dir="auto">
+              <p class="text-lg text-gray-600 dark:text-gray-400 truncate max-w-full" dir="auto">
                 {props.bengaliName}
               </p>
             )}
           </div>
-
+          
           {/* Shop URL */}
-          <div class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-forest-900 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
             </svg>
-            <span class="font-mono text-sm text-gray-600 dark:text-gray-300">
-              byteforge.com/shop/{props.slug}
-            </span>
-            <button class="hover:text-terracotta-500 transition-colors" title="Copy URL">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-            </button>
+            <span class="font-mono">byteforge.com/shop/{props.slug}</span>
           </div>
         </div>
 
         {/* Status Badge - Large & Prominent */}
-        <div class="flex flex-col items-start lg:items-end gap-3">
-          <div class={`inline-flex items-center gap-3 px-5 py-3 rounded-xl bg-gradient-to-r ${gradientColor} text-white shadow-lg`}>
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <div class="flex flex-col items-start lg:items-end gap-2.5">
+          <div class={`inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-gradient-to-r ${gradientColor} text-white shadow-md`}>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={statusIcon} />
             </svg>
-            <span class="text-lg font-bold">{props.statusConfig.label}</span>
+            <span class="text-base font-bold">{props.statusConfig.label}</span>
           </div>
-          <p class="text-sm text-gray-600 dark:text-gray-400 text-right max-w-xs">
+          <p class="text-sm text-gray-600 dark:text-gray-400 text-right max-w-xs leading-relaxed">
             {props.statusConfig.description}
           </p>
         </div>
