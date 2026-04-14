@@ -22,7 +22,7 @@ export default function Input(props: InputProps) {
   return (
     <div class="w-full">
       <Show when={local.label}>
-        <label class="block h6 mb-2">
+        <label class="block body-small font-semibold mb-2">
           {local.label}
         </label>
       </Show>

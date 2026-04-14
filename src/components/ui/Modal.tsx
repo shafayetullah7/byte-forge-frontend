@@ -1,4 +1,4 @@
-import { JSX, Show } from "solid-js";
+import { JSX, Show, createEffect, onCleanup } from "solid-js";
 import { Portal } from "solid-js/web";
 
 interface ModalProps {
@@ -7,14 +7,48 @@ interface ModalProps {
   title?: string;
   children: JSX.Element;
   size?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl";
+  labelledBy?: string;
+  describedBy?: string;
 }
 
 export function Modal(props: ModalProps) {
+  let modalContentRef: HTMLDivElement | undefined;
+
   const handleBackdropClick = (e: MouseEvent) => {
     if (e.target === e.currentTarget) {
       props.onClose();
     }
   };
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "Escape") {
+      props.onClose();
+    }
+  };
+
+  // Focus trap and keyboard handling
+  createEffect(() => {
+    if (props.isOpen) {
+      // Add keyboard listener
+      document.addEventListener("keydown", handleKeyDown);
+      
+      // Focus first focusable element
+      setTimeout(() => {
+        const firstFocusable = modalContentRef?.querySelector(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        ) as HTMLElement;
+        firstFocusable?.focus();
+      }, 0);
+
+      // Prevent body scroll
+      document.body.style.overflow = "hidden";
+    }
+
+    onCleanup(() => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    });
+  });
 
   const sizeClasses = {
     sm: "max-w-sm",
@@ -27,23 +61,30 @@ export function Modal(props: ModalProps) {
 
   return (
     <Show when={props.isOpen}>
-      <Portal>
+      <Portal mount={document.body}>
         <div
           class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
           onClick={handleBackdropClick}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={props.labelledBy || props.title ? "modal-title" : undefined}
+          aria-describedby={props.describedBy}
         >
           <div
-            class={`relative w-full ${sizeClasses[props.size || "md"]} mx-4 bg-white dark:bg-forest-800 rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-200`}
+            ref={modalContentRef!}
+            class={`relative w-full ${sizeClasses[props.size || "md"]} mx-4 bg-white dark:bg-forest-800 rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-200 max-h-[90vh] flex flex-col`}
+            onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
             <Show when={props.title}>
-              <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-forest-700">
+              <div id="modal-title" class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-forest-700 flex-shrink-0">
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
                   {props.title}
                 </h2>
                 <button
                   onClick={props.onClose}
                   class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-forest-700 transition-colors"
+                  aria-label="Close modal"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -68,6 +109,7 @@ export function Modal(props: ModalProps) {
               <button
                 onClick={props.onClose}
                 class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-forest-700 transition-colors"
+                aria-label="Close modal"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -87,7 +129,7 @@ export function Modal(props: ModalProps) {
             </Show>
 
             {/* Content */}
-            <div class="p-6">{props.children}</div>
+            <div class="p-6 overflow-y-auto custom-scrollbar flex-1 min-h-0">{props.children}</div>
           </div>
         </div>
       </Portal>

@@ -78,15 +78,19 @@ export default function AddressEditModal(props: AddressEditModalProps) {
       onClose={props.onClose} 
       title={t("seller.shop.myShop.shopAddress.editTitle")}
       size="2xl"
+      labelledBy="modal-title"
+      describedBy="modal-description"
     >
-      <div class="max-h-[90vh] flex flex-col">
-        {/* Scrollable Content Area */}
-        <div class="overflow-y-auto px-1 space-y-4 custom-scrollbar">
+      <div id="modal-description" class="sr-only">
+        Edit your shop address information in both English and Bengali
+      </div>
+      {/* Scrollable Content Area */}
+      <div class="overflow-y-auto px-1 space-y-4 custom-scrollbar">
           {/* English and Bengali Address Sections - Side by Side on large screens */}
           <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
             {/* English Address Section */}
-            <div class="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
-              <div class="flex items-center gap-3 mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+            <div class="p-4 bg-cream-50 dark:bg-forest-900/30 rounded-xl border border-cream-200 dark:border-forest-700">
+              <div class="flex items-center gap-3 mb-3 pb-2 border-b border-cream-200 dark:border-forest-700">
                 <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-forest-500 to-forest-600 text-white text-xs font-bold shadow-md flex-shrink-0">
                   EN
                 </div>
@@ -128,8 +132,8 @@ export default function AddressEditModal(props: AddressEditModalProps) {
             </div>
 
             {/* Bengali Address Section */}
-            <div class="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
-              <div class="flex items-center gap-3 mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+            <div class="p-4 bg-cream-50 dark:bg-forest-900/30 rounded-xl border border-cream-200 dark:border-forest-700">
+              <div class="flex items-center gap-3 mb-3 pb-2 border-b border-cream-200 dark:border-forest-700">
                 <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-terracotta-500 to-terracotta-600 text-white text-xs font-bold shadow-md flex-shrink-0">
                   বা
                 </div>
@@ -196,7 +200,7 @@ export default function AddressEditModal(props: AddressEditModalProps) {
                 type="url"
               />
               <Input
-                label="Latitude"
+                label={t("seller.shop.myShop.shopAddress.latitude")}
                 value={formData().latitude}
                 onInput={(e) => updateField("latitude", e.currentTarget.value)}
                 placeholder="23.8103"
@@ -204,7 +208,7 @@ export default function AddressEditModal(props: AddressEditModalProps) {
                 step="0.0000000001"
               />
               <Input
-                label="Longitude"
+                label={t("seller.shop.myShop.shopAddress.longitude")}
                 value={formData().longitude}
                 onInput={(e) => updateField("longitude", e.currentTarget.value)}
                 placeholder="90.4125"
@@ -244,7 +248,6 @@ export default function AddressEditModal(props: AddressEditModalProps) {
             )}
           </Button>
         </div>
-      </div>
     </Modal>
   );
 }

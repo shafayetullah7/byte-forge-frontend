@@ -345,6 +345,8 @@ export const dict = {
           district: "District",
           street: "Street Address",
           googleMapsLink: "Google Maps Link",
+          latitude: "Latitude",
+          longitude: "Longitude",
           openInGoogleMaps: "Open in Google Maps",
           verifiedAddress: "Verified Address",
           noEnglishAddress: "No English address provided",

@@ -347,6 +347,8 @@ export const dict = {
           district: "জেলা",
           street: "রাস্তার ঠিকানা",
           googleMapsLink: "গুগল ম্যাপস লিঙ্ক",
+          latitude: "অক্ষাংশ",
+          longitude: "দ্রাঘিমাংশ",
           openInGoogleMaps: "গুগল ম্যাপে খুলুন",
           verifiedAddress: "যাচাইকৃত ঠিকানা",
           noEnglishAddress: "কোন ইংরেজি ঠিকানা দেওয়া হয়নি",
