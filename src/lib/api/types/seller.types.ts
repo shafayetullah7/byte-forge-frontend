@@ -29,7 +29,6 @@ export interface Shop {
   id: string;
   ownerId: string;
   slug: string;
-  address: string | null;
   logoId: string | null;
   bannerId: string | null;
   status: string;
@@ -67,7 +66,6 @@ export interface ShopTranslationInput {
  * Apply as Seller Request (matches backend ApplySellerDto)
  */
 export interface ApplyAsSellerRequest {
-  address: string;
   slug?: string;
   logoId?: string;
   bannerId?: string;
