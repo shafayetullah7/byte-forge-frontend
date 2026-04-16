@@ -2,10 +2,12 @@ import { fetcher } from '../api-client';
 import { ApiError } from '../types';
 
 export interface ShopTranslation {
+  id: string;
+  shopId: string;
   locale: string;
   name: string;
-  description: string;
-  businessHours?: string;
+  description: string | null;
+  businessHours: string | null;
 }
 
 export interface ShopContact {
@@ -34,6 +36,24 @@ export interface ShopAddress {
   googleMapsLink: string | null;
   isVerified: boolean;
   translations: ShopAddressTranslation[];
+}
+
+export interface AddressTranslation {
+  country: string;
+  division: string;
+  district: string;
+  street: string;
+}
+
+export interface UpdateAddressDto {
+  postalCode?: string;
+  latitude?: string;
+  longitude?: string;
+  googleMapsLink?: string;
+  translations?: {
+    en: AddressTranslation;
+    bn: AddressTranslation;
+  };
 }
 
 export interface ShopMedia {
@@ -78,23 +98,6 @@ export interface ShopVerificationStatus {
   verifiedAt: string | null;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface UpdateAddressDto {
-  postalCode?: string;
-  latitude?: number;
-  longitude?: number;
-  googleMapsLink?: string;
-  country?: string;
-  division?: string;
-  district?: string;
-  street?: string;
-  translations?: {
-    country?: string;
-    division?: string;
-    district?: string;
-    street?: string;
-  };
 }
 
 /**

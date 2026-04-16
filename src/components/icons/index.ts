@@ -20,6 +20,9 @@ export { DollarSignIcon } from "./DollarSignIcon";
 export { BankIcon } from "./BankIcon";
 export { CogIcon } from "./CogIcon";
 export { ClockIcon } from "./ClockIcon";
+export { ShopIcon } from "./ShopIcon";
+export { BoltIcon } from "./BoltIcon";
+export { PackageIcon } from "./PackageIcon";
 
 export * from './TagIcon';
 export * from './ArrowsRightLeftIcon';

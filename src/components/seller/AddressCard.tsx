@@ -1,11 +1,13 @@
-import { createSignal, Show } from "solid-js";
+import { createSignal, Show, createEffect } from "solid-js";
 import { useI18n } from "~/i18n";
 import type { ShopAddress } from "~/lib/api/endpoints/seller-shop.api";
-import AddressEditModal, { type AddressFormData } from "./AddressEditModal";
+import AddressEditModal from "./AddressEditModal";
 
 interface AddressCardProps {
   address: ShopAddress | null;
-  onSave?: (data: AddressFormData) => Promise<void>;
+  onSave?: (data: any) => Promise<void>;
+  isSaving?: boolean;
+  shouldClose?: boolean;
 }
 
 export default function AddressCard(props: AddressCardProps) {
@@ -17,6 +19,13 @@ export default function AddressCard(props: AddressCardProps) {
 
   const hasAddress = enTranslation || bnTranslation;
 
+  // Close modal when parent signals
+  createEffect(() => {
+    if (props.shouldClose) {
+      setIsModalOpen(false);
+    }
+  });
+
   const handleEditClick = (e: MouseEvent) => {
     e.preventDefault();
     setIsModalOpen(true);
@@ -26,7 +35,6 @@ export default function AddressCard(props: AddressCardProps) {
     if (props.onSave) {
       await props.onSave(data);
     }
-    setIsModalOpen(false);
   };
 
   return (
@@ -201,6 +209,7 @@ export default function AddressCard(props: AddressCardProps) {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSave}
         address={address}
+        isSaving={props.isSaving || false}
       />
     </>
   );

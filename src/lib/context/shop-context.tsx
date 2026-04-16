@@ -19,7 +19,7 @@ export const getShop = query(async () => {
         }
         throw error;
     }
-}, "shop");
+}, "seller-shop");
 
 /**
  * Shop Status Data Loader (for routing decisions)
@@ -37,14 +37,14 @@ export const getShopStatus = query(async () => {
         }
         throw error;
     }
-}, "shop-status");
+}, "seller-shop-status");
 
 /**
  * Revalidate the shop cache
  */
-export const refetchShop = () => revalidate("shop");
+export const refetchShop = () => revalidate("seller-shop");
 
 /**
  * Revalidate the shop status cache
  */
-export const refetchShopStatus = () => revalidate("shop-status");
+export const refetchShopStatus = () => revalidate("seller-shop-status");

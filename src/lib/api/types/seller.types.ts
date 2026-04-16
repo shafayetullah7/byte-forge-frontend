@@ -1,18 +1,17 @@
 /**
- * Shop Translation structure (matches backend TShopTranslation)
+ * Shop Translation structure (matches backend LocalizedShopDetails.translations)
  */
 export interface ShopTranslation {
   id: string;
   shopId: string;
   locale: string;
-  shopName: string;
-  about: string | null;
-  brandStory: string | null;
-  featuredHighlight: string | null;
+  name: string;
+  description: string | null;
+  businessHours: string | null;
 }
 
 /**
- * Media structure for logo/banner
+ * Media structure for logo/banner (matches backend LocalizedShopDetails.logo/banner)
  */
 export interface MediaAttachment {
   id: string;
@@ -20,6 +19,43 @@ export interface MediaAttachment {
   mimeType: string;
   fileName: string;
   size: number;
+}
+
+/**
+ * Shop Contact structure (matches backend ShopContactDetails)
+ */
+export interface ShopContact {
+  businessEmail: string | null;
+  phone: string | null;
+  alternativePhone: string | null;
+  whatsapp: string | null;
+  telegram: string | null;
+  facebook: string | null;
+  instagram: string | null;
+  x: string | null;
+}
+
+/**
+ * Shop Address Translation structure (matches backend ShopAddressTranslation)
+ */
+export interface ShopAddressTranslation {
+  locale: string;
+  country: string;
+  division: string;
+  district: string;
+  street: string;
+}
+
+/**
+ * Shop Address structure (matches backend ShopAddressDetails)
+ */
+export interface ShopAddress {
+  postalCode: string | null;
+  latitude: string | null;
+  longitude: string | null;
+  googleMapsLink: string | null;
+  isVerified: boolean;
+  translations: ShopAddressTranslation[];
 }
 
 /**
@@ -34,13 +70,14 @@ export interface Shop {
   status: string;
   createdAt: string;
   updatedAt: string;
-  shopName: string;
-  about: string | null;
-  brandStory: string | null;
-  featuredHighlight: string | null;
+  name: string;
+  description: string | null;
+  businessHours: string | null;
   logo: MediaAttachment | null;
   banner: MediaAttachment | null;
   translations: ShopTranslation[];
+  contact: ShopContact | null;
+  address: ShopAddress | null;
 }
 
 /**
@@ -48,8 +85,10 @@ export interface Shop {
  */
 export interface ShopStatus {
   id: string;
+  slug: string;
   status: string;
   hasTranslations: boolean;
+  rejectionReason: string | null;
 }
 
 /**
