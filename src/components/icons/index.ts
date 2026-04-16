@@ -11,6 +11,15 @@ export { Cog6ToothIcon } from "./Cog6ToothIcon";
 export { ArrowRightOnRectangleIcon } from "./ArrowRightOnRectangleIcon";
 export { ChevronRightIcon } from "./ChevronRightIcon";
 export { HeartIcon } from "./HeartIcon";
+export { CubeIcon } from "./CubeIcon";
+export { PlusIcon } from "./PlusIcon";
+export { FolderIcon } from "./FolderIcon";
+export { ClipboardListIcon } from "./ClipboardListIcon";
+export { CheckCircleIcon } from "./CheckCircleIcon";
+export { DollarSignIcon } from "./DollarSignIcon";
+export { BankIcon } from "./BankIcon";
+export { CogIcon } from "./CogIcon";
+export { ClockIcon } from "./ClockIcon";
 
 export * from './TagIcon';
 export * from './ArrowsRightLeftIcon';
