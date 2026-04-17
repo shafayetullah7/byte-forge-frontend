@@ -8,10 +8,11 @@ import ContactInfoCard from "~/components/seller/ContactInfoCard";
 import AddressCard from "~/components/seller/AddressCard";
 import ContactEditModal from "~/components/seller/ContactEditModal";
 import ShopBrandingModal from "~/components/seller/ShopBrandingModal";
+import ShopInfoEditModal from "~/components/seller/ShopInfoEditModal";
 import { useI18n } from "~/i18n";
 import { toaster } from "~/components/ui/Toast";
 import { getShop, getShopStatus, refetchShop } from "~/lib/context/shop-context";
-import { sellerShopApi, type UpdateAddressDto, type UpdateContactDto } from "~/lib/api/endpoints/seller-shop.api";
+import { sellerShopApi, type UpdateAddressDto, type UpdateContactDto, type UpdateShopInfoDto } from "~/lib/api/endpoints/seller-shop.api";
 import { ShopIcon, PlusIcon, BoltIcon, CheckCircleIcon, PackageIcon, EyeIcon } from "~/components/icons";
 
 /**
@@ -192,6 +193,33 @@ export default function MyShopPage() {
     setShouldCloseBrandingModal(false);
   };
 
+  // Shop info modal state
+  const [shouldCloseInfoModal, setShouldCloseInfoModal] = createSignal(false);
+  const [isInfoModalOpen, setIsInfoModalOpen] = createSignal(false);
+  const [isSavingInfo, setIsSavingInfo] = createSignal(false);
+
+  // Handle shop info save
+  const handleSaveInfo = async (data: { translations: { en: { name: string; description?: string; businessHours?: string }; bn: { name: string; description?: string; businessHours?: string } } }) => {
+    setIsSavingInfo(true);
+    try {
+      await sellerShopApi.updateShopInfo(data);
+      toaster.success(t("seller.shop.myShop.shopInfo.saveSuccess"));
+      setShouldCloseInfoModal(true);
+      refetchShop();
+    } catch (error: any) {
+      toaster.error(error.message || t("seller.shop.myShop.shopInfo.saveFailed"));
+      throw error;
+    } finally {
+      setIsSavingInfo(false);
+    }
+  };
+
+  // Handle shop info modal close
+  const handleInfoModalClose = () => {
+    setIsInfoModalOpen(false);
+    setShouldCloseInfoModal(false);
+  };
+
   const statusConfig = createMemo(() => {
     const verificationStatus = verificationData()?.status;
     const shopStatus = shopData()?.status;
@@ -330,6 +358,7 @@ export default function MyShopPage() {
                       description: bnTranslation?.description,
                       businessHours: bnTranslation?.businessHours,
                     }}
+                    onEdit={() => setIsInfoModalOpen(true)}
                   />
 
                   {/* Contact Information */}
@@ -356,6 +385,16 @@ export default function MyShopPage() {
                     shop={shop}
                     isSaving={isSavingBranding()}
                     shouldClose={shouldCloseBrandingModal()}
+                  />
+
+                  {/* Shop Info Edit Modal */}
+                  <ShopInfoEditModal
+                    isOpen={isInfoModalOpen()}
+                    onClose={handleInfoModalClose}
+                    onSave={handleSaveInfo}
+                    shop={shop}
+                    isSaving={isSavingInfo()}
+                    shouldClose={shouldCloseInfoModal()}
                   />
 
                   {/* Address */}

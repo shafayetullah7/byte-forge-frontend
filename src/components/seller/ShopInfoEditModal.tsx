@@ -1,16 +1,22 @@
-import { createSignal, createEffect } from "solid-js";
+import { createEffect } from "solid-js";
 import { Modal } from "~/components/ui/Modal";
 import Input from "~/components/ui/Input";
+import { Textarea } from "~/components/ui/Textarea";
 import Button from "~/components/ui/Button";
 import { createForm } from "@modular-forms/solid";
 import { useI18n } from "~/i18n";
-import type { Shop, UpdateShopInfoDto } from "~/lib/api/endpoints/seller-shop.api";
+import type { Shop } from "~/lib/api/endpoints/seller-shop.api";
 import { shopInfoSchema, type ShopInfoFormData } from "~/schemas/shop-info.schema";
 
 export interface ShopInfoEditModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: UpdateShopInfoDto) => Promise<any>;
+  onSave: (data: {
+    translations: {
+      en: { name: string; description?: string; businessHours?: string };
+      bn: { name: string; description?: string; businessHours?: string };
+    };
+  }) => Promise<any>;
   shop: Shop | null;
   isSaving: boolean;
   shouldClose?: boolean;
@@ -18,9 +24,6 @@ export interface ShopInfoEditModalProps {
 
 export default function ShopInfoEditModal(props: ShopInfoEditModalProps) {
   const { t } = useI18n();
-  const [hasSubmitted, setHasSubmitted] = createSignal(false);
-  const [logoFile, setLogoFile] = createSignal<File | null>(null);
-  const [bannerFile, setBannerFile] = createSignal<File | null>(null);
 
   // Close modal when parent signals success
   createEffect(() => {
@@ -36,16 +39,12 @@ export default function ShopInfoEditModal(props: ShopInfoEditModalProps) {
   // Initialize form with existing shop data
   const [shopForm, { Form, Field }] = createForm<ShopInfoFormData>({
     initialValues: {
-      slug: props.shop?.slug || "",
       nameEn: enTranslation()?.name || "",
       descriptionEn: enTranslation()?.description || "",
       businessHoursEn: enTranslation()?.businessHours || "",
       nameBn: bnTranslation()?.name || "",
       descriptionBn: bnTranslation()?.description || "",
       businessHoursBn: bnTranslation()?.businessHours || "",
-      primaryColor: props.shop?.primaryColor || "",
-      secondaryColor: props.shop?.secondaryColor || "",
-      accentColor: props.shop?.accentColor || "",
     },
     validate: (values) => {
       const result = shopInfoSchema.safeParse(values);
@@ -65,32 +64,21 @@ export default function ShopInfoEditModal(props: ShopInfoEditModalProps) {
   });
 
   const handleSubmit = async (values: ShopInfoFormData) => {
-    setHasSubmitted(true);
-    
-    // Prepare DTO
-    const dto: UpdateShopInfoDto = {
-      slug: values.slug.trim() || undefined,
-      branding: {
-        primaryColor: values.primaryColor || undefined,
-        secondaryColor: values.secondaryColor || undefined,
-        accentColor: values.accentColor || undefined,
-      },
-      translations: {
-        en: {
-          name: values.nameEn.trim(),
-          description: values.descriptionEn?.trim() || undefined,
-          businessHours: values.businessHoursEn?.trim() || undefined,
-        },
-        bn: {
-          name: values.nameBn.trim(),
-          description: values.descriptionBn?.trim() || undefined,
-          businessHours: values.businessHoursBn?.trim() || undefined,
-        },
-      },
-    };
-    
     try {
-      await props.onSave(dto);
+      await props.onSave({
+        translations: {
+          en: {
+            name: values.nameEn.trim(),
+            description: values.descriptionEn?.trim() || undefined,
+            businessHours: values.businessHoursEn?.trim() || undefined,
+          },
+          bn: {
+            name: values.nameBn.trim(),
+            description: values.descriptionBn?.trim() || undefined,
+            businessHours: values.businessHoursBn?.trim() || undefined,
+          },
+        },
+      });
       // Modal will close only if parent's createEffect sees success
     } catch (error) {
       // Modal stays open on error
@@ -106,151 +94,98 @@ export default function ShopInfoEditModal(props: ShopInfoEditModalProps) {
     >
       <div class="overflow-y-auto px-1 space-y-4 custom-scrollbar" style="max-height: 70vh;">
         <Form onSubmit={handleSubmit} class="space-y-6">
-          {/* Shop Name Section (Bilingual) */}
-          <div>
-            <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
-              {/* English */}
-              <div class="space-y-4">
-                <div class="flex items-center gap-2 mb-2">
-                  <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-forest-500 to-forest-600 flex items-center justify-center">
-                    <span class="text-white text-xs font-bold">EN</span>
-                  </div>
-                  <h6 class="font-bold text-gray-900 dark:text-gray-100">English</h6>
+          {/* Side-by-Side Language Columns */}
+          <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            {/* English Section */}
+            <div class="space-y-4">
+              <div class="flex items-center gap-2 mb-2">
+                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-forest-500 to-forest-600 flex items-center justify-center">
+                  <span class="text-white text-xs font-bold">EN</span>
                 </div>
-
-                <Field name="nameEn">
-                  {(field, props) => (
-                    <Input
-                      {...props}
-                      label={t("seller.shop.myShop.shopInfo.name")}
-                      value={field.value || ""}
-                      placeholder="My Shop"
-                      error={field.error}
-                      required
-                    />
-                  )}
-                </Field>
-
-                <Field name="descriptionEn">
-                  {(field, props) => (
-                    <Input
-                      {...props}
-                      label={t("seller.shop.myShop.shopInfo.description")}
-                      value={field.value || ""}
-                      placeholder="Best shop in town..."
-                      error={field.error}
-                    />
-                  )}
-                </Field>
-
-                <Field name="businessHoursEn">
-                  {(field, props) => (
-                    <Input
-                      {...props}
-                      label={t("seller.shop.myShop.shopInfo.businessHours")}
-                      value={field.value || ""}
-                      placeholder="9 AM - 9 PM"
-                      error={field.error}
-                    />
-                  )}
-                </Field>
+                <h6 class="font-bold text-gray-900 dark:text-gray-100">{t("seller.shop.myShop.shopInfo.english")}</h6>
               </div>
 
-              {/* Bengali */}
-              <div class="space-y-4">
-                <div class="flex items-center gap-2 mb-2">
-                  <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-terracotta-500 to-terracotta-600 flex items-center justify-center">
-                    <span class="text-white text-xs font-bold">বা</span>
-                  </div>
-                  <h6 class="font-bold text-gray-900 dark:text-gray-100">বাংলা</h6>
-                </div>
-
-                <Field name="nameBn">
-                  {(field, props) => (
-                    <Input
-                      {...props}
-                      label={t("seller.shop.myShop.shopInfo.name")}
-                      value={field.value || ""}
-                      placeholder="আমার দোকান"
-                      error={field.error}
-                      required
-                    />
-                  )}
-                </Field>
-
-                <Field name="descriptionBn">
-                  {(field, props) => (
-                    <Input
-                      {...props}
-                      label={t("seller.shop.myShop.shopInfo.description")}
-                      value={field.value || ""}
-                      placeholder="শহরের সেরা দোকান..."
-                      error={field.error}
-                    />
-                  )}
-                </Field>
-
-                <Field name="businessHoursBn">
-                  {(field, props) => (
-                    <Input
-                      {...props}
-                      label={t("seller.shop.myShop.shopInfo.businessHours")}
-                      value={field.value || ""}
-                      placeholder="সকাল ৯টা - রাত ৯টা"
-                      error={field.error}
-                    />
-                  )}
-                </Field>
-              </div>
-            </div>
-          </div>
-
-          {/* Branding Colors Section */}
-          <div>
-            <div class="flex items-center gap-2 mb-4">
-              <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-sage-500 to-sage-600 flex items-center justify-center">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                </svg>
-              </div>
-              <h6 class="font-bold text-gray-900 dark:text-gray-100">{t("seller.shop.myShop.shopInfo.brandingColors")}</h6>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <Field name="primaryColor">
+              <Field name="nameEn">
                 {(field, props) => (
                   <Input
                     {...props}
-                    label={t("seller.shop.myShop.shopInfo.primaryColor")}
+                    label={t("seller.shop.myShop.shopInfo.name")}
                     value={field.value || ""}
-                    placeholder="#FF5733"
-                    type="color"
+                    placeholder="My Shop"
                     error={field.error}
+                    required
                   />
                 )}
               </Field>
 
-              <Field name="secondaryColor">
+              <Field name="descriptionEn">
                 {(field, props) => (
-                  <Input
+                  <Textarea
                     {...props}
-                    label={t("seller.shop.myShop.shopInfo.secondaryColor")}
+                    label={t("seller.shop.myShop.shopInfo.description")}
                     value={field.value || ""}
-                    placeholder="#33FF57"
-                    type="color"
+                    placeholder="Best shop in town..."
                     error={field.error}
+                    rows={4}
                   />
                 )}
               </Field>
 
-              <Field name="accentColor">
+              <Field name="businessHoursEn">
                 {(field, props) => (
                   <Input
                     {...props}
-                    label={t("seller.shop.myShop.shopInfo.accentColor")}
+                    label={t("seller.shop.myShop.shopInfo.businessHours")}
                     value={field.value || ""}
-                    placeholder="#3357FF"
-                    type="color"
+                    placeholder="9 AM - 9 PM"
+                    error={field.error}
+                  />
+                )}
+              </Field>
+            </div>
+
+            {/* Bengali Section */}
+            <div class="space-y-4">
+              <div class="flex items-center gap-2 mb-2">
+                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-terracotta-500 to-terracotta-600 flex items-center justify-center">
+                  <span class="text-white text-xs font-bold">বা</span>
+                </div>
+                <h6 class="font-bold text-gray-900 dark:text-gray-100">{t("seller.shop.myShop.shopInfo.bengali")}</h6>
+              </div>
+
+              <Field name="nameBn">
+                {(field, props) => (
+                  <Input
+                    {...props}
+                    label={t("seller.shop.myShop.shopInfo.name")}
+                    value={field.value || ""}
+                    placeholder="আমার দোকান"
+                    error={field.error}
+                    required
+                  />
+                )}
+              </Field>
+
+              <Field name="descriptionBn">
+                {(field, props) => (
+                  <Textarea
+                    {...props}
+                    label={t("seller.shop.myShop.shopInfo.description")}
+                    value={field.value || ""}
+                    placeholder="শহরের সেরা দোকান..."
+                    error={field.error}
+                    rows={4}
+                  />
+                )}
+              </Field>
+
+              <Field name="businessHoursBn">
+                {(field, props) => (
+                  <Input
+                    {...props}
+                    label={t("seller.shop.myShop.shopInfo.businessHours")}
+                    value={field.value || ""}
+                    placeholder="সকাল ৯টা - রাত ৯টা"
                     error={field.error}
                   />
                 )}
