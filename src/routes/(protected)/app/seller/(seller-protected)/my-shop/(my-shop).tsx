@@ -151,17 +151,30 @@ export default function MyShopPage() {
   // Branding modal state
   const [shouldCloseBrandingModal, setShouldCloseBrandingModal] = createSignal(false);
   const [isBrandingModalOpen, setIsBrandingModalOpen] = createSignal(false);
-  const [isUploadingBranding, setIsUploadingBranding] = createSignal(false);
+  const [isSavingBranding, setIsSavingBranding] = createSignal(false);
 
-  // Handle branding save (logo/banner upload)
-  const handleSaveBranding = async (logoFile: File | null, bannerFile: File | null) => {
-    setIsUploadingBranding(true);
+  // Handle branding save (receives media IDs from modal)
+  const handleSaveBranding = async (logoId: string | undefined, bannerId: string | undefined) => {
+    setIsSavingBranding(true);
     try {
-      const formData = new FormData();
-      if (logoFile) formData.append("logo", logoFile);
-      if (bannerFile) formData.append("banner", bannerFile);
+      // Get current shop data to extract translations and existing media IDs
+      const currentShop = shopData();
+      const enTrans = currentShop?.translations?.find(t => t.locale === "en");
+      const bnTrans = currentShop?.translations?.find(t => t.locale === "bn");
       
-      await sellerShopApi.uploadImages(formData);
+      // Only include branding fields that were actually changed
+      const brandingPayload: any = {};
+      if (logoId) brandingPayload.logoId = logoId;
+      if (bannerId) brandingPayload.bannerId = bannerId;
+      
+      // Call updateShopInfo with branding media IDs (only changed fields)
+      await sellerShopApi.updateShopInfo({
+        branding: Object.keys(brandingPayload).length > 0 ? brandingPayload : undefined,
+        translations: {
+          en: { name: enTrans?.name || "", description: enTrans?.description || "", businessHours: enTrans?.businessHours || "" },
+          bn: { name: bnTrans?.name || "", description: bnTrans?.description || "", businessHours: bnTrans?.businessHours || "" },
+        },
+      });
       toaster.success(t("seller.shop.myShop.branding.saveSuccess"));
       setShouldCloseBrandingModal(true);
       refetchShop();
@@ -169,7 +182,7 @@ export default function MyShopPage() {
       toaster.error(error.message || t("seller.shop.myShop.branding.saveFailed"));
       throw error;
     } finally {
-      setIsUploadingBranding(false);
+      setIsSavingBranding(false);
     }
   };
 
@@ -341,7 +354,7 @@ export default function MyShopPage() {
                     onClose={handleBrandingModalClose}
                     onSave={handleSaveBranding}
                     shop={shop}
-                    isSaving={isUploadingBranding()}
+                    isSaving={isSavingBranding()}
                     shouldClose={shouldCloseBrandingModal()}
                   />
 

@@ -1,13 +1,15 @@
-import { createSignal, createEffect } from "solid-js";
+import { createEffect } from "solid-js";
 import { Modal } from "~/components/ui/Modal";
 import Button from "~/components/ui/Button";
+import { ImageUpload } from "~/components/ui";
+import { useImageUpload } from "~/lib/hooks/useImageUpload";
 import { useI18n } from "~/i18n";
 import type { Shop } from "~/lib/api/endpoints/seller-shop.api";
 
 export interface ShopBrandingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (logoFile: File | null, bannerFile: File | null) => Promise<any>;
+  onSave: (logoId: string | undefined, bannerId: string | undefined) => Promise<any>;
   shop: Shop | null;
   isSaving: boolean;
   shouldClose?: boolean;
@@ -15,10 +17,21 @@ export interface ShopBrandingModalProps {
 
 export default function ShopBrandingModal(props: ShopBrandingModalProps) {
   const { t } = useI18n();
-  const [logoFile, setLogoFile] = createSignal<File | null>(null);
-  const [bannerFile, setBannerFile] = createSignal<File | null>(null);
-  const [logoPreview, setLogoPreview] = createSignal<string | null>(null);
-  const [bannerPreview, setBannerPreview] = createSignal<string | null>(null);
+
+  // Use the same image upload hook as setup-shop
+  const logoUpload = useImageUpload({
+    maxSizeMB: 5,
+    onSuccess: () => {
+      // Media ID is already stored in the hook
+    },
+  });
+
+  const bannerUpload = useImageUpload({
+    maxSizeMB: 10,
+    onSuccess: () => {
+      // Media ID is already stored in the hook
+    },
+  });
 
   // Close modal when parent signals success
   createEffect(() => {
@@ -27,55 +40,10 @@ export default function ShopBrandingModal(props: ShopBrandingModalProps) {
     }
   });
 
-  // Set previews from existing shop data
-  createEffect(() => {
-    if (props.shop) {
-      setLogoPreview(props.shop.logo?.url || null);
-      setBannerPreview(props.shop.banner?.url || null);
-    }
-  });
-
-  // Cleanup previews on unmount
-  const cleanup = () => {
-    if (logoPreview() && logoPreview()?.startsWith("blob:")) {
-      URL.revokeObjectURL(logoPreview()!);
-    }
-    if (bannerPreview() && bannerPreview()?.startsWith("blob:")) {
-      URL.revokeObjectURL(bannerPreview()!);
-    }
-  };
-
-  const handleLogoChange = (e: Event) => {
-    const input = e.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (file) {
-      setLogoFile(file);
-      // Create preview
-      if (logoPreview() && logoPreview()?.startsWith("blob:")) {
-        URL.revokeObjectURL(logoPreview()!);
-      }
-      setLogoPreview(URL.createObjectURL(file));
-    }
-  };
-
-  const handleBannerChange = (e: Event) => {
-    const input = e.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (file) {
-      setBannerFile(file);
-      // Create preview
-      if (bannerPreview() && bannerPreview()?.startsWith("blob:")) {
-        URL.revokeObjectURL(bannerPreview()!);
-      }
-      setBannerPreview(URL.createObjectURL(file));
-    }
-  };
-
   const handleSubmit = async () => {
     try {
-      await props.onSave(logoFile(), bannerFile());
-      // Cleanup previews
-      cleanup();
+      // Pass media IDs to parent (not files)
+      await props.onSave(logoUpload.mediaId() || undefined, bannerUpload.mediaId() || undefined);
       // Modal will close only if parent's createEffect sees success
     } catch (error) {
       console.error("Failed to update branding:", error);
@@ -83,11 +51,9 @@ export default function ShopBrandingModal(props: ShopBrandingModalProps) {
   };
 
   const handleClose = () => {
-    cleanup();
-    setLogoFile(null);
-    setBannerFile(null);
-    setLogoPreview(props.shop?.logo?.url || null);
-    setBannerPreview(props.shop?.banner?.url || null);
+    // Clear uploads but don't delete media (user might want to keep them)
+    logoUpload.clear();
+    bannerUpload.clear();
     props.onClose();
   };
 
@@ -110,52 +76,16 @@ export default function ShopBrandingModal(props: ShopBrandingModalProps) {
             <h6 class="font-bold text-gray-900 dark:text-gray-100">{t("seller.shop.myShop.branding.logo")}</h6>
           </div>
 
-          <div class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-800/50 hover:border-terracotta-500 dark:hover:border-terracotta-500 transition-colors">
-            {logoPreview() ? (
-              <div class="relative group">
-                <img
-                  src={logoPreview()}
-                  alt="Logo Preview"
-                  class="w-32 h-32 rounded-xl object-cover shadow-lg"
-                />
-                <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
-                  <label class="cursor-pointer text-white text-sm font-medium">
-                    Change Logo
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleLogoChange}
-                      class="hidden"
-                    />
-                  </label>
-                </div>
-              </div>
-            ) : (
-              <label class="cursor-pointer text-center">
-                <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-terracotta-100 dark:bg-terracotta-900/30 flex items-center justify-center">
-                  <svg class="w-8 h-8 text-terracotta-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                  </svg>
-                </div>
-                <p class="text-gray-600 dark:text-gray-400 font-medium">Upload Logo</p>
-                <p class="text-gray-500 dark:text-gray-500 text-sm mt-1">PNG, JPG up to 5MB</p>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleLogoChange}
-                  class="hidden"
-                />
-              </label>
-            )}
-          </div>
-
-          {/* Logo Requirements */}
-          <div class="mt-3 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>Recommended: 500x500px, square format</span>
-          </div>
+          <ImageUpload
+            preview={logoUpload.preview()}
+            isUploading={logoUpload.isUploading()}
+            isDeleting={logoUpload.isDeleting()}
+            onFileSelect={logoUpload.upload}
+            onDelete={logoUpload.deleteMedia}
+            accept="image/*"
+            maxSizeText="PNG, JPG up to 5MB"
+            requirementsText="Recommended: 500x500px, square format"
+          />
         </div>
 
         {/* Banner Upload Section */}
@@ -169,52 +99,16 @@ export default function ShopBrandingModal(props: ShopBrandingModalProps) {
             <h6 class="font-bold text-gray-900 dark:text-gray-100">{t("seller.shop.myShop.branding.banner")}</h6>
           </div>
 
-          <div class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-800/50 hover:border-forest-500 dark:hover:border-forest-500 transition-colors">
-            {bannerPreview() ? (
-              <div class="relative group w-full">
-                <img
-                  src={bannerPreview()}
-                  alt="Banner Preview"
-                  class="w-full h-48 rounded-xl object-cover shadow-lg"
-                />
-                <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
-                  <label class="cursor-pointer text-white text-sm font-medium">
-                    Change Banner
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleBannerChange}
-                      class="hidden"
-                    />
-                  </label>
-                </div>
-              </div>
-            ) : (
-              <label class="cursor-pointer text-center">
-                <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-forest-100 dark:bg-forest-900/30 flex items-center justify-center">
-                  <svg class="w-8 h-8 text-forest-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                  </svg>
-                </div>
-                <p class="text-gray-600 dark:text-gray-400 font-medium">Upload Banner</p>
-                <p class="text-gray-500 dark:text-gray-500 text-sm mt-1">PNG, JPG up to 10MB</p>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleBannerChange}
-                  class="hidden"
-                />
-              </label>
-            )}
-          </div>
-
-          {/* Banner Requirements */}
-          <div class="mt-3 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>Recommended: 1920x400px, landscape format</span>
-          </div>
+          <ImageUpload
+            preview={bannerUpload.preview()}
+            isUploading={bannerUpload.isUploading()}
+            isDeleting={bannerUpload.isDeleting()}
+            onFileSelect={bannerUpload.upload}
+            onDelete={bannerUpload.deleteMedia}
+            accept="image/*"
+            maxSizeText="PNG, JPG up to 10MB"
+            requirementsText="Recommended: 1920x400px, landscape format"
+          />
         </div>
 
         {/* Action Buttons */}
@@ -230,7 +124,7 @@ export default function ShopBrandingModal(props: ShopBrandingModalProps) {
           <Button
             variant="primary"
             onClick={handleSubmit}
-            disabled={!logoFile() && !bannerFile()}
+            disabled={!logoUpload.mediaId() && !bannerUpload.mediaId()}
             loading={props.isSaving}
             class="flex-1"
           >
