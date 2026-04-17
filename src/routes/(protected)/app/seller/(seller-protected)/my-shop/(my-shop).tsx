@@ -11,7 +11,7 @@ import ShopBrandingModal from "~/components/seller/ShopBrandingModal";
 import ShopInfoEditModal from "~/components/seller/ShopInfoEditModal";
 import { useI18n } from "~/i18n";
 import { toaster } from "~/components/ui/Toast";
-import { getShop, getShopStatus, refetchShop } from "~/lib/context/shop-context";
+import { getShop, getShopStatus } from "~/lib/context/shop-context";
 import { sellerShopApi, type UpdateAddressDto, type UpdateContactDto, type UpdateShopInfoDto } from "~/lib/api/endpoints/seller-shop.api";
 import { ShopIcon, PlusIcon, BoltIcon, CheckCircleIcon, PackageIcon, EyeIcon } from "~/components/icons";
 
@@ -231,7 +231,6 @@ export default function MyShopPage() {
     if (contactSubmission.result?.success === true && !contactSubmission.pending) {
       toaster.success(t("seller.shop.myShop.contactAndSocial.saveSuccess"));
       setShouldCloseContactModal(true);
-      refetchShop();
     }
   });
 
@@ -267,7 +266,6 @@ export default function MyShopPage() {
     if (brandingSubmission.result?.success === true && !brandingSubmission.pending) {
       toaster.success(t("seller.shop.myShop.branding.saveSuccess"));
       setShouldCloseBrandingModal(true);
-      refetchShop();
     }
   });
 
@@ -299,7 +297,6 @@ export default function MyShopPage() {
     if (shopInfoSubmission.result?.success === true && !shopInfoSubmission.pending) {
       toaster.success(t("seller.shop.myShop.shopInfo.saveSuccess"));
       setShouldCloseInfoModal(true);
-      refetchShop();
     }
   });
 

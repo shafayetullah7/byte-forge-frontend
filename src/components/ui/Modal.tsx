@@ -13,11 +13,19 @@ interface ModalProps {
 
 export function Modal(props: ModalProps) {
   let modalContentRef: HTMLDivElement | undefined;
+  let mouseDownTarget: EventTarget | null = null;
+
+  const handleBackdropMouseDown = (e: MouseEvent) => {
+    mouseDownTarget = e.target;
+  };
 
   const handleBackdropClick = (e: MouseEvent) => {
-    if (e.target === e.currentTarget) {
+    // Only close if mousedown and mouseup happened on the same backdrop element
+    // This prevents closing when selecting text that extends to the backdrop
+    if (mouseDownTarget === e.currentTarget && e.target === e.currentTarget) {
       props.onClose();
     }
+    mouseDownTarget = null;
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -64,6 +72,7 @@ export function Modal(props: ModalProps) {
       <Portal mount={document.body}>
         <div
           class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          onMouseDown={handleBackdropMouseDown}
           onClick={handleBackdropClick}
           role="dialog"
           aria-modal="true"
