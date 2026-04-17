@@ -5,9 +5,10 @@ import AddressEditModal from "./AddressEditModal";
 
 interface AddressCardProps {
   address: ShopAddress | null;
-  onSave?: (data: any) => Promise<void>;
+  onSave?: (data: any) => Promise<any>;
   isSaving?: boolean;
   shouldClose?: boolean;
+  onClose?: () => void;
 }
 
 export default function AddressCard(props: AddressCardProps) {
@@ -19,10 +20,28 @@ export default function AddressCard(props: AddressCardProps) {
 
   const hasAddress = enTranslation || bnTranslation;
 
-  // Close modal when parent signals
+  // Close modal when parent signals (success)
   createEffect(() => {
     if (props.shouldClose) {
+      console.log("AddressCard: shouldClose=true, closing modal");
       setIsModalOpen(false);
+      // Reset the close signal after closing
+      setTimeout(() => {
+        // Notify parent to reset the signal
+        if (props.onClose) {
+          props.onClose();
+        }
+      }, 100);
+    }
+  });
+
+  // Reset shouldClose when modal opens (prevents immediate close on reopen)
+  createEffect(() => {
+    if (isModalOpen() && props.shouldClose) {
+      console.log("AddressCard: Modal opened but shouldClose=true, resetting");
+      if (props.onClose) {
+        props.onClose();
+      }
     }
   });
 
@@ -33,7 +52,9 @@ export default function AddressCard(props: AddressCardProps) {
 
   const handleSave = async (data: AddressFormData) => {
     if (props.onSave) {
-      await props.onSave(data);
+      const result = await props.onSave(data);
+      console.log("AddressCard handleSave result:", result);
+      return result;
     }
   };
 
@@ -206,7 +227,10 @@ export default function AddressCard(props: AddressCardProps) {
       {/* Edit Address Modal */}
       <AddressEditModal
         isOpen={isModalOpen()}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          props.onClose?.();
+        }}
         onSave={handleSave}
         address={address}
         isSaving={props.isSaving || false}

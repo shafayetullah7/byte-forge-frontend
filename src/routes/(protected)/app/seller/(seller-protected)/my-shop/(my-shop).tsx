@@ -29,6 +29,7 @@ const updateAddressAction = action(async (data: UpdateAddressDto) => {
       error: {
         message: apiError.message || "Failed to update address",
         statusCode: apiError.statusCode,
+        validationErrors: apiError.response?.validationErrors || (apiError as any).validationErrors,
       },
     };
   }
@@ -39,31 +40,63 @@ export const route = {
 } satisfies RouteDefinition;
 
 export default function MyShopPage() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [shouldCloseModal, setShouldCloseModal] = createSignal(false);
   const addressTrigger = useAction(updateAddressAction);
   const addressSubmission = useSubmission(updateAddressAction);
   const shopData = createAsync(() => getShop());
   const verificationData = createAsync(() => getShopStatus());
 
-  // Handle address update success
-  createEffect(() => {
-    if (addressSubmission.result?.success) {
-      toaster.success(t("seller.shop.myShop.addressUpdated"));
-      // Close address modal
-      setShouldCloseModal(true);
-      // Revalidate shop data
-      refetchShop();
-    }
-  });
+  // Reset close signal when modal is manually closed
+  const handleModalClose = () => {
+    setShouldCloseModal(false);
+  };
 
-  // Handle address update error
+  // Helper to map field paths to user-friendly labels
+  const mapFieldToLabel = (field: string): string => {
+    const fieldLabels: Record<string, { en: string; bn: string }> = {
+      'translations.en.street': { en: 'Street (English)', bn: 'রাস্তা (ইংরেজি)' },
+      'translations.bn.street': { en: 'Street (Bengali)', bn: 'রাস্তা (বাংলা)' },
+      'translations.en.country': { en: 'Country (English)', bn: 'দেশ (ইংরেজি)' },
+      'translations.bn.country': { en: 'Country (Bengali)', bn: 'দেশ (বাংলা)' },
+      'translations.en.division': { en: 'Division (English)', bn: 'বিভাগ (ইংরেজি)' },
+      'translations.bn.division': { en: 'Division (Bengali)', bn: 'বিভাগ (বাংলা)' },
+      'translations.en.district': { en: 'District (English)', bn: 'জেলা (ইংরেজি)' },
+      'translations.bn.district': { en: 'District (Bengali)', bn: 'জেলা (বাংলা)' },
+      'postalCode': { en: 'Postal Code', bn: 'পোস্টাল কোড' },
+      'latitude': { en: 'Latitude', bn: 'অক্ষাংশ' },
+      'longitude': { en: 'Longitude', bn: 'দ্রাঘিমাংশ' },
+      'googleMapsLink': { en: 'Google Maps Link', bn: 'গুগল ম্যাপস লিঙ্ক' },
+    };
+    
+    const label = fieldLabels[field];
+    if (!label) return field;
+    
+    // Return label in current language
+    return locale() === 'bn' ? label.bn : label.en;
+  };
+
+  // Handle address update error (only once, not duplicated)
   createEffect(() => {
     if (addressSubmission.result?.success === false && addressSubmission.result?.error) {
-      const errorData = addressSubmission.result.error;
-      const message = errorData.message || "seller.shop.myShop.addressUpdateFailed";
-      const displayMessage = message.includes(".") ? t(message) : message;
-      toaster.error(displayMessage);
+      console.log("Error detected - showing toast, keeping modal open");
+      const errorData = addressSubmission.result.error as any;
+      
+      // Check if it's a validation error with field details
+      if (errorData.validationErrors && errorData.validationErrors.length > 0) {
+        // Show specific field errors
+        const fieldErrors = errorData.validationErrors.map((err: any) => {
+          const fieldName = mapFieldToLabel(err.field);
+          return `${fieldName}: ${err.message}`;
+        }).join('\n');
+        
+        toaster.error(fieldErrors);
+      } else {
+        // Generic error
+        const message = errorData.message || "seller.shop.myShop.addressUpdateFailed";
+        const displayMessage = message.includes(".") ? t(message) : message;
+        toaster.error(displayMessage);
+      }
     }
   });
 
@@ -176,9 +209,24 @@ export default function MyShopPage() {
 
   const handleSaveAddress = async (data: UpdateAddressDto) => {
     console.log("handleSaveAddress called with:", data);
+    
+    // Clean up empty strings to undefined for optional fields
+    const cleanedData: UpdateAddressDto = {
+      postalCode: data.postalCode?.trim() || undefined,
+      latitude: data.latitude?.trim() || undefined,
+      longitude: data.longitude?.trim() || undefined,
+      googleMapsLink: data.googleMapsLink?.trim() || undefined,
+      translations: data.translations,
+    };
+    
+    console.log("Sending cleaned data:", cleanedData);
+    
     // Trigger the server action and await it
-    await addressTrigger(data);
-    console.log("addressTrigger completed");
+    const result = await addressTrigger(cleanedData);
+    console.log("addressTrigger completed with result:", result);
+    
+    // Return result so AddressEditModal knows if it succeeded
+    return result;
   };
 
               return (
@@ -222,6 +270,7 @@ export default function MyShopPage() {
                     onSave={handleSaveAddress}
                     isSaving={addressSubmission.pending}
                     shouldClose={shouldCloseModal()}
+                    onClose={handleModalClose}
                   />
 
                    {/* Quick Actions Grid */}

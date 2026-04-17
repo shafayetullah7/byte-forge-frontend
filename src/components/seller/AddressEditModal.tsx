@@ -11,7 +11,7 @@ import { BANGLADESH } from "~/data/bangladesh-addresses";
 export interface AddressEditModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: UpdateAddressDto) => Promise<void>;
+  onSave: (data: UpdateAddressDto) => Promise<any>;
   address: ShopAddress | null;
   isSaving: boolean;
 }
@@ -82,16 +82,21 @@ export default function AddressEditModal(props: AddressEditModalProps) {
     console.log("Validation result:", isValid, "Errors:", errors());
     
     if (!isValid) {
-      console.error("Form validation failed");
-      return;
+      console.error("Form validation failed - keeping modal open");
+      // Scroll to first error
+      const firstError = document.querySelector('[data-error="true"]');
+      firstError?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;  // ← Don't call onSave, modal stays open
     }
     
     console.log("Form is valid, submitting...", formData);
     try {
-      await props.onSave(formData);
-      console.log("Save successful");
+      const result = await props.onSave(formData);
+      console.log("Save result:", result);
+      // Modal will close only if parent's createEffect sees success
     } catch (error) {
       console.error("Save failed:", error);
+      // Modal stays open on error
     }
   };
 
