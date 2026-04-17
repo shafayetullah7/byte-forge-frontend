@@ -6,11 +6,12 @@ import ShopStatusCard from "~/components/seller/ShopStatusCard";
 import BilingualInfoCard from "~/components/seller/BilingualInfoCard";
 import ContactInfoCard from "~/components/seller/ContactInfoCard";
 import AddressCard from "~/components/seller/AddressCard";
+import ContactEditModal from "~/components/seller/ContactEditModal";
 import { useI18n } from "~/i18n";
 import { toaster } from "~/components/ui/Toast";
 import { getShop, getShopStatus, refetchShop } from "~/lib/context/shop-context";
 import { sellerShopApi } from "~/lib/api/endpoints/seller-shop.api";
-import type { UpdateAddressDto } from "~/lib/api/endpoints/seller-shop.api";
+import type { UpdateAddressDto, UpdateContactDto } from "~/lib/api/endpoints/seller-shop.api";
 import { ShopIcon, PlusIcon, BoltIcon, CheckCircleIcon, PackageIcon, EyeIcon } from "~/components/icons";
 
 /**
@@ -76,29 +77,76 @@ export default function MyShopPage() {
     return locale() === 'bn' ? label.bn : label.en;
   };
 
+  // Helper to handle address update errors
+  const handleAddressError = (errorData: any) => {
+    if (errorData.validationErrors && errorData.validationErrors.length > 0) {
+      const fieldErrors = errorData.validationErrors.map((err: any) => {
+        const fieldName = mapFieldToLabel(err.field);
+        return `${fieldName}: ${err.message}`;
+      }).join('\n');
+      toaster.error(fieldErrors);
+    } else {
+      const message = errorData.message || "seller.shop.myShop.addressUpdateFailed";
+      const displayMessage = message.includes(".") ? t(message) : message;
+      toaster.error(displayMessage);
+    }
+  };
+
   // Handle address update error (only once, not duplicated)
   createEffect(() => {
     if (addressSubmission.result?.success === false && addressSubmission.result?.error) {
-      console.log("Error detected - showing toast, keeping modal open");
-      const errorData = addressSubmission.result.error as any;
-      
-      // Check if it's a validation error with field details
-      if (errorData.validationErrors && errorData.validationErrors.length > 0) {
-        // Show specific field errors
-        const fieldErrors = errorData.validationErrors.map((err: any) => {
-          const fieldName = mapFieldToLabel(err.field);
-          return `${fieldName}: ${err.message}`;
-        }).join('\n');
-        
-        toaster.error(fieldErrors);
-      } else {
-        // Generic error
-        const message = errorData.message || "seller.shop.myShop.addressUpdateFailed";
-        const displayMessage = message.includes(".") ? t(message) : message;
-        toaster.error(displayMessage);
-      }
+      handleAddressError(addressSubmission.result.error);
     }
   });
+
+  // Handle address save
+  const handleSaveAddress = async (data: UpdateAddressDto) => {
+    // Clean up empty strings to undefined for optional fields
+    const cleanedData: UpdateAddressDto = {
+      postalCode: data.postalCode?.trim() || undefined,
+      latitude: data.latitude?.trim() || undefined,
+      longitude: data.longitude?.trim() || undefined,
+      googleMapsLink: data.googleMapsLink?.trim() || undefined,
+      translations: data.translations,
+    };
+    
+    // Trigger the server action and await it
+    const result = await addressTrigger(cleanedData);
+    
+    // Return result so AddressEditModal knows if it succeeded
+    return result;
+  };
+
+  // Contact modal state
+  const [shouldCloseContactModal, setShouldCloseContactModal] = createSignal(false);
+  const [isContactModalOpen, setIsContactModalOpen] = createSignal(false);
+
+  // Handle contact save
+  const handleSaveContact = async (data: UpdateContactDto) => {
+    // Clean up empty strings to undefined for optional fields
+    const cleanedData: UpdateContactDto = {};
+    (Object.keys(data) as Array<keyof UpdateContactDto>).forEach((key) => {
+      const value = data[key];
+      if (value && typeof value === 'string') {
+        cleanedData[key] = value.trim() || undefined;
+      }
+    });
+    
+    try {
+      await sellerShopApi.updateContact(cleanedData);
+      toaster.success(t("seller.shop.myShop.contactAndSocial.saveSuccess"));
+      setShouldCloseContactModal(true);
+      refetchShop();
+    } catch (error: any) {
+      toaster.error(error.message || t("seller.shop.myShop.contactAndSocial.saveFailed"));
+    }
+  };
+
+  // Handle contact modal close
+  const handleContactModalClose = () => {
+    setIsContactModalOpen(false);
+    setShouldCloseContactModal(false);
+  };
 
   const statusConfig = createMemo(() => {
     const verificationStatus = verificationData()?.status;
@@ -207,28 +255,6 @@ export default function MyShopPage() {
               const enTranslation = shop.translations?.find(t => t.locale === "en");
               const bnTranslation = shop.translations?.find(t => t.locale === "bn");
 
-  const handleSaveAddress = async (data: UpdateAddressDto) => {
-    console.log("handleSaveAddress called with:", data);
-    
-    // Clean up empty strings to undefined for optional fields
-    const cleanedData: UpdateAddressDto = {
-      postalCode: data.postalCode?.trim() || undefined,
-      latitude: data.latitude?.trim() || undefined,
-      longitude: data.longitude?.trim() || undefined,
-      googleMapsLink: data.googleMapsLink?.trim() || undefined,
-      translations: data.translations,
-    };
-    
-    console.log("Sending cleaned data:", cleanedData);
-    
-    // Trigger the server action and await it
-    const result = await addressTrigger(cleanedData);
-    console.log("addressTrigger completed with result:", result);
-    
-    // Return result so AddressEditModal knows if it succeeded
-    return result;
-  };
-
               return (
                 <div class="space-y-8">
                   {/* Header with Logo & Banner */}
@@ -262,7 +288,20 @@ export default function MyShopPage() {
                   />
 
                   {/* Contact Information */}
-                  <ContactInfoCard contact={shop.contact} />
+                  <ContactInfoCard 
+                    contact={shop.contact} 
+                    onEdit={() => setIsContactModalOpen(true)}
+                  />
+
+                  {/* Contact Edit Modal */}
+                  <ContactEditModal
+                    isOpen={isContactModalOpen()}
+                    onClose={handleContactModalClose}
+                    onSave={handleSaveContact}
+                    contact={shop.contact}
+                    isSaving={false}
+                    shouldClose={shouldCloseContactModal()}
+                  />
 
                   {/* Address */}
                   <AddressCard 

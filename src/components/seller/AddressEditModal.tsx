@@ -71,31 +71,22 @@ export default function AddressEditModal(props: AddressEditModalProps) {
         ? t(issue.message) 
         : issue.message;
     });
-    console.log("Validation errors:", newErrors);
     setErrors(newErrors);
     return false;
   };
 
   const handleSubmit = async () => {
-    console.log("handleSubmit called, validating form...");
     const isValid = validateForm();
-    console.log("Validation result:", isValid, "Errors:", errors());
     
     if (!isValid) {
-      console.error("Form validation failed - keeping modal open");
-      // Scroll to first error
-      const firstError = document.querySelector('[data-error="true"]');
-      firstError?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      return;  // ← Don't call onSave, modal stays open
+      // Don't call onSave, modal stays open
+      return;
     }
     
-    console.log("Form is valid, submitting...", formData);
     try {
-      const result = await props.onSave(formData);
-      console.log("Save result:", result);
+      await props.onSave(formData);
       // Modal will close only if parent's createEffect sees success
     } catch (error) {
-      console.error("Save failed:", error);
       // Modal stays open on error
     }
   };
@@ -202,7 +193,7 @@ export default function AddressEditModal(props: AddressEditModalProps) {
                 value={formData.translations.en.street || ""}
                 onInput={(e) => setFormData("translations", "en", "street", e.currentTarget.value)}
                 placeholder="House 123, Road 45, Dhanmondi"
-                error={errors()?.enStreet || ""}
+                error={errors().enStreet}
                 required
               />
             </div>

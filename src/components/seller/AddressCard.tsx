@@ -23,15 +23,11 @@ export default function AddressCard(props: AddressCardProps) {
   // Close modal when parent signals (success)
   createEffect(() => {
     if (props.shouldClose) {
-      console.log("AddressCard: shouldClose=true, closing modal");
       setIsModalOpen(false);
-      // Reset the close signal after closing
-      setTimeout(() => {
-        // Notify parent to reset the signal
-        if (props.onClose) {
-          props.onClose();
-        }
-      }, 100);
+      // Notify parent to reset the signal immediately
+      if (props.onClose) {
+        props.onClose();
+      }
     }
   });
 

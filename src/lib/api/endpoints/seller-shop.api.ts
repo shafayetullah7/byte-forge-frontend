@@ -21,6 +21,17 @@ export interface ShopContact {
   x: string | null;
 }
 
+export interface UpdateContactDto {
+  businessEmail?: string;
+  phone?: string;
+  alternativePhone?: string;
+  whatsapp?: string;
+  telegram?: string;
+  facebook?: string;
+  instagram?: string;
+  x?: string;
+}
+
 export interface ShopAddressTranslation {
   locale: string;
   country: string;
@@ -192,6 +203,16 @@ export const sellerShopApi = {
   updateAddress: async (dto: UpdateAddressDto): Promise<Shop> => {
     return fetcher<Shop>('/api/v1/user/seller/shops/my-shop/address', {
       method: 'PATCH',
+      body: JSON.stringify(dto),
+    });
+  },
+
+  /**
+   * Upsert shop contact information (contact + social media)
+   */
+  updateContact: async (dto: UpdateContactDto): Promise<Shop> => {
+    return fetcher<Shop>('/api/v1/user/seller/shops/my-shop/contact', {
+      method: 'PUT',
       body: JSON.stringify(dto),
     });
   },
