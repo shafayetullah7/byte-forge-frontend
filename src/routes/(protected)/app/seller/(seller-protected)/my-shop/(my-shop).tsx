@@ -7,11 +7,11 @@ import BilingualInfoCard from "~/components/seller/BilingualInfoCard";
 import ContactInfoCard from "~/components/seller/ContactInfoCard";
 import AddressCard from "~/components/seller/AddressCard";
 import ContactEditModal from "~/components/seller/ContactEditModal";
+import ShopBrandingModal from "~/components/seller/ShopBrandingModal";
 import { useI18n } from "~/i18n";
 import { toaster } from "~/components/ui/Toast";
 import { getShop, getShopStatus, refetchShop } from "~/lib/context/shop-context";
-import { sellerShopApi } from "~/lib/api/endpoints/seller-shop.api";
-import type { UpdateAddressDto, UpdateContactDto } from "~/lib/api/endpoints/seller-shop.api";
+import { sellerShopApi, type UpdateAddressDto, type UpdateContactDto } from "~/lib/api/endpoints/seller-shop.api";
 import { ShopIcon, PlusIcon, BoltIcon, CheckCircleIcon, PackageIcon, EyeIcon } from "~/components/icons";
 
 /**
@@ -148,6 +148,37 @@ export default function MyShopPage() {
     setShouldCloseContactModal(false);
   };
 
+  // Branding modal state
+  const [shouldCloseBrandingModal, setShouldCloseBrandingModal] = createSignal(false);
+  const [isBrandingModalOpen, setIsBrandingModalOpen] = createSignal(false);
+  const [isUploadingBranding, setIsUploadingBranding] = createSignal(false);
+
+  // Handle branding save (logo/banner upload)
+  const handleSaveBranding = async (logoFile: File | null, bannerFile: File | null) => {
+    setIsUploadingBranding(true);
+    try {
+      const formData = new FormData();
+      if (logoFile) formData.append("logo", logoFile);
+      if (bannerFile) formData.append("banner", bannerFile);
+      
+      await sellerShopApi.uploadImages(formData);
+      toaster.success(t("seller.shop.myShop.branding.saveSuccess"));
+      setShouldCloseBrandingModal(true);
+      refetchShop();
+    } catch (error: any) {
+      toaster.error(error.message || t("seller.shop.myShop.branding.saveFailed"));
+      throw error;
+    } finally {
+      setIsUploadingBranding(false);
+    }
+  };
+
+  // Handle branding modal close
+  const handleBrandingModalClose = () => {
+    setIsBrandingModalOpen(false);
+    setShouldCloseBrandingModal(false);
+  };
+
   const statusConfig = createMemo(() => {
     const verificationStatus = verificationData()?.status;
     const shopStatus = shopData()?.status;
@@ -262,6 +293,7 @@ export default function MyShopPage() {
                     logo={shop.logo}
                     banner={shop.banner}
                     slug={shop.slug}
+                    onEdit={() => setIsBrandingModalOpen(true)}
                   />
 
                   {/* Status Card */}
@@ -301,6 +333,16 @@ export default function MyShopPage() {
                     contact={shop.contact}
                     isSaving={false}
                     shouldClose={shouldCloseContactModal()}
+                  />
+
+                  {/* Branding Edit Modal */}
+                  <ShopBrandingModal
+                    isOpen={isBrandingModalOpen()}
+                    onClose={handleBrandingModalClose}
+                    onSave={handleSaveBranding}
+                    shop={shop}
+                    isSaving={isUploadingBranding()}
+                    shouldClose={shouldCloseBrandingModal()}
                   />
 
                   {/* Address */}

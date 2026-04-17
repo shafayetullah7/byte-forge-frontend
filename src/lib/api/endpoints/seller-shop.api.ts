@@ -32,6 +32,29 @@ export interface UpdateContactDto {
   x?: string;
 }
 
+export interface ShopBrandingDto {
+  logoId?: string;
+  bannerId?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  accentColor?: string;
+}
+
+export interface ShopTranslationDto {
+  name: string;
+  description?: string;
+  businessHours?: string;
+}
+
+export interface UpdateShopInfoDto {
+  slug?: string;
+  branding?: ShopBrandingDto;
+  translations: {
+    en: ShopTranslationDto;
+    bn: ShopTranslationDto;
+  };
+}
+
 export interface ShopAddressTranslation {
   locale: string;
   country: string;
@@ -212,6 +235,16 @@ export const sellerShopApi = {
    */
   updateContact: async (dto: UpdateContactDto): Promise<Shop> => {
     return fetcher<Shop>('/api/v1/user/seller/shops/my-shop/contact', {
+      method: 'PUT',
+      body: JSON.stringify(dto),
+    });
+  },
+
+  /**
+   * Update shop info (branding + translations)
+   */
+  updateShopInfo: async (dto: UpdateShopInfoDto): Promise<Shop> => {
+    return fetcher<Shop>('/api/v1/user/seller/shops/my-shop', {
       method: 'PUT',
       body: JSON.stringify(dto),
     });

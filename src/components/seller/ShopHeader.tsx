@@ -5,6 +5,7 @@ interface ShopHeaderProps {
   logo: ShopMedia | null;
   banner: ShopMedia | null;
   slug: string;
+  onEdit?: () => void;
 }
 
 export default function ShopHeader(props: ShopHeaderProps) {
@@ -53,14 +54,15 @@ export default function ShopHeader(props: ShopHeaderProps) {
         )}
 
         {/* Floating Edit Button */}
-        <A href="/seller/my-shop/edit" class="absolute top-4 right-4">
-          <button class="px-4 py-2 bg-white/90 dark:bg-forest-900/90 backdrop-blur-sm rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-forest-800 transition-all shadow-lg hover:shadow-xl">
-            <svg class="w-4 h-4 inline mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-            Edit Banner
-          </button>
-        </A>
+        <button 
+          onClick={props.onEdit}
+          class="absolute top-4 right-4 px-4 py-2 bg-white/90 dark:bg-forest-900/90 backdrop-blur-sm rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-forest-800 transition-all shadow-lg hover:shadow-xl"
+        >
+          <svg class="w-4 h-4 inline mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          Edit Banner
+        </button>
       </div>
 
       {/* Logo and Info */}
@@ -83,13 +85,14 @@ export default function ShopHeader(props: ShopHeaderProps) {
                 </div>
               )}
             </div>
-            <A href="/seller/my-shop/edit" class="absolute -bottom-2 -right-2">
-              <button class="w-8 h-8 rounded-full bg-terracotta-500 hover:bg-terracotta-600 text-white shadow-lg flex items-center justify-center transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732a1.5 1.5 0 013.536 0z" />
-                </svg>
-              </button>
-            </A>
+            <button 
+              onClick={props.onEdit}
+              class="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-terracotta-500 hover:bg-terracotta-600 text-white shadow-lg flex items-center justify-center transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732a1.5 1.5 0 013.536 0z" />
+              </svg>
+            </button>
           </div>
 
           <div class="pb-2">
