@@ -18,7 +18,7 @@ export interface ShopInfoEditModalProps {
     };
   }) => Promise<any>;
   shop: Shop | null;
-  isSaving: boolean;
+  isSaving?: boolean;
   shouldClose?: boolean;
 }
 

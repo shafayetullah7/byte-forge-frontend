@@ -13,7 +13,7 @@ export interface AddressEditModalProps {
   onClose: () => void;
   onSave: (data: UpdateAddressDto) => Promise<any>;
   address: ShopAddress | null;
-  isSaving: boolean;
+  isSaving?: boolean;
 }
 
 export default function AddressEditModal(props: AddressEditModalProps) {

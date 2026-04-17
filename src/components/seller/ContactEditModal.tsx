@@ -12,7 +12,7 @@ export interface ContactEditModalProps {
   onClose: () => void;
   onSave: (data: UpdateContactDto) => Promise<any>;
   contact: ShopContact | null;
-  isSaving: boolean;
+  isSaving?: boolean;
   shouldClose?: boolean;
 }
 

@@ -11,7 +11,7 @@ export interface ShopBrandingModalProps {
   onClose: () => void;
   onSave: (logoId: string | undefined, bannerId: string | undefined) => Promise<any>;
   shop: Shop | null;
-  isSaving: boolean;
+  isSaving?: boolean;
   shouldClose?: boolean;
 }
 

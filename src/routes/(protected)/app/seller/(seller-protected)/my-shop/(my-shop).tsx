@@ -37,6 +37,82 @@ const updateAddressAction = action(async (data: UpdateAddressDto) => {
   }
 }, "update-address-action");
 
+/**
+ * Update Contact Action
+ * Handles server-side contact update with proper error handling
+ */
+const updateContactAction = action(async (data: UpdateContactDto) => {
+  "use server";
+  try {
+    await sellerShopApi.updateContact(data);
+    return { success: true };
+  } catch (error) {
+    const apiError = error as any;
+    return {
+      success: false,
+      error: {
+        message: apiError.message || "Failed to update contact",
+        statusCode: apiError.statusCode,
+        validationErrors: apiError.response?.validationErrors || (apiError as any).validationErrors,
+      },
+    };
+  }
+}, "update-contact-action");
+
+/**
+ * Update Branding Action
+ * Handles server-side branding update with proper error handling
+ */
+const updateBrandingAction = action(async (data: { logoId?: string; bannerId?: string }) => {
+  "use server";
+  try {
+    const currentShop = await getShop();
+    const enTrans = currentShop?.translations?.find(t => t.locale === "en");
+    const bnTrans = currentShop?.translations?.find(t => t.locale === "bn");
+    
+    await sellerShopApi.updateShopInfo({
+      branding: data.logoId || data.bannerId ? { logoId: data.logoId, bannerId: data.bannerId } : undefined,
+      translations: {
+        en: { name: enTrans?.name || "", description: enTrans?.description || "", businessHours: enTrans?.businessHours || "" },
+        bn: { name: bnTrans?.name || "", description: bnTrans?.description || "", businessHours: bnTrans?.businessHours || "" },
+      },
+    });
+    return { success: true };
+  } catch (error) {
+    const apiError = error as any;
+    return {
+      success: false,
+      error: {
+        message: apiError.message || "Failed to update branding",
+        statusCode: apiError.statusCode,
+        validationErrors: apiError.response?.validationErrors || (apiError as any).validationErrors,
+      },
+    };
+  }
+}, "update-branding-action");
+
+/**
+ * Update Shop Info Action
+ * Handles server-side shop info update with proper error handling
+ */
+const updateShopInfoAction = action(async (data: UpdateShopInfoDto) => {
+  "use server";
+  try {
+    await sellerShopApi.updateShopInfo(data);
+    return { success: true };
+  } catch (error) {
+    const apiError = error as any;
+    return {
+      success: false,
+      error: {
+        message: apiError.message || "Failed to update shop info",
+        statusCode: apiError.statusCode,
+        validationErrors: apiError.response?.validationErrors || (apiError as any).validationErrors,
+      },
+    };
+  }
+}, "update-shop-info-action");
+
 export const route = {
   preload: () => getShop(),
 } satisfies RouteDefinition;
@@ -46,6 +122,12 @@ export default function MyShopPage() {
   const [shouldCloseModal, setShouldCloseModal] = createSignal(false);
   const addressTrigger = useAction(updateAddressAction);
   const addressSubmission = useSubmission(updateAddressAction);
+  const contactTrigger = useAction(updateContactAction);
+  const contactSubmission = useSubmission(updateContactAction);
+  const brandingTrigger = useAction(updateBrandingAction);
+  const brandingSubmission = useSubmission(updateBrandingAction);
+  const shopInfoTrigger = useAction(updateShopInfoAction);
+  const shopInfoSubmission = useSubmission(updateShopInfoAction);
   const shopData = createAsync(() => getShop());
   const verificationData = createAsync(() => getShopStatus());
 
@@ -133,15 +215,25 @@ export default function MyShopPage() {
       }
     });
     
-    try {
-      await sellerShopApi.updateContact(cleanedData);
+    const result = await contactTrigger(cleanedData);
+    return result;
+  };
+
+  // Handle contact error (only once, not duplicated)
+  createEffect(() => {
+    if (contactSubmission.result?.success === false && contactSubmission.result?.error) {
+      toaster.error(contactSubmission.result.error.message || t("seller.shop.myShop.contactAndSocial.saveFailed"));
+    }
+  });
+
+  // Handle contact success
+  createEffect(() => {
+    if (contactSubmission.result?.success === true && !contactSubmission.pending) {
       toaster.success(t("seller.shop.myShop.contactAndSocial.saveSuccess"));
       setShouldCloseContactModal(true);
       refetchShop();
-    } catch (error: any) {
-      toaster.error(error.message || t("seller.shop.myShop.contactAndSocial.saveFailed"));
     }
-  };
+  });
 
   // Handle contact modal close
   const handleContactModalClose = () => {
@@ -152,40 +244,32 @@ export default function MyShopPage() {
   // Branding modal state
   const [shouldCloseBrandingModal, setShouldCloseBrandingModal] = createSignal(false);
   const [isBrandingModalOpen, setIsBrandingModalOpen] = createSignal(false);
-  const [isSavingBranding, setIsSavingBranding] = createSignal(false);
 
   // Handle branding save (receives media IDs from modal)
   const handleSaveBranding = async (logoId: string | undefined, bannerId: string | undefined) => {
-    setIsSavingBranding(true);
-    try {
-      // Get current shop data to extract translations and existing media IDs
-      const currentShop = shopData();
-      const enTrans = currentShop?.translations?.find(t => t.locale === "en");
-      const bnTrans = currentShop?.translations?.find(t => t.locale === "bn");
-      
-      // Only include branding fields that were actually changed
-      const brandingPayload: any = {};
-      if (logoId) brandingPayload.logoId = logoId;
-      if (bannerId) brandingPayload.bannerId = bannerId;
-      
-      // Call updateShopInfo with branding media IDs (only changed fields)
-      await sellerShopApi.updateShopInfo({
-        branding: Object.keys(brandingPayload).length > 0 ? brandingPayload : undefined,
-        translations: {
-          en: { name: enTrans?.name || "", description: enTrans?.description || "", businessHours: enTrans?.businessHours || "" },
-          bn: { name: bnTrans?.name || "", description: bnTrans?.description || "", businessHours: bnTrans?.businessHours || "" },
-        },
-      });
+    const brandingData = {
+      logoId,
+      bannerId,
+    };
+    const result = await brandingTrigger(brandingData);
+    return result;
+  };
+
+  // Handle branding error
+  createEffect(() => {
+    if (brandingSubmission.result?.success === false && brandingSubmission.result?.error) {
+      toaster.error(brandingSubmission.result.error.message || t("seller.shop.myShop.branding.saveFailed"));
+    }
+  });
+
+  // Handle branding success
+  createEffect(() => {
+    if (brandingSubmission.result?.success === true && !brandingSubmission.pending) {
       toaster.success(t("seller.shop.myShop.branding.saveSuccess"));
       setShouldCloseBrandingModal(true);
       refetchShop();
-    } catch (error: any) {
-      toaster.error(error.message || t("seller.shop.myShop.branding.saveFailed"));
-      throw error;
-    } finally {
-      setIsSavingBranding(false);
     }
-  };
+  });
 
   // Handle branding modal close
   const handleBrandingModalClose = () => {
@@ -196,23 +280,28 @@ export default function MyShopPage() {
   // Shop info modal state
   const [shouldCloseInfoModal, setShouldCloseInfoModal] = createSignal(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = createSignal(false);
-  const [isSavingInfo, setIsSavingInfo] = createSignal(false);
 
   // Handle shop info save
-  const handleSaveInfo = async (data: { translations: { en: { name: string; description?: string; businessHours?: string }; bn: { name: string; description?: string; businessHours?: string } } }) => {
-    setIsSavingInfo(true);
-    try {
-      await sellerShopApi.updateShopInfo(data);
+  const handleSaveInfo = async (data: UpdateShopInfoDto) => {
+    const result = await shopInfoTrigger(data);
+    return result;
+  };
+
+  // Handle shop info error
+  createEffect(() => {
+    if (shopInfoSubmission.result?.success === false && shopInfoSubmission.result?.error) {
+      toaster.error(shopInfoSubmission.result.error.message || t("seller.shop.myShop.shopInfo.saveFailed"));
+    }
+  });
+
+  // Handle shop info success
+  createEffect(() => {
+    if (shopInfoSubmission.result?.success === true && !shopInfoSubmission.pending) {
       toaster.success(t("seller.shop.myShop.shopInfo.saveSuccess"));
       setShouldCloseInfoModal(true);
       refetchShop();
-    } catch (error: any) {
-      toaster.error(error.message || t("seller.shop.myShop.shopInfo.saveFailed"));
-      throw error;
-    } finally {
-      setIsSavingInfo(false);
     }
-  };
+  });
 
   // Handle shop info modal close
   const handleInfoModalClose = () => {
@@ -324,6 +413,9 @@ export default function MyShopPage() {
                 );
               }
 
+              console.log("=== SHOP DATA ===", shop);
+              console.log("=== SHOP CONTACT ===", shop.contact);
+
               const enTranslation = shop.translations?.find(t => t.locale === "en");
               const bnTranslation = shop.translations?.find(t => t.locale === "bn");
 
@@ -373,7 +465,7 @@ export default function MyShopPage() {
                     onClose={handleContactModalClose}
                     onSave={handleSaveContact}
                     contact={shop.contact}
-                    isSaving={false}
+                    isSaving={contactSubmission.pending}
                     shouldClose={shouldCloseContactModal()}
                   />
 
@@ -383,7 +475,7 @@ export default function MyShopPage() {
                     onClose={handleBrandingModalClose}
                     onSave={handleSaveBranding}
                     shop={shop}
-                    isSaving={isSavingBranding()}
+                    isSaving={brandingSubmission.pending}
                     shouldClose={shouldCloseBrandingModal()}
                   />
 
@@ -393,7 +485,7 @@ export default function MyShopPage() {
                     onClose={handleInfoModalClose}
                     onSave={handleSaveInfo}
                     shop={shop}
-                    isSaving={isSavingInfo()}
+                    isSaving={shopInfoSubmission.pending}
                     shouldClose={shouldCloseInfoModal()}
                   />
 
