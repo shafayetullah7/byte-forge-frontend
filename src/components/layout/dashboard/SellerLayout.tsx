@@ -1,4 +1,4 @@
-import { ParentComponent } from "solid-js";
+import { ParentComponent, createMemo } from "solid-js";
 import { DashboardLayout } from "~/components/layout/dashboard/DashboardLayout";
 import { SidebarConfig } from "~/components/layout/dashboard/Sidebar";
 import {
@@ -18,9 +18,9 @@ import {
 import { useI18n } from "~/i18n";
 
 export const SellerLayout: ParentComponent = (props) => {
-    const { t } = useI18n();
+    const { t, locale } = useI18n();
 
-    const sidebarConfig: SidebarConfig = {
+    const sidebarConfig = createMemo<SidebarConfig>(() => ({
         mode: "seller",
         brandColor: "terracotta",
         links: [
@@ -90,7 +90,7 @@ export const SellerLayout: ParentComponent = (props) => {
                 label: t("seller.settings.shopSettings"),
             },
         ],
-    };
+    }));
 
-    return <DashboardLayout sidebarConfig={sidebarConfig}>{props.children}</DashboardLayout>;
+    return <DashboardLayout sidebarConfig={sidebarConfig()}>{props.children}</DashboardLayout>;
 };

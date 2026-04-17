@@ -54,7 +54,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
                         : "text-forest-600/60 dark:text-forest-400/60 group-hover:text-forest-600 dark:group-hover:text-forest-400"
                         }`}
                 />
-                {itemProps.label}
+                <span class="whitespace-nowrap">{itemProps.label}</span>
             </A>
         );
     };
@@ -80,7 +80,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
                         <nav class="flex-1 space-y-1">
                             {/* Navigation Links */}
                             <For each={props.config.links}>
-                                {(link) => <NavItem {...link} />}
+                                {(link) => <NavItem href={link.href} icon={link.icon} label={link.label} />}
                             </For>
                         </nav>
                     </div>
