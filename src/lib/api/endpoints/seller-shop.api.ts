@@ -128,10 +128,23 @@ export interface ShopVerificationStatus {
   id: string;
   shopId: string;
   status: string;
+  tradeLicenseNumber: string | null;
+  tinNumber: string | null;
+  tradeLicenseDocumentId: string | null;
+  tinDocumentId: string | null;
+  utilityBillDocumentId: string | null;
   rejectionReason: string | null;
   verifiedAt: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface UpdateVerificationDto {
+  tradeLicenseNumber?: string;
+  tinNumber?: string;
+  tradeLicenseDocumentId?: string;
+  tinDocumentId?: string;
+  utilityBillDocumentId?: string;
 }
 
 /**
@@ -248,5 +261,18 @@ export const sellerShopApi = {
       method: 'PUT',
       body: JSON.stringify(dto),
     });
+  },
+
+  /**
+   * Update verification documents
+   */
+  updateVerification: async (dto: UpdateVerificationDto): Promise<ShopVerificationStatus> => {
+    return fetcher<ShopVerificationStatus>(
+      '/api/v1/user/seller/shops/my-shop/verification',
+      {
+        method: 'PATCH',
+        body: JSON.stringify(dto),
+      }
+    );
   },
 };
