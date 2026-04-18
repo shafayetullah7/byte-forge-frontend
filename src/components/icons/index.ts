@@ -23,6 +23,7 @@ export { ClockIcon } from "./ClockIcon";
 export { ShopIcon } from "./ShopIcon";
 export { BoltIcon } from "./BoltIcon";
 export { PackageIcon } from "./PackageIcon";
+export { XIcon } from "./XIcon";
 
 export * from './TagIcon';
 export * from './ArrowsRightLeftIcon';

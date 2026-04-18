@@ -1,5 +1,5 @@
 import { createAsync, A, action, useAction, useSubmission, type RouteDefinition } from "@solidjs/router";
-import { Suspense, createMemo, createEffect, createSignal } from "solid-js";
+import { Suspense, createMemo, createEffect, createSignal, Show } from "solid-js";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 import ShopHeader from "~/components/seller/ShopHeader";
 import ShopStatusCard from "~/components/seller/ShopStatusCard";
@@ -9,11 +9,14 @@ import AddressCard from "~/components/seller/AddressCard";
 import ContactEditModal from "~/components/seller/ContactEditModal";
 import ShopBrandingModal from "~/components/seller/ShopBrandingModal";
 import ShopInfoEditModal from "~/components/seller/ShopInfoEditModal";
+import { VerificationDocumentUploader } from "~/components/seller/VerificationDocumentUploader";
+import { VerificationStatusCard } from "~/components/seller/VerificationStatusCard";
+import Card from "~/components/ui/Card";
 import { useI18n } from "~/i18n";
 import { toaster } from "~/components/ui/Toast";
-import { getShop, getShopStatus } from "~/lib/context/shop-context";
-import { sellerShopApi, type UpdateAddressDto, type UpdateContactDto, type UpdateShopInfoDto } from "~/lib/api/endpoints/seller-shop.api";
-import { ShopIcon, PlusIcon, BoltIcon, CheckCircleIcon, PackageIcon, EyeIcon } from "~/components/icons";
+import { getShop, getShopStatus, refetchShop, refetchShopStatus } from "~/lib/context/shop-context";
+import { sellerShopApi, type UpdateAddressDto, type UpdateContactDto, type UpdateShopInfoDto, type UpdateVerificationDto } from "~/lib/api/endpoints/seller-shop.api";
+import { ShopIcon, PlusIcon, BoltIcon, CheckCircleIcon, PackageIcon, EyeIcon, XIcon } from "~/components/icons";
 
 /**
  * Update Address Action
@@ -113,6 +116,27 @@ const updateShopInfoAction = action(async (data: UpdateShopInfoDto) => {
   }
 }, "update-shop-info-action");
 
+/**
+ * Submit Verification Action
+ * Handles server-side verification document submission with proper error handling
+ */
+const submitVerificationAction = action(async (data: UpdateVerificationDto) => {
+  "use server";
+  try {
+    await sellerShopApi.updateVerification(data);
+    return { success: true };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: {
+        message: error.message || "Failed to submit verification documents",
+        statusCode: error.statusCode,
+        validationErrors: error.response?.validationErrors || error.validationErrors,
+      },
+    };
+  }
+}, "submit-verification");
+
 export const route = {
   preload: () => getShop(),
 } satisfies RouteDefinition;
@@ -129,7 +153,8 @@ export default function MyShopPage() {
   const shopInfoTrigger = useAction(updateShopInfoAction);
   const shopInfoSubmission = useSubmission(updateShopInfoAction);
   const shopData = createAsync(() => getShop());
-  const verificationData = createAsync(() => getShopStatus());
+  const shopStatusData = createAsync(() => getShopStatus());
+  const verificationData = createAsync(() => sellerShopApi.getVerificationStatus());
 
   // Reset close signal when modal is manually closed
   const handleModalClose = () => {
@@ -306,6 +331,42 @@ export default function MyShopPage() {
     setShouldCloseInfoModal(false);
   };
 
+  // Verification modal state
+  const [isVerificationModalOpen, setIsVerificationModalOpen] = createSignal(false);
+  const [shouldCloseVerificationModal, setShouldCloseVerificationModal] = createSignal(false);
+  const verificationTrigger = useAction(submitVerificationAction);
+  const verificationSubmission = useSubmission(submitVerificationAction);
+
+  createEffect(() => {
+    if (verificationSubmission.result?.success === true && !verificationSubmission.pending) {
+      toaster.success(t("seller.shop.verification.submittedSuccessfully"));
+      setShouldCloseVerificationModal(true);
+      // Invalidate cache to trigger refetch
+      refetchShop();
+      refetchShopStatus();
+    } else if (verificationSubmission.result?.success === false && verificationSubmission.result?.error) {
+      const errorData = verificationSubmission.result.error;
+      if (errorData.validationErrors && errorData.validationErrors.length > 0) {
+        const errorMsg = errorData.validationErrors
+          .map((err: any) => `${err.field}: ${err.message}`)
+          .join("\n");
+        toaster.error(errorMsg);
+      } else {
+        toaster.error(errorData.message || t("seller.shop.verification.submissionFailed"));
+      }
+    }
+  });
+
+  const handleVerificationSubmit = async (data: UpdateVerificationDto) => {
+    const result = await verificationTrigger(data);
+    return result;
+  };
+
+  const handleVerificationModalClose = () => {
+    setIsVerificationModalOpen(false);
+    setShouldCloseVerificationModal(false);
+  };
+
   const statusConfig = createMemo(() => {
     const verificationStatus = verificationData()?.status;
     const shopStatus = shopData()?.status;
@@ -344,7 +405,7 @@ export default function MyShopPage() {
       },
     };
 
-    return configs[status];
+    return configs[status as keyof typeof configs];
   });
 
   return (
@@ -495,6 +556,92 @@ export default function MyShopPage() {
                     onClose={handleModalClose}
                   />
 
+                  {/* Verification Modal */}
+                  <Show when={isVerificationModalOpen()}>
+                    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                      <div class="bg-white dark:bg-forest-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        {/* Modal Header */}
+                        <div class="sticky top-0 bg-white dark:bg-forest-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+                          <div>
+                            <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">
+                              {t("seller.shop.verification.pageTitle")}
+                            </h2>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">
+                              {t("seller.shop.verification.pageSubtitle")}
+                            </p>
+                          </div>
+                          <button
+                            onClick={handleVerificationModalClose}
+                            class="p-2 hover:bg-gray-100 dark:hover:bg-forest-700 rounded-lg transition-colors"
+                          >
+                            <XIcon class="w-5 h-5 text-gray-500" />
+                          </button>
+                        </div>
+
+                        {/* Modal Content */}
+                        <div class="p-6 space-y-6">
+                          {/* Verification Status Card */}
+                          <Show when={verificationData()}>
+                            {(verification) => (
+                              <VerificationStatusCard
+                                status={verification().status}
+                                rejectionReason={verification().rejectionReason}
+                                verifiedAt={verification().verifiedAt}
+                                updatedAt={verification().updatedAt}
+                              />
+                            )}
+                          </Show>
+
+                          {/* Document Uploader - Only show for PENDING or REJECTED */}
+                          <Show when={verificationData()}>
+                            {(verification) => (
+                              <Show when={verification().status === "PENDING" || verification().status === "REJECTED"}>
+                                <Card title={t("seller.shop.verification.submitDocuments")}>
+                                  <Show when={!verificationSubmission.pending} fallback={
+                                    <div class="py-8 flex flex-col items-center justify-center">
+                                      <svg class="animate-spin h-8 w-8 text-forest-500 mb-3" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" />
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                      </svg>
+                                      <p class="text-sm text-gray-600 dark:text-gray-400">
+                                        {t("seller.shop.verification.submitting")}
+                                      </p>
+                                    </div>
+                                  }>
+                                    <VerificationDocumentUploader
+                                      initialData={{
+                                        tradeLicenseNumber: verification().tradeLicenseNumber,
+                                        tinNumber: verification().tinNumber,
+                                        tradeLicenseDocumentId: verification().tradeLicenseDocumentId,
+                                        tinDocumentId: verification().tinDocumentId,
+                                        utilityBillDocumentId: verification().utilityBillDocumentId,
+                                      }}
+                                      onSubmit={handleVerificationSubmit}
+                                      isLoading={verificationSubmission.pending}
+                                    />
+                                  </Show>
+                                </Card>
+                              </Show>
+                            )}
+                          </Show>
+
+                          {/* Info Message for Approved */}
+                          <Show when={verificationData()}>
+                            {(verification) => (
+                              <Show when={verification().status === "APPROVED"}>
+                                <div class="p-4 bg-sage-50 dark:bg-sage-900/20 border border-sage-200 dark:border-sage-700 rounded-lg">
+                                  <p class="text-sm text-sage-800 dark:text-sage-200">
+                                    {t("seller.shop.verification.approvedMessage")}
+                                  </p>
+                                </div>
+                              </Show>
+                            )}
+                          </Show>
+                        </div>
+                      </div>
+                    </div>
+                  </Show>
+
                    {/* Quick Actions Grid */}
                    <div class="bg-white dark:bg-forest-800 rounded-2xl p-6 sm:p-8 border border-gray-200 dark:border-gray-700 shadow-sm">
                      <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
@@ -513,17 +660,18 @@ export default function MyShopPage() {
                        </div>
                      </div>
                      
-                       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                         <A href="/seller/my-shop/verification">
-                           <button class="w-full p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-forest-500 dark:hover:border-forest-500 hover:bg-forest-50 dark:hover:bg-forest-900/20 transition-all group text-left">
-                             <div class="flex items-center gap-3">
-                               <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-forest-500 to-forest-600 flex items-center justify-center flex-shrink-0">
-                                 <CheckCircleIcon class="w-4 h-4 text-white" />
-                               </div>
-                               <span class="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-forest-600 dark:group-hover:text-forest-400 transition-colors">{t("seller.shop.myShop.quickActions.verificationStatus")}</span>
-                             </div>
-                           </button>
-                         </A>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                          <button
+                            onClick={() => setIsVerificationModalOpen(true)}
+                            class="w-full p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-forest-500 dark:hover:border-forest-500 hover:bg-forest-50 dark:hover:bg-forest-900/20 transition-all group text-left"
+                          >
+                            <div class="flex items-center gap-3">
+                              <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-forest-500 to-forest-600 flex items-center justify-center flex-shrink-0">
+                                <CheckCircleIcon class="w-4 h-4 text-white" />
+                              </div>
+                              <span class="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-forest-600 dark:group-hover:text-forest-400 transition-colors">{t("seller.shop.myShop.quickActions.verificationStatus")}</span>
+                            </div>
+                          </button>
 
                          {shop.status === "ACTIVE" && (
                            <A href="/seller/products">

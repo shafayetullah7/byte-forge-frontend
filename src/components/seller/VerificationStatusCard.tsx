@@ -1,12 +1,11 @@
 import { JSX } from 'solid-js';
-
-export type VerificationStatusType = 'PENDING' | 'REVIEWING' | 'APPROVED' | 'REJECTED';
+import type { VerificationStatusType } from '~/lib/api/endpoints/seller-shop.api';
 
 interface VerificationStatusCardProps {
     status: VerificationStatusType;
     rejectionReason?: string | null;
-    verifiedAt?: Date | null;
-    updatedAt?: Date;
+    verifiedAt?: Date | string | null;
+    updatedAt?: Date | string;
 }
 
 function getStatusConfig(status: VerificationStatusType): {

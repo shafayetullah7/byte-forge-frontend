@@ -124,10 +124,13 @@ export interface Shop {
   address: ShopAddress | null;
 }
 
+export type VerificationStatusType = 'PENDING' | 'REVIEWING' | 'APPROVED' | 'REJECTED';
+export type ShopStatusType = 'DRAFT' | 'PENDING_VERIFICATION' | 'APPROVED' | 'ACTIVE' | 'INACTIVE' | 'REJECTED' | 'SUSPENDED' | 'DELETED';
+
 export interface ShopVerificationStatus {
   id: string;
   shopId: string;
-  status: string;
+  status: VerificationStatusType;
   tradeLicenseNumber: string | null;
   tinNumber: string | null;
   tradeLicenseDocumentId: string | null;

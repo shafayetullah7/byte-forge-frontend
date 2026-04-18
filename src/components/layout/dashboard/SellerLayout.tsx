@@ -4,7 +4,6 @@ import { SidebarConfig } from "~/components/layout/dashboard/Sidebar";
 import {
     Squares2x2Icon,
     ShoppingBagIcon,
-    TagIcon,
     CubeIcon,
     PlusIcon,
     FolderIcon,
@@ -33,11 +32,6 @@ export const SellerLayout: ParentComponent = (props) => {
                 href: "/app/seller/my-shop",
                 icon: ShoppingBagIcon,
                 label: t("seller.myShop"),
-            },
-            {
-                href: "/app/seller/my-shop/verification",
-                icon: TagIcon,
-                label: t("seller.verification.title"),
             },
             {
                 href: "/app/seller/my-shop/history",
