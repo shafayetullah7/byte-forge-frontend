@@ -10,6 +10,7 @@ import ContactEditModal from "~/components/seller/ContactEditModal";
 import ShopBrandingModal from "~/components/seller/ShopBrandingModal";
 import ShopInfoEditModal from "~/components/seller/ShopInfoEditModal";
 import { VerificationCard } from "~/components/seller/VerificationCard";
+import { VerificationModal } from "~/components/seller/VerificationModal";
 import { useI18n } from "~/i18n";
 import { toaster } from "~/components/ui/Toast";
 import { getShop, getShopStatus, refetchShop, refetchShopStatus } from "~/lib/context/shop-context";
@@ -329,17 +330,19 @@ export default function MyShopPage() {
     setShouldCloseInfoModal(false);
   };
 
-  // Verification form submission
+  // Verification modal state
+  const [isVerificationModalOpen, setIsVerificationModalOpen] = createSignal(false);
   const [isSubmitting, setIsSubmitting] = createSignal(false);
   const verificationTrigger = useAction(submitVerificationAction);
   const verificationSubmission = useSubmission(submitVerificationAction);
 
   createEffect(() => {
     if (verificationSubmission.result?.success === true && !verificationSubmission.pending) {
-      toaster.success(t("seller.shop.verification.submittedSuccessfully"));
+      toaster.success(t("seller.verification.submittedSuccessfully"));
       // Invalidate cache to trigger refetch
       refetchShop();
       refetchShopStatus();
+      setIsVerificationModalOpen(false);
     } else if (verificationSubmission.result?.success === false && verificationSubmission.result?.error) {
       const errorData = verificationSubmission.result.error;
       if (errorData.validationErrors && errorData.validationErrors.length > 0) {
@@ -348,7 +351,7 @@ export default function MyShopPage() {
           .join("\n");
         toaster.error(errorMsg);
       } else {
-        toaster.error(errorData.message || t("seller.shop.verification.submissionFailed"));
+        toaster.error(errorData.message || t("seller.verification.submissionFailed"));
       }
     }
     setIsSubmitting(verificationSubmission.pending ?? false);
@@ -357,6 +360,10 @@ export default function MyShopPage() {
   const handleVerificationSubmit = async (data: UpdateVerificationDto) => {
     const result = await verificationTrigger(data);
     return result;
+  };
+
+  const handleOpenVerification = () => {
+    setIsVerificationModalOpen(true);
   };
 
   const statusConfig = createMemo(() => {
@@ -488,6 +495,15 @@ export default function MyShopPage() {
                     statusConfig={statusConfig()}
                   />
 
+                  {/* Verification Section - Moved up for prominence */}
+                  <VerificationCard
+                    status={verificationData()?.status}
+                    rejectionReason={verificationData()?.rejectionReason}
+                    verifiedAt={verificationData()?.verifiedAt}
+                    hasDocuments={!!verificationData()?.tradeLicenseDocumentId}
+                    onManage={handleOpenVerification}
+                  />
+
                   {/* Shop Information - Bilingual */}
                   <BilingualInfoCard
                     enData={{
@@ -548,16 +564,20 @@ export default function MyShopPage() {
                     onClose={handleModalClose}
                   />
 
-                  {/* Verification Section - Dedicated Card */}
-                  <Show when={verificationData()}>
-                    {(verification) => (
-                      <VerificationCard
-                        verification={verification()}
-                        onSubmit={handleVerificationSubmit}
-                        isSubmitting={isSubmitting()}
-                      />
-                    )}
-                  </Show>
+                  {/* Verification Modal */}
+                  <VerificationModal
+                    isOpen={isVerificationModalOpen()}
+                    onClose={() => setIsVerificationModalOpen(false)}
+                    onSubmit={handleVerificationSubmit}
+                    isLoading={isSubmitting()}
+                    initialData={{
+                      tradeLicenseNumber: verificationData()?.tradeLicenseNumber,
+                      tinNumber: verificationData()?.tinNumber,
+                      tradeLicenseDocumentId: verificationData()?.tradeLicenseDocumentId,
+                      tinDocumentId: verificationData()?.tinDocumentId,
+                      utilityBillDocumentId: verificationData()?.utilityBillDocumentId,
+                    }}
+                  />
 
                    {/* Quick Actions Grid */}
                    <div class="bg-white dark:bg-forest-800 rounded-2xl p-6 sm:p-8 border border-gray-200 dark:border-gray-700 shadow-sm">

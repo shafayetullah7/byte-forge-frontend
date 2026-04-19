@@ -2,6 +2,7 @@ import { createSignal, Show } from 'solid-js';
 import { FileUpload } from '../ui/FileUpload';
 import { mediaApi } from '~/lib/api';
 import { toaster } from '../ui/Toast';
+import { useI18n } from '~/i18n';
 
 interface VerificationDocumentUploaderProps {
     initialData?: {
@@ -38,6 +39,7 @@ interface DocumentUploadFieldProps {
  * Uploads files immediately when selected
  */
 function DocumentUploadField(props: DocumentUploadFieldProps) {
+    const { t } = useI18n();
     const [previewUrl, setPreviewUrl] = createSignal<string | null>(null);
     const [fileName, setFileName] = createSignal<string | null>(null);
     const [fileType, setFileType] = createSignal<string | null>(null);
@@ -138,6 +140,7 @@ function DocumentUploadField(props: DocumentUploadFieldProps) {
 }
 
 export function VerificationDocumentUploader(props: VerificationDocumentUploaderProps) {
+    const { t } = useI18n();
     const [tradeLicenseNumber, setTradeLicenseNumber] = createSignal(
         props.initialData?.tradeLicenseNumber || ''
     );
@@ -160,11 +163,11 @@ export function VerificationDocumentUploader(props: VerificationDocumentUploader
         const newErrors: Record<string, string> = {};
 
         if (!tradeLicenseNumber().trim()) {
-            newErrors.tradeLicenseNumber = 'Trade license number is required';
+            newErrors.tradeLicenseNumber = t('seller.verification.tradeLicenseNumber') + ' ' + t('common.required');
         }
 
         if (!tradeLicenseDocumentId()) {
-            newErrors.tradeLicenseDocument = 'Trade license document is required';
+            newErrors.tradeLicenseDocument = t('seller.verification.tradeLicenseDocument') + ' ' + t('common.required');
         }
 
         setErrors(newErrors);
@@ -192,7 +195,7 @@ export function VerificationDocumentUploader(props: VerificationDocumentUploader
             {/* Trade License Section */}
             <div class="space-y-4">
                 <h4 class="text-base font-semibold text-forest-900 dark:text-forest-100">
-                    Trade License
+                    {t('seller.verification.tradeLicenseDocument')}
                 </h4>
 
                 <div>
@@ -200,7 +203,7 @@ export function VerificationDocumentUploader(props: VerificationDocumentUploader
                         for="tradeLicenseNumber"
                         class="block text-sm font-medium text-forest-800 dark:text-forest-200 mb-1"
                     >
-                        Trade License Number <span class="text-terracotta-500">*</span>
+                        {t('seller.verification.tradeLicenseNumber')} <span class="text-terracotta-500">*</span>
                     </label>
                     <input
                         type="text"
@@ -225,15 +228,15 @@ export function VerificationDocumentUploader(props: VerificationDocumentUploader
 
                 <div>
                     <label class="block text-sm font-medium text-forest-800 dark:text-forest-200 mb-1">
-                        Trade License Document <span class="text-terracotta-500">*</span>
+                        {t('seller.verification.tradeLicenseDocument')} <span class="text-terracotta-500">*</span>
                     </label>
                     <DocumentUploadField
                         accept="image/*,.pdf"
                         uploadedMediaId={tradeLicenseDocumentId()}
                         onMediaChange={(mediaId) => setTradeLicenseDocumentId(mediaId || undefined)}
                         disabled={props.isLoading}
-                        label="Upload trade license document"
-                        description="Accepted formats: PDF, JPG, PNG (Max 10MB)"
+                        label={t('seller.verification.uploadDocument')}
+                        description={t('seller.verification.tradeLicenseDocumentDesc')}
                     />
                     <Show when={errors().tradeLicenseDocument}>
                         <p class="mt-1 text-sm text-terracotta-600 dark:text-terracotta-400">
@@ -248,7 +251,7 @@ export function VerificationDocumentUploader(props: VerificationDocumentUploader
             {/* TIN Section */}
             <div class="space-y-4">
                 <h4 class="text-base font-semibold text-forest-900 dark:text-forest-100">
-                    Tax Identification Number (TIN)
+                    {t('seller.verification.tinNumber')}
                 </h4>
 
                 <div>
@@ -256,7 +259,7 @@ export function VerificationDocumentUploader(props: VerificationDocumentUploader
                         for="tinNumber"
                         class="block text-sm font-medium text-forest-800 dark:text-forest-200 mb-1"
                     >
-                        TIN Number <span class="text-forest-400 text-xs">(Optional)</span>
+                        {t('seller.verification.tinNumber')} <span class="text-forest-400 text-xs">({t('common.optional')})</span>
                     </label>
                     <input
                         type="text"
@@ -276,15 +279,15 @@ export function VerificationDocumentUploader(props: VerificationDocumentUploader
 
                 <div>
                     <label class="block text-sm font-medium text-forest-800 dark:text-forest-200 mb-1">
-                        TIN Document <span class="text-forest-400 text-xs">(Optional)</span>
+                        {t('seller.verification.tinDocument')} <span class="text-forest-400 text-xs">({t('common.optional')})</span>
                     </label>
                     <DocumentUploadField
                         accept="image/*,.pdf"
                         uploadedMediaId={tinDocumentId()}
                         onMediaChange={(mediaId) => setTinDocumentId(mediaId || undefined)}
                         disabled={props.isLoading}
-                        label="Upload TIN document"
-                        description="Accepted formats: PDF, JPG, PNG (Max 10MB)"
+                        label={t('seller.verification.uploadDocument')}
+                        description={t('seller.verification.tinDocumentDesc') || 'PDF or Image (max 5MB)'}
                     />
                 </div>
             </div>
@@ -294,20 +297,20 @@ export function VerificationDocumentUploader(props: VerificationDocumentUploader
             {/* Utility Bill Section */}
             <div class="space-y-4">
                 <h4 class="text-base font-semibold text-forest-900 dark:text-forest-100">
-                    Utility Bill
+                    {t('seller.verification.utilityBillDocument')}
                 </h4>
 
                 <div>
                     <label class="block text-sm font-medium text-forest-800 dark:text-forest-200 mb-1">
-                        Utility Bill Document <span class="text-forest-400 text-xs">(Optional)</span>
+                        {t('seller.verification.utilityBillDocument')} <span class="text-forest-400 text-xs">({t('common.optional')})</span>
                     </label>
                     <DocumentUploadField
                         accept="image/*,.pdf"
                         uploadedMediaId={utilityBillDocumentId()}
                         onMediaChange={(mediaId) => setUtilityBillDocumentId(mediaId || undefined)}
                         disabled={props.isLoading}
-                        label="Upload utility bill document"
-                        description="Electricity, water, or gas bill (PDF, JPG, PNG - Max 10MB)"
+                        label={t('seller.verification.uploadDocument')}
+                        description={t('seller.verification.utilityBillDocumentDesc') || 'Electricity, water, or gas bill (PDF, JPG, PNG - Max 10MB)'}
                     />
                 </div>
             </div>
@@ -330,14 +333,14 @@ export function VerificationDocumentUploader(props: VerificationDocumentUploader
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" />
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                             </svg>
-                            Submitting...
+                            {t('seller.verification.submitting')}
                         </span>
                     ) : (
-                        'Submit for Verification'
+                        t('seller.verification.submitDocuments')
                     )}
                 </button>
                 <p class="mt-2 text-xs text-forest-600 dark:text-forest-400 text-center">
-                    Submitting will reset your verification status to "Pending Review"
+                    {t('seller.verification.processInfoText')}
                 </p>
             </div>
         </form>
