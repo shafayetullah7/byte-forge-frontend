@@ -1,3 +1,4 @@
+import { query } from "@solidjs/router";
 import { fetcher } from '../api-client';
 
 export interface PublicShop {
@@ -34,47 +35,56 @@ export interface PublicProduct {
 /**
  * Get all approved shops (public endpoint)
  */
-export const getShops = async (params?: {
-  division?: string;
-  search?: string;
-  page?: number;
-  limit?: number;
-}) => {
-  const searchParams = new URLSearchParams();
-  if (params) {
-    if (params.division) searchParams.set('division', params.division);
-    if (params.search) searchParams.set('search', params.search);
-    if (params.page) searchParams.set('page', params.page.toString());
-    if (params.limit) searchParams.set('limit', params.limit.toString());
-  }
-  const qs = searchParams.toString();
-  const url = qs ? `/api/v1/shops?${qs}` : '/api/v1/shops';
-  return fetcher<{ data: PublicShop[]; pagination: any }>(url);
-};
+export const getShops = query(
+  async (params?: {
+    division?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.division) searchParams.set('division', params.division);
+      if (params.search) searchParams.set('search', params.search);
+      if (params.page) searchParams.set('page', params.page.toString());
+      if (params.limit) searchParams.set('limit', params.limit.toString());
+    }
+    const qs = searchParams.toString();
+    const url = qs ? `/api/v1/shops?${qs}` : '/api/v1/shops';
+    return fetcher<{ data: PublicShop[]; pagination: any }>(url);
+  },
+  "public-shops"
+);
 
 /**
  * Get single shop detail (public)
  */
-export const getShopById = async (id: string) => {
-  return fetcher<PublicShop>(`/api/v1/shops/${id}`);
-};
+export const getShopById = query(
+  async (id: string) => {
+    return fetcher<PublicShop>(`/api/v1/shops/${id}`);
+  },
+  "public-shop-detail"
+);
 
 /**
  * Get products by shop (public)
  */
-export const getShopProducts = async (shopId: string, params?: {
-  page?: number;
-  limit?: number;
-}) => {
-  const searchParams = new URLSearchParams();
-  if (params) {
-    if (params.page) searchParams.set('page', params.page.toString());
-    if (params.limit) searchParams.set('limit', params.limit.toString());
-  }
-  const qs = searchParams.toString();
-  const url = qs ? `/api/v1/shops/${shopId}/products?${qs}` : `/api/v1/shops/${shopId}/products`;
-  return fetcher<{ data: PublicProduct[]; pagination: any }>(url);
-};
+export const getShopProducts = query(
+  async (shopId: string, params?: {
+    page?: number;
+    limit?: number;
+  }) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.page) searchParams.set('page', params.page.toString());
+      if (params.limit) searchParams.set('limit', params.limit.toString());
+    }
+    const qs = searchParams.toString();
+    const url = qs ? `/api/v1/shops/${shopId}/products?${qs}` : `/api/v1/shops/${shopId}/products`;
+    return fetcher<{ data: PublicProduct[]; pagination: any }>(url);
+  },
+  "public-shop-products"
+);
 
 export const publicShopsApi = {
   getAll: getShops,

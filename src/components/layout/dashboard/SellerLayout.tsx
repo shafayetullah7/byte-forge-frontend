@@ -13,6 +13,7 @@ import {
     DollarSignIcon,
     BankIcon,
     CogIcon,
+    BoltIcon,
 } from "~/components/icons";
 import { useI18n } from "~/i18n";
 
@@ -32,6 +33,11 @@ export const SellerLayout: ParentComponent = (props) => {
                 href: "/app/seller/my-shop",
                 icon: ShoppingBagIcon,
                 label: t("seller.myShop"),
+            },
+            {
+                href: "/app/seller/verification",
+                icon: BoltIcon,
+                label: "Verification",
             },
             {
                 href: "/app/seller/my-shop/history",

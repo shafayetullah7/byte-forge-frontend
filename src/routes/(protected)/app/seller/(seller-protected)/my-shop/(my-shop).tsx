@@ -9,12 +9,10 @@ import AddressCard from "~/components/seller/AddressCard";
 import ContactEditModal from "~/components/seller/ContactEditModal";
 import ShopBrandingModal from "~/components/seller/ShopBrandingModal";
 import ShopInfoEditModal from "~/components/seller/ShopInfoEditModal";
-import { VerificationCard } from "~/components/seller/VerificationCard";
-import { VerificationModal } from "~/components/seller/VerificationModal";
 import { useI18n } from "~/i18n";
 import { toaster } from "~/components/ui/Toast";
 import { getShop, getShopStatus, refetchShop, refetchShopStatus } from "~/lib/context/shop-context";
-import { sellerShopApi, type UpdateAddressDto, type UpdateContactDto, type UpdateShopInfoDto, type UpdateVerificationDto } from "~/lib/api/endpoints/seller-shop.api";
+import { sellerShopApi, type UpdateAddressDto, type UpdateContactDto, type UpdateShopInfoDto } from "~/lib/api/endpoints/seller-shop.api";
 import { ShopIcon, PlusIcon, BoltIcon, PackageIcon, EyeIcon, CheckCircleIcon } from "~/components/icons";
 
 /**
@@ -115,27 +113,6 @@ const updateShopInfoAction = action(async (data: UpdateShopInfoDto) => {
   }
 }, "update-shop-info-action");
 
-/**
- * Submit Verification Action
- * Handles server-side verification document submission with proper error handling
- */
-const submitVerificationAction = action(async (data: UpdateVerificationDto) => {
-  "use server";
-  try {
-    await sellerShopApi.updateVerification(data);
-    return { success: true };
-  } catch (error: any) {
-    return {
-      success: false,
-      error: {
-        message: error.message || "Failed to submit verification documents",
-        statusCode: error.statusCode,
-        validationErrors: error.response?.validationErrors || error.validationErrors,
-      },
-    };
-  }
-}, "submit-verification");
-
 export const route = {
   preload: () => getShop(),
 } satisfies RouteDefinition;
@@ -153,7 +130,6 @@ export default function MyShopPage() {
   const shopInfoSubmission = useSubmission(updateShopInfoAction);
   const shopData = createAsync(() => getShop());
   const shopStatusData = createAsync(() => getShopStatus());
-  const verificationData = createAsync(() => sellerShopApi.getVerificationStatus());
 
   // Reset close signal when modal is manually closed
   const handleModalClose = () => {
@@ -330,46 +306,8 @@ export default function MyShopPage() {
     setShouldCloseInfoModal(false);
   };
 
-  // Verification modal state
-  const [isVerificationModalOpen, setIsVerificationModalOpen] = createSignal(false);
-  const [isSubmitting, setIsSubmitting] = createSignal(false);
-  const verificationTrigger = useAction(submitVerificationAction);
-  const verificationSubmission = useSubmission(submitVerificationAction);
-
-  createEffect(() => {
-    if (verificationSubmission.result?.success === true && !verificationSubmission.pending) {
-      toaster.success(t("seller.verification.submittedSuccessfully"));
-      // Invalidate cache to trigger refetch
-      refetchShop();
-      refetchShopStatus();
-      setIsVerificationModalOpen(false);
-    } else if (verificationSubmission.result?.success === false && verificationSubmission.result?.error) {
-      const errorData = verificationSubmission.result.error;
-      if (errorData.validationErrors && errorData.validationErrors.length > 0) {
-        const errorMsg = errorData.validationErrors
-          .map((err: any) => `${err.field}: ${err.message}`)
-          .join("\n");
-        toaster.error(errorMsg);
-      } else {
-        toaster.error(errorData.message || t("seller.verification.submissionFailed"));
-      }
-    }
-    setIsSubmitting(verificationSubmission.pending ?? false);
-  });
-
-  const handleVerificationSubmit = async (data: UpdateVerificationDto) => {
-    const result = await verificationTrigger(data);
-    return result;
-  };
-
-  const handleOpenVerification = () => {
-    setIsVerificationModalOpen(true);
-  };
-
   const statusConfig = createMemo(() => {
-    const verificationStatus = verificationData()?.status;
-    const shopStatus = shopData()?.status;
-    const status = verificationStatus ?? shopStatus ?? "DRAFT";
+    const shopStatus = shopData()?.status ?? "DRAFT";
     
     const configs: Record<string, { color: "default" | "forest" | "sage" | "terracotta" | "cream"; label: string; description: string }> = {
       DRAFT: {
@@ -395,7 +333,7 @@ export default function MyShopPage() {
       REJECTED: {
         color: "terracotta",
         label: t("seller.shop.myShop.status.rejected.label"),
-        description: verificationData()?.rejectionReason ?? t("seller.shop.myShop.status.rejected.description"),
+        description: t("seller.shop.myShop.status.rejected.description"),
       },
       SUSPENDED: {
         color: "terracotta",
@@ -404,7 +342,7 @@ export default function MyShopPage() {
       },
     };
 
-    return configs[status as keyof typeof configs];
+    return configs[shopStatus as keyof typeof configs];
   });
 
   return (
@@ -426,7 +364,7 @@ export default function MyShopPage() {
                   {t("seller.shop.myShop.pageTitle")}
                 </h1>
                 <p class="text-base text-gray-600 dark:text-gray-400">
-                  {t("seller.shop.myShop.pageSubtitle")} - Manage your shop details and verification
+                  {t("seller.shop.myShop.pageSubtitle")}
                 </p>
               </div>
             </div>
@@ -444,7 +382,6 @@ export default function MyShopPage() {
           }>
             {(() => {
               const shop = shopData();
-              const verification = verificationData();
 
               if (!shop) {
                 return (
@@ -470,9 +407,6 @@ export default function MyShopPage() {
                 );
               }
 
-              console.log("=== SHOP DATA ===", shop);
-              console.log("=== SHOP CONTACT ===", shop.contact);
-
               const enTranslation = shop.translations?.find(t => t.locale === "en");
               const bnTranslation = shop.translations?.find(t => t.locale === "bn");
 
@@ -493,15 +427,6 @@ export default function MyShopPage() {
                     status={shop.status}
                     slug={shop.slug}
                     statusConfig={statusConfig()}
-                  />
-
-                  {/* Verification Section - Moved up for prominence */}
-                  <VerificationCard
-                    status={verificationData()?.status}
-                    rejectionReason={verificationData()?.rejectionReason}
-                    verifiedAt={verificationData()?.verifiedAt}
-                    hasDocuments={!!verificationData()?.tradeLicenseDocumentId}
-                    onManage={handleOpenVerification}
                   />
 
                   {/* Shop Information - Bilingual */}
@@ -562,21 +487,6 @@ export default function MyShopPage() {
                     isSaving={addressSubmission.pending}
                     shouldClose={shouldCloseModal()}
                     onClose={handleModalClose}
-                  />
-
-                  {/* Verification Modal */}
-                  <VerificationModal
-                    isOpen={isVerificationModalOpen()}
-                    onClose={() => setIsVerificationModalOpen(false)}
-                    onSubmit={handleVerificationSubmit}
-                    isLoading={isSubmitting()}
-                    initialData={{
-                      tradeLicenseNumber: verificationData()?.tradeLicenseNumber,
-                      tinNumber: verificationData()?.tinNumber,
-                      tradeLicenseDocumentId: verificationData()?.tradeLicenseDocumentId,
-                      tinDocumentId: verificationData()?.tinDocumentId,
-                      utilityBillDocumentId: verificationData()?.utilityBillDocumentId,
-                    }}
                   />
 
                    {/* Quick Actions Grid */}
