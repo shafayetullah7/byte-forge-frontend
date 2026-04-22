@@ -1,26 +1,68 @@
-import { createSignal, Show, Suspense, onMount } from 'solid-js';
-import { createAsync, useNavigate } from '@solidjs/router';
+import { createSignal, Show, Suspense, createEffect, onMount } from 'solid-js';
+import { createAsync, useNavigate, action, useSubmission, useAction, revalidate } from '@solidjs/router';
 import { VerificationStatusCard } from '~/components/seller/VerificationStatusCard';
-import { VerificationForm } from '~/components/seller/VerificationForm';
+import { VerificationForm, type VerificationFormData } from '~/components/seller/VerificationForm';
 import { sellerShopApi } from '~/lib/api/endpoints/seller-shop.api';
 import { getShop } from '~/lib/context/shop-context';
 import { toaster } from '~/components/ui/Toast';
 import { useI18n } from '~/i18n';
 import { BoltIcon } from '~/components/icons';
 
+/**
+ * Submit Verification Action
+ * Handles server-side verification submission and automatic cache revalidation.
+ */
+const submitVerificationAction = action(async (data: VerificationFormData) => {
+    "use server";
+    try {
+        await sellerShopApi.updateVerification(data);
+        // Invalidate verification cache to trigger automatic refetch
+        revalidate("seller-shop-verification");
+        return { success: true };
+    } catch (error: any) {
+        // Return error as result instead of throwing to prevent h3 from setting invalid headers
+        return {
+            success: false,
+            error: {
+                message: error.message || 'Verification submission failed',
+            },
+        };
+    }
+}, "submit-verification-action");
+
 export default function VerificationPage() {
     const { t } = useI18n();
     const navigate = useNavigate();
     const [showForm, setShowForm] = createSignal(false);
-    const [isSubmitting, setIsSubmitting] = createSignal(false);
-
+    
+    // Use action for submission with automatic cache invalidation
+    const submitAction = useAction(submitVerificationAction);
+    const submission = useSubmission(submitVerificationAction);
+    
     // Fetch shop data to check if shop exists
     const shopData = createAsync(() => getShop());
 
-    // Fetch verification status
+    // Fetch verification status - automatically refreshes when action completes
     const verificationData = createAsync(() =>
         sellerShopApi.getVerificationStatus().catch(() => null)
     );
+
+    // Handle server errors from the action - show in toast
+    createEffect(() => {
+        const result = submission.result;
+        if (result && result.success === false && result.error) {
+            toaster.error(result.error.message || t('seller.verification.submissionFailed'));
+        }
+    });
+
+    // Handle successful submission
+    createEffect(() => {
+        if (submission.result?.success) {
+            toaster.success(t('seller.verification.submittedSuccessfully'));
+            setShowForm(false);
+            // Cache automatically invalidated by action
+        }
+    });
 
     // Determine if user can submit documents based on status
     const canSubmitDocuments = () => {
@@ -29,27 +71,8 @@ export default function VerificationPage() {
         return status === null || status === 'REJECTED';
     };
 
-    const handleSubmit = async (data: {
-        tradeLicenseNumber?: string;
-        tinNumber?: string;
-        tradeLicenseDocumentId?: string;
-        tinDocumentId?: string;
-        utilityBillDocumentId?: string;
-    }) => {
-        setIsSubmitting(true);
-        try {
-            await sellerShopApi.updateVerification(data);
-            toaster.success(t('seller.verification.submittedSuccessfully'));
-            setShowForm(false);
-            // Refetch to get updated status
-            verificationData.refetch();
-        } catch (error: any) {
-            toaster.error(error.message || t('seller.verification.submissionFailed'));
-            throw error;
-        } finally {
-            setIsSubmitting(false);
-        }
-        return { success: true };
+    const handleSubmit = (data: VerificationFormData) => {
+        submitAction(data);
     };
 
     const handleStartVerification = () => {
@@ -156,9 +179,12 @@ export default function VerificationPage() {
                                                 tradeLicenseDocumentId: verification?.tradeLicenseDocumentId ?? undefined,
                                                 tinDocumentId: verification?.tinDocumentId ?? undefined,
                                                 utilityBillDocumentId: verification?.utilityBillDocumentId ?? undefined,
+                                                tradeLicenseDocument: verification?.tradeLicenseDocument ?? undefined,
+                                                tinDocument: verification?.tinDocument ?? undefined,
+                                                utilityBillDocument: verification?.utilityBillDocument ?? undefined,
                                             }}
                                             onSubmit={handleSubmit}
-                                            isLoading={isSubmitting()}
+                                            isLoading={submission.pending}
                                             onCancel={handleCancelForm}
                                         />
                                     </div>

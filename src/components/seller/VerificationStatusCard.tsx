@@ -267,8 +267,8 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
                         </div>
                     </Show>
 
-                    {/* Action Button for PENDING/REJECTED */}
-                    <Show when={props.status === 'PENDING' || props.status === 'REJECTED'}>
+                    {/* Action Button for REJECTED */}
+                    <Show when={props.status === 'REJECTED'}>
                         <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
                             {props.onAction && (
                                 <button

@@ -1,3 +1,4 @@
+import { query } from '@solidjs/router';
 import { fetcher } from '../api-client';
 import { ApiError } from '../types';
 
@@ -136,6 +137,9 @@ export interface ShopVerificationStatus {
   tradeLicenseDocumentId: string | null;
   tinDocumentId: string | null;
   utilityBillDocumentId: string | null;
+  tradeLicenseDocument: ShopMedia | null;
+  tinDocument: ShopMedia | null;
+  utilityBillDocument: ShopMedia | null;
   rejectionReason: string | null;
   verifiedAt: string | null;
   createdAt: string;
@@ -201,7 +205,7 @@ export const sellerShopApi = {
   /**
    * Get shop verification status
    */
-  getVerificationStatus: async (): Promise<ShopVerificationStatus | null> => {
+  getVerificationStatus: query(async (): Promise<ShopVerificationStatus | null> => {
     try {
       return await fetcher<ShopVerificationStatus>(
         '/api/v1/user/seller/shops/my-shop/verification'
@@ -212,7 +216,7 @@ export const sellerShopApi = {
       }
       throw error;
     }
-  },
+  }, "seller-shop-verification"),
 
   /**
    * Upload shop images
