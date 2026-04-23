@@ -1,6 +1,6 @@
-import { createSignal, Show } from 'solid-js';
+import { createSignal, Show, createMemo } from 'solid-js';
+import { createStore } from 'solid-js/store';
 import { DocumentUploader } from './DocumentUploader';
-import { FilePreviewCard } from './FilePreviewCard';
 import Input from '~/components/ui/Input';
 import Button from '~/components/ui/Button';
 import { useI18n } from '~/i18n';
@@ -8,20 +8,9 @@ import { useI18n } from '~/i18n';
 export interface VerificationFormData {
     tradeLicenseNumber?: string;
     tinNumber?: string;
-    tradeLicenseDocumentId?: string;
-    tinDocumentId?: string;
-    utilityBillDocumentId?: string;
-    tradeLicenseDocument?: ShopMedia;
-    tinDocument?: ShopMedia;
-    utilityBillDocument?: ShopMedia;
-}
-
-export interface ShopMedia {
-    id: string;
-    url: string;
-    fileName: string;
-    mimeType: string;
-    size: number;
+    tradeLicenseDocumentId?: string | null;
+    tinDocumentId?: string | null;
+    utilityBillDocumentId?: string | null;
 }
 
 export interface VerificationFormProps {
@@ -29,77 +18,98 @@ export interface VerificationFormProps {
     onSubmit: (data: VerificationFormData) => void;
     isLoading?: boolean;
     onCancel?: () => void;
+    isResubmission?: boolean;
 }
 
 export function VerificationForm(props: VerificationFormProps) {
     const { t } = useI18n();
-    const [tradeLicenseNumber, setTradeLicenseNumber] = createSignal(
-        props.initialData?.tradeLicenseNumber || ''
-    );
-    const [tinNumber, setTinNumber] = createSignal(
-        props.initialData?.tinNumber || ''
-    );
-    const [tradeLicenseDocumentId, setTradeLicenseDocumentId] = createSignal<
-        string | undefined
-    >(props.initialData?.tradeLicenseDocumentId || undefined);
-    const [tinDocumentId, setTinDocumentId] = createSignal<string | undefined>(
-        props.initialData?.tinDocumentId || undefined
-    );
-    const [utilityBillDocumentId, setUtilityBillDocumentId] = createSignal<
-        string | undefined
-    >(props.initialData?.utilityBillDocumentId || undefined);
+
+    // Form state using createStore - the SolidJS standard for complex state
+    const [formState, setFormState] = createStore<VerificationFormData>({
+        tradeLicenseNumber: props.initialData?.tradeLicenseNumber || '',
+        tinNumber: props.initialData?.tinNumber || '',
+        tradeLicenseDocumentId: props.initialData?.tradeLicenseDocumentId || null,
+        tinDocumentId: props.initialData?.tinDocumentId || null,
+        utilityBillDocumentId: props.initialData?.utilityBillDocumentId || null,
+    });
 
     const [errors, setErrors] = createSignal<Record<string, string>>({});
 
-    const isResubmit = () => {
-        return !!(props.initialData?.tradeLicenseDocumentId || props.initialData?.tradeLicenseNumber);
-    };
+    // Memo for tracking if form has changes - SolidJS standard pattern
+    const hasChangesMemo = createMemo(() => {
+        const initialTradeLicenseDoc = props.initialData?.tradeLicenseDocumentId || null;
+        const initialTinDoc = props.initialData?.tinDocumentId || null;
+        const initialUtilityBillDoc = props.initialData?.utilityBillDocumentId || null;
+        const initialTradeLicenseNumber = props.initialData?.tradeLicenseNumber || '';
+        const initialTinNumber = props.initialData?.tinNumber || '';
 
-    const hasExistingDocuments = () => {
-        return !!(
-            props.initialData?.tradeLicenseDocumentId ||
-            props.initialData?.tinDocumentId ||
-            props.initialData?.utilityBillDocumentId
-        );
-    };
+        // Access store properties directly - SolidJS tracks these reactively
+        const currentTradeLicenseDoc = formState.tradeLicenseDocumentId || null;
+        const currentTinDoc = formState.tinDocumentId || null;
+        const currentUtilityBillDoc = formState.utilityBillDocumentId || null;
+        const currentTradeLicenseNumber = formState.tradeLicenseNumber?.trim() || '';
+        const currentTinNumber = formState.tinNumber?.trim() || '';
 
-    const hasChanges = (): boolean => {
-        // Check if any field has changed from initial values
-        return (
-            tradeLicenseNumber().trim() !== (props.initialData?.tradeLicenseNumber || '').trim() ||
-            tinNumber().trim() !== (props.initialData?.tinNumber || '').trim() ||
-            tradeLicenseDocumentId() !== props.initialData?.tradeLicenseDocumentId ||
-            tinDocumentId() !== props.initialData?.tinDocumentId ||
-            utilityBillDocumentId() !== props.initialData?.utilityBillDocumentId
-        );
-    };
+        const hasDocumentChanges =
+            (currentTradeLicenseDoc !== initialTradeLicenseDoc) ||
+            (currentTinDoc !== initialTinDoc) ||
+            (currentUtilityBillDoc !== initialUtilityBillDoc);
+
+        const hasNumberChanges =
+            (currentTradeLicenseNumber !== initialTradeLicenseNumber) ||
+            (currentTinNumber !== initialTinNumber);
+
+        return hasDocumentChanges || hasNumberChanges;
+    });
+
+    // Reactive validation - updates when form fields change
+    const isFormValid = createMemo(() => {
+        try {
+            const currentErrors: Record<string, string> = {};
+            const hasChanges = hasChangesMemo();
+            const tlNumber = formState.tradeLicenseNumber?.trim() || '';
+            const tlDocId = formState.tradeLicenseDocumentId || null;
+            const tinNumber = formState.tinNumber?.trim() || '';
+
+            // For resubmission, be more lenient - allow submission if any document has changed
+            if (props.isResubmission) {
+                // Resubmission: At least one document must have changed
+                if (!hasChanges) {
+                    currentErrors.form = t('seller.verification.noChangesDetected');
+                }
+                // Don't require all fields for resubmission if changes have been made
+            } else {
+                // First-time submission: Require all fields
+                // Required field: Trade License Number
+                if (!tlNumber) {
+                    currentErrors.tradeLicenseNumber = t('seller.verification.tradeLicenseNumber') + ' ' + t('common.required');
+                }
+
+                // Required field: Trade License Document
+                if (!tlDocId) {
+                    currentErrors.tradeLicenseDocument = t('seller.verification.tradeLicenseDocument') + ' ' + t('common.required');
+                }
+            }
+
+            // Validation: TIN Number format (if provided) - should be 10 digits for Bangladesh
+            // Only validate TIN format on first-time submission, not resubmission
+            if (!props.isResubmission && tinNumber && !/^\d{10}$/.test(tinNumber)) {
+                currentErrors.tinNumber = t('seller.verification.tinNumber') + ' must be 10 digits';
+            }
+
+            // Update errors signal for display
+            setErrors(currentErrors);
+
+            return Object.keys(currentErrors).length === 0;
+        } catch (error) {
+            console.error('[Validation] error:', error);
+            return false;
+        }
+    });
 
     const validate = (): boolean => {
-        const newErrors: Record<string, string> = {};
-
-        // Required field: Trade License Number
-        if (!tradeLicenseNumber().trim()) {
-            newErrors.tradeLicenseNumber = t('seller.verification.tradeLicenseNumber') + ' ' + t('common.required');
-        }
-
-        // Required field: Trade License Document
-        if (!tradeLicenseDocumentId()) {
-            newErrors.tradeLicenseDocument = t('seller.verification.tradeLicenseDocument') + ' ' + t('common.required');
-        }
-
-        // Validation: TIN Number format (if provided) - should be 10 digits for Bangladesh
-        const tinValue = tinNumber().trim();
-        if (tinValue && !/^\d{10}$/.test(tinValue)) {
-            newErrors.tinNumber = t('seller.verification.tinNumber') + ' must be 10 digits';
-        }
-
-        // EDGE CASE: Prevent identical resubmission (no changes)
-        if (isResubmit() && !hasChanges()) {
-            newErrors.form = t('seller.verification.noChangesDetected');
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+        // Validation is now reactive, just return current validity
+        return isFormValid();
     };
 
     const handleSubmit = (e: Event) => {
@@ -110,78 +120,31 @@ export function VerificationForm(props: VerificationFormProps) {
         }
 
         props.onSubmit({
-            tradeLicenseNumber: tradeLicenseNumber().trim() || undefined,
-            tinNumber: tinNumber().trim() || undefined,
-            tradeLicenseDocumentId: tradeLicenseDocumentId(),
-            tinDocumentId: tinDocumentId(),
-            utilityBillDocumentId: utilityBillDocumentId(),
+            tradeLicenseNumber: formState.tradeLicenseNumber?.trim() || undefined,
+            tinNumber: formState.tinNumber?.trim() || undefined,
+            tradeLicenseDocumentId: formState.tradeLicenseDocumentId ?? undefined,
+            tinDocumentId: formState.tinDocumentId ?? undefined,
+            utilityBillDocumentId: formState.utilityBillDocumentId ?? undefined,
         });
     };
 
     return (
         <form onSubmit={handleSubmit} class="space-y-6">
-            {/* Existing Documents Section - Show on resubmission */}
-            <Show when={isResubmit() && hasExistingDocuments()}>
-                <div class="bg-cream-50 dark:bg-forest-900/30 rounded-xl border border-cream-200 dark:border-forest-700 p-5">
-                    <div class="flex items-center gap-2 mb-4">
-                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-sage-500 to-sage-600 flex items-center justify-center">
-                            <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+            {/* Resubmission Hint */}
+            <Show when={props.isResubmission}>
+                <div class="p-4 bg-sage-50 dark:bg-sage-900/20 border border-sage-200 dark:border-sage-700 rounded-lg">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-sage-600 dark:text-sage-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div class="text-sm text-sage-800 dark:text-sage-200">
+                            <p class="font-semibold mb-1">Update Your Documents</p>
+                            <p>Your currently submitted documents are shown above. Upload new files to replace them, or leave unchanged if only updating other information.</p>
                         </div>
-                        <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
-                            {t('seller.verification.existingDocuments')}
-                        </h3>
-                    </div>
-                    
-                    <div class="space-y-4">
-                        {/* Trade License */}
-                        <Show when={props.initialData?.tradeLicenseDocumentId && props.initialData?.tradeLicenseDocument} keyed>
-                            {(doc) => (
-                                <FilePreviewCard 
-                                    label={t('seller.verification.tradeLicenseDocument')}
-                                    url={doc.url}
-                                    fileName={doc.fileName}
-                                    mimeType={doc.mimeType}
-                                    size={doc.size}
-                                />
-                            )}
-                        </Show>
-
-                        {/* TIN Document */}
-                        <Show when={props.initialData?.tinDocumentId && props.initialData?.tinDocument} keyed>
-                            {(doc) => (
-                                <FilePreviewCard 
-                                    label={t('seller.verification.tinDocument')}
-                                    url={doc.url}
-                                    fileName={doc.fileName}
-                                    mimeType={doc.mimeType}
-                                    size={doc.size}
-                                />
-                            )}
-                        </Show>
-
-                        {/* Utility Bill */}
-                        <Show when={props.initialData?.utilityBillDocumentId && props.initialData?.utilityBillDocument} keyed>
-                            {(doc) => (
-                                <FilePreviewCard 
-                                    label={t('seller.verification.utilityBillDocument')}
-                                    url={doc.url}
-                                    fileName={doc.fileName}
-                                    mimeType={doc.mimeType}
-                                    size={doc.size}
-                                />
-                            )}
-                        </Show>
-                    </div>
-
-                    <div class="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-                        <p class="text-xs text-amber-800 dark:text-amber-300">
-                            {t('seller.verification.replaceDocumentsHint')}
-                        </p>
                     </div>
                 </div>
             </Show>
+
             {/* Trade License Section */}
             <div class="space-y-4">
                 <div class="flex items-center gap-2 pb-2 border-b border-gray-200 dark:border-gray-700">
@@ -197,8 +160,8 @@ export function VerificationForm(props: VerificationFormProps) {
 
                 <Input
                     label={t('seller.verification.tradeLicenseNumber')}
-                    value={tradeLicenseNumber()}
-                    onInput={(e) => setTradeLicenseNumber(e.currentTarget.value)}
+                    value={formState.tradeLicenseNumber}
+                    onInput={(e) => setFormState('tradeLicenseNumber', e.currentTarget.value)}
                     placeholder={t('seller.verification.tradeLicenseNumberDesc')}
                     error={errors().tradeLicenseNumber}
                     required
@@ -207,8 +170,8 @@ export function VerificationForm(props: VerificationFormProps) {
                 <DocumentUploader
                     label={t('seller.verification.tradeLicenseDocument')}
                     accept="image/*,.pdf"
-                    uploadedMediaId={tradeLicenseDocumentId()}
-                    onMediaChange={setTradeLicenseDocumentId}
+                    uploadedMediaId={formState.tradeLicenseDocumentId || undefined}
+                    onMediaChange={(id) => setFormState('tradeLicenseDocumentId', id || null)}
                     description="PDF or Image (JPG, PNG), max 10MB"
                     required
                 />
@@ -233,16 +196,16 @@ export function VerificationForm(props: VerificationFormProps) {
 
                 <Input
                     label={t('seller.verification.tinNumber')}
-                    value={tinNumber()}
-                    onInput={(e) => setTinNumber(e.currentTarget.value)}
+                    value={formState.tinNumber}
+                    onInput={(e) => setFormState('tinNumber', e.currentTarget.value)}
                     placeholder={t('seller.verification.optional')}
                 />
 
                 <DocumentUploader
                     label={t('seller.verification.tinDocument')}
                     accept="image/*,.pdf"
-                    uploadedMediaId={tinDocumentId()}
-                    onMediaChange={setTinDocumentId}
+                    uploadedMediaId={formState.tinDocumentId || undefined}
+                    onMediaChange={(id) => setFormState('tinDocumentId', id || null)}
                     description="TIN Certificate - PDF or Image, max 10MB"
                 />
             </div>
@@ -264,8 +227,8 @@ export function VerificationForm(props: VerificationFormProps) {
                 <DocumentUploader
                     label={t('seller.verification.utilityBillDocument')}
                     accept="image/*,.pdf"
-                    uploadedMediaId={utilityBillDocumentId()}
-                    onMediaChange={setUtilityBillDocumentId}
+                    uploadedMediaId={formState.utilityBillDocumentId || undefined}
+                    onMediaChange={(id) => setFormState('utilityBillDocumentId', id || null)}
                     description="Electricity/Water/Gas bill - PDF or Image, max 10MB"
                 />
             </div>
@@ -307,9 +270,10 @@ export function VerificationForm(props: VerificationFormProps) {
                     type="submit"
                     variant="primary"
                     loading={props.isLoading}
+                    disabled={!isFormValid() || props.isLoading}
                     class="flex-1 sm:flex-none"
                 >
-                    {isResubmit() ? t('seller.verification.resubmit') : t('seller.verification.submitVerificationBtn')}
+                    {props.isLoading ? t('seller.verification.submitting') : (props.isResubmission === true ? t('seller.verification.resubmit') : t('seller.verification.submitVerificationBtn'))}
                 </Button>
                 {props.onCancel && (
                     <Button

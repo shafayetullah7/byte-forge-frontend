@@ -1,7 +1,7 @@
 import { Show } from 'solid-js';
 import Card from '~/components/ui/Card';
 import Badge from '~/components/ui/Badge';
-import type { VerificationStatusType } from '~/lib/api/endpoints/seller-shop.api';
+import type { VerificationStatusType, ShopMedia } from '~/lib/api/endpoints/seller-shop.api';
 import { useI18n } from '~/i18n';
 
 export interface VerificationStatusCardProps {
@@ -12,6 +12,9 @@ export interface VerificationStatusCardProps {
     createdAt?: Date | null;
     tradeLicenseNumber?: string | null;
     tinNumber?: string | null;
+    tradeLicenseDocument?: ShopMedia | null;
+    tinDocument?: ShopMedia | null;
+    utilityBillDocument?: ShopMedia | null;
     hasDocuments?: boolean;
     onAction?: () => void;
     actionLabel?: string;
@@ -65,14 +68,28 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
     function getIconBackground(status: VerificationStatusType): string {
         switch (status) {
             case 'APPROVED':
-                return 'bg-gradient-to-br from-forest-500 to-forest-600';
+                return 'bg-gradient-to-br from-forest-500 to-forest-600 shadow-lg shadow-forest-500/30';
             case 'REJECTED':
-                return 'bg-gradient-to-br from-terracotta-500 to-terracotta-600';
+                return 'bg-gradient-to-br from-terracotta-500 to-terracotta-600 shadow-lg shadow-terracotta-500/30';
             case 'PENDING':
             case 'REVIEWING':
             default:
-                return 'bg-gradient-to-br from-sage-500 to-sage-600';
+                return 'bg-gradient-to-br from-sage-500 to-sage-600 shadow-lg shadow-sage-500/30';
         }
+    }
+
+    function formatFileSize(bytes: number): string {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    function getFileIcon(mimeType: string): string {
+        if (mimeType.includes('image')) return '🖼️';
+        if (mimeType.includes('pdf')) return '📄';
+        return '📁';
     }
 
     return (
@@ -131,16 +148,16 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
                 {/* Has verification record - show status */}
                 <div class="space-y-4">
                     {/* Status Header */}
-                    <div class="flex items-start gap-4">
+                    <div class="flex items-start gap-4 pb-4 border-b border-gray-200 dark:border-gray-700">
                         {/* Status Icon */}
-                        <div class={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 ${getIconBackground(props.status!)}`}>
+                        <div class={`w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0 ${getIconBackground(props.status!)}`}>
                             {getStatusIcon(props.status!)}
                         </div>
 
                         {/* Status Info */}
-                        <div class="flex-1">
+                        <div class="flex-1 pt-1">
                             <div class="flex items-center gap-2 mb-2">
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">
                                     {getStatusLabel(props.status!)}
                                 </h3>
                                 <Badge variant={statusColors[props.status!]}>
@@ -150,7 +167,10 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
 
                             {/* Submitted Date */}
                             <Show when={props.createdAt}>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                <p class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
                                     Submitted: {props.createdAt!.toLocaleDateString('en-US', {
                                         year: 'numeric',
                                         month: 'long',
@@ -161,7 +181,10 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
 
                             {/* Updated Date */}
                             <Show when={props.updatedAt && props.updatedAt !== props.createdAt}>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                <p class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
                                     Last updated: {props.updatedAt!.toLocaleDateString('en-US', {
                                         year: 'numeric',
                                         month: 'long',
@@ -171,29 +194,135 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
                                     })}
                                 </p>
                             </Show>
-
-                            {/* Trade License Number */}
-                            <Show when={props.tradeLicenseNumber}>
-                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                    <span class="font-medium">Trade License:</span> {props.tradeLicenseNumber}
-                                </p>
-                            </Show>
-
-                            {/* TIN Number */}
-                            <Show when={props.tinNumber}>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">
-                                    <span class="font-medium">TIN:</span> {props.tinNumber}
-                                </p>
-                            </Show>
-
-                            {/* Documents Status */}
-                            <Show when={props.hasDocuments}>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">
-                                    <span class="font-medium">Documents:</span> Uploaded
-                                </p>
-                            </Show>
                         </div>
                     </div>
+
+                    {/* Submitted Information Grid */}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Trade License Number */}
+                        <Show when={props.tradeLicenseNumber}>
+                            <div class="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                                    {t('seller.verification.tradeLicenseNumber')}
+                                </p>
+                                <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                    {props.tradeLicenseNumber}
+                                </p>
+                            </div>
+                        </Show>
+
+                        {/* TIN Number */}
+                        <Show when={props.tinNumber}>
+                            <div class="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                                    {t('seller.verification.tinNumber')}
+                                </p>
+                                <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                    {props.tinNumber}
+                                </p>
+                            </div>
+                        </Show>
+                    </div>
+
+                    {/* Uploaded Documents Section */}
+                    <Show when={props.hasDocuments}>
+                        <div>
+                            <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                                <svg class="w-4 h-4 text-sage-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Submitted Documents
+                            </h4>
+                            <div class="space-y-2">
+                                {/* Trade License Document */}
+                                <Show when={props.tradeLicenseDocument}>
+                                    <div class="flex items-center gap-3 p-3 bg-cream-50 dark:bg-cream-900/20 border border-cream-200 dark:border-cream-700 rounded-lg">
+                                        <div class="w-10 h-10 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center text-xl shadow-sm">
+                                            {getFileIcon(props.tradeLicenseDocument!.mimeType)}
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                                                {props.tradeLicenseDocument!.fileName || 'Trade License'}
+                                            </p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                                {formatFileSize(props.tradeLicenseDocument!.size)}
+                                            </p>
+                                        </div>
+                                        <a
+                                            href={props.tradeLicenseDocument!.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="p-2 text-sage-500 hover:text-sage-600 dark:hover:text-sage-400 transition-colors"
+                                            title="View document"
+                                        >
+                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </Show>
+
+                                {/* TIN Document */}
+                                <Show when={props.tinDocument}>
+                                    <div class="flex items-center gap-3 p-3 bg-cream-50 dark:bg-cream-900/20 border border-cream-200 dark:border-cream-700 rounded-lg">
+                                        <div class="w-10 h-10 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center text-xl shadow-sm">
+                                            {getFileIcon(props.tinDocument!.mimeType)}
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                                                {props.tinDocument!.fileName || 'TIN Certificate'}
+                                            </p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                                {formatFileSize(props.tinDocument!.size)}
+                                            </p>
+                                        </div>
+                                        <a
+                                            href={props.tinDocument!.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="p-2 text-sage-500 hover:text-sage-600 dark:hover:text-sage-400 transition-colors"
+                                            title="View document"
+                                        >
+                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </Show>
+
+                                {/* Utility Bill Document */}
+                                <Show when={props.utilityBillDocument}>
+                                    <div class="flex items-center gap-3 p-3 bg-cream-50 dark:bg-cream-900/20 border border-cream-200 dark:border-cream-700 rounded-lg">
+                                        <div class="w-10 h-10 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center text-xl shadow-sm">
+                                            {getFileIcon(props.utilityBillDocument!.mimeType)}
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                                                {props.utilityBillDocument!.fileName || 'Utility Bill'}
+                                            </p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                                {formatFileSize(props.utilityBillDocument!.size)}
+                                            </p>
+                                        </div>
+                                        <a
+                                            href={props.utilityBillDocument!.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="p-2 text-sage-500 hover:text-sage-600 dark:hover:text-sage-400 transition-colors"
+                                            title="View document"
+                                        >
+                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </Show>
+                            </div>
+                        </div>
+                    </Show>
 
                     {/* Rejection Reason */}
                     <Show when={props.status === 'REJECTED' && props.rejectionReason}>

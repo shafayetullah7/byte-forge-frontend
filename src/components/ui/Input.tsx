@@ -5,8 +5,17 @@ export interface InputProps extends JSX.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
 }
 
+// Simple unique ID generator for label-input association
+let inputIdCounter = 0;
+function generateInputId(): string {
+  return `input-${++inputIdCounter}`;
+}
+
 export default function Input(props: InputProps) {
   const [local, others] = splitProps(props, ["label", "error", "class"]);
+  
+  // Generate unique ID for label-input association
+  const inputId = generateInputId();
 
   // Base styles
   const baseStyles =
@@ -22,11 +31,11 @@ export default function Input(props: InputProps) {
   return (
     <div class="w-full">
       <Show when={local.label}>
-        <label class="block body-small font-semibold mb-2">
+        <label for={inputId} class="block body-small font-semibold mb-2">
           {local.label}
         </label>
       </Show>
-      <input class={classes} {...others} />
+      <input id={inputId} class={classes} {...others} />
       <Show when={local.error}>
         <p class="mt-1 body-small text-red-600 dark:text-red-400 font-semibold">{local.error}</p>
       </Show>

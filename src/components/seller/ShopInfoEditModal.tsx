@@ -207,7 +207,7 @@ export default function ShopInfoEditModal(props: ShopInfoEditModalProps) {
             <Button
               variant="primary"
               type="submit"
-              disabled={props.isSaving}
+              loading={props.isSaving}
               class="flex-1"
             >
               {props.isSaving ? t("common.saving") : t("common.save")}

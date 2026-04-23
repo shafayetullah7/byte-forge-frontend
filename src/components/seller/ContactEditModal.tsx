@@ -235,7 +235,7 @@ export default function ContactEditModal(props: ContactEditModalProps) {
             <Button
               variant="primary"
               type="submit"
-              disabled={props.isSaving}
+              loading={props.isSaving}
               class="flex-1"
             >
               {props.isSaving ? t("common.saving") : t("common.save")}

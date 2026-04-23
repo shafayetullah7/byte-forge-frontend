@@ -347,7 +347,7 @@ export default function AddressEditModal(props: AddressEditModalProps) {
             <Button
               variant="primary"
               onClick={handleSubmit}
-              disabled={props.isSaving}
+              loading={props.isSaving}
               class="flex-1"
             >
               {props.isSaving ? t("common.saving") : t("common.save")}

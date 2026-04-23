@@ -1,7 +1,7 @@
 import { createSignal, Show, Suspense, createEffect, onMount } from 'solid-js';
 import { createAsync, useNavigate, action, useSubmission, useAction, revalidate } from '@solidjs/router';
-import { VerificationStatusCard } from '~/components/seller/VerificationStatusCard';
-import { VerificationForm, type VerificationFormData } from '~/components/seller/VerificationForm';
+import { VerificationStatusCard } from './__components__/VerificationStatusCard';
+import { VerificationForm, type VerificationFormData } from './__components__/VerificationForm';
 import { sellerShopApi } from '~/lib/api/endpoints/seller-shop.api';
 import { getShop } from '~/lib/context/shop-context';
 import { toaster } from '~/components/ui/Toast';
@@ -14,12 +14,30 @@ import { BoltIcon } from '~/components/icons';
  */
 const submitVerificationAction = action(async (data: VerificationFormData) => {
     "use server";
+    console.log('[ACTION] Received verification data:', JSON.stringify(data, null, 2));
     try {
-        await sellerShopApi.updateVerification(data);
+        // Convert null to undefined for API compatibility
+        const dto: {
+            tradeLicenseNumber?: string;
+            tinNumber?: string;
+            tradeLicenseDocumentId?: string;
+            tinDocumentId?: string;
+            utilityBillDocumentId?: string;
+        } = {
+            tradeLicenseNumber: data.tradeLicenseNumber || undefined,
+            tinNumber: data.tinNumber || undefined,
+            tradeLicenseDocumentId: data.tradeLicenseDocumentId ?? undefined,
+            tinDocumentId: data.tinDocumentId ?? undefined,
+            utilityBillDocumentId: data.utilityBillDocumentId ?? undefined,
+        };
+        console.log('[ACTION] Calling updateVerification API with:', JSON.stringify(dto, null, 2));
+        await sellerShopApi.updateVerification(dto);
+        console.log('[ACTION] Verification submitted successfully');
         // Invalidate verification cache to trigger automatic refetch
         revalidate("seller-shop-verification");
         return { success: true };
     } catch (error: any) {
+        console.error('[ACTION] Verification failed:', error.message);
         // Return error as result instead of throwing to prevent h3 from setting invalid headers
         return {
             success: false,
@@ -51,7 +69,17 @@ export default function VerificationPage() {
     createEffect(() => {
         const result = submission.result;
         if (result && result.success === false && result.error) {
-            toaster.error(result.error.message || t('seller.verification.submissionFailed'));
+            const errorMessage = result.error.message || t('seller.verification.submissionFailed');
+            
+            // Handle specific error cases
+            if (errorMessage.includes('already pending') || errorMessage.includes('already reviewing')) {
+                // Refresh verification data to show current status
+                setTimeout(() => {
+                    revalidate("seller-shop-verification");
+                }, 500);
+            }
+            
+            toaster.error(errorMessage);
         }
     });
 
@@ -71,7 +99,14 @@ export default function VerificationPage() {
         return status === null || status === 'REJECTED';
     };
 
+    // Determine if this is a resubmission (rejected status with existing data)
+    const isResubmission = () => {
+        const status = verificationData()?.status;
+        return status === 'REJECTED';
+    };
+
     const handleSubmit = (data: VerificationFormData) => {
+        console.log('[VerificationPage] Submitting verification data:', JSON.stringify(data, null, 2));
         submitAction(data);
     };
 
@@ -84,8 +119,10 @@ export default function VerificationPage() {
     };
 
     onMount(() => {
-        // Auto-show form if no verification record exists
-        if (verificationData() === null) {
+        // Auto-show form only if we're sure no verification record exists
+        // Check for null explicitly (not undefined, which means still loading)
+        const verification = verificationData();
+        if (verification === null) {
             setShowForm(true);
         }
     });
@@ -161,6 +198,9 @@ export default function VerificationPage() {
                                     createdAt={verification?.createdAt ? new Date(verification.createdAt) : null}
                                     tradeLicenseNumber={verification?.tradeLicenseNumber ?? null}
                                     tinNumber={verification?.tinNumber ?? null}
+                                    tradeLicenseDocument={verification?.tradeLicenseDocument ?? null}
+                                    tinDocument={verification?.tinDocument ?? null}
+                                    utilityBillDocument={verification?.utilityBillDocument ?? null}
                                     hasDocuments={!!verification?.tradeLicenseDocumentId}
                                     onAction={canSubmitDocuments() ? handleStartVerification : undefined}
                                     actionLabel={verification?.status === 'REJECTED' ? 'Resubmit Documents' : 'Submit Documents'}
@@ -179,13 +219,11 @@ export default function VerificationPage() {
                                                 tradeLicenseDocumentId: verification?.tradeLicenseDocumentId ?? undefined,
                                                 tinDocumentId: verification?.tinDocumentId ?? undefined,
                                                 utilityBillDocumentId: verification?.utilityBillDocumentId ?? undefined,
-                                                tradeLicenseDocument: verification?.tradeLicenseDocument ?? undefined,
-                                                tinDocument: verification?.tinDocument ?? undefined,
-                                                utilityBillDocument: verification?.utilityBillDocument ?? undefined,
                                             }}
                                             onSubmit={handleSubmit}
                                             isLoading={submission.pending}
                                             onCancel={handleCancelForm}
+                                            isResubmission={isResubmission()}
                                         />
                                     </div>
                                 </Show>
