@@ -231,7 +231,7 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
                                 <svg class="w-4 h-4 text-sage-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                Submitted Documents
+                                {t('seller.verification.submittedDocuments')}
                             </h4>
                             <div class="space-y-2">
                                 {/* Trade License Document */}
@@ -242,7 +242,7 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                                                {props.tradeLicenseDocument!.fileName || 'Trade License'}
+                                                {props.tradeLicenseDocument!.fileName || t('seller.verification.tradeLicense')}
                                             </p>
                                             <p class="text-xs text-gray-500 dark:text-gray-400">
                                                 {formatFileSize(props.tradeLicenseDocument!.size)}
@@ -253,7 +253,7 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             class="p-2 text-sage-500 hover:text-sage-600 dark:hover:text-sage-400 transition-colors"
-                                            title="View document"
+                                            title={t('common.viewDocument')}
                                         >
                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -271,7 +271,7 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                                                {props.tinDocument!.fileName || 'TIN Certificate'}
+                                                {props.tinDocument!.fileName || t('seller.verification.tinCertificate')}
                                             </p>
                                             <p class="text-xs text-gray-500 dark:text-gray-400">
                                                 {formatFileSize(props.tinDocument!.size)}
@@ -282,7 +282,7 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             class="p-2 text-sage-500 hover:text-sage-600 dark:hover:text-sage-400 transition-colors"
-                                            title="View document"
+                                            title={t('common.viewDocument')}
                                         >
                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -300,7 +300,7 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                                                {props.utilityBillDocument!.fileName || 'Utility Bill'}
+                                                {props.utilityBillDocument!.fileName || t('seller.verification.utilityBill')}
                                             </p>
                                             <p class="text-xs text-gray-500 dark:text-gray-400">
                                                 {formatFileSize(props.utilityBillDocument!.size)}
@@ -311,7 +311,7 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             class="p-2 text-sage-500 hover:text-sage-600 dark:hover:text-sage-400 transition-colors"
-                                            title="View document"
+                                            title={t('common.viewDocument')}
                                         >
                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -333,7 +333,7 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
                                 </svg>
                                 <div>
                                     <p class="text-sm font-semibold text-terracotta-800 dark:text-terracotta-400 mb-1">
-                                        Rejection Reason
+                                        {t('seller.verification.rejectionReason')}
                                     </p>
                                     <p class="text-sm text-terracotta-700 dark:text-terracotta-300">
                                         {props.rejectionReason}

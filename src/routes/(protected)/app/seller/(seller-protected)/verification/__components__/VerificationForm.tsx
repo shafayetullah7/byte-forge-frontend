@@ -138,8 +138,8 @@ export function VerificationForm(props: VerificationFormProps) {
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <div class="text-sm text-sage-800 dark:text-sage-200">
-                            <p class="font-semibold mb-1">Update Your Documents</p>
-                            <p>Your currently submitted documents are shown above. Upload new files to replace them, or leave unchanged if only updating other information.</p>
+                            <p class="font-semibold mb-1">{t('seller.verification.updateYourDocuments')}</p>
+                            <p>{t('seller.verification.updateYourDocumentsDesc')}</p>
                         </div>
                     </div>
                 </div>
@@ -190,7 +190,7 @@ export function VerificationForm(props: VerificationFormProps) {
                     </div>
                     <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
                         {t('seller.verification.tinNumber')}
-                        <span class="text-gray-400 dark:text-gray-500 font-normal ml-2">(Optional)</span>
+                        <span class="text-gray-400 dark:text-gray-500 font-normal ml-2">{t('common.optional')}</span>
                     </h3>
                 </div>
 
@@ -220,7 +220,7 @@ export function VerificationForm(props: VerificationFormProps) {
                     </div>
                     <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
                         {t('seller.verification.utilityBillDocument')}
-                        <span class="text-gray-400 dark:text-gray-500 font-normal ml-2">(Optional)</span>
+                        <span class="text-gray-400 dark:text-gray-500 font-normal ml-2">{t('common.optional')}</span>
                     </h3>
                 </div>
 

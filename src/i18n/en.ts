@@ -44,6 +44,7 @@ export const dict = {
     cart: "Cart",
     optional: "Optional",
     note: "Note",
+    viewDocument: "View document",
     hero: {
       title: "Cultivate Your Digital Sanctuary",
       subtitle:
@@ -604,6 +605,12 @@ export const dict = {
       noChangesDetected: "No changes detected. Please update at least one document or information before resubmitting.",
       viewFullDocument: "View Full Document",
       clickToViewDocument: "Click to view full document",
+      updateYourDocuments: "Update Your Documents",
+      updateYourDocumentsDesc: "Your currently submitted documents are shown above. Upload new files to replace them, or leave unchanged if only updating other information.",
+      submittedDocuments: "Submitted Documents",
+      tradeLicense: "Trade License",
+      tinCertificate: "TIN Certificate",
+      utilityBill: "Utility Bill",
     },
     overview: "Overview",
     shops: "Shops",
