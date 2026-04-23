@@ -12,7 +12,7 @@ import ShopInfoEditModal from "~/components/seller/ShopInfoEditModal";
 import { useI18n } from "~/i18n";
 import { toaster } from "~/components/ui/Toast";
 import { getShop, getShopStatus, refetchShop, refetchShopStatus } from "~/lib/context/shop-context";
-import { sellerShopApi, type UpdateAddressDto, type UpdateContactDto, type UpdateShopInfoDto } from "~/lib/api/endpoints/seller-shop.api";
+import { sellerShopApi, type UpdateAddressDto, type UpdateContactDto, type UpdateShopInfoDto, type VerificationStatusType } from "~/lib/api/endpoints/seller-shop.api";
 import { ShopIcon, PlusIcon, BoltIcon, PackageIcon, EyeIcon, CheckCircleIcon } from "~/components/icons";
 
 /**
@@ -489,6 +489,28 @@ export default function MyShopPage() {
                     onClose={handleModalClose}
                   />
 
+                  {/* Verification Navigation Card */}
+                  <div class="bg-white dark:bg-forest-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sage-500 to-sage-600 flex items-center justify-center shadow-md shadow-sage-500/20">
+                          <BoltIcon class="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <h3 class="font-bold text-gray-900 dark:text-gray-100">
+                            {t("seller.shop.myShop.quickActions.verificationStatus")}
+                          </h3>
+                          <p class="text-sm text-gray-500 dark:text-gray-400">
+                            {t("seller.verification.subtitle")}
+                          </p>
+                        </div>
+                      </div>
+                      <A href="/app/seller/verification" class="px-4 py-2 bg-sage-500 hover:bg-sage-600 text-white rounded-lg font-medium transition-colors">
+                        {t("common.view")}
+                      </A>
+                    </div>
+                  </div>
+
                    {/* Quick Actions Grid */}
                    <div class="bg-white dark:bg-forest-800 rounded-2xl p-6 sm:p-8 border border-gray-200 dark:border-gray-700 shadow-sm">
                      <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
@@ -523,13 +545,13 @@ export default function MyShopPage() {
 
                          {shop.status === "APPROVED" && (
                            <div class="w-full p-4 rounded-xl border-2 border-sage-500 bg-sage-50 dark:bg-sage-900/20 text-left">
-                             <div class="flex items-center gap-3">
-                               <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-sage-500 to-sage-600 flex items-center justify-center flex-shrink-0">
-                                 <CheckCircleIcon class="w-4 h-4 text-white" />
-                               </div>
-                               <span class="font-semibold text-sage-700 dark:text-sage-400">{t("seller.shop.myShop.quickActions.shopApproved")}</span>
+                           <div class="flex items-center gap-3">
+                             <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-sage-500 to-sage-600 flex items-center justify-center flex-shrink-0">
+                               <CheckCircleIcon class="w-4 h-4 text-white" />
                              </div>
+                             <span class="font-semibold text-sage-700 dark:text-sage-400">{t("seller.shop.myShop.quickActions.shopApproved")}</span>
                            </div>
+                         </div>
                          )}
 
                          <A href={shop.slug ? `/shop/${shop.slug}` : "/"}>
