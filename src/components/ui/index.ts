@@ -9,6 +9,8 @@ export { FileUpload } from "./FileUpload";
 export { ImageUpload } from "./ImageUpload";
 export { Select } from "./Select";
 export { AdvancedSelect } from "./AdvancedSelect";
+export { FilterSelect } from "./FilterSelect";
+export { TagMultiSelect } from "./TagMultiSelect";
 
 export type { ButtonProps } from "./Button";
 export type { BadgeProps } from "./Badge";
@@ -20,3 +22,5 @@ export type { FileUploadProps } from "./FileUpload";
 export type { ImageUploadProps } from "./ImageUpload";
 export type { SelectProps, SelectOption } from "./Select";
 export type { AdvancedSelectProps, AdvancedSelectOption } from "./AdvancedSelect";
+export type { FilterSelectProps, FilterOption } from "./FilterSelect";
+export type { TagMultiSelectProps, TagGroupOption } from "./TagMultiSelect";

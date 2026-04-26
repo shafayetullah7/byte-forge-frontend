@@ -1,5 +1,6 @@
 import type { ShopContact } from "~/lib/api/endpoints/seller-shop.api";
 import { useI18n } from "~/i18n";
+import { EnvelopeIcon, PhoneIcon, PencilIcon, ArrowTopRightOnSquareIcon, ChatBubbleLeftRightIcon } from "~/components/icons";
 
 interface ContactInfoCardProps {
   contact: ShopContact | null;
@@ -50,11 +51,7 @@ function ContactItem(props: ContactItemProps) {
           {props.value}
         </p>
       </div>
-      {props.isExternal && (
-        <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-        </svg>
-      )}
+      {props.isExternal && <ArrowTopRightOnSquareIcon class="w-4 h-4 text-gray-400 flex-shrink-0" />}
     </a>
   );
 }
@@ -83,9 +80,7 @@ export default function ContactInfoCard(props: ContactInfoCardProps) {
       <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-forest-500 to-forest-600 flex items-center justify-center shadow-md shadow-forest-500/20">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
+            <EnvelopeIcon class="w-5 h-5 text-white" />
           </div>
           <div>
             <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">
@@ -102,9 +97,7 @@ export default function ContactInfoCard(props: ContactInfoCardProps) {
           title={t("common.edit")}
           disabled={!props.onEdit}
         >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-          </svg>
+          <PencilIcon class="w-5 h-5" />
         </button>
       </div>
 
@@ -113,9 +106,7 @@ export default function ContactInfoCard(props: ContactInfoCardProps) {
         <div>
           <div class="flex items-center gap-2 mb-4">
             <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-terracotta-500 to-terracotta-600 flex items-center justify-center">
-              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-              </svg>
+              <PhoneIcon class="w-4 h-4 text-white" />
             </div>
             <h4 class="font-bold text-gray-900 dark:text-gray-100">
               {t("seller.shop.myShop.contactAndSocial.contactDetails")}
@@ -179,9 +170,7 @@ export default function ContactInfoCard(props: ContactInfoCardProps) {
           ) : (
             <div class="flex flex-col items-center justify-center py-12 px-4 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50/50 dark:bg-gray-800/30">
               <div class="w-14 h-14 mb-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                <svg class="w-7 h-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
+                <EnvelopeIcon class="w-7 h-7 text-gray-400 dark:text-gray-500" />
               </div>
               <p class="text-gray-600 dark:text-gray-400 font-medium text-sm text-center">
                 {t("seller.shop.myShop.contactAndSocial.noContactInfo")}
@@ -197,9 +186,7 @@ export default function ContactInfoCard(props: ContactInfoCardProps) {
         <div>
           <div class="flex items-center gap-2 mb-4">
             <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-forest-500 to-forest-600 flex items-center justify-center">
-              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.5-1.5" />
-              </svg>
+              <ChatBubbleLeftRightIcon class="w-4 h-4 text-white" />
             </div>
             <h4 class="font-bold text-gray-900 dark:text-gray-100">
               {t("seller.shop.myShop.contactAndSocial.socialMedia")}
@@ -244,9 +231,7 @@ export default function ContactInfoCard(props: ContactInfoCardProps) {
           ) : (
             <div class="flex flex-col items-center justify-center py-12 px-4 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50/50 dark:bg-gray-800/30">
               <div class="w-14 h-14 mb-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                <svg class="w-7 h-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.5-1.5" />
-                </svg>
+                <ChatBubbleLeftRightIcon class="w-7 h-7 text-gray-400 dark:text-gray-500" />
               </div>
               <p class="text-gray-600 dark:text-gray-400 font-medium text-sm text-center">
                 {t("seller.shop.myShop.contactAndSocial.noSocialMedia")}

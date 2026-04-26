@@ -1,6 +1,7 @@
 import { Show } from 'solid-js';
 import Card from '~/components/ui/Card';
 import Badge from '~/components/ui/Badge';
+import { CheckIcon, XCircleIcon, ClockIcon, ShieldCheckIcon, PlusIcon, CalendarIcon, ArrowPathIcon, DocumentTextIcon, EyeIcon, ExclamationCircleIcon, InfoCircleIcon, CheckBadgeIcon } from '~/components/icons';
 import type { VerificationStatusType, ShopMedia } from '~/lib/api/endpoints/seller-shop.api';
 import { useI18n } from '~/i18n';
 
@@ -43,25 +44,13 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
     function getStatusIcon(status: VerificationStatusType) {
         switch (status) {
             case 'APPROVED':
-                return (
-                    <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                );
+                return <CheckIcon class="w-8 h-8 text-white" />;
             case 'REJECTED':
-                return (
-                    <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                );
+                return <XCircleIcon class="w-8 h-8 text-white" />;
             case 'PENDING':
             case 'REVIEWING':
             default:
-                return (
-                    <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                );
+                return <ClockIcon class="w-8 h-8 text-white" />;
         }
     }
 
@@ -98,9 +87,7 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
             <Show when={props.status !== null} fallback={
                 <div class="text-center py-6">
                     <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-sage-500 to-sage-600 flex items-center justify-center shadow-lg shadow-sage-500/30">
-                        <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
+                        <ShieldCheckIcon class="w-8 h-8 text-white" />
                     </div>
                     
                     <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
@@ -137,9 +124,7 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
                             onClick={props.onAction}
                             class="px-6 py-3 bg-sage-500 hover:bg-sage-600 text-white rounded-lg font-semibold transition-colors inline-flex items-center gap-2"
                         >
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
+                            <PlusIcon class="w-5 h-5" />
                             {props.actionLabel || t('seller.verification.startVerification')}
                         </button>
                     )}
@@ -168,9 +153,7 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
                             {/* Submitted Date */}
                             <Show when={props.createdAt}>
                                 <p class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
+                                    <CalendarIcon class="w-4 h-4" />
                                     Submitted: {props.createdAt!.toLocaleDateString('en-US', {
                                         year: 'numeric',
                                         month: 'long',
@@ -182,9 +165,7 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
                             {/* Updated Date */}
                             <Show when={props.updatedAt && props.updatedAt !== props.createdAt}>
                                 <p class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                    </svg>
+                                    <ArrowPathIcon class="w-4 h-4" />
                                     Last updated: {props.updatedAt!.toLocaleDateString('en-US', {
                                         year: 'numeric',
                                         month: 'long',
@@ -228,9 +209,7 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
                     <Show when={props.hasDocuments}>
                         <div>
                             <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
-                                <svg class="w-4 h-4 text-sage-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
+                                <DocumentTextIcon class="w-4 h-4 text-sage-500" />
                                 {t('seller.verification.submittedDocuments')}
                             </h4>
                             <div class="space-y-2">
@@ -255,10 +234,7 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
                                             class="p-2 text-sage-500 hover:text-sage-600 dark:hover:text-sage-400 transition-colors"
                                             title={t('common.viewDocument')}
                                         >
-                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
+                                            <EyeIcon class="w-5 h-5" />
                                         </a>
                                     </div>
                                 </Show>
@@ -284,10 +260,7 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
                                             class="p-2 text-sage-500 hover:text-sage-600 dark:hover:text-sage-400 transition-colors"
                                             title={t('common.viewDocument')}
                                         >
-                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
+                                            <EyeIcon class="w-5 h-5" />
                                         </a>
                                     </div>
                                 </Show>
@@ -313,10 +286,7 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
                                             class="p-2 text-sage-500 hover:text-sage-600 dark:hover:text-sage-400 transition-colors"
                                             title={t('common.viewDocument')}
                                         >
-                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
+                                            <EyeIcon class="w-5 h-5" />
                                         </a>
                                     </div>
                                 </Show>
@@ -328,9 +298,7 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
                     <Show when={props.status === 'REJECTED' && props.rejectionReason}>
                         <div class="p-4 bg-terracotta-50 dark:bg-terracotta-900/20 border-2 border-terracotta-200 dark:border-terracotta-800 rounded-lg">
                             <div class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-terracotta-600 dark:text-terracotta-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                                <ExclamationCircleIcon class="w-5 h-5 text-terracotta-600 dark:text-terracotta-400 mt-0.5 flex-shrink-0" />
                                 <div>
                                     <p class="text-sm font-semibold text-terracotta-800 dark:text-terracotta-400 mb-1">
                                         {t('seller.verification.rejectionReason')}
@@ -347,9 +315,7 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
                     <Show when={props.status === 'APPROVED' && props.verifiedAt}>
                         <div class="p-4 bg-forest-50 dark:bg-forest-900/20 border-2 border-forest-200 dark:border-forest-800 rounded-lg">
                             <div class="flex items-center gap-3">
-                                <svg class="w-5 h-5 text-forest-600 dark:text-forest-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                                </svg>
+                                <CheckBadgeIcon class="w-5 h-5 text-forest-600 dark:text-forest-400" />
                                 <div>
                                     <p class="text-sm font-semibold text-forest-800 dark:text-forest-400">
                                         {t('seller.verification.verifiedOn')}
@@ -372,9 +338,7 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
                     <Show when={props.status === 'PENDING' || props.status === 'REVIEWING'}>
                         <div class="p-4 bg-sage-50 dark:bg-sage-900/20 border-2 border-sage-200 dark:border-sage-700 rounded-lg">
                             <div class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-sage-600 dark:text-sage-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                                <InfoCircleIcon class="w-5 h-5 text-sage-600 dark:text-sage-400 mt-0.5 flex-shrink-0" />
                                 <div>
                                     <p class="text-sm text-sage-800 dark:text-sage-200">
                                         {props.status === 'REVIEWING' 
@@ -404,9 +368,7 @@ export function VerificationStatusCard(props: VerificationStatusCardProps) {
                                     onClick={props.onAction}
                                     class="w-full sm:w-auto px-6 py-3 bg-sage-500 hover:bg-sage-600 text-white rounded-lg font-semibold transition-colors inline-flex items-center justify-center gap-2"
                                 >
-                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                    </svg>
+                                    <ArrowPathIcon class="w-5 h-5" />
                                     {props.actionLabel || (props.status === 'REJECTED' ? t('seller.verification.resubmit') : t('seller.verification.updateDocuments'))}
                                 </button>
                             )}

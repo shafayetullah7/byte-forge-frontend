@@ -128,7 +128,6 @@ export type PlantStatus = (typeof PLANT_STATUS)[keyof typeof PLANT_STATUS];
 export interface Plant {
   id: string;
   shopId: string;
-  categoryId: string;
   name: string;
   slug: string;
   commonName: string | null;
@@ -137,6 +136,7 @@ export interface Plant {
   price: number;
   stock: number;
   status: PlantStatus;
+  categoryId: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -152,32 +152,89 @@ export interface PlantFilter {
 }
 
 /**
+ * Plant Details for Create/Update
+ */
+export interface PlantDetailsInput {
+  categoryId: string;
+  tagIds?: string[];
+  scientificName?: string;
+  commonNames?: string;
+  origin?: string;
+  lightRequirement?: string;
+  wateringFrequency?: string;
+  humidityLevel?: string;
+  temperatureRange?: string;
+  soilType?: string;
+  careDifficulty?: string;
+  growthRate?: string;
+  matureHeight?: string;
+  matureSpread?: string;
+  toxicityInfo?: string;
+}
+
+/**
  * Create Plant Request
  */
 export interface CreatePlantRequest {
-  categoryId: string;
   name: string;
   slug: string;
-  commonName?: string;
-  scientificName?: string;
-  description?: string;
-  price: number;
-  stock: number;
+  thumbnailId?: string;
+  status?: string;
+  translations: Array<{
+    locale: string;
+    name: string;
+    description: string;
+    shortDescription?: string;
+  }>;
+  plantDetails: PlantDetailsInput;
+  enDetails: {
+    commonNames?: string;
+    origin?: string;
+    soilType?: string;
+    toxicityInfo?: string;
+  };
+  bnDetails: {
+    commonNames?: string;
+    origin?: string;
+    soilType?: string;
+    toxicityInfo?: string;
+  };
+  variants: Array<{
+    sku?: string;
+    price: number;
+    salePrice?: number;
+    costPrice?: number;
+    inventoryCount?: number;
+    trackInventory?: boolean;
+    lowStockThreshold?: number;
+    isBase?: boolean;
+    isActive?: boolean;
+    plantAttributes?: Record<string, string | number | boolean | null>;
+    mediaIds?: string[];
+  }>;
+  careInstructions?: Record<string, string | null>;
+  careTranslations?: Array<{
+    locale: string;
+    lightInstructions?: string;
+    wateringInstructions?: string;
+    humidityInstructions?: string;
+    fertilizerSchedule?: string;
+    repottingFrequency?: string;
+    pruningNotes?: string;
+    commonProblems?: string;
+    seasonalCare?: string;
+  }>;
 }
 
 /**
  * Update Plant Request
  */
 export interface UpdatePlantRequest {
-  categoryId?: string;
   name?: string;
   slug?: string;
-  commonName?: string;
-  scientificName?: string;
-  description?: string;
-  price?: number;
-  stock?: number;
+  thumbnailId?: string;
   status?: "active" | "inactive" | "out_of_stock";
+  plantDetails?: Partial<PlantDetailsInput>;
 }
 
 /**

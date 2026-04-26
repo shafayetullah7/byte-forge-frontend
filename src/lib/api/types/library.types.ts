@@ -1,44 +1,68 @@
 /**
- * Tree Category structure
+ * Tree Category structure (matches backend PublicCategoryResponse)
  */
 export interface TreeCategory {
   id: string;
-  name: string;
   slug: string;
+  name: string;
   description: string | null;
-  iconId: string | null;
-  icon: {
-    id: string;
-    url: string;
-  } | null;
+  isActive: boolean;
+  childrenCount: number;
+  usageCount: number;
+  parentId: string | null;
+  translations: Array<{
+    locale: string;
+    name: string;
+    description: string | null;
+  }>;
   createdAt: string;
   updatedAt: string;
+}
+
+/**
+ * Tree Category node (for tree endpoint)
+ */
+export interface TreeCategoryNode extends TreeCategory {
+  children: TreeCategoryNode[];
 }
 
 /**
  * Filter options for categories
  */
 export interface CategoryFilter {
-  name?: string;
-  slug?: string;
+  locale?: 'en' | 'bn';
 }
 
 /**
- * Create category request
+ * Public Tag structure (matches backend PublicTagResponse)
  */
-export interface CreateCategoryRequest {
-  name: string;
+export interface PublicTag {
+  id: string;
   slug: string;
-  description?: string;
-  iconId?: string;
+  name: string;
+  description: string | null;
+  usageCount: number;
+  translations: Array<{
+    locale: string;
+    name: string;
+    description: string | null;
+  }>;
 }
 
 /**
- * Update category request
+ * Public Tag Group structure (matches backend PublicTagGroupResponse)
  */
-export interface UpdateCategoryRequest {
-  name?: string;
-  slug?: string;
-  description?: string;
-  iconId?: string;
+export interface PublicTagGroup {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  tags: PublicTag[];
+}
+
+/**
+ * Filter options for tags
+ */
+export interface TagFilter {
+  locale?: 'en' | 'bn';
 }
