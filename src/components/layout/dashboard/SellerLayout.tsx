@@ -24,11 +24,13 @@ export const SellerLayout: ParentComponent = (props) => {
         mode: "seller",
         brandColor: "terracotta",
         links: [
+            // Dashboard and Overview
             {
                 href: "/app/seller",
                 icon: Squares2x2Icon,
                 label: t("common.dashboard"),
             },
+            // Shop Management
             {
                 href: "/app/seller/my-shop",
                 icon: ShoppingBagIcon,
@@ -44,6 +46,7 @@ export const SellerLayout: ParentComponent = (props) => {
                 icon: ClockIcon,
                 label: t("seller.history"),
             },
+            // Products
             {
                 href: "/app/seller/products",
                 icon: CubeIcon,
@@ -59,6 +62,7 @@ export const SellerLayout: ParentComponent = (props) => {
                 icon: FolderIcon,
                 label: t("seller.products.categories"),
             },
+            // Orders
             {
                 href: "/app/seller/orders",
                 icon: ClipboardListIcon,
@@ -74,6 +78,7 @@ export const SellerLayout: ParentComponent = (props) => {
                 icon: CheckCircleIcon,
                 label: t("seller.orders.delivered"),
             },
+            // Financial
             {
                 href: "/app/seller/earnings",
                 icon: DollarSignIcon,
@@ -84,6 +89,7 @@ export const SellerLayout: ParentComponent = (props) => {
                 icon: BankIcon,
                 label: t("seller.earnings.payouts"),
             },
+            // Settings
             {
                 href: "/app/seller/settings",
                 icon: CogIcon,
