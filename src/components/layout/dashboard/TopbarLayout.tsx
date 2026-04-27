@@ -13,11 +13,11 @@ const TopbarContent: ParentComponent = (props) => {
 export const TopbarLayout: ParentComponent = (props) => {
     return (
         <LayoutProvider>
-            <div class="min-h-screen bg-gray-50 dark:bg-forest-900">
+            <div class="h-screen overflow-hidden flex flex-col bg-gray-50 dark:bg-forest-900">
                 <TopbarContent />
-                <main class="w-full">
+                <div class="flex-1 flex overflow-hidden">
                     {props.children}
-                </main>
+                </div>
             </div>
         </LayoutProvider>
     );

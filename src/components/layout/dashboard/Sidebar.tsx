@@ -224,12 +224,12 @@ export const Sidebar: Component<SidebarProps> = (props) => {
 
             {/* Sidebar Container */}
             <div
-                class={`fixed inset-y-0 left-0 z-50 w-64 sm:w-72 bg-white dark:bg-forest-800 border-r border-cream-200 dark:border-forest-700 transform transition-transform duration-300 ease-in-out will-change-transform md:translate-x-0 md:relative md:inset-0 ${props.isOpen ? "translate-x-0" : "-translate-x-full"
+                class={`fixed inset-y-0 left-0 z-50 w-64 sm:w-72 bg-white dark:bg-forest-800 border-r border-cream-200 dark:border-forest-700 transform transition-transform duration-300 ease-in-out will-change-transform md:translate-x-0 md:relative md:inset-auto md:z-auto md:flex md:flex-col md:h-full md:overflow-y-auto md:overscroll-contain ${props.isOpen ? "translate-x-0" : "-translate-x-full"
                     }`}
             >
                 <div class="h-full flex flex-col">
                     {/* Navigation Links */}
-                    <div class="flex-1 flex flex-col overflow-y-auto pt-5 pb-4 px-3">
+                    <div class="flex-1 flex flex-col overflow-y-auto overscroll-contain pt-5 pb-4 px-3">
                         <nav class="flex-1 space-y-1" role="navigation" aria-label="Main navigation">
                             <For each={props.config.links}>
                                 {(link) => (
