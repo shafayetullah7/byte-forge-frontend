@@ -5,8 +5,7 @@ export default function SeedsPage() {
   const { t } = useI18n();
 
   return (
-    <div class="min-h-screen py-8">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <>
         {/* Header */}
         <div class="mb-8">
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -50,7 +49,6 @@ export default function SeedsPage() {
             {t("seller.products.addYourFirstSeed")}
           </a>
         </div>
-      </div>
-    </div>
+    </>
   );
 }
