@@ -1,4 +1,3 @@
-import { Show } from "solid-js";
 import { useI18n } from "~/i18n";
 import { CubeIcon, PlusIcon } from "~/components/icons";
 
@@ -6,40 +5,51 @@ export default function SeedsPage() {
   const { t } = useI18n();
 
   return (
-    <div class="space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 class="text-2xl font-bold text-forest-900 dark:text-white">
-            {t("seller.products.types.seeds")}
-          </h1>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            {t("seller.products.manageSeedProducts")}
-          </p>
+    <div class="min-h-screen py-8">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div class="mb-8">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-forest-500 to-forest-600 flex items-center justify-center shadow-md shadow-forest-500/20">
+                <CubeIcon class="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                  {t("seller.products.types.seeds")}
+                </h1>
+                <p class="text-base text-gray-600 dark:text-gray-400">
+                  {t("seller.products.manageSeedProducts")}
+                </p>
+              </div>
+            </div>
+            <a
+              href="/app/seller/products/new"
+              class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-forest-500 to-forest-600 hover:from-forest-600 hover:to-forest-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
+            >
+              <PlusIcon class="w-5 h-5" />
+              {t("seller.products.addSeed")}
+            </a>
+          </div>
         </div>
-        <a
-          href="/app/seller/products/new"
-          class="inline-flex items-center gap-2 px-4 py-2.5 bg-terracotta-500 hover:bg-terracotta-600 text-white font-semibold rounded-lg transition-standard text-sm"
-        >
-          <PlusIcon class="h-4 w-4" />
-          {t("seller.products.addSeed")}
-        </a>
-      </div>
 
-      <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 p-12 text-center">
-        <CubeIcon class="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-        <h3 class="text-lg font-semibold text-forest-900 dark:text-white mb-2">
-          {t("seller.products.noSeedsYet")}
-        </h3>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-          {t("seller.products.seedManagementComingSoon")}
-        </p>
-        <a
-          href="/app/seller/products/new"
-          class="inline-flex items-center gap-2 px-4 py-2.5 bg-terracotta-500 hover:bg-terracotta-600 text-white font-semibold rounded-lg transition-standard text-sm"
-        >
-          <PlusIcon class="h-4 w-4" />
-          {t("seller.products.addYourFirstSeed")}
-        </a>
+        {/* Empty State */}
+        <div class="bg-white dark:bg-forest-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center shadow-sm">
+          <CubeIcon class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            {t("seller.products.noSeedsYet")}
+          </h3>
+          <p class="text-gray-500 dark:text-gray-400 mb-6">
+            {t("seller.products.seedManagementComingSoon")}
+          </p>
+          <a
+            href="/app/seller/products/new"
+            class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-forest-500 to-forest-600 hover:from-forest-600 hover:to-forest-700 text-white rounded-xl font-semibold shadow-lg transition-all"
+          >
+            <PlusIcon class="w-5 h-5" />
+            {t("seller.products.addYourFirstSeed")}
+          </a>
+        </div>
       </div>
     </div>
   );
