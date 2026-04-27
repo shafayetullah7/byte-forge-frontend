@@ -1,7 +1,6 @@
-import { createSignal, createMemo, For, Show, createEffect } from "solid-js";
+import { createSignal, createMemo, For, Show } from "solid-js";
 import { A } from "@solidjs/router";
 import { useI18n } from "~/i18n";
-import { InlineErrorFallback } from "~/components/errors";
 import { FilterIcon, DotsVerticalIcon, PencilIcon, TrashIcon, ChevronLeftIcon, ChevronRightIcon, ArchiveIcon, SortIcon, PackageIcon, PlusIcon, XIcon, MagnifyingGlassIcon, FolderIcon, DollarSignIcon, CubeIcon, ClockIcon, CheckCircleIcon, Squares2x2Icon, TagIcon } from "~/components/icons";
 import Badge from "~/components/ui/Badge";
 import { FilterSelect } from "~/components/ui/FilterSelect";
@@ -295,7 +294,6 @@ function FilterChip(props: { label: string; onRemove: () => void }) {
 export default function PlantsPage() {
   const { t } = useI18n();
 
-  // Filters
   const [searchQuery, setSearchQuery] = createSignal("");
   const [statusFilter, setStatusFilter] = createSignal("");
   const [categoryFilter, setCategoryFilter] = createSignal("");
@@ -305,11 +303,9 @@ export default function PlantsPage() {
   const [showFilters, setShowFilters] = createSignal(false);
   const [showSortPanel, setShowSortPanel] = createSignal(false);
 
-  // Pagination
   const [currentPage, setCurrentPage] = createSignal(1);
   const ITEMS_PER_PAGE = 5;
 
-  // Tag toggle
   const toggleTag = (tagId: string) => {
     const current = selectedTagIds();
     if (current.includes(tagId)) {
@@ -325,7 +321,6 @@ export default function PlantsPage() {
     setCurrentPage(1);
   };
 
-  // Filtered products
   const filteredProducts = createMemo(() => {
     let result = [...staticProducts];
 
@@ -376,7 +371,6 @@ export default function PlantsPage() {
     return result;
   });
 
-  // Pagination
   const totalPages = createMemo(() =>
     Math.max(1, Math.ceil(filteredProducts().length / ITEMS_PER_PAGE))
   );
@@ -386,7 +380,6 @@ export default function PlantsPage() {
     return filteredProducts().slice(start, start + ITEMS_PER_PAGE);
   });
 
-  // Stats
   const stats = createMemo(() => ({
     total: staticProducts.length,
     active: staticProducts.filter((p) => p.status === "ACTIVE").length,
@@ -432,11 +425,11 @@ export default function PlantsPage() {
         <div class="mb-8">
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-forest-500 to-forest-600 flex items-center justify-center shadow-md shadow-forest-500/20">
+              <div class="w-12 h-12 rounded-xl bg-forest-600 flex items-center justify-center shadow-sm">
                 <PackageIcon class="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                <h1 class="text-2xl md:text-3xl font-bold text-forest-800 dark:text-cream-50">
                   {t("seller.products.types.plants")}
                 </h1>
                 <p class="text-base text-gray-600 dark:text-gray-400">
@@ -445,7 +438,7 @@ export default function PlantsPage() {
               </div>
             </div>
             <A href="/app/seller/products/new">
-              <button class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-forest-500 to-forest-600 hover:from-forest-600 hover:to-forest-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all">
+              <button class="inline-flex items-center gap-2 px-5 py-2.5 bg-forest-600 hover:bg-forest-700 text-white rounded-lg font-semibold shadow-sm hover:shadow-md transition-colors">
                 <PlusIcon class="w-5 h-5" />
                 {t("seller.products.addPlant")}
               </button>
@@ -454,19 +447,19 @@ export default function PlantsPage() {
         </div>
 
         {/* Stats Cards */}
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div class="bg-white dark:bg-forest-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 mb-6">
+          <div class="bg-white dark:bg-forest-800 rounded-xl p-5 sm:p-6 border border-cream-200 dark:border-forest-700 shadow-sm">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm text-gray-500 dark:text-gray-400">{t("common.total")}</p>
-                <p class="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">{stats().total}</p>
+                <p class="text-2xl font-bold text-forest-800 dark:text-cream-50 mt-1">{stats().total}</p>
               </div>
               <div class="w-10 h-10 rounded-lg bg-cream-100 dark:bg-cream-900/40 flex items-center justify-center">
                 <Squares2x2Icon class="w-5 h-5 text-cream-600 dark:text-cream-400" />
               </div>
             </div>
           </div>
-          <div class="bg-white dark:bg-forest-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
+          <div class="bg-white dark:bg-forest-800 rounded-xl p-5 sm:p-6 border border-cream-200 dark:border-forest-700 shadow-sm">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm text-gray-500 dark:text-gray-400">{t("buyer.profile.status.active")}</p>
@@ -477,7 +470,7 @@ export default function PlantsPage() {
               </div>
             </div>
           </div>
-          <div class="bg-white dark:bg-forest-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
+          <div class="bg-white dark:bg-forest-800 rounded-xl p-5 sm:p-6 border border-cream-200 dark:border-forest-700 shadow-sm">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm text-gray-500 dark:text-gray-400">{t("seller.shop.myShop.status.draft.label")}</p>
@@ -488,7 +481,7 @@ export default function PlantsPage() {
               </div>
             </div>
           </div>
-          <div class="bg-white dark:bg-forest-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
+          <div class="bg-white dark:bg-forest-800 rounded-xl p-5 sm:p-6 border border-cream-200 dark:border-forest-700 shadow-sm">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm text-gray-500 dark:text-gray-400">{t("common.archived")}</p>
@@ -502,7 +495,7 @@ export default function PlantsPage() {
         </div>
 
         {/* Search & Filter Bar */}
-        <div class="bg-white dark:bg-forest-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm mb-6">
+        <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm mb-6">
           <div class="p-4">
             <div class="flex flex-col lg:flex-row gap-3">
               {/* Search */}
@@ -512,7 +505,7 @@ export default function PlantsPage() {
                   placeholder="Search by name or slug..."
                   value={searchQuery()}
                   onInput={(e) => handleFilterChange(setSearchQuery, e.currentTarget.value)}
-                  class="w-full pl-10 pr-4 py-2.5 rounded-lg border-2 border-cream-200 dark:border-forest-700 focus:border-forest-500 dark:focus:border-forest-400 bg-white dark:bg-forest-900/30 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 transition-standard focus-ring-flat"
+                  class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-cream-200 dark:border-forest-700 focus:border-forest-500 dark:focus:border-forest-400 bg-white dark:bg-forest-800 text-forest-800 dark:text-cream-50 placeholder-gray-400 dark:placeholder-gray-500 transition-standard focus-ring-flat"
                 />
                 <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               </div>
@@ -533,7 +526,7 @@ export default function PlantsPage() {
               <div class="hidden lg:block relative">
                 <button
                   onClick={() => setShowSortPanel(!showSortPanel())}
-                  class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 border-cream-200 dark:border-forest-700 focus:border-forest-500 dark:focus:border-forest-400 bg-white dark:bg-forest-900/30 text-gray-900 dark:text-gray-100 transition-standard focus-ring-flat min-w-[200px]"
+                  class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-cream-200 dark:border-forest-700 focus:border-forest-500 dark:focus:border-forest-400 bg-white dark:bg-forest-800 text-forest-800 dark:text-cream-50 transition-standard focus-ring-flat min-w-[200px]"
                 >
                   <SortIcon class="w-4 h-4 text-gray-400" />
                   <span class="text-sm truncate">{sortLabel()}</span>
@@ -541,9 +534,9 @@ export default function PlantsPage() {
 
                 {/* Sort Dropdown */}
                 <Show when={showSortPanel()}>
-                  <div class="absolute right-0 mt-2 w-64 bg-white dark:bg-forest-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl z-50 overflow-hidden">
-                    <div class="p-3 border-b border-gray-200 dark:border-gray-700">
-                      <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">Sort By</p>
+                  <div class="absolute right-0 mt-2 w-64 bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-lg z-50 overflow-hidden">
+                    <div class="p-3 border-b border-cream-200 dark:border-forest-700">
+                      <p class="text-sm font-semibold text-forest-800 dark:text-cream-100">Sort By</p>
                     </div>
                     <div class="p-2">
                       <For each={SORT_OPTIONS}>
@@ -586,7 +579,7 @@ export default function PlantsPage() {
                         }}
                       </For>
                     </div>
-                    <div class="p-3 border-t border-gray-200 dark:border-gray-700">
+                    <div class="p-3 border-t border-cream-200 dark:border-forest-700">
                       <button
                         onClick={() => {
                           setSortBy("createdAt");
@@ -605,7 +598,7 @@ export default function PlantsPage() {
               {/* Filter Toggle (Mobile) */}
               <button
                 onClick={() => setShowFilters(!showFilters())}
-                class="lg:hidden inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 border-cream-200 dark:border-forest-700 text-gray-700 dark:text-gray-300 hover:border-forest-500 dark:hover:border-forest-400 transition-standard"
+                class="lg:hidden inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-cream-200 dark:border-forest-700 text-gray-700 dark:text-gray-300 hover:border-forest-500 dark:hover:border-forest-400 transition-standard"
               >
                 <FilterIcon class="w-5 h-5" />
                 Filters
@@ -619,7 +612,7 @@ export default function PlantsPage() {
 
             {/* Advanced Filters Panel */}
             <Show when={showFilters() || true}>
-              <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div class="mt-4 pt-4 border-t border-cream-200 dark:border-forest-700">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {/* Category Filter */}
                   <div>
@@ -657,7 +650,7 @@ export default function PlantsPage() {
                           setSortBy(e.currentTarget.value);
                           setSortOrder("desc");
                         }}
-                        class="w-full px-4 py-2.5 rounded-lg border-2 border-cream-200 dark:border-forest-700 focus:border-forest-500 dark:focus:border-forest-400 bg-white dark:bg-forest-900/30 text-gray-900 dark:text-gray-100 transition-standard focus-ring-flat"
+                        class="w-full px-4 py-2.5 rounded-lg border border-cream-200 dark:border-forest-700 focus:border-forest-500 dark:focus:border-forest-400 bg-white dark:bg-forest-800 text-forest-800 dark:text-cream-50 transition-standard focus-ring-flat"
                       >
                         {SORT_OPTIONS.map((opt) => (
                           <option value={opt.value}>{opt.label}</option>
@@ -665,7 +658,7 @@ export default function PlantsPage() {
                       </select>
                       <button
                         onClick={() => setSortOrder(sortOrder() === "asc" ? "desc" : "asc")}
-                        class="w-full px-4 py-2.5 rounded-lg border-2 border-cream-200 dark:border-forest-700 bg-white dark:bg-forest-900/30 text-gray-900 dark:text-gray-100 text-sm font-medium transition-standard"
+                        class="w-full px-4 py-2.5 rounded-lg border border-cream-200 dark:border-forest-700 bg-white dark:bg-forest-800 text-forest-800 dark:text-cream-50 text-sm font-medium transition-standard"
                       >
                         Order: {sortOrder() === "asc" ? "↑ Ascending" : "↓ Descending"}
                       </button>
@@ -677,7 +670,7 @@ export default function PlantsPage() {
 
             {/* Active Filters */}
             <Show when={hasActiveFilters()}>
-              <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div class="mt-4 pt-4 border-t border-cream-200 dark:border-forest-700">
                 <div class="flex items-center justify-between mb-2">
                   <p class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
                     <FilterIcon class="w-4 h-4 text-gray-400" />
@@ -726,8 +719,8 @@ export default function PlantsPage() {
         {/* Results Count */}
         <div class="flex items-center justify-between mb-4">
           <p class="text-sm text-gray-500 dark:text-gray-400">
-            Showing <span class="font-semibold text-gray-900 dark:text-gray-100">{filteredProducts().length}</span> of{" "}
-            <span class="font-semibold text-gray-900 dark:text-gray-100">{staticProducts.length}</span> products
+            Showing <span class="font-semibold text-forest-800 dark:text-cream-50">{filteredProducts().length}</span> of{" "}
+            <span class="font-semibold text-forest-800 dark:text-cream-50">{staticProducts.length}</span> products
           </p>
           <Show when={hasActiveFilters()}>
             <button
@@ -744,9 +737,9 @@ export default function PlantsPage() {
         <Show
           when={filteredProducts().length > 0}
           fallback={
-            <div class="bg-white dark:bg-forest-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
-              <PackageIcon class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 py-12 px-4 text-center shadow-sm">
+              <PackageIcon class="w-10 h-10 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+              <h3 class="text-lg font-semibold text-forest-800 dark:text-cream-50 mb-2">
                 No products found
               </h3>
               <p class="text-gray-500 dark:text-gray-400 mb-6">
@@ -759,14 +752,14 @@ export default function PlantsPage() {
                 fallback={
                   <button
                     onClick={clearFilters}
-                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-forest-500 hover:bg-forest-600 text-white rounded-xl font-semibold transition-colors"
+                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-forest-600 hover:bg-forest-700 text-white rounded-lg font-semibold shadow-sm hover:shadow-md transition-colors"
                   >
                     Clear Filters
                   </button>
                 }
               >
                 <A href="/app/seller/products/new">
-                  <button class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-forest-500 to-forest-600 hover:from-forest-600 hover:to-forest-700 text-white rounded-xl font-semibold shadow-lg transition-all">
+                  <button class="inline-flex items-center gap-2 px-5 py-2.5 bg-forest-600 hover:bg-forest-700 text-white rounded-lg font-semibold shadow-sm hover:shadow-md transition-colors">
                     <PlusIcon class="w-5 h-5" />
                     {t("seller.products.addPlant")}
                   </button>
@@ -776,48 +769,48 @@ export default function PlantsPage() {
           }
         >
           {/* Desktop Table */}
-          <div class="hidden lg:block bg-white dark:bg-forest-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+          <div class="hidden lg:block bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm overflow-hidden">
             <table class="w-full">
               <thead>
-                <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-forest-900/50">
-                  <th class="text-left px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                <tr class="border-b border-cream-200 dark:border-forest-700 bg-cream-50 dark:bg-forest-900/50">
+                  <th class="text-left px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
                     <div class="flex items-center gap-2">
                       <PackageIcon class="w-4 h-4 text-gray-400" />
                       Product
                     </div>
                   </th>
-                  <th class="text-left px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  <th class="text-left px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
                     <div class="flex items-center gap-2">
                       <FolderIcon class="w-4 h-4 text-gray-400" />
                       Category
                     </div>
                   </th>
-                  <th class="text-left px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  <th class="text-left px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
                     <div class="flex items-center gap-2">
                       <TagIcon class="w-4 h-4 text-gray-400" />
                       Tags
                     </div>
                   </th>
-                  <th class="text-left px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  <th class="text-left px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
                     <div class="flex items-center gap-2">
                       <DollarSignIcon class="w-4 h-4 text-gray-400" />
                       Price
                     </div>
                   </th>
-                  <th class="text-left px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  <th class="text-left px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
                     <div class="flex items-center gap-2">
                       <CubeIcon class="w-4 h-4 text-gray-400" />
                       Inventory
                     </div>
                   </th>
-                  <th class="text-left px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Status</th>
-                  <th class="text-left px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  <th class="text-left px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Status</th>
+                  <th class="text-left px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
                     <div class="flex items-center gap-2">
                       <ClockIcon class="w-4 h-4 text-gray-400" />
                       Updated
                     </div>
                   </th>
-                  <th class="text-right px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Actions</th>
+                  <th class="text-right px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -825,10 +818,10 @@ export default function PlantsPage() {
                   {(product) => {
                     const inventory = getInventoryStatus(product.inventoryCount);
                     return (
-                      <tr class="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-forest-900/30 transition-colors">
-                        <td class="px-6 py-4">
+                      <tr class="border-b border-cream-100 dark:border-forest-700/50 hover:bg-cream-50 dark:hover:bg-forest-900/30 transition-colors">
+                        <td class="px-4 py-3">
                           <div>
-                            <p class="font-semibold text-gray-900 dark:text-gray-100">
+                            <p class="font-semibold text-forest-800 dark:text-cream-50">
                               {product.name}
                             </p>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
@@ -836,7 +829,7 @@ export default function PlantsPage() {
                             </p>
                           </div>
                         </td>
-                        <td class="px-6 py-4">
+                        <td class="px-4 py-3">
                           <Show
                             when={product.category}
                             fallback={<span class="text-gray-400 dark:text-gray-500 text-sm">—</span>}
@@ -846,25 +839,25 @@ export default function PlantsPage() {
                             </span>
                           </Show>
                         </td>
-                        <td class="px-6 py-4">
+                        <td class="px-4 py-3">
                           <div class="flex flex-wrap gap-1 max-w-[200px]">
                             <For each={product.tags.slice(0, 3)}>
                               {(tagId) => (
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-cream-200 text-cream-800 dark:bg-cream-900/40 dark:text-cream-300">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cream-200 text-cream-800 dark:bg-cream-900/40 dark:text-cream-300">
                                   {getTagName(tagId)}
                                 </span>
                               )}
                             </For>
                             <Show when={product.tags.length > 3}>
-                              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400">
+                              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cream-100 text-cream-700 dark:bg-forest-700 dark:text-gray-400">
                                 +{product.tags.length - 3}
                               </span>
                             </Show>
                           </div>
                         </td>
-                        <td class="px-6 py-4">
+                        <td class="px-4 py-3">
                           <div>
-                            <span class="font-semibold text-gray-900 dark:text-gray-100">
+                            <span class="font-semibold text-forest-800 dark:text-cream-50">
                               {formatPrice(product.price)}
                             </span>
                             <Show when={product.salePrice}>
@@ -874,35 +867,35 @@ export default function PlantsPage() {
                             </Show>
                           </div>
                         </td>
-                        <td class="px-6 py-4">
+                        <td class="px-4 py-3">
                           <Badge variant={inventory.variant}>
                             {inventory.label}
                           </Badge>
                         </td>
-                        <td class="px-6 py-4">
+                        <td class="px-4 py-3">
                           <Badge variant={getStatusVariant(product.status)}>
                             {product.status === "ACTIVE" ? "Active" : product.status === "DRAFT" ? "Draft" : "Archived"}
                           </Badge>
                         </td>
-                        <td class="px-6 py-4">
+                        <td class="px-4 py-3">
                           <span class="text-sm text-gray-500 dark:text-gray-400">
                             {formatDateTime(product.updatedAt)}
                           </span>
                         </td>
-                        <td class="px-6 py-4 text-right">
+                        <td class="px-4 py-3 text-right">
                           <div class="relative group">
                             <button class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-forest-700 transition-colors">
                               <DotsVerticalIcon class="w-5 h-5 text-gray-500 dark:text-gray-400" />
                             </button>
-                            <div class="absolute right-0 mt-1 w-40 bg-white dark:bg-forest-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                            <div class="absolute right-0 mt-1 w-40 bg-white dark:bg-forest-800 rounded-lg border border-cream-200 dark:border-forest-700 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 z-10">
                               <div class="py-1">
                                 <button class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-forest-700 flex items-center gap-2">
                                   <PencilIcon class="w-4 h-4" />
-                                  Edit
+                                  {t("common.edit")}
                                 </button>
                                 <button class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-forest-700 flex items-center gap-2">
                                   <TrashIcon class="w-4 h-4" />
-                                  Delete
+                                  {t("common.delete")}
                                 </button>
                               </div>
                             </div>
@@ -922,11 +915,11 @@ export default function PlantsPage() {
               {(product) => {
                 const inventory = getInventoryStatus(product.inventoryCount);
                 return (
-                  <div class="bg-white dark:bg-forest-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-4">
+                  <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm p-5">
                     <div class="flex items-start justify-between mb-3">
                       <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-1">
-                          <h3 class="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                          <h3 class="font-semibold text-forest-800 dark:text-cream-50 truncate">
                             {product.name}
                           </h3>
                           <Badge variant={getStatusVariant(product.status)} class="flex-shrink-0">
@@ -941,15 +934,15 @@ export default function PlantsPage() {
                         <button class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-forest-700 transition-colors">
                           <DotsVerticalIcon class="w-5 h-5 text-gray-500 dark:text-gray-400" />
                         </button>
-                        <div class="absolute right-0 mt-1 w-36 bg-white dark:bg-forest-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                        <div class="absolute right-0 mt-1 w-36 bg-white dark:bg-forest-800 rounded-lg border border-cream-200 dark:border-forest-700 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 z-10">
                           <div class="py-1">
                             <button class="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-forest-700 flex items-center gap-2">
                               <PencilIcon class="w-4 h-4" />
-                              Edit
+                              {t("common.edit")}
                             </button>
                             <button class="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-forest-700 flex items-center gap-2">
                               <TrashIcon class="w-4 h-4" />
-                              Delete
+                              {t("common.delete")}
                             </button>
                           </div>
                         </div>
@@ -961,7 +954,7 @@ export default function PlantsPage() {
                         <FolderIcon class="w-4 h-4 text-gray-400 flex-shrink-0" />
                         <div>
                           <p class="text-gray-500 dark:text-gray-400">Category</p>
-                          <p class="font-medium text-gray-900 dark:text-gray-100">
+                          <p class="font-medium text-forest-800 dark:text-cream-50">
                             {product.category?.name || "—"}
                           </p>
                         </div>
@@ -970,7 +963,7 @@ export default function PlantsPage() {
                         <DollarSignIcon class="w-4 h-4 text-gray-400 flex-shrink-0" />
                         <div>
                           <p class="text-gray-500 dark:text-gray-400">Price</p>
-                          <p class="font-semibold text-gray-900 dark:text-gray-100">
+                          <p class="font-semibold text-forest-800 dark:text-cream-50">
                             {formatPrice(product.price)}
                             <Show when={product.salePrice}>
                               <span class="ml-1 text-xs text-terracotta-600 dark:text-terracotta-400 line-through">
@@ -993,7 +986,7 @@ export default function PlantsPage() {
                         <ClockIcon class="w-4 h-4 text-gray-400 flex-shrink-0" />
                         <div>
                           <p class="text-gray-500 dark:text-gray-400">Updated</p>
-                          <p class="font-medium text-gray-900 dark:text-gray-100">
+                          <p class="font-medium text-forest-800 dark:text-cream-50">
                             {formatDateTime(product.updatedAt)}
                           </p>
                         </div>
@@ -1004,7 +997,7 @@ export default function PlantsPage() {
                     <div class="flex flex-wrap gap-1">
                       <For each={product.tags}>
                         {(tagId) => (
-                          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-cream-200 text-cream-800 dark:bg-cream-900/40 dark:text-cream-300">
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cream-200 text-cream-800 dark:bg-cream-900/40 dark:text-cream-300">
                             {getTagName(tagId)}
                           </span>
                         )}
@@ -1018,7 +1011,7 @@ export default function PlantsPage() {
 
           {/* Pagination */}
           <Show when={totalPages() > 1}>
-            <div class="bg-white dark:bg-forest-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm px-6 py-4 mt-6">
+            <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm px-6 py-4 mt-6">
               <div class="flex items-center justify-between">
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                   Showing {(currentPage() - 1) * ITEMS_PER_PAGE + 1} to{" "}
@@ -1029,7 +1022,7 @@ export default function PlantsPage() {
                   <button
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage() === 1}
-                    class="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-forest-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    class="p-2 rounded-lg border border-cream-200 dark:border-forest-700 hover:bg-cream-50 dark:hover:bg-forest-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     <ChevronLeftIcon class="w-5 h-5 text-gray-700 dark:text-gray-300" />
                   </button>
@@ -1039,8 +1032,8 @@ export default function PlantsPage() {
                         onClick={() => setCurrentPage(page)}
                         class={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
                           currentPage() === page
-                            ? "bg-forest-500 text-white"
-                            : "border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-forest-700"
+                            ? "bg-forest-600 text-white"
+                            : "border border-cream-200 dark:border-forest-700 text-gray-700 dark:text-gray-300 hover:bg-cream-50 dark:hover:bg-forest-700"
                         }`}
                       >
                         {page}
@@ -1050,7 +1043,7 @@ export default function PlantsPage() {
                   <button
                     onClick={() => setCurrentPage((p) => Math.min(totalPages(), p + 1))}
                     disabled={currentPage() === totalPages()}
-                    class="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-forest-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    class="p-2 rounded-lg border border-cream-200 dark:border-forest-700 hover:bg-cream-50 dark:hover:bg-forest-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     <ChevronRightIcon class="w-5 h-5 text-gray-700 dark:text-gray-300" />
                   </button>
