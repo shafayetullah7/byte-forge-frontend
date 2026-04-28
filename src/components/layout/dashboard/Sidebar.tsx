@@ -178,6 +178,7 @@ const ParentNavItem: Component<{
 
 export const Sidebar: Component<SidebarProps> = (props) => {
     const [expandedMap, setExpandedMap] = createSignal<Record<string, boolean>>({});
+    const [userToggled, setUserToggled] = createSignal<Record<string, boolean>>({});
     const location = useLocation();
 
     const getLinkKey = (link: NavLink): string => link.id || link.href;
@@ -195,7 +196,8 @@ export const Sidebar: Component<SidebarProps> = (props) => {
             }
         }
         const current = expandedMap();
-        const needsUpdate = Object.keys(newExpanded).some(k => !current[k]);
+        const toggled = userToggled();
+        const needsUpdate = Object.keys(newExpanded).some(k => !current[k] && !toggled[k]);
         if (needsUpdate) {
             setExpandedMap(prev => ({ ...prev, ...newExpanded }));
         }
@@ -203,6 +205,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
 
     const toggleExpand = (link: NavLink) => {
         const key = getLinkKey(link);
+        setUserToggled(prev => ({ ...prev, [key]: true }));
         setExpandedMap(prev => ({ ...prev, [key]: !prev[key] }));
     };
 

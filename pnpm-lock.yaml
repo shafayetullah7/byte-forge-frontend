@@ -13,7 +13,7 @@ importers:
         version: 5.2.8
       '@modular-forms/solid':
         specifier: ^0.25.1
-        version: 0.25.1(solid-js@1.9.10)
+        version: 0.25.1(solid-js@1.9.10)(typescript@6.0.3)
       '@solid-primitives/i18n':
         specifier: ^2.2.1
         version: 2.2.1(solid-js@1.9.10)
@@ -57,6 +57,9 @@ importers:
       tailwindcss:
         specifier: ^4.0.7
         version: 4.1.18
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
       vite-plugin-solid:
         specifier: ^2.11.12
         version: 2.11.12(@testing-library/jest-dom@6.9.1)(solid-js@1.9.10)(vite@6.4.1(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1))
@@ -2882,6 +2885,11 @@ packages:
     resolution: {integrity: sha512-VCn+LMHbd4t6sF3wfU/+HKT63C9OoyrSIf4b+vtWHpt2U7/4InZG467YDNMFMR70DdHjAdpPWmw2lzRdg0Xqqg==}
     engines: {node: '>=20'}
 
+  typescript@6.0.3:
+    resolution: {integrity: sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
   ufo@1.6.2:
     resolution: {integrity: sha512-heMioaxBcG9+Znsda5Q8sQbWnLJSl98AFDXTO80wELWEzX3hordXsTdxrIfMQoO9IY1MEnoGoPjpoKpMj+Yx0Q==}
 
@@ -3654,10 +3662,10 @@ snapshots:
       - encoding
       - supports-color
 
-  '@modular-forms/solid@0.25.1(solid-js@1.9.10)':
+  '@modular-forms/solid@0.25.1(solid-js@1.9.10)(typescript@6.0.3)':
     dependencies:
       solid-js: 1.9.10
-      valibot: 1.2.0
+      valibot: 1.2.0(typescript@6.0.3)
     transitivePeerDependencies:
       - typescript
 
@@ -6020,6 +6028,8 @@ snapshots:
     dependencies:
       tagged-tag: 1.0.0
 
+  typescript@6.0.3: {}
+
   ufo@1.6.2: {}
 
   ultrahtml@1.6.0: {}
@@ -6150,7 +6160,9 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
-  valibot@1.2.0: {}
+  valibot@1.2.0(typescript@6.0.3):
+    optionalDependencies:
+      typescript: 6.0.3
 
   vfile-message@4.0.3:
     dependencies:
