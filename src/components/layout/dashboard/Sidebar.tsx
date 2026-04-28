@@ -177,41 +177,43 @@ const ParentNavItem: Component<{
 };
 
 export const Sidebar: Component<SidebarProps> = (props) => {
-    const [expandedMap, setExpandedMap] = createSignal<Record<string, boolean>>({});
-    const [userToggled, setUserToggled] = createSignal<Record<string, boolean>>({});
+    const [manuallyCollapsed, setManuallyCollapsed] = createSignal<Record<string, boolean>>({});
     const location = useLocation();
 
     const getLinkKey = (link: NavLink): string => link.id || link.href;
 
-    createEffect(() => {
+    const autoExpanded = createMemo(() => {
         const currentPath = location.pathname;
-        const newExpanded: Record<string, boolean> = {};
+        const expanded: Record<string, boolean> = {};
         for (const link of props.config.links) {
             if (!isParentLink(link)) continue;
             for (const child of link.children!) {
                 if (currentPath.startsWith(child.href)) {
-                    newExpanded[getLinkKey(link)] = true;
+                    expanded[getLinkKey(link)] = true;
                     break;
                 }
             }
         }
-        const current = expandedMap();
-        const toggled = userToggled();
-        const needsUpdate = Object.keys(newExpanded).some(k => !current[k] && !toggled[k]);
-        if (needsUpdate) {
-            setExpandedMap(prev => ({ ...prev, ...newExpanded }));
-        }
+        return expanded;
     });
-
-    const toggleExpand = (link: NavLink) => {
-        const key = getLinkKey(link);
-        setUserToggled(prev => ({ ...prev, [key]: true }));
-        setExpandedMap(prev => ({ ...prev, [key]: !prev[key] }));
-    };
 
     const isExpanded = (link: NavLink): boolean => {
         const key = getLinkKey(link);
-        return !!expandedMap()[key];
+        return !!autoExpanded()[key] && !manuallyCollapsed()[key];
+    };
+
+    const toggleExpand = (link: NavLink) => {
+        const key = getLinkKey(link);
+        const currentlyExpanded = isExpanded(link);
+        if (currentlyExpanded) {
+            setManuallyCollapsed(prev => ({ ...prev, [key]: true }));
+        } else {
+            setManuallyCollapsed(prev => {
+                const next = { ...prev };
+                delete next[key];
+                return next;
+            });
+        }
     };
 
     return (
