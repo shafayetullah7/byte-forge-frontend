@@ -22,4 +22,7 @@ export * from "./endpoints/media.api";
 export * from "./endpoints/library.api";
 export * from "./endpoints/admin.api";
 export * from "./endpoints/seller.api";
+export * from "./endpoints/shops.api";
+export * from "./endpoints/verification.api";
+export * from "./endpoints/plants.api";
 export * from "./endpoints/user.api";

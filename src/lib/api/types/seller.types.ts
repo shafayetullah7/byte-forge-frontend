@@ -115,44 +115,116 @@ export interface ApplyAsSellerRequest {
  * Plant status constants
  */
 export const PLANT_STATUS = {
-  ACTIVE: "active",
-  INACTIVE: "inactive",
-  OUT_OF_STOCK: "out_of_stock",
+  DRAFT: "DRAFT",
+  ACTIVE: "ACTIVE",
+  ARCHIVED: "ARCHIVED",
 } as const;
 
 export type PlantStatus = (typeof PLANT_STATUS)[keyof typeof PLANT_STATUS];
 
 /**
- * Plant structure
+ * Plant product category (from list response)
  */
-export interface Plant {
+export interface PlantCategory {
   id: string;
-  shopId: string;
-  name: string;
   slug: string;
-  commonName: string | null;
-  scientificName: string | null;
-  description: string | null;
-  price: number;
-  stock: number;
+  name?: string;
+}
+
+/**
+ * Plant list item (matches backend PlantListItemResponseDto)
+ */
+export interface PlantListItem {
+  id: string;
+  slug: string;
   status: PlantStatus;
-  categoryId: string | null;
+  thumbnailId?: string;
+  name?: string;
+  shortDescription?: string;
+  price?: number;
+  salePrice?: number;
+  inventoryCount: number;
+  category?: PlantCategory;
   createdAt: string;
   updatedAt: string;
 }
 
 /**
- * Plant filter options
+ * Plant list response with pagination (matches backend paginated response)
  */
-export interface PlantFilter {
-  name?: string;
-  categoryId?: string;
-  minPrice?: number;
-  maxPrice?: number;
+export interface PlantListResponse {
+  success: boolean;
+  message: string;
+  data: PlantListItem[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 /**
- * Plant Details for Create/Update
+ * Plant filter options (matches backend ListPlantsQueryDto)
+ */
+export interface PlantFilter {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: PlantStatus;
+  categoryId?: string;
+  tagIds?: string[];
+  locale?: "en" | "bn";
+  sortBy?: "createdAt" | "updatedAt" | "name" | "price" | "inventory";
+  sortOrder?: "asc" | "desc";
+}
+
+/**
+ * Plant variant attributes (matches backend plantVariantAttributesSchema)
+ */
+export interface PlantVariantAttributesInput {
+  potSize?: string;
+  potSizeInches?: number;
+  potMaterial?: string;
+  potColor?: string;
+  potType?: string;
+  growthStage?: string;
+  plantForm?: string;
+  variegation?: string;
+  propagationType?: string;
+  containerType?: string;
+  bundleType?: string;
+}
+
+/**
+ * Plant variant input (matches backend productVariantSchema)
+ */
+export interface PlantVariantInput {
+  sku?: string;
+  price: number;
+  salePrice?: number;
+  costPrice?: number;
+  inventoryCount?: number;
+  trackInventory?: boolean;
+  lowStockThreshold?: number;
+  isBase?: boolean;
+  isActive?: boolean;
+  plantAttributes?: PlantVariantAttributesInput;
+  mediaIds?: string[];
+}
+
+/**
+ * Product translation input (matches backend productTranslationSchema)
+ */
+export interface ProductTranslationInput {
+  locale: "en" | "bn";
+  name: string;
+  description: string;
+  shortDescription?: string;
+}
+
+/**
+ * Plant details input (matches backend plantDetailsSchema)
  */
 export interface PlantDetailsInput {
   categoryId: string;
@@ -160,12 +232,12 @@ export interface PlantDetailsInput {
   scientificName?: string;
   commonNames?: string;
   origin?: string;
-  lightRequirement?: string;
-  wateringFrequency?: string;
-  humidityLevel?: string;
+  lightRequirement: string;
+  wateringFrequency: string;
+  humidityLevel: string;
   temperatureRange?: string;
   soilType?: string;
-  careDifficulty?: string;
+  careDifficulty: string;
   growthRate?: string;
   matureHeight?: string;
   matureSpread?: string;
@@ -173,68 +245,66 @@ export interface PlantDetailsInput {
 }
 
 /**
- * Create Plant Request
+ * Plant details translation input (matches backend plantDetailsTranslationSchema)
  */
-export interface CreatePlantRequest {
-  name: string;
-  slug: string;
-  thumbnailId?: string;
-  status?: string;
-  translations: Array<{
-    locale: string;
-    name: string;
-    description: string;
-    shortDescription?: string;
-  }>;
-  plantDetails: PlantDetailsInput;
-  enDetails: {
-    commonNames?: string;
-    origin?: string;
-    soilType?: string;
-    toxicityInfo?: string;
-  };
-  bnDetails: {
-    commonNames?: string;
-    origin?: string;
-    soilType?: string;
-    toxicityInfo?: string;
-  };
-  variants: Array<{
-    sku?: string;
-    price: number;
-    salePrice?: number;
-    costPrice?: number;
-    inventoryCount?: number;
-    trackInventory?: boolean;
-    lowStockThreshold?: number;
-    isBase?: boolean;
-    isActive?: boolean;
-    plantAttributes?: Record<string, string | number | boolean | null>;
-    mediaIds?: string[];
-  }>;
-  careInstructions?: Record<string, string | null>;
-  careTranslations?: Array<{
-    locale: string;
-    lightInstructions?: string;
-    wateringInstructions?: string;
-    humidityInstructions?: string;
-    fertilizerSchedule?: string;
-    repottingFrequency?: string;
-    pruningNotes?: string;
-    commonProblems?: string;
-    seasonalCare?: string;
-  }>;
+export interface PlantDetailsTranslationInput {
+  locale: "en" | "bn";
+  commonNames?: string;
+  origin?: string;
+  soilType?: string;
+  toxicityInfo?: string;
 }
 
 /**
- * Update Plant Request
+ * Care instructions input (matches backend careInstructionsSchema)
  */
-export interface UpdatePlantRequest {
-  name?: string;
+export interface CareInstructionsInput {
+  lightInstructions?: string;
+  wateringInstructions?: string;
+  humidityInstructions?: string;
+  fertilizerSchedule?: string;
+  repottingFrequency?: string;
+  pruningNotes?: string;
+  commonProblems?: string;
+  seasonalCare?: string;
+}
+
+/**
+ * Care translation input (matches backend careInstructionsTranslationSchema)
+ */
+export interface CareTranslationInput {
+  locale: "en" | "bn";
+  lightInstructions?: string;
+  wateringInstructions?: string;
+  humidityInstructions?: string;
+  fertilizerSchedule?: string;
+  repottingFrequency?: string;
+  pruningNotes?: string;
+  commonProblems?: string;
+  seasonalCare?: string;
+}
+
+/**
+ * Create plant request (matches backend CreatePlantDto)
+ */
+export interface CreatePlantRequest {
   slug?: string;
-  thumbnailId?: string;
-  status?: "active" | "inactive" | "out_of_stock";
-  plantDetails?: Partial<PlantDetailsInput>;
+  thumbnailId: string;
+  status?: PlantStatus;
+  translations: ProductTranslationInput[];
+  plantDetails: PlantDetailsInput;
+  enDetails: PlantDetailsTranslationInput;
+  bnDetails: PlantDetailsTranslationInput;
+  variants: PlantVariantInput[];
+  careInstructions?: CareInstructionsInput;
+  careTranslations?: CareTranslationInput[];
+}
+
+/**
+ * Create plant response (backend returns { id })
+ */
+export interface CreatePlantResponse {
+  id: string;
 }
 
 /**

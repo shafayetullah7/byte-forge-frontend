@@ -80,7 +80,6 @@ const PlainNavItem: Component<{
             class={baseClasses()}
             onClick={props.onClick}
             aria-current={isActive() ? "page" : undefined}
-            role="listitem"
         >
             <props.link.icon class={iconClasses()} />
             <span class="whitespace-nowrap">{props.link.label}</span>
