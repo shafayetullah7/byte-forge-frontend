@@ -20,7 +20,7 @@ export function Select(props: SelectProps) {
   return (
     <div class="space-y-2 w-full">
       <Show when={local.label}>
-        <label for={id} class="block h6">
+        <label for={id} class="block text-sm font-medium text-gray-700 dark:text-gray-300">
           {local.label}
         </label>
       </Show>

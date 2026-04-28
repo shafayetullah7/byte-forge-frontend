@@ -79,7 +79,7 @@ export function AdvancedSelect(props: AdvancedSelectProps) {
   return (
     <div class={`relative space-y-1.5 w-full ${props.class || ""}`} ref={containerRef}>
       <Show when={props.label}>
-        <label class="block h6">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
           {props.label}
         </label>
       </Show>

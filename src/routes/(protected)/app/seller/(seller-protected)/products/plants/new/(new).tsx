@@ -11,6 +11,7 @@ import { useI18n } from "~/i18n";
 import { slugify } from "~/lib/utils/slugify";
 import Button from "~/components/ui/Button";
 import { Select, type SelectOption } from "~/components/ui/Select";
+import { TagMultiSelect, type TagGroupOption } from "~/components/ui/TagMultiSelect";
 import { ImageUpload } from "~/components/ui/ImageUpload";
 import { useImageUpload } from "~/lib/hooks/useImageUpload";
 import { toaster } from "~/components/ui/Toast";
@@ -41,6 +42,8 @@ interface VariantStore {
   lowStockThreshold: number | "";
   isBase: boolean;
   isActive: boolean;
+  // Variant images
+  mediaIds: string[];
   // Plant attributes
   potSize: string;
   potSizeInches: number | "";
@@ -60,44 +63,39 @@ interface FormErrors {
 }
 
 // ========================
-// Static Options
+// Static Options (matching backend enum values)
 // ========================
 
 const LIGHT_OPTIONS: SelectOption[] = [
-  { value: "low-light", label: "Low Light" },
-  { value: "bright-indirect", label: "Bright Indirect" },
-  { value: "direct-sun", label: "Direct Sun" },
-  { value: "partial-sun", label: "Partial Sun" },
-  { value: "full-shade", label: "Full Shade" },
+  { value: "low", label: "Low Light (shady corners, indirect light)" },
+  { value: "medium", label: "Medium Light (bright room, no direct sun)" },
+  { value: "bright_indirect", label: "Bright Indirect (near window, filtered light)" },
+  { value: "direct", label: "Direct Sun (full sunlight, windowsill)" },
 ];
 
 const WATERING_OPTIONS: SelectOption[] = [
-  { value: "rarely", label: "Rarely (every 2-3 weeks)" },
-  { value: "moderate", label: "Moderate (weekly)" },
-  { value: "frequent", label: "Frequent (2-3x/week)" },
   { value: "daily", label: "Daily" },
-  { value: "keep-moist", label: "Keep consistently moist" },
-  { value: "allow-dry", label: "Allow soil to dry" },
+  { value: "weekly", label: "Weekly" },
+  { value: "bi_weekly", label: "Every 2 Weeks" },
+  { value: "monthly", label: "Monthly" },
 ];
 
 const HUMIDITY_OPTIONS: SelectOption[] = [
-  { value: "low", label: "Low (20-40%)" },
-  { value: "moderate", label: "Moderate (40-60%)" },
-  { value: "high", label: "High (60-80%)" },
-  { value: "very-high", label: "Very High (80%+)" },
+  { value: "low", label: "Low (normal room humidity)" },
+  { value: "medium", label: "Moderate (slightly humid)" },
+  { value: "high", label: "High (bathroom/misting recommended)" },
 ];
 
 const CARE_DIFFICULTY_OPTIONS: SelectOption[] = [
-  { value: "easy", label: "Easy - Beginner Friendly" },
-  { value: "moderate", label: "Moderate - Some Experience" },
-  { value: "difficult", label: "Difficult - Expert Level" },
+  { value: "beginner", label: "Beginner (hard to kill)" },
+  { value: "intermediate", label: "Intermediate (some experience needed)" },
+  { value: "expert", label: "Expert (finicky, specific conditions)" },
 ];
 
 const GROWTH_RATE_OPTIONS: SelectOption[] = [
   { value: "slow", label: "Slow" },
   { value: "moderate", label: "Moderate" },
   { value: "fast", label: "Fast" },
-  { value: "variable", label: "Variable" },
 ];
 
 const GROWTH_STAGE_OPTIONS: SelectOption[] = [
@@ -111,6 +109,17 @@ const STATUS_OPTIONS: SelectOption[] = [
   { value: "DRAFT", label: "Draft" },
   { value: "ACTIVE", label: "Active" },
   { value: "ARCHIVED", label: "Archived" },
+];
+
+// Placeholder category options (will be replaced with API data)
+const CATEGORY_OPTIONS: SelectOption[] = [
+  { value: "", label: "Loading categories..." },
+  // TODO: Replace with actual API call to fetch categories
+];
+
+// Placeholder tag groups (will be replaced with API data)
+const TAG_GROUPS: TagGroupOption[] = [
+  // TODO: Replace with actual API call to fetch tags
 ];
 
 // ========================
@@ -128,6 +137,7 @@ function createEmptyVariant(): VariantStore {
     lowStockThreshold: "",
     isBase: false,
     isActive: true,
+    mediaIds: [],
     potSize: "",
     potSizeInches: "",
     potMaterial: "",
@@ -372,6 +382,62 @@ function CheckboxField(props: {
 }
 
 // ========================
+// Variant Image Upload Component
+// ========================
+
+function VariantImageUpload(props: {
+  variantIndex: number;
+  mediaIds: string[];
+  onAdd: (mediaId: string) => void;
+  onRemove: (index: number) => void;
+}) {
+  const imageUpload = useImageUpload({ maxSizeMB: 5 });
+
+  return (
+    <div>
+      <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        Variant Images ({props.mediaIds.length}/10)
+      </p>
+      <Show when={props.mediaIds.length > 0}>
+        <div class="flex flex-wrap gap-2 mb-2">
+          <For each={props.mediaIds}>
+            {(mediaId, idx) => (
+              <div class="relative w-16 h-16 rounded-lg overflow-hidden border border-cream-200 dark:border-forest-600">
+                {/* TODO: Show actual image preview from mediaId */}
+                <div class="w-full h-full bg-cream-100 dark:bg-forest-700 flex items-center justify-center text-xs text-gray-400">
+                  IMG {idx() + 1}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => props.onRemove(idx())}
+                  class="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+          </For>
+        </div>
+      </Show>
+      <Show when={props.mediaIds.length < 10}>
+        <ImageUpload
+          preview={imageUpload.preview()}
+          isUploading={imageUpload.isUploading()}
+          isDeleting={imageUpload.isDeleting()}
+          onFileSelect={(file) => {
+            imageUpload.upload(file);
+            // TODO: Get mediaId from upload response and add to variant
+          }}
+          onDelete={() => imageUpload.deleteMedia()}
+          label=""
+          description="Click to add image (JPEG, PNG, WEBP, GIF - max 5MB)"
+        />
+      </Show>
+    </div>
+  );
+}
+
+// ========================
 // Main Page
 // ========================
 
@@ -415,22 +481,19 @@ export default function NewPlantPage() {
   // Plant Details
   const [plantDetails, setPlantDetails] = createStore({
     categoryId: "",
+    tagIds: [] as string[],
     scientificName: "",
-    commonNames: "",
-    origin: "",
     lightRequirement: "",
     wateringFrequency: "",
     humidityLevel: "",
     temperatureRange: "",
-    soilType: "",
     careDifficulty: "",
     growthRate: "",
     matureHeight: "",
     matureSpread: "",
-    toxicityInfo: "",
   });
 
-  // EN/BN Plant Details Translations
+  // EN/BN Plant Details Translations (common names, origin, soil, toxicity)
   const [enDetails, setEnDetails] = createStore({
     commonNames: "",
     origin: "",
@@ -455,6 +518,17 @@ export default function NewPlantPage() {
   function removeVariant(index: number) {
     if (variants.length <= 1) return;
     setVariants((v) => v.filter((_, i) => i !== index));
+  }
+
+  // Tag toggle
+  function toggleTag(tagId: string) {
+    const current = [...plantDetails.tagIds];
+    const idx = current.indexOf(tagId);
+    if (idx >= 0) {
+      setPlantDetails("tagIds", current.filter((id) => id !== tagId));
+    } else if (current.length < 20) {
+      setPlantDetails("tagIds", [...current, tagId]);
+    }
   }
 
   // Care Instructions
@@ -489,35 +563,42 @@ export default function NewPlantPage() {
     // Translations - English
     if (!translations.en.name.trim()) {
       newErrors["en.name"] = t("seller.products.newPlant.nameRequired");
-    } else if (translations.en.name.length > 200) {
+    } else if (translations.en.name.length > 255) {
       newErrors["en.name"] = t("seller.products.newPlant.nameTooLong");
     }
-    if (!translations.en.shortDescription.trim()) {
-      newErrors["en.shortDescription"] = t("seller.products.newPlant.shortDescriptionRequired");
-    } else if (translations.en.shortDescription.length > 150) {
+    // Short description is optional, but if provided max 500
+    if (translations.en.shortDescription.length > 500) {
       newErrors["en.shortDescription"] = t("seller.products.newPlant.shortDescriptionTooLong");
     }
     if (!translations.en.description.trim()) {
       newErrors["en.description"] = t("seller.products.newPlant.descriptionRequired");
-    } else if (translations.en.description.length < 20) {
+    } else if (translations.en.description.length < 50) {
       newErrors["en.description"] = t("seller.products.newPlant.descriptionTooShort");
     }
 
     // Translations - Bengali
     if (!translations.bn.name.trim()) {
       newErrors["bn.name"] = t("seller.products.newPlant.nameRequired");
-    } else if (translations.bn.name.length > 200) {
+    } else if (translations.bn.name.length > 255) {
       newErrors["bn.name"] = t("seller.products.newPlant.nameTooLong");
     }
-    if (!translations.bn.shortDescription.trim()) {
-      newErrors["bn.shortDescription"] = t("seller.products.newPlant.shortDescriptionRequired");
-    } else if (translations.bn.shortDescription.length > 150) {
+    if (translations.bn.shortDescription.length > 500) {
       newErrors["bn.shortDescription"] = t("seller.products.newPlant.shortDescriptionTooLong");
     }
     if (!translations.bn.description.trim()) {
       newErrors["bn.description"] = t("seller.products.newPlant.descriptionRequired");
-    } else if (translations.bn.description.length < 20) {
+    } else if (translations.bn.description.length < 50) {
       newErrors["bn.description"] = t("seller.products.newPlant.descriptionTooShort");
+    }
+
+    // Slug validation (if provided)
+    const currentSlug = slug().trim();
+    if (currentSlug) {
+      if (currentSlug.length < 3) {
+        newErrors.slug = t("seller.products.newPlant.slugTooShort");
+      } else if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(currentSlug)) {
+        newErrors.slug = t("seller.products.newPlant.slugInvalid");
+      }
     }
 
     // Plant details
@@ -542,11 +623,17 @@ export default function NewPlantPage() {
       newErrors.variants = t("seller.products.newPlant.atLeastOneVariant");
     }
 
+    let baseCount = 0;
     variants.forEach((v, i) => {
+      if (v.isBase) baseCount++;
       if (v.price === "" || v.price <= 0) {
         newErrors[`variants.${i}.price`] = t("seller.products.newPlant.priceRequired");
       }
     });
+
+    if (variants.length > 1 && baseCount !== 1) {
+      newErrors.baseVariant = t("seller.products.newPlant.exactlyOneBase");
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -564,7 +651,6 @@ export default function NewPlantPage() {
     setIsSubmitting(true);
 
     try {
-      // Build the payload matching CreatePlantRequest
       const payload = {
         slug: slug().trim() || undefined,
         thumbnailId: thumbnailUpload.mediaId()!,
@@ -573,31 +659,28 @@ export default function NewPlantPage() {
           {
             locale: "en" as const,
             name: translations.en.name.trim(),
-            shortDescription: translations.en.shortDescription.trim(),
+            shortDescription: translations.en.shortDescription.trim() || undefined,
             description: translations.en.description.trim(),
           },
           {
             locale: "bn" as const,
             name: translations.bn.name.trim(),
-            shortDescription: translations.bn.shortDescription.trim(),
+            shortDescription: translations.bn.shortDescription.trim() || undefined,
             description: translations.bn.description.trim(),
           },
         ],
         plantDetails: {
           categoryId: plantDetails.categoryId.trim(),
+          tagIds: plantDetails.tagIds.length > 0 ? plantDetails.tagIds : undefined,
           scientificName: plantDetails.scientificName.trim() || undefined,
-          commonNames: plantDetails.commonNames.trim() || undefined,
-          origin: plantDetails.origin.trim() || undefined,
           lightRequirement: plantDetails.lightRequirement,
           wateringFrequency: plantDetails.wateringFrequency,
           humidityLevel: plantDetails.humidityLevel,
           temperatureRange: plantDetails.temperatureRange.trim() || undefined,
-          soilType: plantDetails.soilType.trim() || undefined,
           careDifficulty: plantDetails.careDifficulty,
           growthRate: plantDetails.growthRate || undefined,
           matureHeight: plantDetails.matureHeight.trim() || undefined,
           matureSpread: plantDetails.matureSpread.trim() || undefined,
-          toxicityInfo: plantDetails.toxicityInfo.trim() || undefined,
         },
         enDetails: {
           locale: "en" as const,
@@ -623,6 +706,7 @@ export default function NewPlantPage() {
           lowStockThreshold: typeof v.lowStockThreshold === "number" ? v.lowStockThreshold : undefined,
           isBase: v.isBase,
           isActive: v.isActive,
+          mediaIds: v.mediaIds.length > 0 ? v.mediaIds : undefined,
           plantAttributes: {
             potSize: v.potSize.trim() || undefined,
             potSizeInches: typeof v.potSizeInches === "number" ? v.potSizeInches : undefined,
@@ -674,20 +758,19 @@ export default function NewPlantPage() {
         setTranslations("bn", { name: "", shortDescription: "", description: "" });
         setPlantDetails({
           categoryId: "",
+          tagIds: [],
           scientificName: "",
-          commonNames: "",
-          origin: "",
           lightRequirement: "",
           wateringFrequency: "",
           humidityLevel: "",
           temperatureRange: "",
-          soilType: "",
           careDifficulty: "",
           growthRate: "",
           matureHeight: "",
           matureSpread: "",
-          toxicityInfo: "",
         });
+        setEnDetails({ commonNames: "", origin: "", soilType: "", toxicityInfo: "" });
+        setBnDetails({ commonNames: "", origin: "", soilType: "", toxicityInfo: "" });
         setVariants([createEmptyVariant()]);
         thumbnailUpload.clear();
         setSlug("");
@@ -705,13 +788,13 @@ export default function NewPlantPage() {
   const hasEnglishContent = createMemo(
     () =>
       translations.en.name.trim().length > 0 &&
-      translations.en.description.trim().length > 0
+      translations.en.description.trim().length >= 50
   );
 
   const hasBengaliContent = createMemo(
     () =>
       translations.bn.name.trim().length > 0 &&
-      translations.bn.description.trim().length > 0
+      translations.bn.description.trim().length >= 50
   );
 
   return (
@@ -763,11 +846,11 @@ export default function NewPlantPage() {
         class="space-y-6"
         noValidate
       >
-        {/* Section 1: Basic Info (Thumbnail + Status + Slug) */}
+        {/* Section 1: Identity & Photos */}
         <SectionCard
           icon={PackageIcon}
-          title={t("seller.products.newPlant.basicInfo")}
-          description={t("seller.products.newPlant.basicInfoDesc")}
+          title={t("seller.products.newPlant.identitySection")}
+          description={t("seller.products.newPlant.identitySectionDesc")}
         >
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Thumbnail Upload */}
@@ -818,19 +901,29 @@ export default function NewPlantPage() {
                       setIsSlugManual(true);
                     }}
                     placeholder="monstera-deliciosa"
-                    class="flex-1 min-w-0 block w-full px-3 py-2 rounded-r-lg border border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-forest-500 focus:border-transparent text-sm"
+                    class={`flex-1 min-w-0 block w-full px-3 py-2 rounded-r-lg border border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-forest-500 focus:border-transparent text-sm ${
+                      errors()["slug"] ? "border-red-500 dark:border-red-400" : ""
+                    }`}
                   />
                 </div>
+                <Show when={errors()["slug"]}>
+                  <p class="mt-1 text-xs text-red-600 dark:text-red-400 font-medium">
+                    {errors()["slug"]}
+                  </p>
+                </Show>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  {t("seller.products.newPlant.slugHint")}
+                </p>
               </div>
             </div>
           </div>
         </SectionCard>
 
-        {/* Section 2: Bilingual Translations */}
+        {/* Section 2: Bilingual Names & Descriptions */}
         <SectionCard
           icon={BoltIcon}
-          title={t("seller.products.newPlant.detailsEn")}
-          description={t("seller.products.newPlant.detailsEnDesc")}
+          title={t("seller.products.newPlant.namesAndDescriptions")}
+          description={t("seller.products.newPlant.namesAndDescriptionsDesc")}
         >
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* English Column */}
@@ -855,25 +948,26 @@ export default function NewPlantPage() {
                 value={translations.en.name}
                 onInput={(v) => setTranslations("en", "name", v)}
                 error={errors()["en.name"]}
-                maxLen={200}
+                maxLen={255}
+                hint={t("seller.products.newPlant.plantNameHint")}
               />
 
               <InputField
                 id="en-short-desc"
-                label={t("seller.products.newPlant.shortDescriptionLabel")}
-                required
-                placeholder={t("seller.products.newPlant.shortDescriptionPlaceholder")}
+                label={t("seller.products.newPlant.shortSummaryLabel")}
+                placeholder={t("seller.products.newPlant.shortSummaryPlaceholder")}
                 value={translations.en.shortDescription}
                 onInput={(v) => setTranslations("en", "shortDescription", v)}
                 error={errors()["en.shortDescription"]}
-                maxLen={150}
+                maxLen={500}
                 textarea
                 rows={2}
+                hint={t("seller.products.newPlant.shortSummaryHint")}
               />
 
               <InputField
                 id="en-description"
-                label={t("seller.products.newPlant.descriptionLabel")}
+                label={t("seller.products.newPlant.detailedDescriptionLabel")}
                 required
                 placeholder={t("seller.products.newPlant.descriptionPlaceholder")}
                 value={translations.en.description}
@@ -881,6 +975,7 @@ export default function NewPlantPage() {
                 error={errors()["en.description"]}
                 textarea
                 rows={5}
+                hint={t("seller.products.newPlant.descriptionHint")}
               />
             </div>
 
@@ -907,26 +1002,27 @@ export default function NewPlantPage() {
                 onInput={(v) => setTranslations("bn", "name", v)}
                 error={errors()["bn.name"]}
                 dir="auto"
-                maxLen={200}
+                maxLen={255}
+                hint={t("seller.products.newPlant.plantNameHint")}
               />
 
               <InputField
                 id="bn-short-desc"
-                label={t("seller.products.newPlant.shortDescriptionLabel")}
-                required
-                placeholder={t("seller.products.newPlant.shortDescriptionBnPlaceholder")}
+                label={t("seller.products.newPlant.shortSummaryLabel")}
+                placeholder={t("seller.products.newPlant.shortSummaryBnPlaceholder")}
                 value={translations.bn.shortDescription}
                 onInput={(v) => setTranslations("bn", "shortDescription", v)}
                 error={errors()["bn.shortDescription"]}
                 dir="auto"
-                maxLen={150}
+                maxLen={500}
                 textarea
                 rows={2}
+                hint={t("seller.products.newPlant.shortSummaryHint")}
               />
 
               <InputField
                 id="bn-description"
-                label={t("seller.products.newPlant.descriptionLabel")}
+                label={t("seller.products.newPlant.detailedDescriptionLabel")}
                 required
                 placeholder={t("seller.products.newPlant.descriptionBnPlaceholder")}
                 value={translations.bn.description}
@@ -935,204 +1031,211 @@ export default function NewPlantPage() {
                 dir="auto"
                 textarea
                 rows={5}
+                hint={t("seller.products.newPlant.descriptionHint")}
               />
             </div>
           </div>
         </SectionCard>
 
-        {/* Section 3: Plant Details */}
+        {/* Section 3: Plant Characteristics */}
         <SectionCard
           icon={SunIcon}
-          title={t("seller.products.newPlant.plantDetails")}
-          description={t("seller.products.newPlant.plantDetailsDesc")}
+          title={t("seller.products.newPlant.characteristics")}
+          description={t("seller.products.newPlant.characteristicsDesc")}
           collapsible
         >
           <div class="space-y-6">
-            {/* Required fields row */}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Category & Tags */}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Select
                 label={t("seller.products.newPlant.categoryLabel")}
-                options={[]}
+                options={CATEGORY_OPTIONS}
                 value={plantDetails.categoryId}
                 onChange={(e) => setPlantDetails("categoryId", e.currentTarget.value)}
                 placeholder={t("seller.products.newPlant.categoryPlaceholder")}
                 error={errors()["categoryId"]}
               />
-              <Select
-                label={t("seller.products.newPlant.lightRequirementLabel")}
-                options={LIGHT_OPTIONS}
-                value={plantDetails.lightRequirement}
-                onChange={(e) => setPlantDetails("lightRequirement", e.currentTarget.value)}
-                placeholder={t("seller.products.newPlant.lightRequirementPlaceholder")}
-                error={errors()["lightRequirement"]}
-              />
-              <Select
-                label={t("seller.products.newPlant.wateringFrequencyLabel")}
-                options={WATERING_OPTIONS}
-                value={plantDetails.wateringFrequency}
-                onChange={(e) => setPlantDetails("wateringFrequency", e.currentTarget.value)}
-                placeholder={t("seller.products.newPlant.wateringFrequencyPlaceholder")}
-                error={errors()["wateringFrequency"]}
-              />
-              <Select
-                label={t("seller.products.newPlant.humidityLevelLabel")}
-                options={HUMIDITY_OPTIONS}
-                value={plantDetails.humidityLevel}
-                onChange={(e) => setPlantDetails("humidityLevel", e.currentTarget.value)}
-                placeholder={t("seller.products.newPlant.humidityLevelPlaceholder")}
-                error={errors()["humidityLevel"]}
-              />
-              <Select
-                label={t("seller.products.newPlant.careDifficultyLabel")}
-                options={CARE_DIFFICULTY_OPTIONS}
-                value={plantDetails.careDifficulty}
-                onChange={(e) => setPlantDetails("careDifficulty", e.currentTarget.value)}
-                placeholder={t("seller.products.newPlant.careDifficultyPlaceholder")}
-                error={errors()["careDifficulty"]}
-              />
-              <Select
-                label={t("seller.products.newPlant.growthRateLabel")}
-                options={GROWTH_RATE_OPTIONS}
-                value={plantDetails.growthRate}
-                onChange={(e) => setPlantDetails("growthRate", e.currentTarget.value)}
-                placeholder={t("seller.products.newPlant.growthRatePlaceholder")}
-              />
+              <div>
+                <p class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  {t("seller.products.newPlant.tagsLabel")}
+                  <span class="text-gray-400 ml-1">({t("common.optional")})</span>
+                </p>
+                <TagMultiSelect
+                  selectedTags={plantDetails.tagIds}
+                  onToggle={toggleTag}
+                  groups={TAG_GROUPS}
+                  placeholder={t("seller.products.newPlant.tagsPlaceholder")}
+                />
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  {t("seller.products.newPlant.tagsHint")}
+                </p>
+              </div>
+            </div>
+
+            {/* Required care fields */}
+            <div class="border-t border-cream-200 dark:border-forest-700 pt-4">
+              <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                {t("seller.products.newPlant.careRequirements")}
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Select
+                  label={t("seller.products.newPlant.lightRequirementLabel")}
+                  options={LIGHT_OPTIONS}
+                  value={plantDetails.lightRequirement}
+                  onChange={(e) => setPlantDetails("lightRequirement", e.currentTarget.value)}
+                  placeholder={t("seller.products.newPlant.lightRequirementPlaceholder")}
+                  error={errors()["lightRequirement"]}
+                />
+                <Select
+                  label={t("seller.products.newPlant.wateringFrequencyLabel")}
+                  options={WATERING_OPTIONS}
+                  value={plantDetails.wateringFrequency}
+                  onChange={(e) => setPlantDetails("wateringFrequency", e.currentTarget.value)}
+                  placeholder={t("seller.products.newPlant.wateringFrequencyPlaceholder")}
+                  error={errors()["wateringFrequency"]}
+                />
+                <Select
+                  label={t("seller.products.newPlant.humidityLevelLabel")}
+                  options={HUMIDITY_OPTIONS}
+                  value={plantDetails.humidityLevel}
+                  onChange={(e) => setPlantDetails("humidityLevel", e.currentTarget.value)}
+                  placeholder={t("seller.products.newPlant.humidityLevelPlaceholder")}
+                  error={errors()["humidityLevel"]}
+                />
+                <Select
+                  label={t("seller.products.newPlant.careDifficultyLabel")}
+                  options={CARE_DIFFICULTY_OPTIONS}
+                  value={plantDetails.careDifficulty}
+                  onChange={(e) => setPlantDetails("careDifficulty", e.currentTarget.value)}
+                  placeholder={t("seller.products.newPlant.careDifficultyPlaceholder")}
+                  error={errors()["careDifficulty"]}
+                />
+                <Select
+                  label={t("seller.products.newPlant.growthRateLabel")}
+                  options={GROWTH_RATE_OPTIONS}
+                  value={plantDetails.growthRate}
+                  onChange={(e) => setPlantDetails("growthRate", e.currentTarget.value)}
+                  placeholder={t("seller.products.newPlant.growthRatePlaceholder")}
+                />
+              </div>
             </div>
 
             {/* Botanical info */}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <InputField
-                id="scientific-name"
-                label={t("seller.products.newPlant.scientificNameLabel")}
-                placeholder={t("seller.products.newPlant.scientificNamePlaceholder")}
-                value={plantDetails.scientificName}
-                onInput={(v) => setPlantDetails("scientificName", v)}
-              />
-              <InputField
-                id="common-names"
-                label={t("seller.products.newPlant.commonNamesLabel")}
-                placeholder={t("seller.products.newPlant.commonNamesPlaceholder")}
-                value={plantDetails.commonNames}
-                onInput={(v) => setPlantDetails("commonNames", v)}
-              />
-              <InputField
-                id="origin"
-                label={t("seller.products.newPlant.originLabel")}
-                placeholder={t("seller.products.newPlant.originPlaceholder")}
-                value={plantDetails.origin}
-                onInput={(v) => setPlantDetails("origin", v)}
-              />
-              <InputField
-                id="temperature-range"
-                label={t("seller.products.newPlant.temperatureRangeLabel")}
-                placeholder={t("seller.products.newPlant.temperatureRangePlaceholder")}
-                value={plantDetails.temperatureRange}
-                onInput={(v) => setPlantDetails("temperatureRange", v)}
-              />
-              <InputField
-                id="soil-type"
-                label={t("seller.products.newPlant.soilTypeLabel")}
-                placeholder={t("seller.products.newPlant.soilTypePlaceholder")}
-                value={plantDetails.soilType}
-                onInput={(v) => setPlantDetails("soilType", v)}
-              />
-              <InputField
-                id="toxicity-info"
-                label={t("seller.products.newPlant.toxicityInfoLabel")}
-                placeholder={t("seller.products.newPlant.toxicityInfoPlaceholder")}
-                value={plantDetails.toxicityInfo}
-                onInput={(v) => setPlantDetails("toxicityInfo", v)}
-              />
-              <InputField
-                id="mature-height"
-                label={t("seller.products.newPlant.matureHeightLabel")}
-                placeholder={t("seller.products.newPlant.matureHeightPlaceholder")}
-                value={plantDetails.matureHeight}
-                onInput={(v) => setPlantDetails("matureHeight", v)}
-              />
-              <InputField
-                id="mature-spread"
-                label={t("seller.products.newPlant.matureSpreadLabel")}
-                placeholder={t("seller.products.newPlant.matureSpreadPlaceholder")}
-                value={plantDetails.matureSpread}
-                onInput={(v) => setPlantDetails("matureSpread", v)}
-              />
+            <div class="border-t border-cream-200 dark:border-forest-700 pt-4">
+              <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                {t("seller.products.newPlant.botanicalInfo")}
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InputField
+                  id="scientific-name"
+                  label={t("seller.products.newPlant.scientificNameLabel")}
+                  placeholder={t("seller.products.newPlant.scientificNamePlaceholder")}
+                  value={plantDetails.scientificName}
+                  onInput={(v) => setPlantDetails("scientificName", v)}
+                  hint={t("seller.products.newPlant.scientificNameHint")}
+                />
+                <InputField
+                  id="temperature-range"
+                  label={t("seller.products.newPlant.temperatureRangeLabel")}
+                  placeholder={t("seller.products.newPlant.temperatureRangePlaceholder")}
+                  value={plantDetails.temperatureRange}
+                  onInput={(v) => setPlantDetails("temperatureRange", v)}
+                  hint={t("seller.products.newPlant.temperatureRangeHint")}
+                />
+                <InputField
+                  id="mature-height"
+                  label={t("seller.products.newPlant.matureHeightLabel")}
+                  placeholder={t("seller.products.newPlant.matureHeightPlaceholder")}
+                  value={plantDetails.matureHeight}
+                  onInput={(v) => setPlantDetails("matureHeight", v)}
+                  hint={t("seller.products.newPlant.matureHeightHint")}
+                />
+                <InputField
+                  id="mature-spread"
+                  label={t("seller.products.newPlant.matureSpreadLabel")}
+                  placeholder={t("seller.products.newPlant.matureSpreadPlaceholder")}
+                  value={plantDetails.matureSpread}
+                  onInput={(v) => setPlantDetails("matureSpread", v)}
+                  hint={t("seller.products.newPlant.matureSpreadHint")}
+                />
+              </div>
             </div>
 
             {/* EN/BN Plant Details Translations */}
-            <div class="border-t border-cream-200 dark:border-forest-700 pt-6">
+            <div class="border-t border-cream-200 dark:border-forest-700 pt-4">
               <h4 class="text-sm font-semibold text-forest-800 dark:text-cream-50 mb-4">
-                Localized Details (Common Names, Origin, Soil, Toxicity)
+                {t("seller.products.newPlant.localizedDetails")}
               </h4>
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* EN Details */}
                 <div class="space-y-3">
-                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                  <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     English
                   </p>
                   <InputField
                     id="en-common-names"
-                    label="Common Names"
-                    placeholder="Localized common names in English"
+                    label={t("seller.products.newPlant.commonNamesLabel")}
+                    placeholder={t("seller.products.newPlant.commonNamesPlaceholder")}
                     value={enDetails.commonNames}
                     onInput={(v) => setEnDetails("commonNames", v)}
                   />
                   <InputField
                     id="en-origin"
-                    label="Origin"
-                    placeholder="Localized origin in English"
+                    label={t("seller.products.newPlant.originLabel")}
+                    placeholder={t("seller.products.newPlant.originPlaceholder")}
                     value={enDetails.origin}
                     onInput={(v) => setEnDetails("origin", v)}
                   />
                   <InputField
                     id="en-soil-type"
-                    label="Soil Type"
-                    placeholder="Localized soil type in English"
+                    label={t("seller.products.newPlant.soilTypeLabel")}
+                    placeholder={t("seller.products.newPlant.soilTypePlaceholder")}
                     value={enDetails.soilType}
                     onInput={(v) => setEnDetails("soilType", v)}
                   />
                   <InputField
                     id="en-toxicity"
-                    label="Toxicity Info"
-                    placeholder="Localized toxicity in English"
+                    label={t("seller.products.newPlant.toxicityInfoLabel")}
+                    placeholder={t("seller.products.newPlant.toxicityInfoPlaceholder")}
                     value={enDetails.toxicityInfo}
                     onInput={(v) => setEnDetails("toxicityInfo", v)}
+                    hint={t("seller.products.newPlant.toxicityInfoHint")}
                   />
                 </div>
 
                 {/* BN Details */}
                 <div class="space-y-3">
-                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                  <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     বাংলা
                   </p>
                   <InputField
                     id="bn-common-names"
-                    label="সাধারণ নাম"
-                    placeholder="বাংলায় সাধারণ নাম"
+                    label={t("seller.products.newPlant.commonNamesLabel")}
+                    placeholder={t("seller.products.newPlant.commonNamesBnPlaceholder")}
                     value={bnDetails.commonNames}
                     onInput={(v) => setBnDetails("commonNames", v)}
                     dir="auto"
                   />
                   <InputField
                     id="bn-origin"
-                    label="উৎপত্তি"
-                    placeholder="বাংলায় উৎপত্তি"
+                    label={t("seller.products.newPlant.originLabel")}
+                    placeholder={t("seller.products.newPlant.originBnPlaceholder")}
                     value={bnDetails.origin}
                     onInput={(v) => setBnDetails("origin", v)}
                     dir="auto"
                   />
                   <InputField
                     id="bn-soil-type"
-                    label="মাটির ধরন"
-                    placeholder="বাংলায় মাটির ধরন"
+                    label={t("seller.products.newPlant.soilTypeLabel")}
+                    placeholder={t("seller.products.newPlant.soilTypeBnPlaceholder")}
                     value={bnDetails.soilType}
                     onInput={(v) => setBnDetails("soilType", v)}
                     dir="auto"
                   />
                   <InputField
                     id="bn-toxicity"
-                    label="বিষাক্ততা তথ্য"
-                    placeholder="বাংলায় বিষাক্ততা"
+                    label={t("seller.products.newPlant.toxicityInfoLabel")}
+                    placeholder={t("seller.products.newPlant.toxicityInfoBnPlaceholder")}
                     value={bnDetails.toxicityInfo}
                     onInput={(v) => setBnDetails("toxicityInfo", v)}
                     dir="auto"
@@ -1143,7 +1246,7 @@ export default function NewPlantPage() {
           </div>
         </SectionCard>
 
-        {/* Section 4: Variants */}
+        {/* Section 4: Pricing & Variants */}
         <SectionCard
           icon={BoltIcon}
           title={t("seller.products.newPlant.variants")}
@@ -1154,6 +1257,11 @@ export default function NewPlantPage() {
             <Show when={errors()["variants"]}>
               <p class="text-sm text-red-600 dark:text-red-400 font-medium">
                 {errors()["variants"]}
+              </p>
+            </Show>
+            <Show when={errors()["baseVariant"]}>
+              <p class="text-sm text-red-600 dark:text-red-400 font-medium">
+                {errors()["baseVariant"]}
               </p>
             </Show>
 
@@ -1231,6 +1339,14 @@ export default function NewPlantPage() {
                       onInput={(v) => setVariants(index(), "sku", v)}
                     />
 
+                    {/* Variant images */}
+                    <VariantImageUpload
+                      variantIndex={index()}
+                      mediaIds={variant.mediaIds}
+                      onAdd={(mediaId) => setVariants(index(), "mediaIds", [...variant.mediaIds, mediaId])}
+                      onRemove={(idx) => setVariants(index(), "mediaIds", variant.mediaIds.filter((_, i) => i !== idx))}
+                    />
+
                     {/* Checkboxes */}
                     <div class="flex flex-wrap gap-6">
                       <CheckboxField
@@ -1265,7 +1381,7 @@ export default function NewPlantPage() {
                       />
                     </Show>
 
-                    {/* Plant Attributes */}
+                    {/* Plant Attributes (collapsible) */}
                     <div class="border-t border-cream-200 dark:border-forest-700 pt-4">
                       <h5 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                         {t("seller.products.newPlant.plantAttributes")}
@@ -1284,7 +1400,7 @@ export default function NewPlantPage() {
                           placeholder={t("seller.products.newPlant.potSizeInchesPlaceholder")}
                           value={variant.potSizeInches}
                           onInput={(v) => setVariants(index(), "potSizeInches", v)}
-                          min={0}
+                          min={0.5}
                         />
                         <InputField
                           id={`variant-${index()}-pot-material`}
@@ -1367,7 +1483,7 @@ export default function NewPlantPage() {
           </div>
         </SectionCard>
 
-        {/* Section 5: Care Instructions */}
+        {/* Section 5: Care Guide (Optional) */}
         <SectionCard
           icon={ClipboardListIcon}
           title={t("seller.products.newPlant.careInstructions")}
@@ -1455,18 +1571,18 @@ export default function NewPlantPage() {
             {/* Care Translations */}
             <div class="border-t border-cream-200 dark:border-forest-700 pt-6">
               <h4 class="text-sm font-semibold text-forest-800 dark:text-cream-50 mb-4">
-                Care Instructions Translations
+                {t("seller.products.newPlant.careTranslationsTitle")}
               </h4>
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* EN Care */}
                 <div class="space-y-3">
-                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                  <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     English Care
                   </p>
                   <InputField
                     id="care-en-light"
-                    label="Light Instructions"
-                    placeholder="EN care instructions for light..."
+                    label={t("seller.products.newPlant.lightInstructionsLabel")}
+                    placeholder={t("seller.products.newPlant.lightInstructionsPlaceholder")}
                     value={careTranslations.en.lightInstructions}
                     onInput={(v) => setCareTranslations("en", "lightInstructions", v)}
                     textarea
@@ -1474,8 +1590,8 @@ export default function NewPlantPage() {
                   />
                   <InputField
                     id="care-en-watering"
-                    label="Watering Instructions"
-                    placeholder="EN care instructions for watering..."
+                    label={t("seller.products.newPlant.wateringInstructionsLabel")}
+                    placeholder={t("seller.products.newPlant.wateringInstructionsPlaceholder")}
                     value={careTranslations.en.wateringInstructions}
                     onInput={(v) => setCareTranslations("en", "wateringInstructions", v)}
                     textarea
@@ -1483,8 +1599,8 @@ export default function NewPlantPage() {
                   />
                   <InputField
                     id="care-en-humidity"
-                    label="Humidity Instructions"
-                    placeholder="EN care instructions for humidity..."
+                    label={t("seller.products.newPlant.humidityInstructionsLabel")}
+                    placeholder={t("seller.products.newPlant.humidityInstructionsPlaceholder")}
                     value={careTranslations.en.humidityInstructions}
                     onInput={(v) => setCareTranslations("en", "humidityInstructions", v)}
                     textarea
@@ -1494,13 +1610,13 @@ export default function NewPlantPage() {
 
                 {/* BN Care */}
                 <div class="space-y-3">
-                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                  <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     বাংলা যত্ন
                   </p>
                   <InputField
                     id="care-bn-light"
-                    label="আলো নির্দেশনা"
-                    placeholder="বাংলায় আলো যত্ন নির্দেশনা..."
+                    label={t("seller.products.newPlant.lightInstructionsLabel")}
+                    placeholder={t("seller.products.newPlant.lightInstructionsBnPlaceholder")}
                     value={careTranslations.bn.lightInstructions}
                     onInput={(v) => setCareTranslations("bn", "lightInstructions", v)}
                     dir="auto"
@@ -1509,8 +1625,8 @@ export default function NewPlantPage() {
                   />
                   <InputField
                     id="care-bn-watering"
-                    label="পানি নির্দেশনা"
-                    placeholder="বাংলায় পানি যত্ন নির্দেশনা..."
+                    label={t("seller.products.newPlant.wateringInstructionsLabel")}
+                    placeholder={t("seller.products.newPlant.wateringInstructionsBnPlaceholder")}
                     value={careTranslations.bn.wateringInstructions}
                     onInput={(v) => setCareTranslations("bn", "wateringInstructions", v)}
                     dir="auto"
@@ -1519,8 +1635,8 @@ export default function NewPlantPage() {
                   />
                   <InputField
                     id="care-bn-humidity"
-                    label="আর্দ্রতা নির্দেশনা"
-                    placeholder="বাংলায় আর্দ্রতা যত্ন নির্দেশনা..."
+                    label={t("seller.products.newPlant.humidityInstructionsLabel")}
+                    placeholder={t("seller.products.newPlant.humidityInstructionsBnPlaceholder")}
                     value={careTranslations.bn.humidityInstructions}
                     onInput={(v) => setCareTranslations("bn", "humidityInstructions", v)}
                     dir="auto"
@@ -1540,10 +1656,7 @@ export default function NewPlantPage() {
             variant="outline"
             class="flex-1 sm:flex-none"
             disabled={isSubmitting()}
-            onClick={() => {
-              // Navigate back or cancel
-              window.history.back();
-            }}
+            onClick={() => window.history.back()}
           >
             {t("common.cancel")}
           </Button>
