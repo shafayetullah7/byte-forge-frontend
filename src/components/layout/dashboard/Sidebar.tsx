@@ -176,7 +176,7 @@ const ParentNavItem: Component<{
 };
 
 export const Sidebar: Component<SidebarProps> = (props) => {
-    const [manuallyCollapsed, setManuallyCollapsed] = createSignal<Record<string, boolean>>({});
+    const [expandedKeys, setExpandedKeys] = createSignal<Record<string, boolean>>({});
     const location = useLocation();
 
     const getLinkKey = (link: NavLink): string => link.id || link.href;
@@ -198,21 +198,15 @@ export const Sidebar: Component<SidebarProps> = (props) => {
 
     const isExpanded = (link: NavLink): boolean => {
         const key = getLinkKey(link);
-        return !!autoExpanded()[key] && !manuallyCollapsed()[key];
+        if (key in expandedKeys()) {
+            return expandedKeys()[key];
+        }
+        return !!autoExpanded()[key];
     };
 
     const toggleExpand = (link: NavLink) => {
         const key = getLinkKey(link);
-        const currentlyExpanded = isExpanded(link);
-        if (currentlyExpanded) {
-            setManuallyCollapsed(prev => ({ ...prev, [key]: true }));
-        } else {
-            setManuallyCollapsed(prev => {
-                const next = { ...prev };
-                delete next[key];
-                return next;
-            });
-        }
+        setExpandedKeys(prev => ({ ...prev, [key]: !isExpanded(link) }));
     };
 
     return (
