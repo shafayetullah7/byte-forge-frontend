@@ -663,6 +663,15 @@ export const dict = {
         namesAndDescriptionsDesc: "Bilingual names and descriptions for customers",
         characteristics: "Plant Characteristics",
         characteristicsDesc: "Care requirements, botanical info, and localization",
+        // Steps
+        step: "Step",
+        of: "of",
+        step1Title: "Identity & Photos",
+        step2Title: "Names & Descriptions",
+        step3Title: "Plant Characteristics",
+        step4Title: "Variants & Pricing",
+        step5Title: "Care Guide",
+        fieldsNeedAttention: "fields need attention",
         // Thumbnail
         thumbnailLabel: "Plant Thumbnail *",
         thumbnailDesc: "Main image shown in listings (JPEG, PNG, WEBP, or GIF — max 5MB)",

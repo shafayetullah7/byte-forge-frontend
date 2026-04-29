@@ -667,6 +667,15 @@ export const dict = {
         namesAndDescriptionsDesc: "গ্রাহকদের জন্য দ্বিভাষিক নাম ও বিবরণ",
         characteristics: "গাছপালা বৈশিষ্ট্য",
         characteristicsDesc: "যত্নের প্রয়োজনীয়তা, উদ্ভিদ তথ্য, এবং স্থানীয়করণ",
+        // Steps
+        step: "ধাপ",
+        of: "অব",
+        step1Title: "পরিচয় ও ছবি",
+        step2Title: "নাম ও বিবরণ",
+        step3Title: "গাছপালা বৈশিষ্ট্য",
+        step4Title: "ভেরিয়েন্ট ও মূল্য",
+        step5Title: "যত্ন নির্দেশিকা",
+        fieldsNeedAttention: "ক্ষেত্রগুলোর দিকে মনোযোগ প্রয়োজন",
         // Thumbnail
         thumbnailLabel: "গাছপালা থাম্বনেইল *",
         thumbnailDesc: "তালিকায় দেখানো প্রধান ছবি (JPEG, PNG, WEBP, বা GIF — সর্বোচ্চ ৫MB)",

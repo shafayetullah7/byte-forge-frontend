@@ -14,7 +14,9 @@ export interface SelectProps extends JSX.SelectHTMLAttributes<HTMLSelectElement>
 
 export function Select(props: SelectProps) {
   const [local, rest] = splitProps(props, ["label", "options", "error", "class", "value", "id", "placeholder"]);
-  const id = local.id || `select-${Math.random().toString(36).slice(2, 11)}`;
+  // SSR-safe: derive ID from label text (deterministic, no Math.random)
+  const labelId = local.label ? local.label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") : "select";
+  const id = local.id || `select-${labelId}`;
   const errorId = `${id}-error`;
 
   return (
