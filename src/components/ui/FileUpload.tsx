@@ -17,6 +17,8 @@ export interface FileUploadProps {
     accept?: string;
     maxSizeMB?: number;
     showPreview?: boolean;
+    uploadAreaHeight?: string;
+    previewSize?: string;
 }
 
 /**
@@ -184,7 +186,7 @@ export const FileUpload: Component<FileUploadProps> = (props) => {
                                 <img
                                     src={previewUrl()!}
                                     alt="Preview"
-                                    class="w-20 h-20 object-cover rounded-lg"
+                                    class={`object-cover rounded-lg ${props.previewSize || "w-20 h-20"}`}
                                     onError={(e) => {
                                         // Fallback to icon if image fails to load
                                         e.currentTarget.style.display = "none";
@@ -230,7 +232,11 @@ export const FileUpload: Component<FileUploadProps> = (props) => {
                         disabled={props.disabled || props.isUploading}
                         class="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
                     />
-                    <div class="flex items-center justify-center px-4 py-3 border-2 border-dashed border-cream-200 dark:border-forest-700 rounded-lg hover:border-terracotta-500 dark:hover:border-terracotta-400 transition-colors duration-200 bg-white dark:bg-forest-900/30">
+                    <div
+                        class="flex items-center justify-center px-4 border-2 border-dashed border-cream-200 dark:border-forest-700 rounded-lg hover:border-terracotta-500 dark:hover:border-terracotta-400 transition-colors duration-200 bg-white dark:bg-forest-900/30"
+                        classList={{ "py-3": !props.uploadAreaHeight, "h-full": !!props.uploadAreaHeight }}
+                        style={{ "min-height": props.uploadAreaHeight || undefined }}
+                    >
                         <Show
                             when={!props.isUploading}
                             fallback={

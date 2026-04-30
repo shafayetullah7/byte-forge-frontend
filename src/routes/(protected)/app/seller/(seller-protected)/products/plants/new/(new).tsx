@@ -9,10 +9,11 @@ import { TagMultiSelect, type TagGroupOption } from "~/components/ui/TagMultiSel
 import { ImageUpload } from "~/components/ui/ImageUpload";
 import { useImageUpload } from "~/lib/hooks/useImageUpload";
 import { toaster } from "~/components/ui/Toast";
+import { plantsApi } from "~/lib/api/endpoints/plants.api";
 import { SunIcon, ChevronLeftIcon } from "~/components/icons";
 import { StepIndicator } from "./StepIndicator";
 import { Step1Identity } from "./Step1Identity";
-import { Step2Descriptions } from "./Step2Descriptions";
+import { Step2CategoryTags } from "./Step2CategoryTags";
 import { Step3Classification } from "./Step3Classification";
 import { Step4Variants, type VariantStore } from "./Step4Variants";
 import { Step5CareProfile } from "./Step5CareProfile";
@@ -32,45 +33,6 @@ interface FormErrors {
 // ========================
 // Static Options
 // ========================
-
-const LIGHT_OPTIONS: SelectOption[] = [
-  { value: "low", label: "Low Light (shady corners, indirect light)" },
-  { value: "medium", label: "Medium Light (bright room, no direct sun)" },
-  { value: "bright_indirect", label: "Bright Indirect (near window, filtered light)" },
-  { value: "direct", label: "Direct Sun (full sunlight, windowsill)" },
-];
-
-const WATERING_OPTIONS: SelectOption[] = [
-  { value: "daily", label: "Daily" },
-  { value: "weekly", label: "Weekly" },
-  { value: "bi_weekly", label: "Every 2 Weeks" },
-  { value: "monthly", label: "Monthly" },
-];
-
-const HUMIDITY_OPTIONS: SelectOption[] = [
-  { value: "low", label: "Low (normal room humidity)" },
-  { value: "medium", label: "Moderate (slightly humid)" },
-  { value: "high", label: "High (bathroom/misting recommended)" },
-];
-
-const CARE_DIFFICULTY_OPTIONS: SelectOption[] = [
-  { value: "beginner", label: "Beginner (hard to kill)" },
-  { value: "intermediate", label: "Intermediate (some experience needed)" },
-  { value: "expert", label: "Expert (finicky, specific conditions)" },
-];
-
-const GROWTH_RATE_OPTIONS: SelectOption[] = [
-  { value: "slow", label: "Slow" },
-  { value: "moderate", label: "Moderate" },
-  { value: "fast", label: "Fast" },
-];
-
-const GROWTH_STAGE_OPTIONS: SelectOption[] = [
-  { value: "seedling", label: "Seedling" },
-  { value: "juvenile", label: "Juvenile" },
-  { value: "mature", label: "Mature" },
-  { value: "cutting", label: "Cutting" },
-];
 
 const CATEGORY_OPTIONS: SelectOption[] = [
   { value: "", label: "Loading categories..." },
@@ -107,6 +69,52 @@ function createEmptyVariant(): VariantStore {
 
 export default function NewPlantPage() {
   const { t } = useI18n();
+
+  // ---- Translated Select Options ----
+  const lightOptions = createMemo<SelectOption[]>(() => [
+    { value: "low", label: t("seller.products.newPlant.lightLow") },
+    { value: "medium", label: t("seller.products.newPlant.lightMedium") },
+    { value: "bright_indirect", label: t("seller.products.newPlant.lightBrightIndirect") },
+    { value: "direct", label: t("seller.products.newPlant.lightDirect") },
+  ]);
+
+  const wateringOptions = createMemo<SelectOption[]>(() => [
+    { value: "daily", label: t("seller.products.newPlant.wateringDaily") },
+    { value: "weekly", label: t("seller.products.newPlant.wateringWeekly") },
+    { value: "bi_weekly", label: t("seller.products.newPlant.wateringBiWeekly") },
+    { value: "monthly", label: t("seller.products.newPlant.wateringMonthly") },
+  ]);
+
+  const humidityOptions = createMemo<SelectOption[]>(() => [
+    { value: "low", label: t("seller.products.newPlant.humidityLow") },
+    { value: "medium", label: t("seller.products.newPlant.humidityMedium") },
+    { value: "high", label: t("seller.products.newPlant.humidityHigh") },
+  ]);
+
+  const careDifficultyOptions = createMemo<SelectOption[]>(() => [
+    { value: "beginner", label: t("seller.products.newPlant.careBeginner") },
+    { value: "intermediate", label: t("seller.products.newPlant.careIntermediate") },
+    { value: "expert", label: t("seller.products.newPlant.careExpert") },
+  ]);
+
+  const growthRateOptions = createMemo<SelectOption[]>(() => [
+    { value: "slow", label: t("seller.products.newPlant.growthSlow") },
+    { value: "moderate", label: t("seller.products.newPlant.growthModerate") },
+    { value: "fast", label: t("seller.products.newPlant.growthFast") },
+  ]);
+
+  const growthStageOptions = createMemo<SelectOption[]>(() => [
+    { value: "seedling", label: t("seller.products.newPlant.stageSeedling") },
+    { value: "juvenile", label: t("seller.products.newPlant.stageJuvenile") },
+    { value: "mature", label: t("seller.products.newPlant.stageMature") },
+    { value: "cutting", label: t("seller.products.newPlant.stageCutting") },
+  ]);
+
+  const statusOptions = createMemo<SelectOption[]>(() => [
+    { value: "DRAFT", label: t("seller.products.newPlant.statusDraft") },
+    { value: "ACTIVE", label: t("seller.products.newPlant.statusActive") },
+    { value: "ARCHIVED", label: t("seller.products.newPlant.statusArchived") },
+  ]);
 
   // ---- Wizard State ----
   const [currentStep, setCurrentStep] = createSignal(1);
@@ -281,34 +289,27 @@ export default function NewPlantPage() {
   const validateAll = (): FormErrors => {
     const newErrors: FormErrors = {};
 
-    // Step 1: Thumbnail
+    // Step 1: Identity, names, descriptions, scientific name
     if (!thumbnailUpload.mediaId()) {
       newErrors["thumbnail"] = t("seller.products.newPlant.thumbnailRequired");
     }
-
-    // Step 2: Translations
     if (!translations.en.name.trim()) newErrors["en.name"] = t("seller.products.newPlant.nameRequired");
     else if (translations.en.name.length > 255) newErrors["en.name"] = t("seller.products.newPlant.nameTooLong");
     if (translations.en.shortDescription.length > 500) newErrors["en.shortDescription"] = t("seller.products.newPlant.shortDescriptionTooLong");
-    if (!translations.en.description.trim()) newErrors["en.description"] = t("seller.products.newPlant.descriptionRequired");
-    else if (translations.en.description.length < 50) newErrors["en.description"] = t("seller.products.newPlant.descriptionTooShort");
 
-    // Bengali is optional — only validate if user started filling it in
     if (translations.bn.name.trim() && translations.bn.name.length > 255) newErrors["bn.name"] = t("seller.products.newPlant.nameTooLong");
     if (translations.bn.shortDescription.length > 500) newErrors["bn.shortDescription"] = t("seller.products.newPlant.shortDescriptionTooLong");
-    if (translations.bn.description.trim() && translations.bn.description.length < 50) newErrors["bn.description"] = t("seller.products.newPlant.descriptionTooShort");
 
-    // Slug
     const currentSlug = effectiveSlug().trim();
     if (currentSlug) {
       if (currentSlug.length < 3) newErrors["slug"] = t("seller.products.newPlant.slugTooShort");
       else if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(currentSlug)) newErrors["slug"] = t("seller.products.newPlant.slugInvalid");
     }
 
-    // Step 3: Plant details
+    // Step 2: Category
     if (!plantDetails.categoryId.trim()) newErrors["categoryId"] = t("seller.products.newPlant.categoryRequired");
 
-    // Step 4: Variants (always validate — backend requires valid price even for drafts)
+    // Step 4: Variants
     if (variants.length === 0) newErrors["variants"] = t("seller.products.newPlant.atLeastOneVariant");
     let baseCount = 0;
     variants.forEach((v, i) => {
@@ -328,16 +329,14 @@ export default function NewPlantPage() {
   };
 
   const findFirstStepWithError = (errs: FormErrors): number => {
-    const step1Keys = ["thumbnail", "slug"];
-    const step2Keys = ["en.name", "en.shortDescription", "en.description", "bn.name", "bn.shortDescription", "bn.description"];
-    const step3Keys = ["categoryId"];
+    const step1Keys = ["thumbnail", "slug", "en.name", "en.shortDescription", "bn.name", "bn.shortDescription"];
+    const step2Keys = ["categoryId"];
     const step4Keys = ["variants", "baseVariant"];
     const step5Keys = ["lightRequirement", "wateringFrequency", "humidityLevel", "careDifficulty"];
 
     const keys = Object.keys(errs);
     if (keys.some(k => step1Keys.includes(k))) return 1;
     if (keys.some(k => step2Keys.includes(k))) return 2;
-    if (keys.some(k => step3Keys.includes(k))) return 3;
     if (keys.some(k => step4Keys.includes(k) || k.startsWith("variants."))) return 4;
     if (keys.some(k => step5Keys.includes(k))) return 5;
     return 1;
@@ -364,16 +363,16 @@ export default function NewPlantPage() {
     setIsSubmitting(true);
 
     try {
-      const payload: Record<string, unknown> = {
+      const payload: import("~/lib/api/types/seller.types").CreatePlantRequest = {
         slug: effectiveSlug().trim() || undefined,
-        thumbnailId: thumbnailUpload.mediaId(),
+        thumbnailId: thumbnailUpload.mediaId()!,
         status: saveAsDraft ? "DRAFT" : status(),
         translations: [
           {
-            locale: "en" as const,
+            locale: "en",
             name: translations.en.name.trim(),
             shortDescription: translations.en.shortDescription.trim() || undefined,
-            description: translations.en.description.trim(),
+            description: translations.en.description.trim() || undefined,
           },
         ],
         plantDetails: {
@@ -405,8 +404,8 @@ export default function NewPlantPage() {
         },
         variants: variants.map((v) => ({
           sku: v.sku.trim() || undefined,
-          price: typeof v.price === "number" && v.price > 0 ? v.price : undefined,
-          inventoryCount: typeof v.inventoryCount === "number" ? v.inventoryCount : undefined,
+          price: v.price as number,
+          inventoryCount: typeof v.inventoryCount === "number" ? v.inventoryCount : 0,
           trackInventory: v.trackInventory,
           lowStockThreshold: typeof v.lowStockThreshold === "number" ? v.lowStockThreshold : undefined,
           isBase: v.isBase,
@@ -464,17 +463,16 @@ export default function NewPlantPage() {
       };
 
       // Add Bengali translation only if user provided content
-      if (translations.bn.name.trim() || translations.bn.description.trim()) {
-        (payload.translations as Array<Record<string, unknown>>).push({
+      if (translations.bn.name.trim()) {
+        payload.translations.push({
           locale: "bn",
           name: translations.bn.name.trim(),
           shortDescription: translations.bn.shortDescription.trim() || undefined,
-          description: translations.bn.description.trim(),
+          description: translations.bn.description.trim() || undefined,
         });
       }
 
-      // TODO: await plantsApi.create(payload);
-      console.log("Plant payload (not sent):", JSON.stringify(payload, null, 2));
+      await plantsApi.create(payload);
 
       setSubmitStatus("success");
       toaster.success(t("seller.products.newPlant.plantCreated"));
@@ -505,9 +503,10 @@ export default function NewPlantPage() {
         });
         setCurrentStep(1);
       }, 1500);
-    } catch (err) {
+    } catch (err: any) {
       setSubmitStatus("error");
-      toaster.error(t("seller.products.newPlant.createFailed"));
+      const msg = err?.response?.message || err?.message || t("seller.products.newPlant.createFailed");
+      toaster.error(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -585,7 +584,7 @@ export default function NewPlantPage() {
             </h2>
           </div>
           <div class="p-6">
-            {/* Step 1: Product Identity */}
+            {/* Step 1: Identity, Names & Descriptions */}
             <Show when={currentStep() === 1}>
               <Step1Identity
                 thumbnailUpload={thumbnailUpload}
@@ -593,15 +592,6 @@ export default function NewPlantPage() {
                 onStatusChange={(v) => setStatus(v as PlantStatus)}
                 slug={effectiveSlug()}
                 onSlugChange={(v) => { setSlug(v); setIsSlugManual(true); }}
-                errors={errors()}
-                t={t}
-                onWarningChange={handleWarningChange(1)}
-              />
-            </Show>
-
-            {/* Step 2: Names & Descriptions */}
-            <Show when={currentStep() === 2}>
-              <Step2Descriptions
                 enName={translations.en.name}
                 onEnNameChange={(v) => setTranslations("en", "name", v)}
                 enShortDesc={translations.en.shortDescription}
@@ -614,21 +604,32 @@ export default function NewPlantPage() {
                 onBnShortDescChange={(v) => setTranslations("bn", "shortDescription", v)}
                 bnDescription={translations.bn.description}
                 onBnDescriptionChange={(v) => setTranslations("bn", "description", v)}
+                scientificName={plantDetails.scientificName}
+                onScientificNameChange={(v) => setPlantDetails("scientificName", v)}
                 errors={errors()}
+                t={t}
+                onWarningChange={handleWarningChange(1)}
+              />
+            </Show>
+
+            {/* Step 2: Category & Tags */}
+            <Show when={currentStep() === 2}>
+              <Step2CategoryTags
+                categoryId={plantDetails.categoryId}
+                onCategoryIdChange={(v) => setPlantDetails("categoryId", v)}
+                tagIds={plantDetails.tagIds}
+                onTagToggle={toggleTag}
+                errors={errors()}
+                categoryOptions={CATEGORY_OPTIONS}
+                tagGroups={TAG_GROUPS}
                 t={t}
                 onWarningChange={handleWarningChange(2)}
               />
             </Show>
 
-            {/* Step 3: Classification & Localized Details */}
+            {/* Step 3: Localized Details */}
             <Show when={currentStep() === 3}>
               <Step3Classification
-                categoryId={plantDetails.categoryId}
-                onCategoryIdChange={(v) => setPlantDetails("categoryId", v)}
-                tagIds={plantDetails.tagIds}
-                onTagToggle={toggleTag}
-                scientificName={plantDetails.scientificName}
-                onScientificNameChange={(v) => setPlantDetails("scientificName", v)}
                 enCommonNames={plantDetails.translations.en.commonNames}
                 onEnCommonNamesChange={(v) => setPlantDetails("translations", "en", "commonNames", v)}
                 enOrigin={plantDetails.translations.en.origin}
@@ -645,9 +646,6 @@ export default function NewPlantPage() {
                 onBnSoilTypeChange={(v) => setPlantDetails("translations", "bn", "soilType", v)}
                 bnToxicityInfo={plantDetails.translations.bn.toxicityInfo}
                 onBnToxicityInfoChange={(v) => setPlantDetails("translations", "bn", "toxicityInfo", v)}
-                errors={errors()}
-                categoryOptions={CATEGORY_OPTIONS}
-                tagGroups={TAG_GROUPS}
                 t={t}
                 onWarningChange={handleWarningChange(3)}
               />
@@ -661,7 +659,7 @@ export default function NewPlantPage() {
                 addVariant={addVariant}
                 removeVariant={removeVariant}
                 errors={errors()}
-                growthStageOptions={GROWTH_STAGE_OPTIONS}
+                growthStageOptions={growthStageOptions()}
                 t={t}
                 onWarningChange={handleWarningChange(4)}
               />
@@ -687,11 +685,11 @@ export default function NewPlantPage() {
                 matureSpread={plantDetails.matureSpread}
                 onMatureSpreadChange={(v) => setPlantDetails("matureSpread", v)}
                 errors={errors()}
-                lightOptions={LIGHT_OPTIONS}
-                wateringOptions={WATERING_OPTIONS}
-                humidityOptions={HUMIDITY_OPTIONS}
-                careDifficultyOptions={CARE_DIFFICULTY_OPTIONS}
-                growthRateOptions={GROWTH_RATE_OPTIONS}
+                lightOptions={lightOptions()}
+                wateringOptions={wateringOptions()}
+                humidityOptions={humidityOptions()}
+                careDifficultyOptions={careDifficultyOptions()}
+                growthRateOptions={growthRateOptions()}
                 t={t}
                 onWarningChange={handleWarningChange(5)}
               />

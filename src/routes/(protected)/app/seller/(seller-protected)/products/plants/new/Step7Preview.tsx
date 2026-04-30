@@ -173,7 +173,7 @@ export function Step7Preview(props: {
             </span>
           </PreviewRow>
           <Show when={props.slug}>
-            <PreviewRow label="URL Slug" value={props.slug} />
+            <PreviewRow label={props.t("seller.products.newPlant.urlSlugLabel")} value={props.slug} />
           </Show>
         </dl>
       </PreviewSection>
@@ -181,13 +181,13 @@ export function Step7Preview(props: {
       {/* Names & Descriptions */}
       <PreviewSection title={props.t("seller.products.newPlant.step2Title")}>
         <BilingualSection
-          enLabel="Name"
+          enLabel={props.t("seller.products.newPlant.previewNameLabel")}
           enValue={props.enName}
           bnLabel="নাম"
           bnValue={props.bnName}
         />
         <BilingualSection
-          enLabel="Short Description"
+          enLabel={props.t("seller.products.newPlant.previewShortDescriptionLabel")}
           enValue={props.enShortDesc}
           bnLabel="সংক্ষিপ্ত বিবরণ"
           bnValue={props.bnShortDesc}
@@ -196,7 +196,7 @@ export function Step7Preview(props: {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                🇬🇧 Description
+                🇬🇧 {props.t("seller.products.newPlant.previewDescriptionLabel")}
               </dt>
               <dd class="text-sm text-gray-900 dark:text-white whitespace-pre-wrap">
                 {props.enDescription || <span class="text-gray-400 dark:text-gray-500 italic">—</span>}
@@ -230,8 +230,38 @@ export function Step7Preview(props: {
         </dl>
       </PreviewSection>
 
+      {/* Localized Details */}
+      <PreviewSection title={props.t("seller.products.newPlant.step3Title")}>
+        <BilingualSection
+          enLabel={props.t("seller.products.newPlant.previewCommonNamesLabel")}
+          enValue={props.enCommonNames}
+          bnLabel="সাধারণ নাম"
+          bnValue={props.bnCommonNames}
+        />
+        <BilingualSection
+          enLabel={props.t("seller.products.newPlant.previewOriginLabel")}
+          enValue={props.enOrigin}
+          bnLabel="উৎপত্তি"
+          bnValue={props.bnOrigin}
+        />
+        <BilingualSection
+          enLabel={props.t("seller.products.newPlant.previewSoilTypeLabel")}
+          enValue={props.enSoilType}
+          bnLabel="মাটির ধরন"
+          bnValue={props.bnSoilType}
+        />
+        <Show when={props.enToxicityInfo || props.bnToxicityInfo}>
+          <BilingualSection
+            enLabel={props.t("seller.products.newPlant.previewToxicityInfoLabel")}
+            enValue={props.enToxicityInfo}
+            bnLabel="বিষাক্ত তথ্য"
+            bnValue={props.bnToxicityInfo}
+          />
+        </Show>
+      </PreviewSection>
+
       {/* Care Profile */}
-      <PreviewSection title={props.t("seller.products.newPlant.step4Title")}>
+      <PreviewSection title={props.t("seller.products.newPlant.step5Title")}>
         <dl class="divide-y divide-cream-100 dark:divide-forest-700/50">
           <PreviewRow label={props.t("seller.products.newPlant.lightRequirementLabel")} value={props.lightRequirement} />
           <PreviewRow label={props.t("seller.products.newPlant.wateringFrequencyLabel")} value={props.wateringFrequency} />
@@ -250,39 +280,6 @@ export function Step7Preview(props: {
             <PreviewRow label={props.t("seller.products.newPlant.matureSpreadLabel")} value={props.matureSpread} />
           </Show>
         </dl>
-
-        {/* Localized Details */}
-        <div class="mt-4 pt-4 border-t border-cream-200 dark:border-forest-700">
-          <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
-            {props.t("seller.products.newPlant.localizedDetails")}
-          </p>
-          <BilingualSection
-            enLabel="Common Names"
-            enValue={props.enCommonNames}
-            bnLabel="সাধারণ নাম"
-            bnValue={props.bnCommonNames}
-          />
-          <BilingualSection
-            enLabel="Origin"
-            enValue={props.enOrigin}
-            bnLabel="উৎপত্তি"
-            bnValue={props.bnOrigin}
-          />
-          <BilingualSection
-            enLabel="Soil Type"
-            enValue={props.enSoilType}
-            bnLabel="মাটির ধরন"
-            bnValue={props.bnSoilType}
-          />
-          <Show when={props.enToxicityInfo || props.bnToxicityInfo}>
-            <BilingualSection
-              enLabel="Toxicity Info"
-              enValue={props.enToxicityInfo}
-              bnLabel="বিষাক্ত তথ্য"
-              bnValue={props.bnToxicityInfo}
-            />
-          </Show>
-        </div>
       </PreviewSection>
 
       {/* Variants */}
@@ -296,13 +293,13 @@ export function Step7Preview(props: {
                 </span>
                 <Show when={variant.isBase}>
                   <span class="text-xs px-2 py-0.5 rounded-full bg-forest-100 text-forest-700 dark:bg-forest-700 dark:text-forest-200 font-medium">
-                    Base
+                    {props.t("seller.products.newPlant.baseBadge")}
                   </span>
                 </Show>
               </div>
               <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
                 <Show when={variant.sku}>
-                  <PreviewRow label="SKU" value={variant.sku} />
+                  <PreviewRow label={props.t("seller.products.newPlant.skuLabel")} value={variant.sku} />
                 </Show>
                 <PreviewRow label={props.t("seller.products.newPlant.priceLabel")} value={`৳${typeof variant.price === "number" ? variant.price.toFixed(2) : "0.00"}`} />
                 <Show when={typeof variant.inventoryCount === "number" && variant.inventoryCount >= 0}>
@@ -349,7 +346,16 @@ export function Step7Preview(props: {
           </div>
 
           {/* BN Care Guide */}
-          <Show when={props.careGuideBn.lightInstructions || props.careGuideBn.wateringInstructions || props.careGuideBn.humidityInstructions}>
+          <Show when={
+            props.careGuideBn.lightInstructions ||
+            props.careGuideBn.wateringInstructions ||
+            props.careGuideBn.humidityInstructions ||
+            props.careGuideBn.fertilizerSchedule ||
+            props.careGuideBn.repottingFrequency ||
+            props.careGuideBn.pruningNotes ||
+            props.careGuideBn.commonProblems ||
+            props.careGuideBn.seasonalCare
+          }>
             <div class="pt-4 border-t border-cream-200 dark:border-forest-700">
               <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">🇧🇩 বাংলা</p>
               <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
@@ -361,6 +367,21 @@ export function Step7Preview(props: {
                 </Show>
                 <Show when={props.careGuideBn.humidityInstructions}>
                   <PreviewRow label={props.t("seller.products.newPlant.humidityInstructionsLabel")} value={props.careGuideBn.humidityInstructions} />
+                </Show>
+                <Show when={props.careGuideBn.fertilizerSchedule}>
+                  <PreviewRow label={props.t("seller.products.newPlant.fertilizerScheduleLabel")} value={props.careGuideBn.fertilizerSchedule} />
+                </Show>
+                <Show when={props.careGuideBn.repottingFrequency}>
+                  <PreviewRow label={props.t("seller.products.newPlant.repottingFrequencyLabel")} value={props.careGuideBn.repottingFrequency} />
+                </Show>
+                <Show when={props.careGuideBn.pruningNotes}>
+                  <PreviewRow label={props.t("seller.products.newPlant.pruningNotesLabel")} value={props.careGuideBn.pruningNotes} />
+                </Show>
+                <Show when={props.careGuideBn.commonProblems}>
+                  <PreviewRow label={props.t("seller.products.newPlant.commonProblemsLabel")} value={props.careGuideBn.commonProblems} />
+                </Show>
+                <Show when={props.careGuideBn.seasonalCare}>
+                  <PreviewRow label={props.t("seller.products.newPlant.seasonalCareLabel")} value={props.careGuideBn.seasonalCare} />
                 </Show>
               </dl>
             </div>

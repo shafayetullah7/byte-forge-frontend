@@ -121,11 +121,12 @@ function VariantImageUpload(props: {
   variantIndex: number;
   mediaIds: string[];
   setVariants: (fn: (v: VariantStore[]) => VariantStore[]) => void;
+  t: (key: string) => string;
 }) {
   return (
     <div>
       <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-        Variant Images ({props.mediaIds.length}/10)
+        {props.t("seller.products.newPlant.variantImagesLabel").replace("{count}", String(props.mediaIds.length))}
       </p>
       <Show when={props.mediaIds.length > 0}>
         <div class="flex flex-wrap gap-2 mb-2">
@@ -133,7 +134,7 @@ function VariantImageUpload(props: {
             {(mediaId, idx) => (
               <div class="relative w-16 h-16 rounded-lg overflow-hidden border border-cream-200 dark:border-forest-600">
                 <div class="w-full h-full bg-cream-100 dark:bg-forest-700 flex items-center justify-center text-xs text-gray-400">
-                  IMG {idx() + 1}
+                  {props.t("seller.products.newPlant.variantImagePlaceholder").replace("{n}", String(idx() + 1))}
                 </div>
                 <button
                   type="button"
@@ -150,7 +151,7 @@ function VariantImageUpload(props: {
       <Show when={props.mediaIds.length < 10}>
         <div class="flex items-center justify-center px-4 py-3 border-2 border-dashed border-cream-200 dark:border-forest-700 rounded-lg bg-white dark:bg-forest-900/30">
           <p class="text-xs text-forest-600 dark:text-forest-400">
-            Variant image upload — coming soon
+            {props.t("seller.products.newPlant.variantImageComingSoon")}
           </p>
         </div>
       </Show>
@@ -210,7 +211,7 @@ export function Step4Variants(props: {
                 </span>
                 <Show when={variant.isBase}>
                   <span class="text-xs px-2 py-0.5 rounded-full bg-forest-100 text-forest-700 dark:bg-forest-700 dark:text-forest-200 font-medium">
-                    Base
+                    {props.t("seller.products.newPlant.baseBadge")}
                   </span>
                 </Show>
               </div>
@@ -258,7 +259,7 @@ export function Step4Variants(props: {
               />
 
       {/* Variant images */}
-      <VariantImageUpload variantIndex={index()} mediaIds={variant.mediaIds} setVariants={props.setVariants} />
+      <VariantImageUpload variantIndex={index()} mediaIds={variant.mediaIds} setVariants={props.setVariants} t={props.t} />
 
               {/* Checkboxes */}
               <div class="flex flex-wrap gap-6">

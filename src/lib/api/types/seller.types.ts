@@ -192,13 +192,64 @@ export interface PlantVariantAttributesInput {
 }
 
 /**
+ * Product translation input (matches backend productTranslationSchema)
+ */
+export interface ProductTranslationInput {
+  locale: "en" | "bn";
+  name: string;
+  description?: string;
+  shortDescription?: string;
+}
+
+/**
+ * Plant details translation input (matches backend plantDetailsTranslationSchema)
+ */
+export interface PlantDetailsTranslationInput {
+  commonNames?: string;
+  origin?: string;
+  soilType?: string;
+  toxicityInfo?: string;
+}
+
+/**
+ * Plant details input (matches backend plantDetailsSchema)
+ */
+export interface PlantDetailsInput {
+  categoryId: string;
+  tagIds?: string[];
+  scientificName?: string;
+  lightRequirement: string;
+  wateringFrequency: string;
+  humidityLevel: string;
+  temperatureRange?: string;
+  careDifficulty: string;
+  growthRate?: string;
+  matureHeight?: string;
+  matureSpread?: string;
+  translations: {
+    en: PlantDetailsTranslationInput;
+    bn: PlantDetailsTranslationInput;
+  };
+}
+
+/**
+ * Plant variant attributes input (matches backend plantVariantAttributesSchema)
+ */
+export interface PlantVariantAttributesInput {
+  growthStage?: string;
+  plantForm?: string;
+  variegation?: string;
+  propagationType?: string;
+  containerType?: string;
+  bundleType?: string;
+}
+
+/**
  * Plant variant input (matches backend productVariantSchema)
  */
 export interface PlantVariantInput {
   sku?: string;
   price: number;
-  salePrice?: number;
-  costPrice?: number;
   inventoryCount?: number;
   trackInventory?: boolean;
   lowStockThreshold?: number;
@@ -209,66 +260,9 @@ export interface PlantVariantInput {
 }
 
 /**
- * Product translation input (matches backend productTranslationSchema)
+ * Care guide input (matches backend careGuideSchema)
  */
-export interface ProductTranslationInput {
-  locale: "en" | "bn";
-  name: string;
-  description: string;
-  shortDescription?: string;
-}
-
-/**
- * Plant details input (matches backend plantDetailsSchema)
- */
-export interface PlantDetailsInput {
-  categoryId: string;
-  tagIds?: string[];
-  scientificName?: string;
-  commonNames?: string;
-  origin?: string;
-  lightRequirement: string;
-  wateringFrequency: string;
-  humidityLevel: string;
-  temperatureRange?: string;
-  soilType?: string;
-  careDifficulty: string;
-  growthRate?: string;
-  matureHeight?: string;
-  matureSpread?: string;
-  toxicityInfo?: string;
-}
-
-/**
- * Plant details translation input (matches backend plantDetailsTranslationSchema)
- */
-export interface PlantDetailsTranslationInput {
-  locale: "en" | "bn";
-  commonNames?: string;
-  origin?: string;
-  soilType?: string;
-  toxicityInfo?: string;
-}
-
-/**
- * Care instructions input (matches backend careInstructionsSchema)
- */
-export interface CareInstructionsInput {
-  lightInstructions?: string;
-  wateringInstructions?: string;
-  humidityInstructions?: string;
-  fertilizerSchedule?: string;
-  repottingFrequency?: string;
-  pruningNotes?: string;
-  commonProblems?: string;
-  seasonalCare?: string;
-}
-
-/**
- * Care translation input (matches backend careInstructionsTranslationSchema)
- */
-export interface CareTranslationInput {
-  locale: "en" | "bn";
+export interface CareGuideInput {
   lightInstructions?: string;
   wateringInstructions?: string;
   humidityInstructions?: string;
@@ -288,11 +282,11 @@ export interface CreatePlantRequest {
   status?: PlantStatus;
   translations: ProductTranslationInput[];
   plantDetails: PlantDetailsInput;
-  enDetails: PlantDetailsTranslationInput;
-  bnDetails: PlantDetailsTranslationInput;
   variants: PlantVariantInput[];
-  careInstructions?: CareInstructionsInput;
-  careTranslations?: CareTranslationInput[];
+  careGuide?: {
+    en?: CareGuideInput;
+    bn?: CareGuideInput;
+  };
 }
 
 /**
