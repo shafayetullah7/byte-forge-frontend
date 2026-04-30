@@ -40,7 +40,7 @@ function InputField(props: {
   );
 }
 
-export function Step5Care(props: {
+export function Step6Care(props: {
   lightInstructions: string;
   onLightInstructionsChange: (v: string) => void;
   wateringInstructions: string;
@@ -63,10 +63,19 @@ export function Step5Care(props: {
   onBnWateringInstructionsChange: (v: string) => void;
   bnHumidityInstructions: string;
   onBnHumidityInstructionsChange: (v: string) => void;
+  bnFertilizerSchedule: string;
+  onBnFertilizerScheduleChange: (v: string) => void;
+  bnRepottingFrequency: string;
+  onBnRepottingFrequencyChange: (v: string) => void;
+  bnPruningNotes: string;
+  onBnPruningNotesChange: (v: string) => void;
+  bnCommonProblems: string;
+  onBnCommonProblemsChange: (v: string) => void;
+  bnSeasonalCare: string;
+  onBnSeasonalCareChange: (v: string) => void;
   t: (key: string) => string;
   onWarningChange: (hasWarning: boolean, missingFields: string[]) => void;
 }) {
-  // Optional step — never warns
   props.onWarningChange(false, []);
 
   return (
@@ -147,46 +156,92 @@ export function Step5Care(props: {
         />
       </div>
 
-      {/* Care Translations */}
+      {/* Bengali Care Translations */}
       <div class="border-t border-cream-200 dark:border-forest-700 pt-6">
         <h4 class="text-sm font-semibold text-forest-800 dark:text-cream-50 mb-4">
           {props.t("seller.products.newPlant.careTranslationsTitle")}
         </h4>
-        <div class="grid grid-cols-1 gap-6">
-          {/* BN Care */}
-          <div class="space-y-3">
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">বাংলা যত্ন</p>
-            <InputField
-              id="care-bn-light"
-              label={props.t("seller.products.newPlant.lightInstructionsLabel")}
-              placeholder={props.t("seller.products.newPlant.lightInstructionsBnPlaceholder")}
-              value={props.bnLightInstructions}
-              onInput={props.onBnLightInstructionsChange}
-              dir="auto"
-              textarea
-              rows={2}
-            />
-            <InputField
-              id="care-bn-watering"
-              label={props.t("seller.products.newPlant.wateringInstructionsLabel")}
-              placeholder={props.t("seller.products.newPlant.wateringInstructionsBnPlaceholder")}
-              value={props.bnWateringInstructions}
-              onInput={props.onBnWateringInstructionsChange}
-              dir="auto"
-              textarea
-              rows={2}
-            />
-            <InputField
-              id="care-bn-humidity"
-              label={props.t("seller.products.newPlant.humidityInstructionsLabel")}
-              placeholder={props.t("seller.products.newPlant.humidityInstructionsBnPlaceholder")}
-              value={props.bnHumidityInstructions}
-              onInput={props.onBnHumidityInstructionsChange}
-              dir="auto"
-              textarea
-              rows={2}
-            />
-          </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <InputField
+            id="care-bn-light"
+            label={props.t("seller.products.newPlant.lightInstructionsLabel")}
+            placeholder={props.t("seller.products.newPlant.lightInstructionsBnPlaceholder")}
+            value={props.bnLightInstructions}
+            onInput={props.onBnLightInstructionsChange}
+            dir="auto"
+            textarea
+            rows={3}
+          />
+          <InputField
+            id="care-bn-watering"
+            label={props.t("seller.products.newPlant.wateringInstructionsLabel")}
+            placeholder={props.t("seller.products.newPlant.wateringInstructionsBnPlaceholder")}
+            value={props.bnWateringInstructions}
+            onInput={props.onBnWateringInstructionsChange}
+            dir="auto"
+            textarea
+            rows={3}
+          />
+          <InputField
+            id="care-bn-humidity"
+            label={props.t("seller.products.newPlant.humidityInstructionsLabel")}
+            placeholder={props.t("seller.products.newPlant.humidityInstructionsBnPlaceholder")}
+            value={props.bnHumidityInstructions}
+            onInput={props.onBnHumidityInstructionsChange}
+            dir="auto"
+            textarea
+            rows={3}
+          />
+          <InputField
+            id="care-bn-fertilizer"
+            label={props.t("seller.products.newPlant.fertilizerScheduleLabel")}
+            placeholder={props.t("seller.products.newPlant.fertilizerScheduleBnPlaceholder")}
+            value={props.bnFertilizerSchedule}
+            onInput={props.onBnFertilizerScheduleChange}
+            dir="auto"
+            textarea
+            rows={3}
+          />
+          <InputField
+            id="care-bn-repotting"
+            label={props.t("seller.products.newPlant.repottingFrequencyLabel")}
+            placeholder={props.t("seller.products.newPlant.repottingFrequencyBnPlaceholder")}
+            value={props.bnRepottingFrequency}
+            onInput={props.onBnRepottingFrequencyChange}
+            dir="auto"
+            textarea
+            rows={3}
+          />
+          <InputField
+            id="care-bn-pruning"
+            label={props.t("seller.products.newPlant.pruningNotesLabel")}
+            placeholder={props.t("seller.products.newPlant.pruningNotesBnPlaceholder")}
+            value={props.bnPruningNotes}
+            onInput={props.onBnPruningNotesChange}
+            dir="auto"
+            textarea
+            rows={3}
+          />
+          <InputField
+            id="care-bn-problems"
+            label={props.t("seller.products.newPlant.commonProblemsLabel")}
+            placeholder={props.t("seller.products.newPlant.commonProblemsBnPlaceholder")}
+            value={props.bnCommonProblems}
+            onInput={props.onBnCommonProblemsChange}
+            dir="auto"
+            textarea
+            rows={3}
+          />
+          <InputField
+            id="care-bn-seasonal"
+            label={props.t("seller.products.newPlant.seasonalCareLabel")}
+            placeholder={props.t("seller.products.newPlant.seasonalCareBnPlaceholder")}
+            value={props.bnSeasonalCare}
+            onInput={props.onBnSeasonalCareChange}
+            dir="auto"
+            textarea
+            rows={3}
+          />
         </div>
       </div>
     </div>

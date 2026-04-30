@@ -100,9 +100,12 @@ export function Step2Descriptions(props: {
     if (!props.enDescription.trim() || props.enDescription.trim().length < 50) {
       missing.push(props.t("seller.products.newPlant.descriptionTooShort"));
     }
-    if (!props.bnName.trim()) missing.push(props.t("seller.products.newPlant.nameRequired"));
-    if (!props.bnDescription.trim() || props.bnDescription.trim().length < 50) {
-      missing.push(props.t("seller.products.newPlant.descriptionTooShort"));
+    // Bengali is optional — only warn if user started filling it but it's incomplete
+    if (props.bnName.trim() || props.bnDescription.trim()) {
+      if (!props.bnName.trim()) missing.push(props.t("seller.products.newPlant.nameRequired"));
+      if (!props.bnDescription.trim() || props.bnDescription.trim().length < 50) {
+        missing.push(props.t("seller.products.newPlant.descriptionTooShort"));
+      }
     }
     props.onWarningChange(missing.length > 0, missing);
   });
@@ -165,6 +168,7 @@ export function Step2Descriptions(props: {
         <div class="flex items-center gap-2 mb-2">
           <span class="text-lg">🇧🇩</span>
           <h4 class="text-sm font-semibold text-forest-800 dark:text-cream-50">বাংলা</h4>
+          <span class="text-xs font-normal text-gray-400">({props.t("common.optional")})</span>
           <div class="ml-auto">
             <Show when={hasBengaliContent()}>
               <CheckCircleIcon class="w-5 h-5 text-forest-500" />
@@ -175,7 +179,6 @@ export function Step2Descriptions(props: {
         <InputField
           id="bn-name"
           label={props.t("seller.products.newPlant.plantNameLabel")}
-          required
           placeholder={props.t("seller.products.newPlant.plantNameBnPlaceholder")}
           value={props.bnName}
           onInput={props.onBnNameChange}
@@ -202,7 +205,6 @@ export function Step2Descriptions(props: {
         <InputField
           id="bn-description"
           label={props.t("seller.products.newPlant.detailedDescriptionLabel")}
-          required
           placeholder={props.t("seller.products.newPlant.descriptionBnPlaceholder")}
           value={props.bnDescription}
           onInput={props.onBnDescriptionChange}

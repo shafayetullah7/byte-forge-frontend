@@ -13,6 +13,7 @@ export interface FileUploadProps {
     disabled?: boolean;
     label?: string;
     description?: string;
+    required?: boolean;
     accept?: string;
     maxSizeMB?: number;
     showPreview?: boolean;
@@ -148,6 +149,9 @@ export const FileUpload: Component<FileUploadProps> = (props) => {
             <Show when={props.label}>
                 <label for={inputId} class="block text-sm font-medium text-forest-800 dark:text-forest-200 mb-2">
                     {props.label}
+                    <Show when={props.required}>
+                        <span class="text-red-500 ml-1">*</span>
+                    </Show>
                 </label>
             </Show>
 

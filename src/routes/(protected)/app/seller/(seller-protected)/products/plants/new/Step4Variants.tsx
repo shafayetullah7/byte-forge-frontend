@@ -103,19 +103,12 @@ function CheckboxField(props: {
 export interface VariantStore {
   sku: string;
   price: number | "";
-  salePrice: number | "";
-  costPrice: number | "";
   inventoryCount: number | "";
   trackInventory: boolean;
   lowStockThreshold: number | "";
   isBase: boolean;
   isActive: boolean;
   mediaIds: string[];
-  potSize: string;
-  potSizeInches: number | "";
-  potMaterial: string;
-  potColor: string;
-  potType: string;
   growthStage: string;
   plantForm: string;
   variegation: string;
@@ -197,12 +190,12 @@ export function Step4Variants(props: {
   return (
     <div class="space-y-6">
       <Show when={props.errors["variants"]}>
-        <p class="text-sm text-red-600 dark:text-red-400 font-medium">
+        <p class="text-xs text-red-600 dark:text-red-400 font-medium">
           {props.errors["variants"]}
         </p>
       </Show>
       <Show when={props.errors["baseVariant"]}>
-        <p class="text-sm text-red-600 dark:text-red-400 font-medium">
+        <p class="text-xs text-red-600 dark:text-red-400 font-medium">
           {props.errors["baseVariant"]}
         </p>
       </Show>
@@ -234,7 +227,7 @@ export function Step4Variants(props: {
 
             <div class="p-4 space-y-4">
               {/* Pricing row */}
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 <NumberField
                   id={`variant-${index()}-price`}
                   label={props.t("seller.products.newPlant.priceLabel")}
@@ -243,22 +236,6 @@ export function Step4Variants(props: {
                   value={variant.price}
                   onInput={(v) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, price: v } : item))}
                   error={props.errors[`variants.${index()}.price`]}
-                  min={0}
-                />
-                <NumberField
-                  id={`variant-${index()}-sale-price`}
-                  label={props.t("seller.products.newPlant.salePriceLabel")}
-                  placeholder={props.t("seller.products.newPlant.salePricePlaceholder")}
-                  value={variant.salePrice}
-                  onInput={(v) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, salePrice: v } : item))}
-                  min={0}
-                />
-                <NumberField
-                  id={`variant-${index()}-cost-price`}
-                  label={props.t("seller.products.newPlant.costPriceLabel")}
-                  placeholder={props.t("seller.products.newPlant.costPricePlaceholder")}
-                  value={variant.costPrice}
-                  onInput={(v) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, costPrice: v } : item))}
                   min={0}
                 />
                 <NumberField
@@ -323,42 +300,6 @@ export function Step4Variants(props: {
                   {props.t("seller.products.newPlant.plantAttributes")}
                 </h5>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  <InputField
-                    id={`variant-${index()}-pot-size`}
-                    label={props.t("seller.products.newPlant.potSizeLabel")}
-                    placeholder={props.t("seller.products.newPlant.potSizePlaceholder")}
-                    value={variant.potSize}
-                    onInput={(v) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, potSize: v } : item))}
-                  />
-                  <NumberField
-                    id={`variant-${index()}-pot-inches`}
-                    label={props.t("seller.products.newPlant.potSizeInchesLabel")}
-                    placeholder={props.t("seller.products.newPlant.potSizeInchesPlaceholder")}
-                    value={variant.potSizeInches}
-                    onInput={(v) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, potSizeInches: v } : item))}
-                    min={0.5}
-                  />
-                  <InputField
-                    id={`variant-${index()}-pot-material`}
-                    label={props.t("seller.products.newPlant.potMaterialLabel")}
-                    placeholder={props.t("seller.products.newPlant.potMaterialPlaceholder")}
-                    value={variant.potMaterial}
-                    onInput={(v) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, potMaterial: v } : item))}
-                  />
-                  <InputField
-                    id={`variant-${index()}-pot-color`}
-                    label={props.t("seller.products.newPlant.potColorLabel")}
-                    placeholder={props.t("seller.products.newPlant.potColorPlaceholder")}
-                    value={variant.potColor}
-                    onInput={(v) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, potColor: v } : item))}
-                  />
-                  <InputField
-                    id={`variant-${index()}-pot-type`}
-                    label={props.t("seller.products.newPlant.potTypeLabel")}
-                    placeholder={props.t("seller.products.newPlant.potTypePlaceholder")}
-                    value={variant.potType}
-                    onInput={(v) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, potType: v } : item))}
-                  />
                   <Select
                     label={props.t("seller.products.newPlant.growthStageLabel")}
                     options={props.growthStageOptions}

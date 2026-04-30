@@ -8,6 +8,7 @@ export interface StepInfo {
   warningCount: number;
   isCurrent: boolean;
   isOptional: boolean;
+  isPreview: boolean;
 }
 
 export function StepIndicator(props: {
@@ -30,6 +31,8 @@ export function StepIndicator(props: {
                   ? "bg-forest-100 text-forest-700 hover:bg-forest-200 cursor-pointer"
                   : step.hasWarning
                   ? "bg-amber-100 text-amber-700 hover:bg-amber-200 cursor-pointer"
+                  : step.isPreview
+                  ? "bg-purple-100 text-purple-700 hover:bg-purple-200 cursor-pointer"
                   : step.isOptional
                   ? "bg-cream-100 text-gray-400 hover:bg-cream-200 cursor-pointer"
                   : "bg-cream-200 text-gray-400 hover:bg-cream-300 cursor-pointer"
@@ -38,6 +41,11 @@ export function StepIndicator(props: {
               {step.isComplete ? (
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                </svg>
+              ) : step.isPreview ? (
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
               ) : (
                 step.number

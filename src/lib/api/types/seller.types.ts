@@ -183,11 +183,6 @@ export interface PlantFilter {
  * Plant variant attributes (matches backend plantVariantAttributesSchema)
  */
 export interface PlantVariantAttributesInput {
-  potSize?: string;
-  potSizeInches?: number;
-  potMaterial?: string;
-  potColor?: string;
-  potType?: string;
   growthStage?: string;
   plantForm?: string;
   variegation?: string;

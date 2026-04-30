@@ -38,6 +38,7 @@ export function Step1Identity(props: {
           onDelete={props.thumbnailUpload.deleteMedia}
           label={props.t("seller.products.newPlant.thumbnailLabel")}
           description={props.t("seller.products.newPlant.thumbnailDesc")}
+          required
         />
         <Show when={props.errors["thumbnail"]}>
           <p class="mt-2 text-xs text-red-600 dark:text-red-400 font-medium">
