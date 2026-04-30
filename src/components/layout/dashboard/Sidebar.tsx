@@ -1,4 +1,4 @@
-import { Component, Show, For, createMemo, createSignal, createEffect } from "solid-js";
+import { Component, Show, For, createMemo, createSignal } from "solid-js";
 import { A, useMatch, useLocation } from "@solidjs/router";
 import { ChevronDownIcon } from "~/components/icons";
 
@@ -30,8 +30,10 @@ const PlainNavItem: Component<{
     onClick: () => void;
     variant?: "default" | "child";
 }> = (props) => {
-    const match = useMatch(() => props.link.href, { exact: true });
-    const isActive = () => !!match();
+    const isChild = props.variant === "child";
+    const partialMatch = isChild ? useMatch(() => props.link.href + "/*") : undefined;
+    const exactMatch = useMatch(() => props.link.href, { exact: true });
+    const isActive = () => !!(partialMatch?.() || exactMatch());
 
     const activeStyles = createMemo(() => {
         if (props.variant === "child") {

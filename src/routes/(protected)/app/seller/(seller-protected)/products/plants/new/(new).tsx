@@ -246,14 +246,15 @@ export default function NewPlantPage() {
       const stepNum = i + 1;
       const warning = stepWarnings[stepNum];
       const isCurrent = currentStep() === stepNum;
+      const isPast = stepNum < currentStep();
       const isOptional = stepNum === 6;
       const isPreview = stepNum === 7;
-      const thumbnailDone = stepNum === 1 ? !!thumbnailUpload.mediaId() : true;
+      const hasNoWarnings = !warning.hasWarning;
       return {
         number: stepNum,
         title: stepTitles[i],
-        isComplete: thumbnailDone && !warning.hasWarning,
-        hasWarning: warning.hasWarning,
+        isComplete: isPast && hasNoWarnings,
+        hasWarning: !isPast && warning.hasWarning,
         warningCount: warning.missing.length,
         isCurrent,
         isOptional,
@@ -798,23 +799,11 @@ export default function NewPlantPage() {
               </Button>
             </Show>
 
-            <Show when={currentStep() < 7}>
-              <Button
-                type="button"
-                variant="secondary"
-                disabled={isSubmitting()}
-                loading={isSubmitting()}
-                onClick={() => handleSubmit(true)}
-              >
-                {isSubmitting() ? t("seller.products.newPlant.saving") : t("seller.products.newPlant.submitDraft")}
-              </Button>
-            </Show>
-
             <Show when={currentStep() < totalSteps} fallback={
               <Button
                 type="submit"
                 variant="accent"
-                disabled={isSubmitting()}
+                disabled={isSubmitting() || hasAnyWarnings()}
                 loading={isSubmitting()}
               >
                 {isSubmitting() ? t("seller.products.newPlant.creating") : t("seller.products.newPlant.submitActive")}
