@@ -186,8 +186,13 @@ export interface PlantVariantAttributesInput {
   growthStage?: string;
   plantForm?: string;
   variegation?: string;
+  leafDensity?: string;
+  stemCount?: number;
+  currentHeight?: string;
+  currentSpread?: string;
   propagationType?: string;
   containerType?: string;
+  containerSize?: string;
   bundleType?: string;
 }
 

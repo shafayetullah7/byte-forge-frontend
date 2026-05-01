@@ -46,11 +46,18 @@ export interface VariantStore {
   isActive: boolean;
   mediaIds: string[];
   mediaUrls: string[];
+  // Morphology
   growthStage: string;
   plantForm: string;
   variegation: string;
+  leafDensity: string;
+  stemCount: number | "";
+  currentHeight: string;
+  currentSpread: string;
+  // Container & Packaging
   propagationType: string;
   containerType: string;
+  containerSize: string;
   bundleType: string;
 }
 
@@ -158,6 +165,11 @@ export function Step4Variants(props: {
   removeVariant: (index: number) => void;
   errors: Record<string, string>;
   growthStageOptions: SelectOption[];
+  plantFormOptions: SelectOption[];
+  variegationOptions: SelectOption[];
+  leafDensityOptions: SelectOption[];
+  propagationTypeOptions: SelectOption[];
+  containerTypeOptions: SelectOption[];
   t: (key: string) => string;
   onWarningChange: (hasWarning: boolean, missingFields: string[]) => void;
 }) {
@@ -312,33 +324,73 @@ export function Step4Variants(props: {
                     onChange={(e) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, growthStage: e.currentTarget.value } : item))}
                     placeholder={props.t("seller.products.newPlant.growthStagePlaceholder")}
                   />
-                  <Input
-                    id={`variant-${index()}-plant-form`}
+                  <Select
                     label={props.t("seller.products.newPlant.plantFormLabel")}
-                    placeholder={props.t("seller.products.newPlant.plantFormPlaceholder")}
+                    options={props.plantFormOptions}
                     value={variant.plantForm}
-                    onInput={(e) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, plantForm: e.currentTarget.value } : item))}
+                    onChange={(e) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, plantForm: e.currentTarget.value } : item))}
+                    placeholder={props.t("seller.products.newPlant.plantFormPlaceholder")}
                   />
-                  <Input
-                    id={`variant-${index()}-variegation`}
+                  <Select
                     label={props.t("seller.products.newPlant.variegationLabel")}
-                    placeholder={props.t("seller.products.newPlant.variegationPlaceholder")}
+                    options={props.variegationOptions}
                     value={variant.variegation}
-                    onInput={(e) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, variegation: e.currentTarget.value } : item))}
+                    onChange={(e) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, variegation: e.currentTarget.value } : item))}
+                    placeholder={props.t("seller.products.newPlant.variegationPlaceholder")}
+                  />
+                  <Select
+                    label={props.t("seller.products.newPlant.leafDensityLabel")}
+                    options={props.leafDensityOptions}
+                    value={variant.leafDensity}
+                    onChange={(e) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, leafDensity: e.currentTarget.value } : item))}
+                    placeholder={props.t("seller.products.newPlant.leafDensityPlaceholder")}
                   />
                   <Input
-                    id={`variant-${index()}-propagation`}
+                    type="number"
+                    id={`variant-${index()}-stem-count`}
+                    label={props.t("seller.products.newPlant.stemCountLabel")}
+                    placeholder={props.t("seller.products.newPlant.stemCountPlaceholder")}
+                    value={variant.stemCount}
+                    onInput={(e) => {
+                      const v = e.currentTarget.value;
+                      props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, stemCount: v === "" ? "" : parseInt(v) } : item));
+                    }}
+                    min={1}
+                  />
+                  <Input
+                    id={`variant-${index()}-current-height`}
+                    label={props.t("seller.products.newPlant.currentHeightLabel")}
+                    placeholder={props.t("seller.products.newPlant.currentHeightPlaceholder")}
+                    value={variant.currentHeight}
+                    onInput={(e) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, currentHeight: e.currentTarget.value } : item))}
+                  />
+                  <Input
+                    id={`variant-${index()}-current-spread`}
+                    label={props.t("seller.products.newPlant.currentSpreadLabel")}
+                    placeholder={props.t("seller.products.newPlant.currentSpreadPlaceholder")}
+                    value={variant.currentSpread}
+                    onInput={(e) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, currentSpread: e.currentTarget.value } : item))}
+                  />
+                  <Select
                     label={props.t("seller.products.newPlant.propagationTypeLabel")}
-                    placeholder={props.t("seller.products.newPlant.propagationTypePlaceholder")}
+                    options={props.propagationTypeOptions}
                     value={variant.propagationType}
-                    onInput={(e) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, propagationType: e.currentTarget.value } : item))}
+                    onChange={(e) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, propagationType: e.currentTarget.value } : item))}
+                    placeholder={props.t("seller.products.newPlant.propagationTypePlaceholder")}
+                  />
+                  <Select
+                    label={props.t("seller.products.newPlant.containerTypeLabel")}
+                    options={props.containerTypeOptions}
+                    value={variant.containerType}
+                    onChange={(e) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, containerType: e.currentTarget.value } : item))}
+                    placeholder={props.t("seller.products.newPlant.containerTypePlaceholder")}
                   />
                   <Input
-                    id={`variant-${index()}-container`}
-                    label={props.t("seller.products.newPlant.containerTypeLabel")}
-                    placeholder={props.t("seller.products.newPlant.containerTypePlaceholder")}
-                    value={variant.containerType}
-                    onInput={(e) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, containerType: e.currentTarget.value } : item))}
+                    id={`variant-${index()}-container-size`}
+                    label={props.t("seller.products.newPlant.containerSizeLabel")}
+                    placeholder={props.t("seller.products.newPlant.containerSizePlaceholder")}
+                    value={variant.containerSize}
+                    onInput={(e) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, containerSize: e.currentTarget.value } : item))}
                   />
                   <Input
                     id={`variant-${index()}-bundle`}

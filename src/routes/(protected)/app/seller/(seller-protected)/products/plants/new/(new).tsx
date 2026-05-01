@@ -46,11 +46,16 @@ function createEmptyVariant(): VariantStore {
     isActive: true,
     mediaIds: [],
     mediaUrls: [],
-    growthStage: "",
-    plantForm: "",
-    variegation: "",
-    propagationType: "",
-    containerType: "",
+    growthStage: "juvenile",
+    plantForm: "upright",
+    variegation: "none",
+    leafDensity: "moderate",
+    stemCount: 1,
+    currentHeight: "",
+    currentSpread: "",
+    propagationType: "cutting",
+    containerType: "nursery_pot",
+    containerSize: "",
     bundleType: "",
   };
 }
@@ -106,6 +111,44 @@ export default function NewPlantPage() {
     { value: "juvenile", label: t("seller.products.newPlant.stageJuvenile") },
     { value: "mature", label: t("seller.products.newPlant.stageMature") },
     { value: "cutting", label: t("seller.products.newPlant.stageCutting") },
+  ]);
+
+  const plantFormOptions = createMemo<SelectOption[]>(() => [
+    { value: "upright", label: t("seller.products.newPlant.formUpright") },
+    { value: "trailing", label: t("seller.products.newPlant.formTrailing") },
+    { value: "bushy", label: t("seller.products.newPlant.formBushy") },
+    { value: "climbing", label: t("seller.products.newPlant.formClimbing") },
+    { value: "rosette", label: t("seller.products.newPlant.formRosette") },
+  ]);
+
+  const variegationOptions = createMemo<SelectOption[]>(() => [
+    { value: "none", label: t("seller.products.newPlant.varNone") },
+    { value: "variegated", label: t("seller.products.newPlant.varVariegated") },
+    { value: "semi_variegated", label: t("seller.products.newPlant.varSemiVariegated") },
+    { value: "albo", label: t("seller.products.newPlant.varAlbo") },
+    { value: "aureo", label: t("seller.products.newPlant.varAureo") },
+  ]);
+
+  const leafDensityOptions = createMemo<SelectOption[]>(() => [
+    { value: "sparse", label: t("seller.products.newPlant.densitySparse") },
+    { value: "moderate", label: t("seller.products.newPlant.densityModerate") },
+    { value: "dense", label: t("seller.products.newPlant.densityDense") },
+  ]);
+
+  const propagationTypeOptions = createMemo<SelectOption[]>(() => [
+    { value: "cutting", label: t("seller.products.newPlant.propCutting") },
+    { value: "seed", label: t("seller.products.newPlant.propSeed") },
+    { value: "tissue_culture", label: t("seller.products.newPlant.propTissueCulture") },
+    { value: "air_layer", label: t("seller.products.newPlant.propAirLayer") },
+    { value: "division", label: t("seller.products.newPlant.propDivision") },
+  ]);
+
+  const containerTypeOptions = createMemo<SelectOption[]>(() => [
+    { value: "nursery_pot", label: t("seller.products.newPlant.contNurseryPot") },
+    { value: "decorative_pot", label: t("seller.products.newPlant.contDecorativePot") },
+    { value: "hanging_basket", label: t("seller.products.newPlant.contHangingBasket") },
+    { value: "terrarium", label: t("seller.products.newPlant.contTerrarium") },
+    { value: "grow_bag", label: t("seller.products.newPlant.contGrowBag") },
   ]);
 
   const statusOptions = createMemo<SelectOption[]>(() => [
@@ -414,8 +457,13 @@ export default function NewPlantPage() {
             growthStage: v.growthStage || undefined,
             plantForm: v.plantForm.trim() || undefined,
             variegation: v.variegation.trim() || undefined,
+            leafDensity: v.leafDensity.trim() || undefined,
+            stemCount: typeof v.stemCount === "number" ? v.stemCount : undefined,
+            currentHeight: v.currentHeight.trim() || undefined,
+            currentSpread: v.currentSpread.trim() || undefined,
             propagationType: v.propagationType.trim() || undefined,
             containerType: v.containerType.trim() || undefined,
+            containerSize: v.containerSize.trim() || undefined,
             bundleType: v.bundleType.trim() || undefined,
           },
         })),
@@ -659,6 +707,11 @@ export default function NewPlantPage() {
                 removeVariant={removeVariant}
                 errors={errors()}
                 growthStageOptions={growthStageOptions()}
+                plantFormOptions={plantFormOptions()}
+                variegationOptions={variegationOptions()}
+                leafDensityOptions={leafDensityOptions()}
+                propagationTypeOptions={propagationTypeOptions()}
+                containerTypeOptions={containerTypeOptions()}
                 t={t}
                 onWarningChange={handleWarningChange(4)}
               />
