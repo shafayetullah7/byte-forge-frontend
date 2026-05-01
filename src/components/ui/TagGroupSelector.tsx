@@ -1,5 +1,5 @@
-import { createMemo, For, Show } from "solid-js";
-import { TagIcon, CheckIcon, SearchIcon, XIcon } from "~/components/icons";
+import { createMemo, For, Show, createSignal } from "solid-js";
+import { TagIcon, CheckIcon, XIcon, MagnifyingGlassIcon } from "~/components/icons";
 
 export interface TagGroupOption {
   id: string;
@@ -18,10 +18,7 @@ export interface TagGroupSelectorProps {
 }
 
 export function TagGroupSelector(props: TagGroupSelectorProps) {
-  const searchQuery = createMemo(() => "");
-  let searchInputRef: HTMLInputElement | undefined;
   const [localSearch, setLocalSearch] = createSignal("");
-
   const selectedCount = createMemo(() => props.selectedTags.length);
 
   const filteredGroups = createMemo(() => {
@@ -56,9 +53,8 @@ export function TagGroupSelector(props: TagGroupSelectorProps) {
       {/* Search + Selected Count */}
       <div class="flex items-center gap-3">
         <div class="relative flex-1">
-          <SearchIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
-            ref={searchInputRef}
             type="text"
             placeholder="Search tags..."
             value={localSearch()}

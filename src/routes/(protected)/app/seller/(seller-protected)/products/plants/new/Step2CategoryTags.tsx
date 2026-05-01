@@ -1,6 +1,6 @@
 import { createEffect, createMemo, type Accessor } from "solid-js";
 import { CategoryTreeSelect } from "~/components/ui/CategoryTreeSelect";
-import { TagMultiSelect } from "~/components/ui/TagMultiSelect";
+import { TagGroupSelector } from "~/components/ui/TagGroupSelector";
 import type { CategoryTree } from "~/lib/api/endpoints/public/categories.api";
 import type { TagGroup } from "~/lib/api/endpoints/public/tags.api";
 
@@ -22,6 +22,7 @@ export function Step2CategoryTags(props: {
       id: group.id,
       slug: group.slug,
       name: group.name,
+      description: group.description,
       tags: group.tags.map((tag) => ({
         id: tag.id,
         slug: tag.slug,
@@ -29,6 +30,7 @@ export function Step2CategoryTags(props: {
       })),
     }));
   });
+
   createEffect(() => {
     const missing: string[] = [];
     if (!props.categoryId.trim()) missing.push(props.t("seller.products.newPlant.categoryRequired"));
@@ -61,21 +63,25 @@ export function Step2CategoryTags(props: {
         </p>
       </div>
 
-      {/* Tags */}
+      {/* Tags - Visual Group Selector */}
       <div>
-        <p class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-          {props.t("seller.products.newPlant.tagsLabel")}
-          <span class="text-gray-400 ml-1">({props.t("common.optional")})</span>
-        </p>
-        <TagMultiSelect
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <p class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {props.t("seller.products.newPlant.tagsLabel")}
+              <span class="text-gray-400 ml-1">({props.t("common.optional")})</span>
+            </p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              {props.t("seller.products.newPlant.tagsHint")}
+            </p>
+          </div>
+        </div>
+        <TagGroupSelector
           selectedTags={props.tagIds}
           onToggle={props.onTagToggle}
           groups={tagGroups()}
-          placeholder={props.t("seller.products.newPlant.tagsPlaceholder")}
+          isLoading={props.tags() === undefined}
         />
-        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-          {props.t("seller.products.newPlant.tagsHint")}
-        </p>
       </div>
     </div>
   );
