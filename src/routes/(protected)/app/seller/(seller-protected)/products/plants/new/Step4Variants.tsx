@@ -1,73 +1,9 @@
-import { createEffect, Show, For } from "solid-js";
+import { createEffect, Show, For, createSignal } from "solid-js";
 import { PlusIcon, TrashIcon } from "~/components/icons";
 import { Select, type SelectOption } from "~/components/ui/Select";
-
-function NumberField(props: {
-  id: string;
-  label: string;
-  required?: boolean;
-  placeholder?: string;
-  value: number | "";
-  onInput: (val: number | "") => void;
-  error?: string;
-  min?: number;
-  step?: number;
-}) {
-  return (
-    <div>
-      <label for={props.id} class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-        {props.label}
-        {props.required && <span class="text-red-500 ml-1">*</span>}
-      </label>
-      <input
-        type="number"
-        id={props.id}
-        value={props.value}
-        onInput={(e) => {
-          const v = (e.target as HTMLInputElement).value;
-          props.onInput(v === "" ? "" : parseFloat(v));
-        }}
-        placeholder={props.placeholder}
-        min={props.min}
-        step={props.step || "any"}
-        class={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-forest-500 focus:border-transparent transition-colors text-sm ${
-          props.error
-            ? "border-red-500 dark:border-red-400"
-            : "border-cream-200 dark:border-forest-600"
-        }`}
-      />
-      <Show when={props.error}>
-        <p class="mt-1 text-xs text-red-600 dark:text-red-400 font-medium">
-          {props.error}
-        </p>
-      </Show>
-    </div>
-  );
-}
-
-function InputField(props: {
-  id: string;
-  label: string;
-  placeholder?: string;
-  value: string;
-  onInput: (val: string) => void;
-}) {
-  return (
-    <div>
-      <label for={props.id} class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-        {props.label}
-      </label>
-      <input
-        type="text"
-        id={props.id}
-        value={props.value}
-        onInput={(e) => props.onInput((e.target as HTMLInputElement).value)}
-        placeholder={props.placeholder}
-        class="w-full px-3 py-2 rounded-lg border border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-forest-500 focus:border-transparent transition-colors text-sm"
-      />
-    </div>
-  );
-}
+import Input from "~/components/ui/Input";
+import { mediaApi } from "~/lib/api";
+import { toaster } from "~/components/ui/Toast";
 
 function CheckboxField(props: {
   id: string;
@@ -85,7 +21,7 @@ function CheckboxField(props: {
           onChange={(e) => props.onChange((e.target as HTMLInputElement).checked)}
           class="sr-only peer"
         />
-        <div class="w-5 h-5 rounded border-2 border-cream-300 dark:border-forest-600 bg-white dark:bg-forest-700 peer-checked:bg-forest-600 peer-checked:border-forest-600 transition-colors flex items-center justify-center">
+        <div class="w-5 h-5 rounded border-2 border-cream-200 dark:border-forest-700 bg-white dark:bg-forest-900/30 peer-checked:bg-forest-600 peer-checked:border-forest-600 transition-colors flex items-center justify-center">
           <Show when={props.checked}>
             <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
@@ -109,6 +45,7 @@ export interface VariantStore {
   isBase: boolean;
   isActive: boolean;
   mediaIds: string[];
+  mediaUrls: string[];
   growthStage: string;
   plantForm: string;
   variegation: string;
@@ -120,28 +57,70 @@ export interface VariantStore {
 function VariantImageUpload(props: {
   variantIndex: number;
   mediaIds: string[];
+  mediaUrls: string[];
   setVariants: (fn: (v: VariantStore[]) => VariantStore[]) => void;
   t: (key: string) => string;
 }) {
+  const [isUploading, setIsUploading] = createSignal(false);
+  const [isDeleting, setIsDeleting] = createSignal(false);
+
+  const handleUpload = async (file: File) => {
+    if (file.size > 5 * 1024 * 1024) {
+      toaster.error(props.t("seller.products.newPlant.imageSizeError"));
+      return;
+    }
+    setIsUploading(true);
+    try {
+      const response = await mediaApi.upload(file);
+      props.setVariants(v => v.map((item, i) => i === props.variantIndex ? {
+        ...item,
+        mediaIds: [...item.mediaIds, response.id],
+        mediaUrls: [...item.mediaUrls, response.url]
+      } : item));
+      toaster.success(props.t("seller.products.newPlant.imageUploaded"));
+    } catch (err: any) {
+      toaster.error(err.message || props.t("seller.products.newPlant.imageUploadFailed"));
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDelete = async (idx: number) => {
+    const id = props.mediaIds[idx];
+    if (!id) return;
+    setIsDeleting(true);
+    try {
+      await mediaApi.delete(id);
+      props.setVariants(v => v.map((item, i) => i === props.variantIndex ? {
+        ...item,
+        mediaIds: item.mediaIds.filter((_, j) => j !== idx),
+        mediaUrls: item.mediaUrls.filter((_, j) => j !== idx)
+      } : item));
+    } catch (err: any) {
+      toaster.error(err.message || props.t("seller.products.newPlant.imageDeleteFailed"));
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div>
       <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
         {props.t("seller.products.newPlant.variantImagesLabel").replace("{count}", String(props.mediaIds.length))}
       </p>
       <Show when={props.mediaIds.length > 0}>
-        <div class="flex flex-wrap gap-2 mb-2">
-          <For each={props.mediaIds}>
-            {(mediaId, idx) => (
-              <div class="relative w-16 h-16 rounded-lg overflow-hidden border border-cream-200 dark:border-forest-600">
-                <div class="w-full h-full bg-cream-100 dark:bg-forest-700 flex items-center justify-center text-xs text-gray-400">
-                  {props.t("seller.products.newPlant.variantImagePlaceholder").replace("{n}", String(idx() + 1))}
-                </div>
+        <div class="flex flex-wrap gap-2 mb-3">
+          <For each={props.mediaUrls}>
+            {(url, idx) => (
+              <div class="relative w-20 h-20 rounded-lg overflow-hidden border-2 border-cream-200 dark:border-forest-700 group">
+                <img src={url} alt={props.t("seller.products.newPlant.variantImageAlt").replace("{n}", String(idx() + 1))} class="w-full h-full object-cover" />
                 <button
                   type="button"
-                  onClick={() => props.setVariants(v => v.map((item, i) => i === props.variantIndex ? { ...item, mediaIds: item.mediaIds.filter((_, j) => j !== idx()) } : item))}
-                  class="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600"
+                  onClick={() => handleDelete(idx())}
+                  disabled={isDeleting()}
+                  class="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  ×
+                  {isDeleting() ? "…" : "×"}
                 </button>
               </div>
             )}
@@ -149,10 +128,23 @@ function VariantImageUpload(props: {
         </div>
       </Show>
       <Show when={props.mediaIds.length < 10}>
-        <div class="flex items-center justify-center px-4 py-3 border-2 border-dashed border-cream-200 dark:border-forest-700 rounded-lg bg-white dark:bg-forest-900/30">
-          <p class="text-xs text-forest-600 dark:text-forest-400">
-            {props.t("seller.products.newPlant.variantImageComingSoon")}
-          </p>
+        <div class="relative">
+          <input
+            type="file"
+            accept="image/*"
+            disabled={isUploading()}
+            onChange={(e) => {
+              const file = e.currentTarget.files?.[0];
+              if (file) handleUpload(file);
+              e.currentTarget.value = "";
+            }}
+            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+          />
+          <div class="flex items-center justify-center px-4 py-3 border-2 border-dashed border-cream-200 dark:border-forest-700 rounded-lg bg-white dark:bg-forest-900/30 hover:border-terracotta-500 dark:hover:border-terracotta-400 transition-colors">
+            <p class="text-xs text-forest-600 dark:text-forest-400">
+              {isUploading() ? props.t("seller.products.newPlant.imageUploading") : props.t("seller.products.newPlant.imageUploadPrompt")}
+            </p>
+          </div>
         </div>
       </Show>
     </div>
@@ -204,7 +196,7 @@ export function Step4Variants(props: {
       <For each={props.variants}>
         {(variant, index) => (
           <div class="border border-cream-200 dark:border-forest-700 rounded-xl overflow-hidden">
-            <div class="bg-cream-50 dark:bg-forest-800/50 px-4 py-3 flex items-center justify-between border-b border-cream-200 dark:border-forest-700">
+            <div class="bg-cream-50 dark:bg-forest-900/20 px-4 py-3 flex items-center justify-between border-b border-cream-200 dark:border-forest-700">
               <div class="flex items-center gap-2">
                 <span class="text-sm font-semibold text-forest-800 dark:text-cream-50">
                   {props.t("seller.products.newPlant.variantTitle")} #{index() + 1}
@@ -229,37 +221,45 @@ export function Step4Variants(props: {
             <div class="p-4 space-y-4">
               {/* Pricing row */}
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                <NumberField
+                <Input
+                  type="number"
                   id={`variant-${index()}-price`}
                   label={props.t("seller.products.newPlant.priceLabel")}
                   required
                   placeholder={props.t("seller.products.newPlant.pricePlaceholder")}
                   value={variant.price}
-                  onInput={(v) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, price: v } : item))}
+                  onInput={(e) => {
+                    const v = e.currentTarget.value;
+                    props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, price: v === "" ? "" : parseFloat(v) } : item));
+                  }}
                   error={props.errors[`variants.${index()}.price`]}
                   min={0}
                 />
-                <NumberField
+                <Input
+                  type="number"
                   id={`variant-${index()}-inventory`}
                   label={props.t("seller.products.newPlant.inventoryCountLabel")}
                   placeholder={props.t("seller.products.newPlant.inventoryCountPlaceholder")}
                   value={variant.inventoryCount}
-                  onInput={(v) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, inventoryCount: v } : item))}
+                  onInput={(e) => {
+                    const v = e.currentTarget.value;
+                    props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, inventoryCount: v === "" ? "" : parseFloat(v) } : item));
+                  }}
                   min={0}
                 />
               </div>
 
               {/* SKU */}
-              <InputField
+              <Input
                 id={`variant-${index()}-sku`}
                 label={props.t("seller.products.newPlant.skuLabel")}
                 placeholder={props.t("seller.products.newPlant.skuPlaceholder")}
                 value={variant.sku}
-                onInput={(v) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, sku: v } : item))}
+                onInput={(e) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, sku: e.currentTarget.value } : item))}
               />
 
       {/* Variant images */}
-      <VariantImageUpload variantIndex={index()} mediaIds={variant.mediaIds} setVariants={props.setVariants} t={props.t} />
+      <VariantImageUpload variantIndex={index()} mediaIds={variant.mediaIds} mediaUrls={variant.mediaUrls} setVariants={props.setVariants} t={props.t} />
 
               {/* Checkboxes */}
               <div class="flex flex-wrap gap-6">
@@ -285,12 +285,16 @@ export function Step4Variants(props: {
 
               {/* Low stock threshold */}
               <Show when={variant.trackInventory}>
-                <NumberField
+                <Input
+                  type="number"
                   id={`variant-${index()}-low-stock`}
                   label={props.t("seller.products.newPlant.lowStockThresholdLabel")}
                   placeholder={props.t("seller.products.newPlant.lowStockThresholdPlaceholder")}
                   value={variant.lowStockThreshold}
-                  onInput={(v) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, lowStockThreshold: v } : item))}
+                  onInput={(e) => {
+                    const v = e.currentTarget.value;
+                    props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, lowStockThreshold: v === "" ? "" : parseFloat(v) } : item));
+                  }}
                   min={0}
                 />
               </Show>
@@ -308,40 +312,40 @@ export function Step4Variants(props: {
                     onChange={(e) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, growthStage: e.currentTarget.value } : item))}
                     placeholder={props.t("seller.products.newPlant.growthStagePlaceholder")}
                   />
-                  <InputField
+                  <Input
                     id={`variant-${index()}-plant-form`}
                     label={props.t("seller.products.newPlant.plantFormLabel")}
                     placeholder={props.t("seller.products.newPlant.plantFormPlaceholder")}
                     value={variant.plantForm}
-                    onInput={(v) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, plantForm: v } : item))}
+                    onInput={(e) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, plantForm: e.currentTarget.value } : item))}
                   />
-                  <InputField
+                  <Input
                     id={`variant-${index()}-variegation`}
                     label={props.t("seller.products.newPlant.variegationLabel")}
                     placeholder={props.t("seller.products.newPlant.variegationPlaceholder")}
                     value={variant.variegation}
-                    onInput={(v) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, variegation: v } : item))}
+                    onInput={(e) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, variegation: e.currentTarget.value } : item))}
                   />
-                  <InputField
+                  <Input
                     id={`variant-${index()}-propagation`}
                     label={props.t("seller.products.newPlant.propagationTypeLabel")}
                     placeholder={props.t("seller.products.newPlant.propagationTypePlaceholder")}
                     value={variant.propagationType}
-                    onInput={(v) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, propagationType: v } : item))}
+                    onInput={(e) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, propagationType: e.currentTarget.value } : item))}
                   />
-                  <InputField
+                  <Input
                     id={`variant-${index()}-container`}
                     label={props.t("seller.products.newPlant.containerTypeLabel")}
                     placeholder={props.t("seller.products.newPlant.containerTypePlaceholder")}
                     value={variant.containerType}
-                    onInput={(v) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, containerType: v } : item))}
+                    onInput={(e) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, containerType: e.currentTarget.value } : item))}
                   />
-                  <InputField
+                  <Input
                     id={`variant-${index()}-bundle`}
                     label={props.t("seller.products.newPlant.bundleTypeLabel")}
                     placeholder={props.t("seller.products.newPlant.bundleTypePlaceholder")}
                     value={variant.bundleType}
-                    onInput={(v) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, bundleType: v } : item))}
+                    onInput={(e) => props.setVariants(vr => vr.map((item, i) => i === index() ? { ...item, bundleType: e.currentTarget.value } : item))}
                   />
                 </div>
               </div>

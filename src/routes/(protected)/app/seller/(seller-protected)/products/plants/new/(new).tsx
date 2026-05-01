@@ -45,6 +45,7 @@ function createEmptyVariant(): VariantStore {
     isBase: false,
     isActive: true,
     mediaIds: [],
+    mediaUrls: [],
     growthStage: "",
     plantForm: "",
     variegation: "",
