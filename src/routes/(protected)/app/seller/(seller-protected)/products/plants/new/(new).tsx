@@ -1,7 +1,7 @@
 import { createSignal, createMemo, Show, For, mergeProps } from "solid-js";
 import { createStore } from "solid-js/store";
 import { A, createAsync } from "@solidjs/router";
-import { getCategoryTree } from "~/lib/api/endpoints/public/categories.api";
+import { getCategoryTree, getTags } from "~/lib/api/endpoints/public";
 import { useI18n } from "~/i18n";
 import { slugify } from "~/lib/utils/slugify";
 import Button from "~/components/ui/Button";
@@ -63,6 +63,9 @@ export default function NewPlantPage() {
 
   // ---- Category Tree ----
   const categoryTree = createAsync(() => getCategoryTree());
+
+  // ---- Tags ----
+  const tags = createAsync(() => getTags());
 
   // ---- Translated Select Options ----
   const lightOptions = createMemo<SelectOption[]>(() => [
@@ -616,6 +619,7 @@ export default function NewPlantPage() {
                 onTagToggle={toggleTag}
                 errors={errors()}
                 categoryTree={categoryTree}
+                tags={tags}
                 t={t}
                 onWarningChange={handleWarningChange(2)}
               />

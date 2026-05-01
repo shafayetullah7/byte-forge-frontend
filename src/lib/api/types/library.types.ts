@@ -10,11 +10,6 @@ export interface TreeCategory {
   childrenCount: number;
   usageCount: number;
   parentId: string | null;
-  translations: Array<{
-    locale: string;
-    name: string;
-    description: string | null;
-  }>;
   createdAt: string;
   updatedAt: string;
 }
@@ -42,11 +37,6 @@ export interface PublicTag {
   name: string;
   description: string | null;
   usageCount: number;
-  translations: Array<{
-    locale: string;
-    name: string;
-    description: string | null;
-  }>;
 }
 
 /**
