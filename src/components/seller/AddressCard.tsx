@@ -1,6 +1,6 @@
 import { createSignal, Show, createEffect } from "solid-js";
 import { useI18n } from "~/i18n";
-import type { ShopAddress } from "~/lib/api/endpoints/seller-shop.api";
+import type { ShopAddress } from "~/lib/api/endpoints/seller/shop-detail.api";
 import AddressEditModal from "./AddressEditModal";
 import { MapPinIcon, PencilIcon, HashIcon, CheckIcon } from "~/components/icons";
 

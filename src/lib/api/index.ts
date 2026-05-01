@@ -17,12 +17,7 @@ export * from "./utils/server-auth";
 export * from "./utils/client-auth";
 
 // Re-export API endpoints
-export * from "./endpoints/auth.api";
-export * from "./endpoints/media.api";
-export * from "./endpoints/library.api";
-export * from "./endpoints/admin.api";
-export * from "./endpoints/seller.api";
-export * from "./endpoints/shops.api";
-export * from "./endpoints/verification.api";
-export * from "./endpoints/plants.api";
-export * from "./endpoints/user.api";
+export * from "./endpoints/public";
+export * from "./endpoints/user";
+export * from "./endpoints/seller";
+export * from "./endpoints/admin";

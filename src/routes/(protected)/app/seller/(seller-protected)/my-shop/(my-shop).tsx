@@ -12,7 +12,7 @@ import ShopInfoEditModal from "~/components/seller/ShopInfoEditModal";
 import { useI18n } from "~/i18n";
 import { toaster } from "~/components/ui/Toast";
 import { getShop, getShopStatus, refetchShop, refetchShopStatus } from "~/lib/context/shop-context";
-import { sellerShopApi, type UpdateAddressDto, type UpdateContactDto, type UpdateShopInfoDto, type VerificationStatusType } from "~/lib/api/endpoints/seller-shop.api";
+import { sellerShopApi, type UpdateAddressDto, type UpdateContactDto, type UpdateShopInfoDto, type VerificationStatusType } from "~/lib/api/endpoints/seller/shop-detail.api";
 import { ShopIcon, PlusIcon, BoltIcon, PackageIcon, EyeIcon, CheckCircleIcon } from "~/components/icons";
 
 /**

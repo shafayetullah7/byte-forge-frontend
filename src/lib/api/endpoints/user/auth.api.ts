@@ -1,4 +1,4 @@
-import { fetcher } from "../api-client";
+import { fetcher } from "../../api-client";
 import type {
   CreateUserRequest,
   LoginRequest,
@@ -11,7 +11,7 @@ import type {
   ResendResetOtpRequest,
   ResetPasswordRequest,
   RefreshTokenResponse,
-} from "../types/auth.types";
+} from "../../types/auth.types";
 
 /**
  * Authentication API endpoints

@@ -2,7 +2,7 @@ import { createAsync } from "@solidjs/router";
 import { Suspense } from "solid-js";
 import Card from "~/components/ui/Card";
 import Badge from "~/components/ui/Badge";
-import { sellerShopApi } from "~/lib/api/endpoints/seller-shop.api";
+import { sellerShopApi } from "~/lib/api/endpoints/seller/shop-detail.api";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 
 // Placeholder data - replace with actual API call when endpoint is ready

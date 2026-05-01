@@ -1,5 +1,5 @@
 import { query } from "@solidjs/router";
-import { fetcher } from '../api-client';
+import { fetcher } from '../../api-client';
 
 export interface PublicShop {
   id: string;

@@ -1,4 +1,4 @@
-import type { ShopContact } from "~/lib/api/endpoints/seller-shop.api";
+import type { ShopContact } from "~/lib/api/endpoints/seller/shop-detail.api";
 import { useI18n } from "~/i18n";
 import { EnvelopeIcon, PhoneIcon, PencilIcon, ArrowTopRightOnSquareIcon, ChatBubbleLeftRightIcon } from "~/components/icons";
 

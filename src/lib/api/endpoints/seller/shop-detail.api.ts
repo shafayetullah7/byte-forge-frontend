@@ -1,6 +1,6 @@
 import { query } from '@solidjs/router';
-import { fetcher } from '../api-client';
-import { ApiError } from '../types';
+import { fetcher } from '../../api-client';
+import { ApiError } from '../../types';
 
 export interface ShopTranslation {
   id: string;

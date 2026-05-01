@@ -1,4 +1,4 @@
-import type { PublicShop } from "~/lib/api/endpoints/public-shops.api";
+import type { PublicShop } from "~/lib/api/endpoints/public/shops.api";
 
 interface ShopCardProps {
   shop: PublicShop;

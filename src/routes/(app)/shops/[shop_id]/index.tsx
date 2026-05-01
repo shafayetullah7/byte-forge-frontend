@@ -1,6 +1,6 @@
 import { useParams, A, createAsync } from "@solidjs/router";
 import { Suspense } from "solid-js";
-import { publicShopsApi, type PublicShop } from "~/lib/api/endpoints/public-shops.api";
+import { publicShopsApi, type PublicShop } from "~/lib/api/endpoints/public/shops.api";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 import Button from "~/components/ui/Button";
 

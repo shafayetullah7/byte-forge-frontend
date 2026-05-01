@@ -1,5 +1,5 @@
-import { fetcher } from "../api-client";
-import type { AuthUser } from "../types/auth.types";
+import { fetcher } from "../../api-client";
+import type { AuthUser } from "../../types/auth.types";
 
 /**
  * User/Profile API endpoints

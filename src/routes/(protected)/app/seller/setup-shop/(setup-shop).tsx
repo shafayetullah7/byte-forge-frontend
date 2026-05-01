@@ -8,7 +8,7 @@ import { toaster } from "~/components/ui/Toast";
 import { useI18n } from "~/i18n";
 import { useImageUpload } from "~/lib/hooks/useImageUpload";
 import type { ApplyAsSellerRequest, ShopTranslationInput } from "~/lib/api/types/seller.types";
-import { sellerApi } from "~/lib/api/endpoints/seller.api";
+import { sellerApi } from "~/lib/api/endpoints/seller";
 import type { Locale } from "~/i18n";
 
 /**

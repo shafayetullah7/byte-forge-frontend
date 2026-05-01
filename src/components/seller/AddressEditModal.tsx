@@ -4,7 +4,7 @@ import Input from "~/components/ui/Input";
 import Button from "~/components/ui/Button";
 import { createStore } from "solid-js/store";
 import { useI18n } from "~/i18n";
-import type { ShopAddress, UpdateAddressDto } from "~/lib/api/endpoints/seller-shop.api";
+import type { ShopAddress, UpdateAddressDto } from "~/lib/api/endpoints/seller/shop-detail.api";
 import { AddressFormData, addressSchema } from "~/schemas/address.schema";
 import { BANGLADESH } from "~/data/bangladesh-addresses";
 

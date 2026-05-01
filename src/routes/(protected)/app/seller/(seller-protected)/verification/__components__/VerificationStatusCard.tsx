@@ -2,7 +2,7 @@ import { Show } from 'solid-js';
 import Card from '~/components/ui/Card';
 import Badge from '~/components/ui/Badge';
 import { CheckIcon, XCircleIcon, ClockIcon, ShieldCheckIcon, PlusIcon, CalendarIcon, ArrowPathIcon, DocumentTextIcon, EyeIcon, ExclamationCircleIcon, InfoCircleIcon, CheckBadgeIcon } from '~/components/icons';
-import type { VerificationStatusType, ShopMedia } from '~/lib/api/endpoints/seller-shop.api';
+import type { VerificationStatusType, ShopMedia } from '~/lib/api/endpoints/seller/shop-detail.api';
 import { useI18n } from '~/i18n';
 
 export interface VerificationStatusCardProps {

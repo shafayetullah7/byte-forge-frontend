@@ -1,4 +1,9 @@
-import type {
+import { sellerShopsApi } from "./shops.api";
+import { sellerVerificationApi } from "./verification.api";
+import { plantsApi } from "./plants.api";
+
+export { sellerShopApi } from "./shop-detail.api";
+export type {
   Shop,
   ShopStatus,
   ApplyAsSellerRequest,
@@ -9,16 +14,12 @@ import type {
   CreatePlantResponse,
   VerificationStatus,
   UpdateVerificationRequest,
-} from "../types/seller.types";
-import { sellerShopsApi } from "./shops.api";
-import { sellerVerificationApi } from "./verification.api";
-import { plantsApi } from "./plants.api";
+} from "../../types/seller.types";
 
 /**
  * Seller API endpoints
  *
  * Barrel file that re-exports all seller-related APIs.
- * Individual modules: shops.api.ts, verification.api.ts, plants.api.ts
  */
 export const sellerApi = {
   /**
@@ -35,18 +36,4 @@ export const sellerApi = {
    * Plant/Product management
    */
   plants: plantsApi,
-};
-
-// Re-export types for convenience
-export type {
-  Shop,
-  ShopStatus,
-  ApplyAsSellerRequest,
-  PlantListItem,
-  PlantListResponse,
-  PlantFilter,
-  CreatePlantRequest,
-  CreatePlantResponse,
-  VerificationStatus,
-  UpdateVerificationRequest,
 };

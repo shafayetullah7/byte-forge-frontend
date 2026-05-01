@@ -1,5 +1,5 @@
-import { fetcher } from "../api-client";
-import type { MediaRecord, UploadMediaResponse } from "../types/media.types";
+import { fetcher } from "../../api-client";
+import type { MediaRecord, UploadMediaResponse } from "../../types/media.types";
 
 /**
  * Media API endpoints

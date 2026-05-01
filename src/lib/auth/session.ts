@@ -1,5 +1,5 @@
 import { query, createAsync } from "@solidjs/router";
-import { authApi } from "~/lib/api/endpoints/auth.api";
+import { authApi } from "~/lib/api/endpoints/user/auth.api";
 
 /**
  * Session Management for ByteForge Frontend

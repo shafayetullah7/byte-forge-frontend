@@ -1,15 +1,16 @@
 import { createSignal, createMemo, Show, For, mergeProps } from "solid-js";
 import { createStore } from "solid-js/store";
-import { A } from "@solidjs/router";
+import { A, createAsync } from "@solidjs/router";
+import { getCategoryTree } from "~/lib/api/endpoints/public/categories.api";
 import { useI18n } from "~/i18n";
 import { slugify } from "~/lib/utils/slugify";
 import Button from "~/components/ui/Button";
-import { Select, type SelectOption } from "~/components/ui/Select";
-import { TagMultiSelect, type TagGroupOption } from "~/components/ui/TagMultiSelect";
+import { type SelectOption } from "~/components/ui/Select";
+import { TagMultiSelect } from "~/components/ui/TagMultiSelect";
 import { ImageUpload } from "~/components/ui/ImageUpload";
 import { useImageUpload } from "~/lib/hooks/useImageUpload";
 import { toaster } from "~/components/ui/Toast";
-import { plantsApi } from "~/lib/api/endpoints/plants.api";
+import { plantsApi } from "~/lib/api/endpoints/seller/plants.api";
 import { SunIcon, ChevronLeftIcon } from "~/components/icons";
 import { StepIndicator } from "./StepIndicator";
 import { Step1Identity } from "./Step1Identity";
@@ -29,16 +30,6 @@ type PlantStatus = "DRAFT" | "ACTIVE" | "ARCHIVED";
 interface FormErrors {
   [key: string]: string;
 }
-
-// ========================
-// Static Options
-// ========================
-
-const CATEGORY_OPTIONS: SelectOption[] = [
-  { value: "", label: "Loading categories..." },
-];
-
-const TAG_GROUPS: TagGroupOption[] = [];
 
 // ========================
 // Helper
@@ -69,6 +60,9 @@ function createEmptyVariant(): VariantStore {
 
 export default function NewPlantPage() {
   const { t } = useI18n();
+
+  // ---- Category Tree ----
+  const categoryTree = createAsync(() => getCategoryTree().then((res) => { console.log("CATEGORY_TREE_API_RESPONSE:", JSON.stringify(res, null, 2)); return res; }));
 
   // ---- Translated Select Options ----
   const lightOptions = createMemo<SelectOption[]>(() => [
@@ -568,7 +562,7 @@ export default function NewPlantPage() {
         noValidate
       >
         {/* Step Content */}
-        <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm overflow-hidden">
+        <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm">
           <div class="px-6 py-4 border-b border-cream-200 dark:border-forest-700">
             <h2 class="text-base font-semibold text-forest-800 dark:text-cream-50">
               {stepTitle()}
@@ -621,8 +615,7 @@ export default function NewPlantPage() {
                 tagIds={plantDetails.tagIds}
                 onTagToggle={toggleTag}
                 errors={errors()}
-                categoryOptions={CATEGORY_OPTIONS}
-                tagGroups={TAG_GROUPS}
+                categoryTree={categoryTree}
                 t={t}
                 onWarningChange={handleWarningChange(2)}
               />

@@ -1,5 +1,5 @@
 import { A } from "@solidjs/router";
-import type { ShopMedia } from "~/lib/api/endpoints/seller-shop.api";
+import type { ShopMedia } from "~/lib/api/endpoints/seller/shop-detail.api";
 
 interface ShopHeaderProps {
   logo: ShopMedia | null;

@@ -1,6 +1,7 @@
-import { createEffect } from "solid-js";
-import { Select, type SelectOption } from "~/components/ui/Select";
-import { TagMultiSelect, type TagGroupOption } from "~/components/ui/TagMultiSelect";
+import { createEffect, type Accessor } from "solid-js";
+import { CategoryTreeSelect } from "~/components/ui/CategoryTreeSelect";
+import { TagMultiSelect } from "~/components/ui/TagMultiSelect";
+import type { CategoryTree } from "~/lib/api/endpoints/public/categories.api";
 
 export function Step2CategoryTags(props: {
   categoryId: string;
@@ -8,8 +9,7 @@ export function Step2CategoryTags(props: {
   tagIds: string[];
   onTagToggle: (tagId: string) => void;
   errors: Record<string, string>;
-  categoryOptions: SelectOption[];
-  tagGroups: TagGroupOption[];
+  categoryTree: Accessor<CategoryTree[] | undefined>;
   t: (key: string) => string;
   onWarningChange: (hasWarning: boolean, missingFields: string[]) => void;
 }) {
@@ -28,13 +28,14 @@ export function Step2CategoryTags(props: {
         </p>
       </div>
 
-      {/* Category */}
+      {/* Category Tree Selector */}
       <div>
-        <Select
+        <CategoryTreeSelect
           label={props.t("seller.products.newPlant.categoryLabel")}
-          options={props.categoryOptions}
+          categories={props.categoryTree() ?? []}
+          isLoading={props.categoryTree() === undefined}
           value={props.categoryId}
-          onChange={(e) => props.onCategoryIdChange(e.currentTarget.value)}
+          onChange={props.onCategoryIdChange}
           placeholder={props.t("seller.products.newPlant.categoryPlaceholder")}
           error={props.errors["categoryId"]}
           required
@@ -53,7 +54,7 @@ export function Step2CategoryTags(props: {
         <TagMultiSelect
           selectedTags={props.tagIds}
           onToggle={props.onTagToggle}
-          groups={props.tagGroups}
+          groups={[]}
           placeholder={props.t("seller.products.newPlant.tagsPlaceholder")}
         />
         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">

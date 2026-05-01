@@ -1,5 +1,5 @@
-import { fetcher } from "../api-client";
-import type { TreeCategory, TreeCategoryNode, CategoryFilter, PublicTagGroup, PublicTag, TagFilter } from "../types/library.types";
+import { fetcher } from '../../api-client';
+import type { TreeCategory, TreeCategoryNode, CategoryFilter, PublicTagGroup, PublicTag, TagFilter } from '../../types/library.types';
 
 /**
  * Library API endpoints

@@ -1,7 +1,7 @@
 import { query, revalidate } from "@solidjs/router";
 import { ApiError } from "~/lib/api/types";
 import type { Shop, ShopStatus } from "~/lib/api/types/seller.types";
-import { sellerApi } from "~/lib/api/endpoints/seller.api";
+import { sellerApi } from "~/lib/api/endpoints/seller";
 
 /**
  * Shop Data Loader

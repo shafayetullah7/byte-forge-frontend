@@ -2,7 +2,7 @@ import { createSignal, Show, Suspense, createEffect, onMount } from 'solid-js';
 import { createAsync, useNavigate, action, useSubmission, useAction, revalidate } from '@solidjs/router';
 import { VerificationStatusCard } from './__components__/VerificationStatusCard';
 import { VerificationForm, type VerificationFormData } from './__components__/VerificationForm';
-import { sellerShopApi } from '~/lib/api/endpoints/seller-shop.api';
+import { sellerShopApi } from '~/lib/api/endpoints/seller/shop-detail.api';
 import { getShop } from '~/lib/context/shop-context';
 import { toaster } from '~/components/ui/Toast';
 import { useI18n } from '~/i18n';

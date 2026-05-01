@@ -5,7 +5,7 @@ import { Textarea } from "~/components/ui/Textarea";
 import Button from "~/components/ui/Button";
 import { createForm } from "@modular-forms/solid";
 import { useI18n } from "~/i18n";
-import type { Shop } from "~/lib/api/endpoints/seller-shop.api";
+import type { Shop } from "~/lib/api/endpoints/seller/shop-detail.api";
 import { shopInfoSchema, type ShopInfoFormData } from "~/schemas/shop-info.schema";
 
 export interface ShopInfoEditModalProps {

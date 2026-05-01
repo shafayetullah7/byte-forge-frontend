@@ -1,10 +1,10 @@
-import { fetcher } from "../api-client";
+import { fetcher } from "../../api-client";
 import type {
   TreeCategory,
   CategoryFilter,
   CreateCategoryRequest,
   UpdateCategoryRequest,
-} from "../types/library.types";
+} from "../../types/library.types";
 
 /**
  * Admin API endpoints

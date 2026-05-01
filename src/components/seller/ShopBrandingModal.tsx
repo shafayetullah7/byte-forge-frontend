@@ -4,7 +4,7 @@ import Button from "~/components/ui/Button";
 import { ImageUpload } from "~/components/ui";
 import { useImageUpload } from "~/lib/hooks/useImageUpload";
 import { useI18n } from "~/i18n";
-import type { Shop } from "~/lib/api/endpoints/seller-shop.api";
+import type { Shop } from "~/lib/api/endpoints/seller/shop-detail.api";
 
 export interface ShopBrandingModalProps {
   isOpen: boolean;

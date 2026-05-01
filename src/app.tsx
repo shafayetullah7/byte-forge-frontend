@@ -1,6 +1,7 @@
 import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { Suspense, createEffect } from "solid-js";
+import { revalidate } from "@solidjs/router";
 import { Toaster } from "~/components/ui/Toast";
 import { I18nContext, createI18n, type Locale } from "~/i18n";
 import { ThemeProvider, Theme } from "~/lib/context/theme-context";
@@ -54,6 +55,16 @@ export default function App() {
     const loc = i18n.locale();
     if (!isServer) {
       document.cookie = `locale=${loc}; path=/; max-age=31536000; SameSite=Lax`;
+    }
+  });
+
+  // Revalidate localized queries when locale changes
+  let prevLocale = initialLocale;
+  createEffect(() => {
+    const newLocale = i18n.locale();
+    if (prevLocale !== newLocale) {
+      revalidate();
+      prevLocale = newLocale;
     }
   });
 

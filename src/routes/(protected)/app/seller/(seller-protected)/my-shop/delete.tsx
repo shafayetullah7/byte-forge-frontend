@@ -3,7 +3,7 @@ import { createSignal } from "solid-js";
 import Button from "~/components/ui/Button";
 import Card from "~/components/ui/Card";
 import { Modal } from "~/components/ui/Modal";
-import { sellerShopApi } from "~/lib/api/endpoints/seller-shop.api";
+import { sellerShopApi } from "~/lib/api/endpoints/seller/shop-detail.api";
 import { createAsync } from "@solidjs/router";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 

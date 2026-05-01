@@ -1,10 +1,10 @@
-import { fetcher } from "../api-client";
-import { ApiError } from "../types";
+import { fetcher } from "../../api-client";
+import { ApiError } from "../../types";
 import type {
   Shop,
   ShopStatus,
   ApplyAsSellerRequest,
-} from "../types/seller.types";
+} from "../../types/seller.types";
 
 /**
  * Seller Shops API endpoints

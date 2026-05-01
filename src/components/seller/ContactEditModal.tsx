@@ -4,7 +4,7 @@ import Input from "~/components/ui/Input";
 import Button from "~/components/ui/Button";
 import { createForm } from "@modular-forms/solid";
 import { useI18n } from "~/i18n";
-import type { ShopContact, UpdateContactDto } from "~/lib/api/endpoints/seller-shop.api";
+import type { ShopContact, UpdateContactDto } from "~/lib/api/endpoints/seller/shop-detail.api";
 import { contactSchema, type ContactFormData } from "~/schemas/contact.schema";
 
 export interface ContactEditModalProps {

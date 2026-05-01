@@ -4,7 +4,7 @@ import Button from "~/components/ui/Button";
 import Input from "~/components/ui/Input";
 import Card from "~/components/ui/Card";
 import { Modal } from "~/components/ui/Modal";
-import { sellerShopApi } from "~/lib/api/endpoints/seller-shop.api";
+import { sellerShopApi } from "~/lib/api/endpoints/seller/shop-detail.api";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 
 export default function EditShopPage() {

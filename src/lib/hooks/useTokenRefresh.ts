@@ -1,5 +1,5 @@
 import { createEffect, createSignal, onCleanup } from "solid-js";
-import { authApi } from "~/lib/api/endpoints/auth.api";
+import { authApi } from "~/lib/api/endpoints/user/auth.api";
 import { useSession } from "~/lib/auth/session";
 import { performLogout } from "~/lib/auth/session";
 

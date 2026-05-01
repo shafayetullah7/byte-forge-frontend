@@ -1,11 +1,11 @@
-import { fetcher } from "../api-client";
+import { fetcher } from "../../api-client";
 import type {
   PlantListItem,
   PlantListResponse,
   PlantFilter,
   CreatePlantRequest,
   CreatePlantResponse,
-} from "../types/seller.types";
+} from "../../types/seller.types";
 
 /**
  * Plant/Product API endpoints
