@@ -63,19 +63,12 @@ export function Step2CategoryTags(props: {
         </p>
       </div>
 
-      {/* Tags - Visual Group Selector */}
+      {/* Tags - Compact Group Selector */}
       <div>
-        <div class="flex items-center justify-between mb-3">
-          <div>
-            <p class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              {props.t("seller.products.newPlant.tagsLabel")}
-              <span class="text-gray-400 ml-1">({props.t("common.optional")})</span>
-            </p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-              {props.t("seller.products.newPlant.tagsHint")}
-            </p>
-          </div>
-        </div>
+        <p class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          {props.t("seller.products.newPlant.tagsLabel")}
+          <span class="text-gray-400 dark:text-gray-500 ml-1">({props.t("common.optional")})</span>
+        </p>
         <TagGroupSelector
           selectedTags={props.tagIds}
           onToggle={props.onTagToggle}
