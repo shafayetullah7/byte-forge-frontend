@@ -18,7 +18,6 @@ interface FlatNode {
   id: string;
   name: string;
   level: number;
-  depth: number;
 }
 
 function buildTree(flat: CategoryTree[]): CategoryTree[] {
@@ -44,7 +43,7 @@ function buildTree(flat: CategoryTree[]): CategoryTree[] {
 function flattenTree(nodes: CategoryTree[], level = 0): FlatNode[] {
   let result: FlatNode[] = [];
   for (const node of nodes) {
-    result.push({ id: node.id, name: node.name, level, depth: level });
+    result.push({ id: node.id, name: node.name, level });
     if (node.children && node.children.length > 0) {
       result = [...result, ...flattenTree(node.children, level + 1)];
     }
@@ -65,19 +64,8 @@ export function CategoryTreeSelect(props: CategoryTreeSelectProps) {
   const allNodes = createMemo(() => {
     const cats = props.categories;
     if (!cats || cats.length === 0) return [];
-
-    const hasParentRefs = cats.some((c) => c.parentId !== null && c.parentId !== undefined);
     const hasNestedChildren = cats.some((c) => c.children && c.children.length > 0);
-
-    let tree: CategoryTree[];
-    if (hasNestedChildren) {
-      tree = cats;
-    } else if (hasParentRefs) {
-      tree = buildTree(cats);
-    } else {
-      tree = cats;
-    }
-
+    const tree = hasNestedChildren ? cats : buildTree(cats);
     return flattenTree(tree);
   });
 
@@ -157,7 +145,7 @@ export function CategoryTreeSelect(props: CategoryTreeSelectProps) {
             />
           </div>
 
-          {/* List */}
+          {/* Tree List */}
           <div class="max-h-72 overflow-y-auto">
             <Show
               when={props.isLoading}
@@ -187,7 +175,7 @@ export function CategoryTreeSelect(props: CategoryTreeSelectProps) {
                               : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-forest-700"
                           }`}
                         >
-                          <div style={{ width: `${node.level * 12}px` }} class="flex-shrink-0" />
+                          <div style={{ width: `${node.level * 16}px` }} class="flex-shrink-0" />
                           <FolderIcon class={`w-3.5 h-3.5 flex-shrink-0 ${getIconColor(node.level)}`} />
                           <span class="flex-1 truncate">{node.name}</span>
                           <Show when={isSelected}>

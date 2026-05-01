@@ -62,7 +62,7 @@ export default function NewPlantPage() {
   const { t } = useI18n();
 
   // ---- Category Tree ----
-  const categoryTree = createAsync(() => getCategoryTree().then((res) => { console.log("CATEGORY_TREE_API_RESPONSE:", JSON.stringify(res, null, 2)); return res; }));
+  const categoryTree = createAsync(() => getCategoryTree());
 
   // ---- Translated Select Options ----
   const lightOptions = createMemo<SelectOption[]>(() => [
