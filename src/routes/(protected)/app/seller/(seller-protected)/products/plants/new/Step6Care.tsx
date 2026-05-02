@@ -1,44 +1,5 @@
 import { Show } from "solid-js";
-
-function InputField(props: {
-  id: string;
-  label: string;
-  placeholder?: string;
-  value: string;
-  onInput: (val: string) => void;
-  textarea?: boolean;
-  rows?: number;
-  dir?: "auto" | "ltr" | "rtl";
-}) {
-  return (
-    <div>
-      <label for={props.id} class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-        {props.label}
-      </label>
-      {props.textarea ? (
-        <textarea
-          id={props.id}
-          value={props.value}
-          onInput={(e) => props.onInput((e.target as HTMLTextAreaElement).value)}
-          placeholder={props.placeholder}
-          rows={props.rows || 3}
-          dir={props.dir}
-          class="w-full px-3 py-2 rounded-lg border border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-forest-500 focus:border-transparent transition-colors text-sm resize-none"
-        />
-      ) : (
-        <input
-          type="text"
-          id={props.id}
-          value={props.value}
-          onInput={(e) => props.onInput((e.target as HTMLInputElement).value)}
-          placeholder={props.placeholder}
-          dir={props.dir}
-          class="w-full px-3 py-2 rounded-lg border border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-forest-500 focus:border-transparent transition-colors text-sm"
-        />
-      )}
-    </div>
-  );
-}
+import { Textarea } from "~/components/ui";
 
 export function Step6Care(props: {
   lightInstructions: string;
@@ -82,165 +43,133 @@ export function Step6Care(props: {
     <div class="space-y-6">
       {/* General Care Instructions */}
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <InputField
-          id="care-light"
+        <Textarea
           label={props.t("seller.products.newPlant.lightInstructionsLabel")}
           placeholder={props.t("seller.products.newPlant.lightInstructionsPlaceholder")}
           value={props.lightInstructions}
-          onInput={props.onLightInstructionsChange}
-          textarea
+          onInput={(e) => props.onLightInstructionsChange((e.currentTarget as HTMLTextAreaElement).value)}
           rows={3}
         />
-        <InputField
-          id="care-watering"
+        <Textarea
           label={props.t("seller.products.newPlant.wateringInstructionsLabel")}
           placeholder={props.t("seller.products.newPlant.wateringInstructionsPlaceholder")}
           value={props.wateringInstructions}
-          onInput={props.onWateringInstructionsChange}
-          textarea
+          onInput={(e) => props.onWateringInstructionsChange((e.currentTarget as HTMLTextAreaElement).value)}
           rows={3}
         />
-        <InputField
-          id="care-humidity"
+        <Textarea
           label={props.t("seller.products.newPlant.humidityInstructionsLabel")}
           placeholder={props.t("seller.products.newPlant.humidityInstructionsPlaceholder")}
           value={props.humidityInstructions}
-          onInput={props.onHumidityInstructionsChange}
-          textarea
+          onInput={(e) => props.onHumidityInstructionsChange((e.currentTarget as HTMLTextAreaElement).value)}
           rows={3}
         />
-        <InputField
-          id="care-fertilizer"
+        <Textarea
           label={props.t("seller.products.newPlant.fertilizerScheduleLabel")}
           placeholder={props.t("seller.products.newPlant.fertilizerSchedulePlaceholder")}
           value={props.fertilizerSchedule}
-          onInput={props.onFertilizerScheduleChange}
-          textarea
+          onInput={(e) => props.onFertilizerScheduleChange((e.currentTarget as HTMLTextAreaElement).value)}
           rows={3}
         />
-        <InputField
-          id="care-repotting"
+        <Textarea
           label={props.t("seller.products.newPlant.repottingFrequencyLabel")}
           placeholder={props.t("seller.products.newPlant.repottingFrequencyPlaceholder")}
           value={props.repottingFrequency}
-          onInput={props.onRepottingFrequencyChange}
-          textarea
+          onInput={(e) => props.onRepottingFrequencyChange((e.currentTarget as HTMLTextAreaElement).value)}
           rows={3}
         />
-        <InputField
-          id="care-pruning"
+        <Textarea
           label={props.t("seller.products.newPlant.pruningNotesLabel")}
           placeholder={props.t("seller.products.newPlant.pruningNotesPlaceholder")}
           value={props.pruningNotes}
-          onInput={props.onPruningNotesChange}
-          textarea
+          onInput={(e) => props.onPruningNotesChange((e.currentTarget as HTMLTextAreaElement).value)}
           rows={3}
         />
-        <InputField
-          id="care-problems"
+        <Textarea
           label={props.t("seller.products.newPlant.commonProblemsLabel")}
           placeholder={props.t("seller.products.newPlant.commonProblemsPlaceholder")}
           value={props.commonProblems}
-          onInput={props.onCommonProblemsChange}
-          textarea
+          onInput={(e) => props.onCommonProblemsChange((e.currentTarget as HTMLTextAreaElement).value)}
           rows={3}
         />
-        <InputField
-          id="care-seasonal"
+        <Textarea
           label={props.t("seller.products.newPlant.seasonalCareLabel")}
           placeholder={props.t("seller.products.newPlant.seasonalCarePlaceholder")}
           value={props.seasonalCare}
-          onInput={props.onSeasonalCareChange}
-          textarea
+          onInput={(e) => props.onSeasonalCareChange((e.currentTarget as HTMLTextAreaElement).value)}
           rows={3}
         />
       </div>
 
       {/* Bengali Care Translations */}
       <div class="border-t border-cream-200 dark:border-forest-700 pt-6">
-        <h4 class="text-sm font-semibold text-forest-800 dark:text-cream-50 mb-4">
+        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
           {props.t("seller.products.newPlant.careTranslationsTitle")}
         </h4>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <InputField
-            id="care-bn-light"
+          <Textarea
             label={props.t("seller.products.newPlant.lightInstructionsLabel")}
             placeholder={props.t("seller.products.newPlant.lightInstructionsBnPlaceholder")}
             value={props.bnLightInstructions}
-            onInput={props.onBnLightInstructionsChange}
-            dir="auto"
-            textarea
+            onInput={(e) => props.onBnLightInstructionsChange((e.currentTarget as HTMLTextAreaElement).value)}
             rows={3}
+            dir="auto"
           />
-          <InputField
-            id="care-bn-watering"
+          <Textarea
             label={props.t("seller.products.newPlant.wateringInstructionsLabel")}
             placeholder={props.t("seller.products.newPlant.wateringInstructionsBnPlaceholder")}
             value={props.bnWateringInstructions}
-            onInput={props.onBnWateringInstructionsChange}
-            dir="auto"
-            textarea
+            onInput={(e) => props.onBnWateringInstructionsChange((e.currentTarget as HTMLTextAreaElement).value)}
             rows={3}
+            dir="auto"
           />
-          <InputField
-            id="care-bn-humidity"
+          <Textarea
             label={props.t("seller.products.newPlant.humidityInstructionsLabel")}
             placeholder={props.t("seller.products.newPlant.humidityInstructionsBnPlaceholder")}
             value={props.bnHumidityInstructions}
-            onInput={props.onBnHumidityInstructionsChange}
-            dir="auto"
-            textarea
+            onInput={(e) => props.onBnHumidityInstructionsChange((e.currentTarget as HTMLTextAreaElement).value)}
             rows={3}
+            dir="auto"
           />
-          <InputField
-            id="care-bn-fertilizer"
+          <Textarea
             label={props.t("seller.products.newPlant.fertilizerScheduleLabel")}
             placeholder={props.t("seller.products.newPlant.fertilizerScheduleBnPlaceholder")}
             value={props.bnFertilizerSchedule}
-            onInput={props.onBnFertilizerScheduleChange}
-            dir="auto"
-            textarea
+            onInput={(e) => props.onBnFertilizerScheduleChange((e.currentTarget as HTMLTextAreaElement).value)}
             rows={3}
+            dir="auto"
           />
-          <InputField
-            id="care-bn-repotting"
+          <Textarea
             label={props.t("seller.products.newPlant.repottingFrequencyLabel")}
             placeholder={props.t("seller.products.newPlant.repottingFrequencyBnPlaceholder")}
             value={props.bnRepottingFrequency}
-            onInput={props.onBnRepottingFrequencyChange}
-            dir="auto"
-            textarea
+            onInput={(e) => props.onBnRepottingFrequencyChange((e.currentTarget as HTMLTextAreaElement).value)}
             rows={3}
+            dir="auto"
           />
-          <InputField
-            id="care-bn-pruning"
+          <Textarea
             label={props.t("seller.products.newPlant.pruningNotesLabel")}
             placeholder={props.t("seller.products.newPlant.pruningNotesBnPlaceholder")}
             value={props.bnPruningNotes}
-            onInput={props.onBnPruningNotesChange}
-            dir="auto"
-            textarea
+            onInput={(e) => props.onBnPruningNotesChange((e.currentTarget as HTMLTextAreaElement).value)}
             rows={3}
+            dir="auto"
           />
-          <InputField
-            id="care-bn-problems"
+          <Textarea
             label={props.t("seller.products.newPlant.commonProblemsLabel")}
             placeholder={props.t("seller.products.newPlant.commonProblemsBnPlaceholder")}
             value={props.bnCommonProblems}
-            onInput={props.onBnCommonProblemsChange}
-            dir="auto"
-            textarea
+            onInput={(e) => props.onBnCommonProblemsChange((e.currentTarget as HTMLTextAreaElement).value)}
             rows={3}
+            dir="auto"
           />
-          <InputField
-            id="care-bn-seasonal"
+          <Textarea
             label={props.t("seller.products.newPlant.seasonalCareLabel")}
             placeholder={props.t("seller.products.newPlant.seasonalCareBnPlaceholder")}
             value={props.bnSeasonalCare}
-            onInput={props.onBnSeasonalCareChange}
-            dir="auto"
-            textarea
+            onInput={(e) => props.onBnSeasonalCareChange((e.currentTarget as HTMLTextAreaElement).value)}
             rows={3}
+            dir="auto"
           />
         </div>
       </div>

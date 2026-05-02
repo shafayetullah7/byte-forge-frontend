@@ -236,6 +236,22 @@ export default function NewPlantPage() {
     setVariants((v) => v.filter((_, i) => i !== index));
   }
 
+  function duplicateVariant(index: number) {
+    const source = variants[index];
+    const copy: VariantStore = {
+      ...source,
+      sku: source.sku ? `${source.sku}-copy` : "",
+      isBase: false,
+      mediaIds: [...source.mediaIds],
+      mediaUrls: [...source.mediaUrls],
+    };
+    setVariants((v) => {
+      const newArr = [...v];
+      newArr.splice(index + 1, 0, copy);
+      return newArr;
+    });
+  }
+
   // Tag toggle
   function toggleTag(tagId: string) {
     const current = [...plantDetails.tagIds];
@@ -446,7 +462,7 @@ export default function NewPlantPage() {
         },
         variants: variants.map((v) => ({
           sku: v.sku.trim() || undefined,
-          price: v.price as number,
+          price: v.price === "" ? 0 : v.price,
           inventoryCount: typeof v.inventoryCount === "number" ? v.inventoryCount : 0,
           trackInventory: v.trackInventory,
           lowStockThreshold: typeof v.lowStockThreshold === "number" ? v.lowStockThreshold : undefined,
@@ -704,6 +720,7 @@ export default function NewPlantPage() {
                 variants={variants}
                 setVariants={(fn: (v: VariantStore[]) => VariantStore[]) => setVariants(fn)}
                 addVariant={addVariant}
+                duplicateVariant={duplicateVariant}
                 removeVariant={removeVariant}
                 errors={errors()}
                 growthStageOptions={growthStageOptions()}

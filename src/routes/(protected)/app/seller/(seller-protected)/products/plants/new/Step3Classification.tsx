@@ -1,34 +1,5 @@
 import { Show } from "solid-js";
-
-function InputField(props: {
-  id: string;
-  label: string;
-  placeholder?: string;
-  value: string;
-  onInput: (val: string) => void;
-  hint?: string;
-  dir?: "auto" | "ltr" | "rtl";
-}) {
-  return (
-    <div>
-      <label for={props.id} class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-        {props.label}
-      </label>
-      <input
-        type="text"
-        id={props.id}
-        value={props.value}
-        onInput={(e) => props.onInput((e.target as HTMLInputElement).value)}
-        placeholder={props.placeholder}
-        dir={props.dir}
-        class="w-full px-3 py-2 rounded-lg border border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-forest-500 focus:border-transparent transition-colors text-sm"
-      />
-      <Show when={props.hint}>
-        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{props.hint}</p>
-      </Show>
-    </div>
-  );
-}
+import { Input } from "~/components/ui";
 
 export function Step3Classification(props: {
   enCommonNames: string;
@@ -67,36 +38,31 @@ export function Step3Classification(props: {
         <div class="space-y-4">
           <div class="flex items-center gap-2 mb-2">
             <span class="text-lg">🇬🇧</span>
-            <h4 class="text-sm font-semibold text-forest-800 dark:text-cream-50">English</h4>
+            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">English</h4>
           </div>
-          <InputField
-            id="en-common-names"
+          <Input
             label={props.t("seller.products.newPlant.commonNamesLabel")}
             placeholder={props.t("seller.products.newPlant.commonNamesPlaceholder")}
             value={props.enCommonNames}
-            onInput={props.onEnCommonNamesChange}
+            onInput={(e) => props.onEnCommonNamesChange((e.currentTarget as HTMLInputElement).value)}
           />
-          <InputField
-            id="en-origin"
+          <Input
             label={props.t("seller.products.newPlant.originLabel")}
             placeholder={props.t("seller.products.newPlant.originPlaceholder")}
             value={props.enOrigin}
-            onInput={props.onEnOriginChange}
+            onInput={(e) => props.onEnOriginChange((e.currentTarget as HTMLInputElement).value)}
           />
-          <InputField
-            id="en-soil-type"
+          <Input
             label={props.t("seller.products.newPlant.soilTypeLabel")}
             placeholder={props.t("seller.products.newPlant.soilTypePlaceholder")}
             value={props.enSoilType}
-            onInput={props.onEnSoilTypeChange}
+            onInput={(e) => props.onEnSoilTypeChange((e.currentTarget as HTMLInputElement).value)}
           />
-          <InputField
-            id="en-toxicity"
+          <Input
             label={props.t("seller.products.newPlant.toxicityInfoLabel")}
             placeholder={props.t("seller.products.newPlant.toxicityInfoPlaceholder")}
             value={props.enToxicityInfo}
-            onInput={props.onEnToxicityInfoChange}
-            hint={props.t("seller.products.newPlant.toxicityInfoHint")}
+            onInput={(e) => props.onEnToxicityInfoChange((e.currentTarget as HTMLInputElement).value)}
           />
         </div>
 
@@ -104,39 +70,31 @@ export function Step3Classification(props: {
         <div class="space-y-4">
           <div class="flex items-center gap-2 mb-2">
             <span class="text-lg">🇧🇩</span>
-            <h4 class="text-sm font-semibold text-forest-800 dark:text-cream-50">বাংলা</h4>
+            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">বাংলা</h4>
           </div>
-          <InputField
-            id="bn-common-names"
+          <Input
             label={props.t("seller.products.newPlant.commonNamesLabel")}
             placeholder={props.t("seller.products.newPlant.commonNamesBnPlaceholder")}
             value={props.bnCommonNames}
-            onInput={props.onBnCommonNamesChange}
-            dir="auto"
+            onInput={(e) => props.onBnCommonNamesChange((e.currentTarget as HTMLInputElement).value)}
           />
-          <InputField
-            id="bn-origin"
+          <Input
             label={props.t("seller.products.newPlant.originLabel")}
             placeholder={props.t("seller.products.newPlant.originBnPlaceholder")}
             value={props.bnOrigin}
-            onInput={props.onBnOriginChange}
-            dir="auto"
+            onInput={(e) => props.onBnOriginChange((e.currentTarget as HTMLInputElement).value)}
           />
-          <InputField
-            id="bn-soil-type"
+          <Input
             label={props.t("seller.products.newPlant.soilTypeLabel")}
             placeholder={props.t("seller.products.newPlant.soilTypeBnPlaceholder")}
             value={props.bnSoilType}
-            onInput={props.onBnSoilTypeChange}
-            dir="auto"
+            onInput={(e) => props.onBnSoilTypeChange((e.currentTarget as HTMLInputElement).value)}
           />
-          <InputField
-            id="bn-toxicity"
+          <Input
             label={props.t("seller.products.newPlant.toxicityInfoLabel")}
             placeholder={props.t("seller.products.newPlant.toxicityInfoBnPlaceholder")}
             value={props.bnToxicityInfo}
-            onInput={props.onBnToxicityInfoChange}
-            dir="auto"
+            onInput={(e) => props.onBnToxicityInfoChange((e.currentTarget as HTMLInputElement).value)}
           />
         </div>
       </div>

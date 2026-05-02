@@ -19,7 +19,7 @@ export default function Input(props: InputProps) {
 
   // Base styles
   const baseStyles =
-    "w-full px-4 py-2.5 rounded-lg border-2 transition-standard focus-ring-flat disabled:opacity-50 disabled:cursor-not-allowed body-base bg-white dark:bg-forest-900/30";
+    "w-full px-4 py-2.5 rounded-lg border-2 transition-standard focus-ring-flat disabled:opacity-50 disabled:cursor-not-allowed text-sm bg-white dark:bg-forest-900/30";
 
   // State styles
   const stateStyles = local.error
@@ -31,13 +31,13 @@ export default function Input(props: InputProps) {
   return (
     <div class="w-full">
       <Show when={local.label}>
-        <label for={inputId} class="block body-small font-semibold mb-2">
+        <label for={inputId} class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
           {local.label}
         </label>
       </Show>
       <input id={inputId} class={classes} {...others} />
       <Show when={local.error}>
-        <p class="mt-1 body-small text-red-600 dark:text-red-400 font-semibold">{local.error}</p>
+        <p class="mt-1 text-xs text-red-600 dark:text-red-400 font-medium">{local.error}</p>
       </Show>
     </div>
   );

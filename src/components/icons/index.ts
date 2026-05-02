@@ -15,6 +15,7 @@ export { CubeIcon } from "./CubeIcon";
 export { PlusIcon } from "./PlusIcon";
 export { FolderIcon } from "./FolderIcon";
 export { ClipboardListIcon } from "./ClipboardListIcon";
+export { ClipboardDocumentIcon } from "./ClipboardDocumentIcon";
 export { CheckCircleIcon } from "./CheckCircleIcon";
 export { DollarSignIcon } from "./DollarSignIcon";
 export { BankIcon } from "./BankIcon";

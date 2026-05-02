@@ -2,70 +2,27 @@ import { createEffect, Show, createMemo } from "solid-js";
 import { CheckCircleIcon } from "~/components/icons";
 import { Select, type SelectOption } from "~/components/ui/Select";
 import { ImageUpload } from "~/components/ui/ImageUpload";
+import { Input, Textarea } from "~/components/ui";
 
-function InputField(props: {
-  id: string;
+function InlineFieldset(props: {
   label: string;
   required?: boolean;
-  placeholder?: string;
-  value: string;
-  onInput: (val: string) => void;
   error?: string;
-  textarea?: boolean;
-  rows?: number;
-  dir?: "auto" | "ltr" | "rtl";
   hint?: string;
-  maxLen?: number;
+  children: any;
 }) {
   return (
     <div>
-      <label for={props.id} class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
         {props.label}
         {props.required && <span class="text-red-500 ml-1">*</span>}
       </label>
-      {props.textarea ? (
-        <textarea
-          id={props.id}
-          value={props.value}
-          onInput={(e) => props.onInput((e.target as HTMLTextAreaElement).value)}
-          placeholder={props.placeholder}
-          rows={props.rows || 3}
-          dir={props.dir}
-          maxlength={props.maxLen || undefined}
-          class={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-forest-500 focus:border-transparent transition-colors text-sm resize-none ${
-            props.error
-              ? "border-red-500 dark:border-red-400"
-              : "border-cream-200 dark:border-forest-600"
-          }`}
-        />
-      ) : (
-        <input
-          type="text"
-          id={props.id}
-          value={props.value}
-          onInput={(e) => props.onInput((e.target as HTMLInputElement).value)}
-          placeholder={props.placeholder}
-          dir={props.dir}
-          maxlength={props.maxLen || undefined}
-          class={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-forest-500 focus:border-transparent transition-colors text-sm ${
-            props.error
-              ? "border-red-500 dark:border-red-400"
-              : "border-cream-200 dark:border-forest-600"
-          }`}
-        />
-      )}
+      {props.children}
       <Show when={props.error}>
-        <p class="mt-1 text-xs text-red-600 dark:text-red-400 font-medium">
-          {props.error}
-        </p>
+        <p class="mt-1 text-xs text-red-600 dark:text-red-400 font-medium">{props.error}</p>
       </Show>
       <Show when={props.hint}>
         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{props.hint}</p>
-      </Show>
-      <Show when={props.maxLen && props.textarea}>
-        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500 text-right">
-          {props.value.length}/{props.maxLen}
-        </p>
       </Show>
     </div>
   );
@@ -161,7 +118,7 @@ export function Step1Identity(props: {
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               {props.t("seller.products.newPlant.urlSlugLabel")}
-              <span class="text-gray-400 ml-1">({props.t("common.optional")})</span>
+              <span class="text-gray-400 dark:text-gray-500 ml-1">({props.t("common.optional")})</span>
             </label>
             <div class="flex rounded-lg">
               <span class="inline-flex items-center px-2.5 rounded-l-lg border border-r-0 border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-700 text-forest-700/70 dark:text-gray-400 text-xs">
@@ -172,7 +129,7 @@ export function Step1Identity(props: {
                 value={props.slug}
                 onInput={(e) => props.onSlugChange((e.currentTarget as HTMLInputElement).value)}
                 placeholder={props.t("seller.products.newPlant.urlSlugPlaceholder")}
-                class={`flex-1 min-w-0 block w-full px-3 py-2 rounded-r-lg border border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-forest-500 focus:border-transparent text-sm ${
+                class={`flex-1 min-w-0 block w-full px-4 py-2.5 rounded-r-lg border-2 border-cream-200 dark:border-forest-700 bg-white dark:bg-forest-900/30 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-forest-500 focus:border-transparent text-sm ${
                   props.errors["slug"] ? "border-red-500 dark:border-red-400" : ""
                 }`}
               />
@@ -187,14 +144,16 @@ export function Step1Identity(props: {
             </p>
           </div>
 
-          <InputField
-            id="scientific-name"
+          <InlineFieldset
             label={props.t("seller.products.newPlant.scientificNameLabel")}
-            placeholder={props.t("seller.products.newPlant.scientificNamePlaceholder")}
-            value={props.scientificName}
-            onInput={props.onScientificNameChange}
             hint={props.t("seller.products.newPlant.scientificNameHint")}
-          />
+          >
+            <Input
+              placeholder={props.t("seller.products.newPlant.scientificNamePlaceholder")}
+              value={props.scientificName}
+              onInput={(e) => props.onScientificNameChange((e.currentTarget as HTMLInputElement).value)}
+            />
+          </InlineFieldset>
         </div>
       </div>
 
@@ -204,7 +163,7 @@ export function Step1Identity(props: {
         <div class="space-y-4">
           <div class="flex items-center gap-2 mb-2">
             <span class="text-lg">🇬🇧</span>
-            <h4 class="text-sm font-semibold text-forest-800 dark:text-cream-50">{props.t("seller.products.newPlant.englishLabel")}</h4>
+            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">{props.t("seller.products.newPlant.englishLabel")}</h4>
             <div class="ml-auto">
               <Show when={hasEnglishContent()}>
                 <CheckCircleIcon class="w-5 h-5 text-forest-500" />
@@ -212,49 +171,53 @@ export function Step1Identity(props: {
             </div>
           </div>
 
-          <InputField
-            id="en-name"
+          <InlineFieldset
             label={props.t("seller.products.newPlant.plantNameLabel")}
             required
-            placeholder={props.t("seller.products.newPlant.plantNamePlaceholder")}
-            value={props.enName}
-            onInput={props.onEnNameChange}
             error={props.errors["en.name"]}
-            maxLen={255}
             hint={props.t("seller.products.newPlant.plantNameHint")}
-          />
+          >
+            <Input
+              placeholder={props.t("seller.products.newPlant.plantNamePlaceholder")}
+              value={props.enName}
+              onInput={(e) => props.onEnNameChange((e.currentTarget as HTMLInputElement).value)}
+              error={props.errors["en.name"]}
+            />
+          </InlineFieldset>
 
-          <InputField
-            id="en-short-desc"
+          <InlineFieldset
             label={props.t("seller.products.newPlant.shortSummaryLabel")}
-            placeholder={props.t("seller.products.newPlant.shortSummaryPlaceholder")}
-            value={props.enShortDesc}
-            onInput={props.onEnShortDescChange}
             error={props.errors["en.shortDescription"]}
-            maxLen={500}
-            textarea
-            rows={2}
             hint={props.t("seller.products.newPlant.shortSummaryHint")}
-          />
+          >
+            <Textarea
+              placeholder={props.t("seller.products.newPlant.shortSummaryPlaceholder")}
+              value={props.enShortDesc}
+              onInput={(e) => props.onEnShortDescChange((e.currentTarget as HTMLTextAreaElement).value)}
+              error={props.errors["en.shortDescription"]}
+              rows={2}
+            />
+          </InlineFieldset>
 
-          <InputField
-            id="en-description"
+          <InlineFieldset
             label={props.t("seller.products.newPlant.detailedDescriptionLabel")}
-            placeholder={props.t("seller.products.newPlant.descriptionPlaceholder")}
-            value={props.enDescription}
-            onInput={props.onEnDescriptionChange}
-            textarea
-            rows={5}
             hint={props.t("seller.products.newPlant.descriptionHint")}
-          />
+          >
+            <Textarea
+              placeholder={props.t("seller.products.newPlant.descriptionPlaceholder")}
+              value={props.enDescription}
+              onInput={(e) => props.onEnDescriptionChange((e.currentTarget as HTMLTextAreaElement).value)}
+              rows={5}
+            />
+          </InlineFieldset>
         </div>
 
         {/* Bengali Column */}
         <div class="space-y-4">
           <div class="flex items-center gap-2 mb-2">
             <span class="text-lg">🇧🇩</span>
-            <h4 class="text-sm font-semibold text-forest-800 dark:text-cream-50">বাংলা</h4>
-            <span class="text-xs font-normal text-gray-400">({props.t("common.optional")})</span>
+            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">বাংলা</h4>
+            <span class="text-xs text-gray-400 dark:text-gray-500">({props.t("common.optional")})</span>
             <div class="ml-auto">
               <Show when={hasBengaliContent()}>
                 <CheckCircleIcon class="w-5 h-5 text-forest-500" />
@@ -262,43 +225,44 @@ export function Step1Identity(props: {
             </div>
           </div>
 
-          <InputField
-            id="bn-name"
+          <InlineFieldset
             label={props.t("seller.products.newPlant.plantNameLabel")}
-            placeholder={props.t("seller.products.newPlant.plantNameBnPlaceholder")}
-            value={props.bnName}
-            onInput={props.onBnNameChange}
             error={props.errors["bn.name"]}
-            dir="auto"
-            maxLen={255}
             hint={props.t("seller.products.newPlant.plantNameHint")}
-          />
+          >
+            <Input
+              placeholder={props.t("seller.products.newPlant.plantNameBnPlaceholder")}
+              value={props.bnName}
+              onInput={(e) => props.onBnNameChange((e.currentTarget as HTMLInputElement).value)}
+              error={props.errors["bn.name"]}
+            />
+          </InlineFieldset>
 
-          <InputField
-            id="bn-short-desc"
+          <InlineFieldset
             label={props.t("seller.products.newPlant.shortSummaryLabel")}
-            placeholder={props.t("seller.products.newPlant.shortSummaryBnPlaceholder")}
-            value={props.bnShortDesc}
-            onInput={props.onBnShortDescChange}
             error={props.errors["bn.shortDescription"]}
-            dir="auto"
-            maxLen={500}
-            textarea
-            rows={2}
             hint={props.t("seller.products.newPlant.shortSummaryHint")}
-          />
+          >
+            <Textarea
+              placeholder={props.t("seller.products.newPlant.shortSummaryBnPlaceholder")}
+              value={props.bnShortDesc}
+              onInput={(e) => props.onBnShortDescChange((e.currentTarget as HTMLTextAreaElement).value)}
+              error={props.errors["bn.shortDescription"]}
+              rows={2}
+            />
+          </InlineFieldset>
 
-          <InputField
-            id="bn-description"
+          <InlineFieldset
             label={props.t("seller.products.newPlant.detailedDescriptionLabel")}
-            placeholder={props.t("seller.products.newPlant.descriptionBnPlaceholder")}
-            value={props.bnDescription}
-            onInput={props.onBnDescriptionChange}
-            dir="auto"
-            textarea
-            rows={5}
             hint={props.t("seller.products.newPlant.descriptionHint")}
-          />
+          >
+            <Textarea
+              placeholder={props.t("seller.products.newPlant.descriptionBnPlaceholder")}
+              value={props.bnDescription}
+              onInput={(e) => props.onBnDescriptionChange((e.currentTarget as HTMLTextAreaElement).value)}
+              rows={5}
+            />
+          </InlineFieldset>
         </div>
       </div>
     </div>
