@@ -216,7 +216,7 @@ export function Step1Identity(props: {
         <div class="space-y-4">
           <div class="flex items-center gap-2 mb-2">
             <span class="text-lg">🇧🇩</span>
-            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">বাংলা</h4>
+            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">{props.t("seller.products.newPlant.bengaliLabel")}</h4>
             <span class="text-xs text-gray-400 dark:text-gray-500">({props.t("common.optional")})</span>
             <div class="ml-auto">
               <Show when={hasBengaliContent()}>

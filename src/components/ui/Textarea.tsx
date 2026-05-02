@@ -1,19 +1,14 @@
-import { JSX, splitProps, Show } from "solid-js";
+import { JSX, splitProps, Show, createUniqueId } from "solid-js";
 
 export interface TextareaProps extends JSX.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   error?: string;
 }
 
-let textareaIdCounter = 0;
-function generateTextareaId(): string {
-  return `textarea-${++textareaIdCounter}`;
-}
-
 export default function Textarea(props: TextareaProps) {
   const [local, others] = splitProps(props, ["label", "error", "class"]);
 
-  const textareaId = generateTextareaId();
+  const textareaId = createUniqueId();
 
   const baseStyles =
     "w-full px-4 py-2.5 rounded-lg border-2 transition-standard focus-ring-flat disabled:opacity-50 disabled:cursor-not-allowed text-sm bg-white dark:bg-forest-900/30 resize-none";

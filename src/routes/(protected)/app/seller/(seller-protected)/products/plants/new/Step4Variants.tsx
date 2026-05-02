@@ -1,4 +1,4 @@
-import { createEffect, Show, For, createSignal } from "solid-js";
+import { createEffect, Show, createSignal, createMemo, Index, For } from "solid-js";
 import { PlusIcon, TrashIcon, ClipboardDocumentIcon } from "~/components/icons";
 import { Select, type SelectOption } from "~/components/ui/Select";
 import Input from "~/components/ui/Input";
@@ -39,6 +39,7 @@ function CheckboxField(props: {
 }
 
 export interface VariantStore {
+  id: string;
   sku: string;
   price: number | "";
   inventoryCount: number | "";
@@ -198,7 +199,7 @@ export function Step4Variants(props: {
   t: (key: string) => string;
   onWarningChange: (hasWarning: boolean, missingFields: string[]) => void;
 }) {
-  createEffect(() => {
+  const missingFields = createMemo(() => {
     const missing: string[] = [];
     if (props.variants.length === 0) {
       missing.push(props.t("seller.products.newPlant.atLeastOneVariant"));
@@ -214,7 +215,18 @@ export function Step4Variants(props: {
         missing.push(props.t("seller.products.newPlant.exactlyOneBase"));
       }
     }
-    props.onWarningChange(missing.length > 0, missing);
+    return missing;
+  });
+
+  let prevWarnings: string[] = [];
+  createEffect(() => {
+    const missing = missingFields();
+    const hasChanged = missing.length !== prevWarnings.length ||
+      missing.some((m, i) => m !== prevWarnings[i]);
+    if (hasChanged) {
+      prevWarnings = [...missing];
+      props.onWarningChange(missing.length > 0, missing);
+    }
   });
 
   return (
@@ -286,17 +298,17 @@ export function Step4Variants(props: {
       </Show>
 
       {/* Variant Cards */}
-      <For each={props.variants}>
+      <Index each={props.variants}>
         {(variant, index) => {
-          const i = index();
+          const i = index;
           const baseCount = props.variants.filter(v => v.isBase).length;
-          const isLastBase = variant.isBase && baseCount === 1;
+          const isLastBase = variant().isBase && baseCount === 1;
 
           const attrs = [
-            variant.growthStage, variant.plantForm, variant.variegation,
-            variant.leafDensity, variant.stemCount, variant.currentHeight,
-            variant.currentSpread, variant.propagationType, variant.containerType,
-            variant.containerSize, variant.bundleType
+            variant().growthStage, variant().plantForm, variant().variegation,
+            variant().leafDensity, variant().stemCount, variant().currentHeight,
+            variant().currentSpread, variant().propagationType, variant().containerType,
+            variant().containerSize, variant().bundleType
           ];
           const filled = attrs.filter(a => a && a !== '').length;
           const completionPercent = Math.round((filled / attrs.length) * 100);
@@ -311,7 +323,7 @@ export function Step4Variants(props: {
                   <span class="text-sm font-semibold text-gray-800 dark:text-gray-100">
                     {props.t("seller.products.newPlant.variantTitle")} #{i + 1}
                   </span>
-                  <Show when={variant.isBase}>
+                  <Show when={variant().isBase}>
                     <span class="text-xs px-2 py-0.5 rounded-full bg-forest-100 text-forest-700 dark:bg-forest-700 dark:text-forest-200 font-medium">
                       {props.t("seller.products.newPlant.baseBadge")}
                     </span>
@@ -322,11 +334,11 @@ export function Step4Variants(props: {
                   {/* Summary Bar */}
                   <div class="hidden sm:flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                     <span class="font-medium text-forest-700 dark:text-forest-300">
-                      ${typeof variant.price === 'number' ? variant.price.toFixed(2) : (variant.price || '—')}
+                      ${typeof variant().price === 'number' ? (variant().price as number).toFixed(2) : (variant().price || '—')}
                     </span>
-                    <span>📦 {variant.inventoryCount || '∞'}</span>
-                    <span>📸 {variant.mediaIds.length}</span>
-                    <span>🌱 {variant.growthStage || '—'}</span>
+                    <span>📦 {variant().inventoryCount || '∞'}</span>
+                    <span>📸 {variant().mediaIds.length}</span>
+                    <span>🌱 {variant().growthStage || '—'}</span>
                   </div>
 
                   {/* Completion Progress */}
@@ -343,7 +355,7 @@ export function Step4Variants(props: {
                   </Show>
 
                   {/* Low Stock Warning */}
-                  <Show when={variant.trackInventory && typeof variant.inventoryCount === 'number' && typeof variant.lowStockThreshold === 'number' && variant.inventoryCount <= variant.lowStockThreshold && variant.inventoryCount > 0}>
+                  <Show when={variant().trackInventory && typeof variant().inventoryCount === 'number' && typeof variant().lowStockThreshold === 'number' && (variant().inventoryCount as number) <= (variant().lowStockThreshold as number) && (variant().inventoryCount as number) > 0}>
                     <span class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 font-medium">
                       ⚠️ Low stock
                     </span>
@@ -382,7 +394,7 @@ export function Step4Variants(props: {
                     label={props.t("seller.products.newPlant.priceLabel")}
                     required
                     placeholder={props.t("seller.products.newPlant.pricePlaceholder")}
-                    value={variant.price}
+                    value={variant().price}
                     onInput={(e) => {
                       const v = e.currentTarget.value;
                       props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, price: v === "" ? "" : parseFloat(v) } : item));
@@ -395,7 +407,7 @@ export function Step4Variants(props: {
                     id={`variant-${i}-inventory`}
                     label={props.t("seller.products.newPlant.inventoryCountLabel")}
                     placeholder={props.t("seller.products.newPlant.inventoryCountPlaceholder")}
-                    value={variant.inventoryCount}
+                    value={variant().inventoryCount}
                     onInput={(e) => {
                       const v = e.currentTarget.value;
                       props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, inventoryCount: v === "" ? "" : parseFloat(v) } : item));
@@ -409,25 +421,25 @@ export function Step4Variants(props: {
                   id={`variant-${i}-sku`}
                   label={props.t("seller.products.newPlant.skuLabel")}
                   placeholder={props.t("seller.products.newPlant.skuPlaceholder")}
-                  value={variant.sku}
+                  value={variant().sku}
                   onInput={(e) => props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, sku: e.currentTarget.value } : item))}
                 />
 
                 {/* Variant images */}
-                <VariantImageUpload variantIndex={i} mediaIds={variant.mediaIds} mediaUrls={variant.mediaUrls} setVariants={props.setVariants} t={props.t} />
+                <VariantImageUpload variantIndex={i} mediaIds={variant().mediaIds} mediaUrls={variant().mediaUrls} setVariants={props.setVariants} t={props.t} />
 
                 {/* Checkboxes */}
                 <div class="flex flex-wrap gap-6">
                   <CheckboxField
                     id={`variant-${i}-track`}
                     label={props.t("seller.products.newPlant.trackInventoryLabel")}
-                    checked={variant.trackInventory}
+                    checked={variant().trackInventory}
                     onChange={(v) => props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, trackInventory: v } : item))}
                   />
                   <CheckboxField
                     id={`variant-${i}-base`}
                     label={props.t("seller.products.newPlant.isBaseLabel")}
-                    checked={variant.isBase}
+                    checked={variant().isBase}
                     disabled={isLastBase}
                     onChange={(v) => props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, isBase: v } : item))}
                   />
@@ -439,19 +451,19 @@ export function Step4Variants(props: {
                   <CheckboxField
                     id={`variant-${i}-active`}
                     label={props.t("seller.products.newPlant.isActiveLabel")}
-                    checked={variant.isActive}
+                    checked={variant().isActive}
                     onChange={(v) => props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, isActive: v } : item))}
                   />
                 </div>
 
                 {/* Low stock threshold */}
-                <Show when={variant.trackInventory}>
+                <Show when={variant().trackInventory}>
                   <Input
                     type="number"
                     id={`variant-${i}-low-stock`}
                     label={props.t("seller.products.newPlant.lowStockThresholdLabel")}
                     placeholder={props.t("seller.products.newPlant.lowStockThresholdPlaceholder")}
-                    value={variant.lowStockThreshold}
+                    value={variant().lowStockThreshold}
                     onInput={(e) => {
                       const v = e.currentTarget.value;
                       props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, lowStockThreshold: v === "" ? "" : parseFloat(v) } : item));
@@ -467,32 +479,32 @@ export function Step4Variants(props: {
                   </h5>
 
                   {/* Morphology */}
-                  <AttributeFieldset title="Morphology" emoji="🌱">
+                  <AttributeFieldset title={props.t("seller.products.newPlant.morphology")} emoji="🌱">
                     <Select
                       label={props.t("seller.products.newPlant.growthStageLabel")}
                       options={props.growthStageOptions}
-                      value={variant.growthStage}
+                      value={variant().growthStage}
                       onChange={(e) => props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, growthStage: e.currentTarget.value } : item))}
                       placeholder={props.t("seller.products.newPlant.growthStagePlaceholder")}
                     />
                     <Select
                       label={props.t("seller.products.newPlant.plantFormLabel")}
                       options={props.plantFormOptions}
-                      value={variant.plantForm}
+                      value={variant().plantForm}
                       onChange={(e) => props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, plantForm: e.currentTarget.value } : item))}
                       placeholder={props.t("seller.products.newPlant.plantFormPlaceholder")}
                     />
                     <Select
                       label={props.t("seller.products.newPlant.variegationLabel")}
                       options={props.variegationOptions}
-                      value={variant.variegation}
+                      value={variant().variegation}
                       onChange={(e) => props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, variegation: e.currentTarget.value } : item))}
                       placeholder={props.t("seller.products.newPlant.variegationPlaceholder")}
                     />
                     <Select
                       label={props.t("seller.products.newPlant.leafDensityLabel")}
                       options={props.leafDensityOptions}
-                      value={variant.leafDensity}
+                      value={variant().leafDensity}
                       onChange={(e) => props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, leafDensity: e.currentTarget.value } : item))}
                       placeholder={props.t("seller.products.newPlant.leafDensityPlaceholder")}
                     />
@@ -501,7 +513,7 @@ export function Step4Variants(props: {
                       id={`variant-${i}-stem-count`}
                       label={props.t("seller.products.newPlant.stemCountLabel")}
                       placeholder={props.t("seller.products.newPlant.stemCountPlaceholder")}
-                      value={variant.stemCount}
+                      value={variant().stemCount}
                       onInput={(e) => {
                         const v = e.currentTarget.value;
                         props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, stemCount: v === "" ? "" : parseInt(v) } : item));
@@ -516,14 +528,14 @@ export function Step4Variants(props: {
                       id={`variant-${i}-current-height`}
                       label={props.t("seller.products.newPlant.currentHeightLabel")}
                       placeholder={props.t("seller.products.newPlant.currentHeightPlaceholder")}
-                      value={variant.currentHeight}
+                      value={variant().currentHeight}
                       onInput={(e) => props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, currentHeight: e.currentTarget.value } : item))}
                     />
                     <Input
                       id={`variant-${i}-current-spread`}
                       label={props.t("seller.products.newPlant.currentSpreadLabel")}
                       placeholder={props.t("seller.products.newPlant.currentSpreadPlaceholder")}
-                      value={variant.currentSpread}
+                      value={variant().currentSpread}
                       onInput={(e) => props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, currentSpread: e.currentTarget.value } : item))}
                     />
                   </AttributeFieldset>
@@ -533,14 +545,14 @@ export function Step4Variants(props: {
                     <Select
                       label={props.t("seller.products.newPlant.propagationTypeLabel")}
                       options={props.propagationTypeOptions}
-                      value={variant.propagationType}
+                      value={variant().propagationType}
                       onChange={(e) => props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, propagationType: e.currentTarget.value } : item))}
                       placeholder={props.t("seller.products.newPlant.propagationTypePlaceholder")}
                     />
                     <Select
                       label={props.t("seller.products.newPlant.containerTypeLabel")}
                       options={props.containerTypeOptions}
-                      value={variant.containerType}
+                      value={variant().containerType}
                       onChange={(e) => props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, containerType: e.currentTarget.value } : item))}
                       placeholder={props.t("seller.products.newPlant.containerTypePlaceholder")}
                     />
@@ -548,14 +560,14 @@ export function Step4Variants(props: {
                       id={`variant-${i}-container-size`}
                       label={props.t("seller.products.newPlant.containerSizeLabel")}
                       placeholder={props.t("seller.products.newPlant.containerSizePlaceholder")}
-                      value={variant.containerSize}
+                      value={variant().containerSize}
                       onInput={(e) => props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, containerSize: e.currentTarget.value } : item))}
                     />
                     <Input
                       id={`variant-${i}-bundle`}
                       label={props.t("seller.products.newPlant.bundleTypeLabel")}
                       placeholder={props.t("seller.products.newPlant.bundleTypePlaceholder")}
-                      value={variant.bundleType}
+                      value={variant().bundleType}
                       onInput={(e) => props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, bundleType: e.currentTarget.value } : item))}
                     />
                   </AttributeFieldset>
@@ -564,7 +576,7 @@ export function Step4Variants(props: {
             </details>
           );
         }}
-      </For>
+      </Index>
     </div>
   );
 }

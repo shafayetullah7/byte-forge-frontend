@@ -1,21 +1,14 @@
-import { JSX, splitProps, Show } from "solid-js";
+import { JSX, splitProps, Show, createUniqueId } from "solid-js";
 
 export interface InputProps extends JSX.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
 }
 
-// Simple unique ID generator for label-input association
-let inputIdCounter = 0;
-function generateInputId(): string {
-  return `input-${++inputIdCounter}`;
-}
-
 export default function Input(props: InputProps) {
   const [local, others] = splitProps(props, ["label", "error", "class"]);
   
-  // Generate unique ID for label-input association
-  const inputId = generateInputId();
+  const inputId = createUniqueId();
 
   // Base styles
   const baseStyles =

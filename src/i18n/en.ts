@@ -671,6 +671,7 @@ export const dict = {
         step3Title: "Localized Details",
         step4Title: "Variants & Pricing",
         step4Description: "Each variant is a version of this plant (e.g., juvenile, mature, cutting). You must add at least one variant to set a price and create your plant listing.",
+        morphology: "Morphology",
         step5Title: "Care Profile",
         step6Title: "Care Guide",
         step7Title: "Preview & Submit",
@@ -705,6 +706,7 @@ export const dict = {
         categoryTagsDescription: "Organize your plant with a category and tags for better discoverability.",
         localizedDetailsDescription: "Add localized information to help customers in both English and Bengali.",
         // Care Requirements
+        careProfileDescription: "Define the care requirements and growth characteristics for this plant.",
         careRequirements: "Care Requirements",
         lightRequirementLabel: "Light Requirement",
         lightRequirementPlaceholder: "Select light level",
@@ -926,6 +928,10 @@ export const dict = {
         duplicateVariant: "Duplicate variant",
         atLeastOneBase: "At least one base required",
         previewStep: "Preview",
+        previewLocalizedDetails: "Localized Details",
+        previewVariants: "Variants",
+        namesAndDescriptionsSection: "Names & Descriptions",
+        categoryAndTagsSection: "Category & Tags",
       },
     },
     orders: {

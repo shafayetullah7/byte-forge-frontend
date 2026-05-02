@@ -1,7 +1,7 @@
 import { createEffect } from "solid-js";
 import { Modal } from "~/components/ui/Modal";
 import Input from "~/components/ui/Input";
-import { Textarea } from "~/components/ui/Textarea";
+import Textarea from "~/components/ui/Textarea";
 import Button from "~/components/ui/Button";
 import { createForm } from "@modular-forms/solid";
 import { useI18n } from "~/i18n";

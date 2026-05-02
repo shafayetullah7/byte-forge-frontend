@@ -38,7 +38,7 @@ export function Step3Classification(props: {
         <div class="space-y-4">
           <div class="flex items-center gap-2 mb-2">
             <span class="text-lg">🇬🇧</span>
-            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">English</h4>
+            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">{props.t("seller.products.newPlant.englishLabel")}</h4>
           </div>
           <Input
             label={props.t("seller.products.newPlant.commonNamesLabel")}
@@ -70,7 +70,7 @@ export function Step3Classification(props: {
         <div class="space-y-4">
           <div class="flex items-center gap-2 mb-2">
             <span class="text-lg">🇧🇩</span>
-            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">বাংলা</h4>
+            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">{props.t("seller.products.newPlant.bengaliLabel")}</h4>
           </div>
           <Input
             label={props.t("seller.products.newPlant.commonNamesLabel")}

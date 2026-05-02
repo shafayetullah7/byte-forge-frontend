@@ -675,6 +675,7 @@ export const dict = {
         step3Title: "স্থানীয় বিবরণ",
         step4Title: "ভেরিয়েন্ট ও মূল্য",
         step4Description: "প্রতিটি ভেরিয়েন্ট হলো এই গাছের একটি সংস্করণ (যেমন, শাবক, প্রাপ্তবয়স্ক, কাটিং)। মূল্য নির্ধারণ করতে এবং আপনার গাছের তালিকা তৈরি করতে আপনাকে অন্তত একটি ভেরিয়েন্ট যোগ করতে হবে।",
+        morphology: "গঠন",
         step5Title: "যত্ন প্রোফাইল",
         step6Title: "যত্ন নির্দেশিকা",
         step7Title: "পর্যালোচনা ও জমা দিন",
@@ -709,6 +710,7 @@ export const dict = {
         categoryTagsDescription: "বেস্ট ডিসকাভারেবিলিটির জন্য আপনার গাছকে ক্যাটাগরি ও ট্যাগ দিয়ে সংগঠিত করুন।",
         localizedDetailsDescription: "ইংরেজি ও বাংলায় স্থানীয় তথ্য যোগ করুন।",
         // Care Requirements
+        careProfileDescription: "এই গাছের যত্নের প্রয়োজনীয়তা এবং বৃদ্ধির বৈশিষ্ট্য নির্ধারণ করুন।",
         careRequirements: "যত্নের প্রয়োজনীয়তা",
         lightRequirementLabel: "আলোর প্রয়োজনীয়তা",
         lightRequirementPlaceholder: "আলোর মাত্রা নির্বাচন করুন",
@@ -929,6 +931,10 @@ export const dict = {
         duplicateVariant: "ভেরিয়েন্ট নকল করুন",
         atLeastOneBase: "কমপক্ষে একটি বেস প্রয়োজন",
         previewStep: "পূর্বরূপ",
+        previewLocalizedDetails: "স্থানীয় বিবরণ",
+        previewVariants: "ভেরিয়েন্ট",
+        namesAndDescriptionsSection: "নাম ও বিবরণ",
+        categoryAndTagsSection: "ক্যাটাগরি ও ট্যাগ",
       },
     },
     orders: {

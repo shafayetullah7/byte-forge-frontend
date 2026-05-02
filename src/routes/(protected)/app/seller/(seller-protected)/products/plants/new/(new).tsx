@@ -1,7 +1,9 @@
-import { createSignal, createMemo, Show, For, mergeProps } from "solid-js";
+import { createSignal, createMemo, Show, createEffect } from "solid-js";
 import { createStore } from "solid-js/store";
 import { A, createAsync } from "@solidjs/router";
 import { getCategoryTree, getTags } from "~/lib/api/endpoints/public";
+import type { CategoryTree } from "~/lib/api/endpoints/public/categories.api";
+import type { TagGroup } from "~/lib/api/endpoints/public/tags.api";
 import { useI18n } from "~/i18n";
 import { slugify } from "~/lib/utils/slugify";
 import Button from "~/components/ui/Button";
@@ -20,6 +22,8 @@ import { Step4Variants, type VariantStore } from "./Step4Variants";
 import { Step5CareProfile } from "./Step5CareProfile";
 import { Step6Care } from "./Step6Care";
 import { Step7Preview } from "./Step7Preview";
+import type { PlantFormState } from "~/lib/types/plant-form";
+import { createEmptyVariant, toCreatePlantDto } from "~/lib/types/plant-form";
 
 // ========================
 // Types
@@ -29,35 +33,6 @@ type PlantStatus = "DRAFT" | "ACTIVE" | "ARCHIVED";
 
 interface FormErrors {
   [key: string]: string;
-}
-
-// ========================
-// Helper
-// ========================
-
-function createEmptyVariant(): VariantStore {
-  return {
-    sku: "",
-    price: "",
-    inventoryCount: "",
-    trackInventory: true,
-    lowStockThreshold: "",
-    isBase: false,
-    isActive: true,
-    mediaIds: [],
-    mediaUrls: [],
-    growthStage: "juvenile",
-    plantForm: "upright",
-    variegation: "none",
-    leafDensity: "moderate",
-    stemCount: 1,
-    currentHeight: "",
-    currentSpread: "",
-    propagationType: "cutting",
-    containerType: "nursery_pot",
-    containerSize: "",
-    bundleType: "",
-  };
 }
 
 // ========================
@@ -151,12 +126,6 @@ export default function NewPlantPage() {
     { value: "grow_bag", label: t("seller.products.newPlant.contGrowBag") },
   ]);
 
-  const statusOptions = createMemo<SelectOption[]>(() => [
-    { value: "DRAFT", label: t("seller.products.newPlant.statusDraft") },
-    { value: "ACTIVE", label: t("seller.products.newPlant.statusActive") },
-    { value: "ARCHIVED", label: t("seller.products.newPlant.statusArchived") },
-  ]);
-
   // ---- Wizard State ----
   const [currentStep, setCurrentStep] = createSignal(1);
   const totalSteps = 7;
@@ -176,116 +145,147 @@ export default function NewPlantPage() {
   const [errors, setErrors] = createSignal<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = createSignal(false);
   const [submitStatus, setSubmitStatus] = createSignal<"success" | "error" | null>(null);
-
-  // Thumbnail
-  const thumbnailUpload = useImageUpload({ maxSizeMB: 5 });
-
-  // Status
-  const [status, setStatus] = createSignal<PlantStatus>("DRAFT");
-
-  // Translations (EN + BN)
-  const [translations, setTranslations] = createStore<{
-    en: { name: string; shortDescription: string; description: string };
-    bn: { name: string; shortDescription: string; description: string };
-  }>({
-    en: { name: "", shortDescription: "", description: "" },
-    bn: { name: "", shortDescription: "", description: "" },
-  });
-
-  // Slug
-  const [slug, setSlug] = createSignal("");
   const [isSlugManual, setIsSlugManual] = createSignal(false);
 
-  // Auto-computed slug (pure, no side effects — safe for SSR hydration)
-  const computedSlug = createMemo(() => {
-    const englishName = translations.en.name;
-    if (englishName) return slugify(englishName);
-    return "";
-  });
-
-  const effectiveSlug = createMemo(() => isSlugManual() ? slug() : computedSlug());
-
-  // Plant Details
-  const [plantDetails, setPlantDetails] = createStore({
-    categoryId: "",
-    tagIds: [] as string[],
-    scientificName: "",
-    lightRequirement: "",
-    wateringFrequency: "",
-    humidityLevel: "",
-    temperatureRange: "",
-    careDifficulty: "",
-    growthRate: "",
-    matureHeight: "",
-    matureSpread: "",
+  // Single form store
+  const [form, setForm] = createStore<PlantFormState>({
+    thumbnail: { id: null, url: null },
+    status: "DRAFT",
+    slug: "",
     translations: {
-      en: { commonNames: "", origin: "", soilType: "", toxicityInfo: "" },
-      bn: { commonNames: "", origin: "", soilType: "", toxicityInfo: "" },
+      en: { name: "", shortDescription: "", description: "" },
+      bn: { name: "", shortDescription: "", description: "" },
+    },
+    plantDetails: {
+      categoryId: "",
+      tagIds: [],
+      scientificName: "",
+      lightRequirement: "",
+      wateringFrequency: "",
+      humidityLevel: "",
+      temperatureRange: "",
+      careDifficulty: "",
+      growthRate: "",
+      matureHeight: "",
+      matureSpread: "",
+      translations: {
+        en: { commonNames: "", origin: "", soilType: "", toxicityInfo: "" },
+        bn: { commonNames: "", origin: "", soilType: "", toxicityInfo: "" },
+      },
+    },
+    variants: [createEmptyVariant()],
+    careGuide: {
+      en: {
+        lightInstructions: "",
+        wateringInstructions: "",
+        humidityInstructions: "",
+        fertilizerSchedule: "",
+        repottingFrequency: "",
+        pruningNotes: "",
+        commonProblems: "",
+        seasonalCare: "",
+      },
+      bn: {
+        lightInstructions: "",
+        wateringInstructions: "",
+        humidityInstructions: "",
+        fertilizerSchedule: "",
+        repottingFrequency: "",
+        pruningNotes: "",
+        commonProblems: "",
+        seasonalCare: "",
+      },
     },
   });
 
-  // Variants
-  const [variants, setVariants] = createStore<VariantStore[]>([createEmptyVariant()]);
+  // Thumbnail upload — hook handles upload logic, state syncs to form
+  const thumbnailUpload = useImageUpload({
+    maxSizeMB: 5,
+    onSuccess: (id, url) => setForm("thumbnail", { id, url }),
+    onError: () => setForm("thumbnail", { id: null, url: null }),
+  });
 
+  // Sync hook state to form store (handles deletion case)
+  createEffect(() => {
+    const hookId = thumbnailUpload.mediaId();
+    const hookUrl = thumbnailUpload.preview();
+    if (hookId !== form.thumbnail.id || hookUrl !== form.thumbnail.url) {
+      setForm("thumbnail", { id: hookId, url: hookUrl });
+    }
+  });
+
+  // Computed slug
+  const computedSlug = createMemo(() => slugify(form.translations.en.name));
+  const effectiveSlug = createMemo(() => isSlugManual() ? form.slug : computedSlug());
+
+  // ---- Resolved Display Data (for Preview) ----
+  const resolvedCategoryName = createMemo(() => {
+    const catId = form.plantDetails.categoryId;
+    if (!catId || !categoryTree()) return "";
+    const find = (cats: CategoryTree[]): string => {
+      for (const c of cats) {
+        if (c.id === catId) return c.name;
+        if (c.children) {
+          const found = find(c.children);
+          if (found) return found;
+        }
+      }
+      return "";
+    };
+    return find(categoryTree()!);
+  });
+
+  const resolvedTags = createMemo(() => {
+    const tagIds = form.plantDetails.tagIds;
+    if (!tags() || tagIds.length === 0) return [];
+    const result: { id: string; name: string }[] = [];
+    for (const group of tags()!) {
+      for (const tag of group.tags) {
+        if (tagIds.includes(tag.id)) {
+          result.push({ id: tag.id, name: tag.name });
+        }
+      }
+    }
+    return result;
+  });
+
+  // ---- Variant helpers ----
   function addVariant() {
-    setVariants((v) => [...v, createEmptyVariant()]);
+    setForm("variants", (v) => [...v, createEmptyVariant()]);
   }
 
   function removeVariant(index: number) {
-    if (variants.length <= 1) return;
-    setVariants((v) => v.filter((_, i) => i !== index));
+    if (form.variants.length <= 1) return;
+    setForm("variants", (v) => v.filter((_, i) => i !== index));
   }
 
   function duplicateVariant(index: number) {
-    const source = variants[index];
+    const source = form.variants[index];
     const copy: VariantStore = {
       ...source,
+      id: `variant-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       sku: source.sku ? `${source.sku}-copy` : "",
       isBase: false,
       mediaIds: [...source.mediaIds],
       mediaUrls: [...source.mediaUrls],
     };
-    setVariants((v) => {
+    setForm("variants", (v) => {
       const newArr = [...v];
       newArr.splice(index + 1, 0, copy);
       return newArr;
     });
   }
 
-  // Tag toggle
+  // ---- Tag toggle ----
   function toggleTag(tagId: string) {
-    const current = [...plantDetails.tagIds];
+    const current = [...form.plantDetails.tagIds];
     const idx = current.indexOf(tagId);
     if (idx >= 0) {
-      setPlantDetails("tagIds", current.filter((id) => id !== tagId));
+      setForm("plantDetails", "tagIds", current.filter((id) => id !== tagId));
     } else if (current.length < 20) {
-      setPlantDetails("tagIds", [...current, tagId]);
+      setForm("plantDetails", "tagIds", [...current, tagId]);
     }
   }
-
-  // Care Guide (EN + BN)
-  const [careGuide, setCareGuide] = createStore({
-    en: {
-      lightInstructions: "",
-      wateringInstructions: "",
-      humidityInstructions: "",
-      fertilizerSchedule: "",
-      repottingFrequency: "",
-      pruningNotes: "",
-      commonProblems: "",
-      seasonalCare: "",
-    },
-    bn: {
-      lightInstructions: "",
-      wateringInstructions: "",
-      humidityInstructions: "",
-      fertilizerSchedule: "",
-      repottingFrequency: "",
-      pruningNotes: "",
-      commonProblems: "",
-      seasonalCare: "",
-    },
-  });
 
   // ---- Step Indicator Data ----
   const stepTitles = [
@@ -348,15 +348,15 @@ export default function NewPlantPage() {
     const newErrors: FormErrors = {};
 
     // Step 1: Identity, names, descriptions, scientific name
-    if (!thumbnailUpload.mediaId()) {
+    if (!form.thumbnail.id) {
       newErrors["thumbnail"] = t("seller.products.newPlant.thumbnailRequired");
     }
-    if (!translations.en.name.trim()) newErrors["en.name"] = t("seller.products.newPlant.nameRequired");
-    else if (translations.en.name.length > 255) newErrors["en.name"] = t("seller.products.newPlant.nameTooLong");
-    if (translations.en.shortDescription.length > 500) newErrors["en.shortDescription"] = t("seller.products.newPlant.shortDescriptionTooLong");
+    if (!form.translations.en.name.trim()) newErrors["en.name"] = t("seller.products.newPlant.nameRequired");
+    else if (form.translations.en.name.length > 255) newErrors["en.name"] = t("seller.products.newPlant.nameTooLong");
+    if (form.translations.en.shortDescription.length > 500) newErrors["en.shortDescription"] = t("seller.products.newPlant.shortDescriptionTooLong");
 
-    if (translations.bn.name.trim() && translations.bn.name.length > 255) newErrors["bn.name"] = t("seller.products.newPlant.nameTooLong");
-    if (translations.bn.shortDescription.length > 500) newErrors["bn.shortDescription"] = t("seller.products.newPlant.shortDescriptionTooLong");
+    if (form.translations.bn.name.trim() && form.translations.bn.name.length > 255) newErrors["bn.name"] = t("seller.products.newPlant.nameTooLong");
+    if (form.translations.bn.shortDescription.length > 500) newErrors["bn.shortDescription"] = t("seller.products.newPlant.shortDescriptionTooLong");
 
     const currentSlug = effectiveSlug().trim();
     if (currentSlug) {
@@ -365,22 +365,22 @@ export default function NewPlantPage() {
     }
 
     // Step 2: Category
-    if (!plantDetails.categoryId.trim()) newErrors["categoryId"] = t("seller.products.newPlant.categoryRequired");
+    if (!form.plantDetails.categoryId.trim()) newErrors["categoryId"] = t("seller.products.newPlant.categoryRequired");
 
     // Step 4: Variants
-    if (variants.length === 0) newErrors["variants"] = t("seller.products.newPlant.atLeastOneVariant");
+    if (form.variants.length === 0) newErrors["variants"] = t("seller.products.newPlant.atLeastOneVariant");
     let baseCount = 0;
-    variants.forEach((v, i) => {
+    form.variants.forEach((v, i) => {
       if (v.isBase) baseCount++;
       if (v.price === "" || v.price <= 0) newErrors[`variants.${i}.price`] = t("seller.products.newPlant.priceRequired");
     });
-    if (variants.length > 1 && baseCount !== 1) newErrors["baseVariant"] = t("seller.products.newPlant.exactlyOneBase");
+    if (form.variants.length > 1 && baseCount !== 1) newErrors["baseVariant"] = t("seller.products.newPlant.exactlyOneBase");
 
     // Step 5: Care profile
-    if (!plantDetails.lightRequirement) newErrors["lightRequirement"] = t("seller.products.newPlant.lightRequired");
-    if (!plantDetails.wateringFrequency) newErrors["wateringFrequency"] = t("seller.products.newPlant.wateringRequired");
-    if (!plantDetails.humidityLevel) newErrors["humidityLevel"] = t("seller.products.newPlant.humidityRequired");
-    if (!plantDetails.careDifficulty) newErrors["careDifficulty"] = t("seller.products.newPlant.careDifficultyRequired");
+    if (!form.plantDetails.lightRequirement) newErrors["lightRequirement"] = t("seller.products.newPlant.lightRequired");
+    if (!form.plantDetails.wateringFrequency) newErrors["wateringFrequency"] = t("seller.products.newPlant.wateringRequired");
+    if (!form.plantDetails.humidityLevel) newErrors["humidityLevel"] = t("seller.products.newPlant.humidityRequired");
+    if (!form.plantDetails.careDifficulty) newErrors["careDifficulty"] = t("seller.products.newPlant.careDifficultyRequired");
 
     setErrors(newErrors);
     return newErrors;
@@ -421,149 +421,43 @@ export default function NewPlantPage() {
     setIsSubmitting(true);
 
     try {
-      const payload: import("~/lib/api/types/seller.types").CreatePlantRequest = {
-        slug: effectiveSlug().trim() || undefined,
-        thumbnailId: thumbnailUpload.mediaId()!,
-        status: saveAsDraft ? "DRAFT" : status(),
-        translations: [
-          {
-            locale: "en",
-            name: translations.en.name.trim(),
-            shortDescription: translations.en.shortDescription.trim() || undefined,
-            description: translations.en.description.trim() || undefined,
-          },
-        ],
-        plantDetails: {
-          categoryId: plantDetails.categoryId.trim(),
-          tagIds: plantDetails.tagIds.length > 0 ? plantDetails.tagIds : undefined,
-          scientificName: plantDetails.scientificName.trim() || undefined,
-          lightRequirement: plantDetails.lightRequirement,
-          wateringFrequency: plantDetails.wateringFrequency,
-          humidityLevel: plantDetails.humidityLevel,
-          temperatureRange: plantDetails.temperatureRange.trim() || undefined,
-          careDifficulty: plantDetails.careDifficulty,
-          growthRate: plantDetails.growthRate || undefined,
-          matureHeight: plantDetails.matureHeight.trim() || undefined,
-          matureSpread: plantDetails.matureSpread.trim() || undefined,
-          translations: {
-            en: {
-              commonNames: plantDetails.translations.en.commonNames.trim() || undefined,
-              origin: plantDetails.translations.en.origin.trim() || undefined,
-              soilType: plantDetails.translations.en.soilType.trim() || undefined,
-              toxicityInfo: plantDetails.translations.en.toxicityInfo.trim() || undefined,
-            },
-            bn: {
-              commonNames: plantDetails.translations.bn.commonNames.trim() || undefined,
-              origin: plantDetails.translations.bn.origin.trim() || undefined,
-              soilType: plantDetails.translations.bn.soilType.trim() || undefined,
-              toxicityInfo: plantDetails.translations.bn.toxicityInfo.trim() || undefined,
-            },
-          },
-        },
-        variants: variants.map((v) => ({
-          sku: v.sku.trim() || undefined,
-          price: v.price === "" ? 0 : v.price,
-          inventoryCount: typeof v.inventoryCount === "number" ? v.inventoryCount : 0,
-          trackInventory: v.trackInventory,
-          lowStockThreshold: typeof v.lowStockThreshold === "number" ? v.lowStockThreshold : undefined,
-          isBase: v.isBase,
-          isActive: v.isActive,
-          mediaIds: v.mediaIds.length > 0 ? v.mediaIds : undefined,
-          plantAttributes: {
-            growthStage: v.growthStage || undefined,
-            plantForm: v.plantForm.trim() || undefined,
-            variegation: v.variegation.trim() || undefined,
-            leafDensity: v.leafDensity.trim() || undefined,
-            stemCount: typeof v.stemCount === "number" ? v.stemCount : undefined,
-            currentHeight: v.currentHeight.trim() || undefined,
-            currentSpread: v.currentSpread.trim() || undefined,
-            propagationType: v.propagationType.trim() || undefined,
-            containerType: v.containerType.trim() || undefined,
-            containerSize: v.containerSize.trim() || undefined,
-            bundleType: v.bundleType.trim() || undefined,
-          },
-        })),
-        careGuide:
-          careGuide.en.lightInstructions ||
-          careGuide.en.wateringInstructions ||
-          careGuide.en.humidityInstructions ||
-          careGuide.en.fertilizerSchedule ||
-          careGuide.en.repottingFrequency ||
-          careGuide.en.pruningNotes ||
-          careGuide.en.commonProblems ||
-          careGuide.en.seasonalCare ||
-          careGuide.bn.lightInstructions ||
-          careGuide.bn.wateringInstructions ||
-          careGuide.bn.humidityInstructions ||
-          careGuide.bn.fertilizerSchedule ||
-          careGuide.bn.repottingFrequency ||
-          careGuide.bn.pruningNotes ||
-          careGuide.bn.commonProblems ||
-          careGuide.bn.seasonalCare
-            ? {
-                en: {
-                  lightInstructions: careGuide.en.lightInstructions.trim() || undefined,
-                  wateringInstructions: careGuide.en.wateringInstructions.trim() || undefined,
-                  humidityInstructions: careGuide.en.humidityInstructions.trim() || undefined,
-                  fertilizerSchedule: careGuide.en.fertilizerSchedule.trim() || undefined,
-                  repottingFrequency: careGuide.en.repottingFrequency.trim() || undefined,
-                  pruningNotes: careGuide.en.pruningNotes.trim() || undefined,
-                  commonProblems: careGuide.en.commonProblems.trim() || undefined,
-                  seasonalCare: careGuide.en.seasonalCare.trim() || undefined,
-                },
-                bn: {
-                  lightInstructions: careGuide.bn.lightInstructions.trim() || undefined,
-                  wateringInstructions: careGuide.bn.wateringInstructions.trim() || undefined,
-                  humidityInstructions: careGuide.bn.humidityInstructions.trim() || undefined,
-                  fertilizerSchedule: careGuide.bn.fertilizerSchedule.trim() || undefined,
-                  repottingFrequency: careGuide.bn.repottingFrequency.trim() || undefined,
-                  pruningNotes: careGuide.bn.pruningNotes.trim() || undefined,
-                  commonProblems: careGuide.bn.commonProblems.trim() || undefined,
-                  seasonalCare: careGuide.bn.seasonalCare.trim() || undefined,
-                },
-              }
-            : undefined,
-      };
-
-      // Add Bengali translation only if user provided content
-      if (translations.bn.name.trim()) {
-        payload.translations.push({
-          locale: "bn",
-          name: translations.bn.name.trim(),
-          shortDescription: translations.bn.shortDescription.trim() || undefined,
-          description: translations.bn.description.trim() || undefined,
-        });
-      }
-
-      await plantsApi.create(payload);
+      const dto = toCreatePlantDto(form) as unknown as import("~/lib/api/types/seller.types").CreatePlantRequest;
+      if (saveAsDraft) dto.status = "DRAFT";
+      await plantsApi.create(dto);
 
       setSubmitStatus("success");
       toaster.success(t("seller.products.newPlant.plantCreated"));
 
       setTimeout(() => {
-        setTranslations("en", { name: "", shortDescription: "", description: "" });
-        setTranslations("bn", { name: "", shortDescription: "", description: "" });
-        setPlantDetails({
-          categoryId: "", tagIds: [], scientificName: "", lightRequirement: "",
-          wateringFrequency: "", humidityLevel: "", temperatureRange: "",
-          careDifficulty: "", growthRate: "", matureHeight: "", matureSpread: "",
+        setForm({
+          thumbnail: { id: null, url: null },
+          status: "DRAFT",
+          slug: "",
           translations: {
-            en: { commonNames: "", origin: "", soilType: "", toxicityInfo: "" },
-            bn: { commonNames: "", origin: "", soilType: "", toxicityInfo: "" },
+            en: { name: "", shortDescription: "", description: "" },
+            bn: { name: "", shortDescription: "", description: "" },
+          },
+          plantDetails: {
+            categoryId: "", tagIds: [], scientificName: "", lightRequirement: "",
+            wateringFrequency: "", humidityLevel: "", temperatureRange: "",
+            careDifficulty: "", growthRate: "", matureHeight: "", matureSpread: "",
+            translations: {
+              en: { commonNames: "", origin: "", soilType: "", toxicityInfo: "" },
+              bn: { commonNames: "", origin: "", soilType: "", toxicityInfo: "" },
+            },
+          },
+          variants: [createEmptyVariant()],
+          careGuide: {
+            en: { lightInstructions: "", wateringInstructions: "", humidityInstructions: "",
+              fertilizerSchedule: "", repottingFrequency: "", pruningNotes: "",
+              commonProblems: "", seasonalCare: "" },
+            bn: { lightInstructions: "", wateringInstructions: "", humidityInstructions: "",
+              fertilizerSchedule: "", repottingFrequency: "", pruningNotes: "",
+              commonProblems: "", seasonalCare: "" },
           },
         });
-        setVariants([createEmptyVariant()]);
         thumbnailUpload.clear();
-        setSlug("");
         setIsSlugManual(false);
-        setCareGuide({
-          en: { lightInstructions: "", wateringInstructions: "", humidityInstructions: "",
-            fertilizerSchedule: "", repottingFrequency: "", pruningNotes: "",
-            commonProblems: "", seasonalCare: "" },
-          bn: { lightInstructions: "", wateringInstructions: "", humidityInstructions: "",
-            fertilizerSchedule: "", repottingFrequency: "", pruningNotes: "",
-            commonProblems: "", seasonalCare: "" },
-        });
         setCurrentStep(1);
       }, 1500);
     } catch (err: any) {
@@ -651,24 +545,24 @@ export default function NewPlantPage() {
             <Show when={currentStep() === 1}>
               <Step1Identity
                 thumbnailUpload={thumbnailUpload}
-                status={status()}
-                onStatusChange={(v) => setStatus(v as PlantStatus)}
+                status={form.status}
+                onStatusChange={(v) => setForm("status", v as PlantStatus)}
                 slug={effectiveSlug()}
-                onSlugChange={(v) => { setSlug(v); setIsSlugManual(true); }}
-                enName={translations.en.name}
-                onEnNameChange={(v) => setTranslations("en", "name", v)}
-                enShortDesc={translations.en.shortDescription}
-                onEnShortDescChange={(v) => setTranslations("en", "shortDescription", v)}
-                enDescription={translations.en.description}
-                onEnDescriptionChange={(v) => setTranslations("en", "description", v)}
-                bnName={translations.bn.name}
-                onBnNameChange={(v) => setTranslations("bn", "name", v)}
-                bnShortDesc={translations.bn.shortDescription}
-                onBnShortDescChange={(v) => setTranslations("bn", "shortDescription", v)}
-                bnDescription={translations.bn.description}
-                onBnDescriptionChange={(v) => setTranslations("bn", "description", v)}
-                scientificName={plantDetails.scientificName}
-                onScientificNameChange={(v) => setPlantDetails("scientificName", v)}
+                onSlugChange={(v) => { setForm("slug", v); setIsSlugManual(true); }}
+                enName={form.translations.en.name}
+                onEnNameChange={(v) => setForm("translations", "en", "name", v)}
+                enShortDesc={form.translations.en.shortDescription}
+                onEnShortDescChange={(v) => setForm("translations", "en", "shortDescription", v)}
+                enDescription={form.translations.en.description}
+                onEnDescriptionChange={(v) => setForm("translations", "en", "description", v)}
+                bnName={form.translations.bn.name}
+                onBnNameChange={(v) => setForm("translations", "bn", "name", v)}
+                bnShortDesc={form.translations.bn.shortDescription}
+                onBnShortDescChange={(v) => setForm("translations", "bn", "shortDescription", v)}
+                bnDescription={form.translations.bn.description}
+                onBnDescriptionChange={(v) => setForm("translations", "bn", "description", v)}
+                scientificName={form.plantDetails.scientificName}
+                onScientificNameChange={(v) => setForm("plantDetails", "scientificName", v)}
                 errors={errors()}
                 t={t}
                 onWarningChange={handleWarningChange(1)}
@@ -678,10 +572,18 @@ export default function NewPlantPage() {
             {/* Step 2: Category & Tags */}
             <Show when={currentStep() === 2}>
               <Step2CategoryTags
-                categoryId={plantDetails.categoryId}
-                onCategoryIdChange={(v) => setPlantDetails("categoryId", v)}
-                tagIds={plantDetails.tagIds}
-                onTagToggle={toggleTag}
+                categoryId={form.plantDetails.categoryId}
+                onCategoryIdChange={(v) => setForm("plantDetails", "categoryId", v)}
+                tagIds={form.plantDetails.tagIds}
+                onTagToggle={(tagId) => {
+                  const current = [...form.plantDetails.tagIds];
+                  const idx = current.indexOf(tagId);
+                  if (idx >= 0) {
+                    setForm("plantDetails", "tagIds", current.filter((id) => id !== tagId));
+                  } else if (current.length < 20) {
+                    setForm("plantDetails", "tagIds", [...current, tagId]);
+                  }
+                }}
                 errors={errors()}
                 categoryTree={categoryTree}
                 tags={tags}
@@ -693,22 +595,22 @@ export default function NewPlantPage() {
             {/* Step 3: Localized Details */}
             <Show when={currentStep() === 3}>
               <Step3Classification
-                enCommonNames={plantDetails.translations.en.commonNames}
-                onEnCommonNamesChange={(v) => setPlantDetails("translations", "en", "commonNames", v)}
-                enOrigin={plantDetails.translations.en.origin}
-                onEnOriginChange={(v) => setPlantDetails("translations", "en", "origin", v)}
-                enSoilType={plantDetails.translations.en.soilType}
-                onEnSoilTypeChange={(v) => setPlantDetails("translations", "en", "soilType", v)}
-                enToxicityInfo={plantDetails.translations.en.toxicityInfo}
-                onEnToxicityInfoChange={(v) => setPlantDetails("translations", "en", "toxicityInfo", v)}
-                bnCommonNames={plantDetails.translations.bn.commonNames}
-                onBnCommonNamesChange={(v) => setPlantDetails("translations", "bn", "commonNames", v)}
-                bnOrigin={plantDetails.translations.bn.origin}
-                onBnOriginChange={(v) => setPlantDetails("translations", "bn", "origin", v)}
-                bnSoilType={plantDetails.translations.bn.soilType}
-                onBnSoilTypeChange={(v) => setPlantDetails("translations", "bn", "soilType", v)}
-                bnToxicityInfo={plantDetails.translations.bn.toxicityInfo}
-                onBnToxicityInfoChange={(v) => setPlantDetails("translations", "bn", "toxicityInfo", v)}
+                enCommonNames={form.plantDetails.translations.en.commonNames}
+                onEnCommonNamesChange={(v) => setForm("plantDetails", "translations", "en", "commonNames", v)}
+                enOrigin={form.plantDetails.translations.en.origin}
+                onEnOriginChange={(v) => setForm("plantDetails", "translations", "en", "origin", v)}
+                enSoilType={form.plantDetails.translations.en.soilType}
+                onEnSoilTypeChange={(v) => setForm("plantDetails", "translations", "en", "soilType", v)}
+                enToxicityInfo={form.plantDetails.translations.en.toxicityInfo}
+                onEnToxicityInfoChange={(v) => setForm("plantDetails", "translations", "en", "toxicityInfo", v)}
+                bnCommonNames={form.plantDetails.translations.bn.commonNames}
+                onBnCommonNamesChange={(v) => setForm("plantDetails", "translations", "bn", "commonNames", v)}
+                bnOrigin={form.plantDetails.translations.bn.origin}
+                onBnOriginChange={(v) => setForm("plantDetails", "translations", "bn", "origin", v)}
+                bnSoilType={form.plantDetails.translations.bn.soilType}
+                onBnSoilTypeChange={(v) => setForm("plantDetails", "translations", "bn", "soilType", v)}
+                bnToxicityInfo={form.plantDetails.translations.bn.toxicityInfo}
+                onBnToxicityInfoChange={(v) => setForm("plantDetails", "translations", "bn", "toxicityInfo", v)}
                 t={t}
                 onWarningChange={handleWarningChange(3)}
               />
@@ -717,8 +619,8 @@ export default function NewPlantPage() {
             {/* Step 4: Variants & Pricing */}
             <Show when={currentStep() === 4}>
               <Step4Variants
-                variants={variants}
-                setVariants={(fn: (v: VariantStore[]) => VariantStore[]) => setVariants(fn)}
+                variants={form.variants}
+                setVariants={(fn: (v: VariantStore[]) => VariantStore[]) => setForm("variants", fn)}
                 addVariant={addVariant}
                 duplicateVariant={duplicateVariant}
                 removeVariant={removeVariant}
@@ -737,22 +639,22 @@ export default function NewPlantPage() {
             {/* Step 5: Care Profile */}
             <Show when={currentStep() === 5}>
               <Step5CareProfile
-                lightRequirement={plantDetails.lightRequirement}
-                onLightChange={(v) => setPlantDetails("lightRequirement", v)}
-                wateringFrequency={plantDetails.wateringFrequency}
-                onWateringChange={(v) => setPlantDetails("wateringFrequency", v)}
-                humidityLevel={plantDetails.humidityLevel}
-                onHumidityChange={(v) => setPlantDetails("humidityLevel", v)}
-                careDifficulty={plantDetails.careDifficulty}
-                onCareDifficultyChange={(v) => setPlantDetails("careDifficulty", v)}
-                growthRate={plantDetails.growthRate}
-                onGrowthRateChange={(v) => setPlantDetails("growthRate", v)}
-                temperatureRange={plantDetails.temperatureRange}
-                onTemperatureChange={(v) => setPlantDetails("temperatureRange", v)}
-                matureHeight={plantDetails.matureHeight}
-                onMatureHeightChange={(v) => setPlantDetails("matureHeight", v)}
-                matureSpread={plantDetails.matureSpread}
-                onMatureSpreadChange={(v) => setPlantDetails("matureSpread", v)}
+                lightRequirement={form.plantDetails.lightRequirement}
+                onLightChange={(v) => setForm("plantDetails", "lightRequirement", v)}
+                wateringFrequency={form.plantDetails.wateringFrequency}
+                onWateringChange={(v) => setForm("plantDetails", "wateringFrequency", v)}
+                humidityLevel={form.plantDetails.humidityLevel}
+                onHumidityChange={(v) => setForm("plantDetails", "humidityLevel", v)}
+                careDifficulty={form.plantDetails.careDifficulty}
+                onCareDifficultyChange={(v) => setForm("plantDetails", "careDifficulty", v)}
+                growthRate={form.plantDetails.growthRate}
+                onGrowthRateChange={(v) => setForm("plantDetails", "growthRate", v)}
+                temperatureRange={form.plantDetails.temperatureRange}
+                onTemperatureChange={(v) => setForm("plantDetails", "temperatureRange", v)}
+                matureHeight={form.plantDetails.matureHeight}
+                onMatureHeightChange={(v) => setForm("plantDetails", "matureHeight", v)}
+                matureSpread={form.plantDetails.matureSpread}
+                onMatureSpreadChange={(v) => setForm("plantDetails", "matureSpread", v)}
                 errors={errors()}
                 lightOptions={lightOptions()}
                 wateringOptions={wateringOptions()}
@@ -767,38 +669,38 @@ export default function NewPlantPage() {
             {/* Step 6: Care Guide */}
             <Show when={currentStep() === 6}>
               <Step6Care
-                lightInstructions={careGuide.en.lightInstructions}
-                onLightInstructionsChange={(v) => setCareGuide("en", "lightInstructions", v)}
-                wateringInstructions={careGuide.en.wateringInstructions}
-                onWateringInstructionsChange={(v) => setCareGuide("en", "wateringInstructions", v)}
-                humidityInstructions={careGuide.en.humidityInstructions}
-                onHumidityInstructionsChange={(v) => setCareGuide("en", "humidityInstructions", v)}
-                fertilizerSchedule={careGuide.en.fertilizerSchedule}
-                onFertilizerScheduleChange={(v) => setCareGuide("en", "fertilizerSchedule", v)}
-                repottingFrequency={careGuide.en.repottingFrequency}
-                onRepottingFrequencyChange={(v) => setCareGuide("en", "repottingFrequency", v)}
-                pruningNotes={careGuide.en.pruningNotes}
-                onPruningNotesChange={(v) => setCareGuide("en", "pruningNotes", v)}
-                commonProblems={careGuide.en.commonProblems}
-                onCommonProblemsChange={(v) => setCareGuide("en", "commonProblems", v)}
-                seasonalCare={careGuide.en.seasonalCare}
-                onSeasonalCareChange={(v) => setCareGuide("en", "seasonalCare", v)}
-                bnLightInstructions={careGuide.bn.lightInstructions}
-                onBnLightInstructionsChange={(v) => setCareGuide("bn", "lightInstructions", v)}
-                bnWateringInstructions={careGuide.bn.wateringInstructions}
-                onBnWateringInstructionsChange={(v) => setCareGuide("bn", "wateringInstructions", v)}
-                bnHumidityInstructions={careGuide.bn.humidityInstructions}
-                onBnHumidityInstructionsChange={(v) => setCareGuide("bn", "humidityInstructions", v)}
-                bnFertilizerSchedule={careGuide.bn.fertilizerSchedule}
-                onBnFertilizerScheduleChange={(v) => setCareGuide("bn", "fertilizerSchedule", v)}
-                bnRepottingFrequency={careGuide.bn.repottingFrequency}
-                onBnRepottingFrequencyChange={(v) => setCareGuide("bn", "repottingFrequency", v)}
-                bnPruningNotes={careGuide.bn.pruningNotes}
-                onBnPruningNotesChange={(v) => setCareGuide("bn", "pruningNotes", v)}
-                bnCommonProblems={careGuide.bn.commonProblems}
-                onBnCommonProblemsChange={(v) => setCareGuide("bn", "commonProblems", v)}
-                bnSeasonalCare={careGuide.bn.seasonalCare}
-                onBnSeasonalCareChange={(v) => setCareGuide("bn", "seasonalCare", v)}
+                lightInstructions={form.careGuide.en.lightInstructions}
+                onLightInstructionsChange={(v) => setForm("careGuide", "en", "lightInstructions", v)}
+                wateringInstructions={form.careGuide.en.wateringInstructions}
+                onWateringInstructionsChange={(v) => setForm("careGuide", "en", "wateringInstructions", v)}
+                humidityInstructions={form.careGuide.en.humidityInstructions}
+                onHumidityInstructionsChange={(v) => setForm("careGuide", "en", "humidityInstructions", v)}
+                fertilizerSchedule={form.careGuide.en.fertilizerSchedule}
+                onFertilizerScheduleChange={(v) => setForm("careGuide", "en", "fertilizerSchedule", v)}
+                repottingFrequency={form.careGuide.en.repottingFrequency}
+                onRepottingFrequencyChange={(v) => setForm("careGuide", "en", "repottingFrequency", v)}
+                pruningNotes={form.careGuide.en.pruningNotes}
+                onPruningNotesChange={(v) => setForm("careGuide", "en", "pruningNotes", v)}
+                commonProblems={form.careGuide.en.commonProblems}
+                onCommonProblemsChange={(v) => setForm("careGuide", "en", "commonProblems", v)}
+                seasonalCare={form.careGuide.en.seasonalCare}
+                onSeasonalCareChange={(v) => setForm("careGuide", "en", "seasonalCare", v)}
+                bnLightInstructions={form.careGuide.bn.lightInstructions}
+                onBnLightInstructionsChange={(v) => setForm("careGuide", "bn", "lightInstructions", v)}
+                bnWateringInstructions={form.careGuide.bn.wateringInstructions}
+                onBnWateringInstructionsChange={(v) => setForm("careGuide", "bn", "wateringInstructions", v)}
+                bnHumidityInstructions={form.careGuide.bn.humidityInstructions}
+                onBnHumidityInstructionsChange={(v) => setForm("careGuide", "bn", "humidityInstructions", v)}
+                bnFertilizerSchedule={form.careGuide.bn.fertilizerSchedule}
+                onBnFertilizerScheduleChange={(v) => setForm("careGuide", "bn", "fertilizerSchedule", v)}
+                bnRepottingFrequency={form.careGuide.bn.repottingFrequency}
+                onBnRepottingFrequencyChange={(v) => setForm("careGuide", "bn", "repottingFrequency", v)}
+                bnPruningNotes={form.careGuide.bn.pruningNotes}
+                onBnPruningNotesChange={(v) => setForm("careGuide", "bn", "pruningNotes", v)}
+                bnCommonProblems={form.careGuide.bn.commonProblems}
+                onBnCommonProblemsChange={(v) => setForm("careGuide", "bn", "commonProblems", v)}
+                bnSeasonalCare={form.careGuide.bn.seasonalCare}
+                onBnSeasonalCareChange={(v) => setForm("careGuide", "bn", "seasonalCare", v)}
                 t={t}
                 onWarningChange={handleWarningChange(6)}
               />
@@ -807,37 +709,39 @@ export default function NewPlantPage() {
             {/* Step 7: Preview & Submit */}
             <Show when={currentStep() === 7}>
               <Step7Preview
-                thumbnailPreview={thumbnailUpload.preview}
-                status={status()}
+                thumbnailPreview={form.thumbnail.url}
+                status={form.status}
                 slug={effectiveSlug()}
-                enName={translations.en.name}
-                enShortDesc={translations.en.shortDescription}
-                enDescription={translations.en.description}
-                bnName={translations.bn.name}
-                bnShortDesc={translations.bn.shortDescription}
-                bnDescription={translations.bn.description}
-                categoryId={plantDetails.categoryId}
-                tagIds={plantDetails.tagIds}
-                scientificName={plantDetails.scientificName}
-                lightRequirement={plantDetails.lightRequirement}
-                wateringFrequency={plantDetails.wateringFrequency}
-                humidityLevel={plantDetails.humidityLevel}
-                careDifficulty={plantDetails.careDifficulty}
-                growthRate={plantDetails.growthRate}
-                temperatureRange={plantDetails.temperatureRange}
-                matureHeight={plantDetails.matureHeight}
-                matureSpread={plantDetails.matureSpread}
-                enCommonNames={plantDetails.translations.en.commonNames}
-                enOrigin={plantDetails.translations.en.origin}
-                enSoilType={plantDetails.translations.en.soilType}
-                enToxicityInfo={plantDetails.translations.en.toxicityInfo}
-                bnCommonNames={plantDetails.translations.bn.commonNames}
-                bnOrigin={plantDetails.translations.bn.origin}
-                bnSoilType={plantDetails.translations.bn.soilType}
-                bnToxicityInfo={plantDetails.translations.bn.toxicityInfo}
-                variants={variants}
-                careGuideEn={careGuide.en}
-                careGuideBn={careGuide.bn}
+                enName={form.translations.en.name}
+                enShortDesc={form.translations.en.shortDescription}
+                enDescription={form.translations.en.description}
+                bnName={form.translations.bn.name}
+                bnShortDesc={form.translations.bn.shortDescription}
+                bnDescription={form.translations.bn.description}
+                categoryId={form.plantDetails.categoryId}
+                categoryName={resolvedCategoryName()}
+                tagIds={form.plantDetails.tagIds}
+                tags={resolvedTags()}
+                scientificName={form.plantDetails.scientificName}
+                lightRequirement={form.plantDetails.lightRequirement}
+                wateringFrequency={form.plantDetails.wateringFrequency}
+                humidityLevel={form.plantDetails.humidityLevel}
+                careDifficulty={form.plantDetails.careDifficulty}
+                growthRate={form.plantDetails.growthRate}
+                temperatureRange={form.plantDetails.temperatureRange}
+                matureHeight={form.plantDetails.matureHeight}
+                matureSpread={form.plantDetails.matureSpread}
+                enCommonNames={form.plantDetails.translations.en.commonNames}
+                enOrigin={form.plantDetails.translations.en.origin}
+                enSoilType={form.plantDetails.translations.en.soilType}
+                enToxicityInfo={form.plantDetails.translations.en.toxicityInfo}
+                bnCommonNames={form.plantDetails.translations.bn.commonNames}
+                bnOrigin={form.plantDetails.translations.bn.origin}
+                bnSoilType={form.plantDetails.translations.bn.soilType}
+                bnToxicityInfo={form.plantDetails.translations.bn.toxicityInfo}
+                variants={form.variants}
+                careGuideEn={form.careGuide.en}
+                careGuideBn={form.careGuide.bn}
                 t={t}
               />
             </Show>

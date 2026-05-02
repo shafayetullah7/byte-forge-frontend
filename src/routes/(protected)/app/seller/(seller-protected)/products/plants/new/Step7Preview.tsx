@@ -14,6 +14,11 @@ interface CareGuideData {
   seasonalCare: string;
 }
 
+interface TagInfo {
+  id: string;
+  name: string;
+}
+
 interface PreviewSectionProps {
   title: string;
   children: any;
@@ -78,7 +83,7 @@ function BilingualSection(props: {
 }
 
 export function Step7Preview(props: {
-  thumbnailPreview: () => string | null;
+  thumbnailPreview: string | null;
   status: PlantStatus;
   slug: string;
   enName: string;
@@ -88,7 +93,9 @@ export function Step7Preview(props: {
   bnShortDesc: string;
   bnDescription: string;
   categoryId: string;
+  categoryName: string;
   tagIds: string[];
+  tags: TagInfo[];
   scientificName: string;
   lightRequirement: string;
   wateringFrequency: string;
@@ -122,7 +129,12 @@ export function Step7Preview(props: {
     props.careGuideEn.seasonalCare ||
     props.careGuideBn.lightInstructions ||
     props.careGuideBn.wateringInstructions ||
-    props.careGuideBn.humidityInstructions;
+    props.careGuideBn.humidityInstructions ||
+    props.careGuideBn.fertilizerSchedule ||
+    props.careGuideBn.repottingFrequency ||
+    props.careGuideBn.pruningNotes ||
+    props.careGuideBn.commonProblems ||
+    props.careGuideBn.seasonalCare;
 
   const statusBadgeClass = () => {
     switch (props.status) {
@@ -152,11 +164,11 @@ export function Step7Preview(props: {
       </div>
 
       {/* Thumbnail */}
-      <Show when={props.thumbnailPreview()}>
+      <Show when={props.thumbnailPreview}>
         <div class="flex justify-center">
           <div class="w-48 h-48 rounded-xl overflow-hidden border-2 border-cream-200 dark:border-forest-600 shadow-sm">
             <img
-              src={props.thumbnailPreview()!}
+              src={props.thumbnailPreview!}
               alt="Plant thumbnail"
               class="w-full h-full object-cover"
             />
@@ -179,7 +191,7 @@ export function Step7Preview(props: {
       </PreviewSection>
 
       {/* Names & Descriptions */}
-      <PreviewSection title={props.t("seller.products.newPlant.step2Title")}>
+      <PreviewSection title={props.t("seller.products.newPlant.namesAndDescriptionsSection")}>
         <BilingualSection
           enLabel={props.t("seller.products.newPlant.previewNameLabel")}
           enValue={props.enName}
@@ -214,14 +226,14 @@ export function Step7Preview(props: {
         </div>
       </PreviewSection>
 
-      {/* Classification */}
-      <PreviewSection title={props.t("seller.products.newPlant.step3Title")}>
+      {/* Category & Tags */}
+      <PreviewSection title={props.t("seller.products.newPlant.categoryAndTagsSection")}>
         <dl class="divide-y divide-cream-100 dark:divide-forest-700/50">
-          <PreviewRow label={props.t("seller.products.newPlant.categoryLabel")} value={props.categoryId || undefined} />
-          <Show when={props.tagIds.length > 0}>
+          <PreviewRow label={props.t("seller.products.newPlant.categoryLabel")} value={props.categoryName || undefined} />
+          <Show when={props.tags.length > 0}>
             <PreviewRow
               label={props.t("seller.products.newPlant.tagsLabel")}
-              value={`${props.tagIds.length} tag${props.tagIds.length > 1 ? "s" : ""} selected`}
+              value={props.tags.map(t => t.name).join(", ")}
             />
           </Show>
           <Show when={props.scientificName}>
@@ -231,7 +243,7 @@ export function Step7Preview(props: {
       </PreviewSection>
 
       {/* Localized Details */}
-      <PreviewSection title={props.t("seller.products.newPlant.step3Title")}>
+      <PreviewSection title={props.t("seller.products.newPlant.previewLocalizedDetails")}>
         <BilingualSection
           enLabel={props.t("seller.products.newPlant.previewCommonNamesLabel")}
           enValue={props.enCommonNames}
@@ -283,7 +295,7 @@ export function Step7Preview(props: {
       </PreviewSection>
 
       {/* Variants */}
-      <PreviewSection title={props.t("seller.products.newPlant.step5Title")}>
+      <PreviewSection title={props.t("seller.products.newPlant.previewVariants")}>
         <For each={props.variants}>
           {(variant, index) => (
             <div class={index() > 0 ? "mt-4 pt-4 border-t border-cream-200 dark:border-forest-700" : ""}>
@@ -297,13 +309,61 @@ export function Step7Preview(props: {
                   </span>
                 </Show>
               </div>
+
+              {/* Variant Images */}
+              <Show when={variant.mediaUrls && variant.mediaUrls.length > 0}>
+                <div class="flex flex-wrap gap-2 mb-3">
+                  <For each={variant.mediaUrls}>
+                    {(url, imgIdx) => (
+                      <div class="w-16 h-16 rounded-lg overflow-hidden border border-cream-200 dark:border-forest-700">
+                        <img src={url} alt={`Variant ${index() + 1} image ${imgIdx() + 1}`} class="w-full h-full object-cover" />
+                      </div>
+                    )}
+                  </For>
+                </div>
+              </Show>
+
+              {/* Variant Attributes */}
               <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
                 <Show when={variant.sku}>
                   <PreviewRow label={props.t("seller.products.newPlant.skuLabel")} value={variant.sku} />
                 </Show>
-                <PreviewRow label={props.t("seller.products.newPlant.priceLabel")} value={`৳${typeof variant.price === "number" ? variant.price.toFixed(2) : "0.00"}`} />
+                <PreviewRow label={props.t("seller.products.newPlant.priceLabel")} value={`৳${typeof variant.price === "number" ? (variant.price as number).toFixed(2) : "0.00"}`} />
                 <Show when={typeof variant.inventoryCount === "number" && variant.inventoryCount >= 0}>
                   <PreviewRow label={props.t("seller.products.newPlant.inventoryCountLabel")} value={String(variant.inventoryCount)} />
+                </Show>
+                <Show when={variant.growthStage}>
+                  <PreviewRow label={props.t("seller.products.newPlant.growthStageLabel")} value={variant.growthStage} />
+                </Show>
+                <Show when={variant.plantForm}>
+                  <PreviewRow label={props.t("seller.products.newPlant.plantFormLabel")} value={variant.plantForm} />
+                </Show>
+                <Show when={variant.variegation}>
+                  <PreviewRow label={props.t("seller.products.newPlant.variegationLabel")} value={variant.variegation} />
+                </Show>
+                <Show when={variant.leafDensity}>
+                  <PreviewRow label={props.t("seller.products.newPlant.leafDensityLabel")} value={variant.leafDensity} />
+                </Show>
+                <Show when={typeof variant.stemCount === "number" && (variant.stemCount as number) > 0}>
+                  <PreviewRow label={props.t("seller.products.newPlant.stemCountLabel")} value={String(variant.stemCount)} />
+                </Show>
+                <Show when={variant.currentHeight}>
+                  <PreviewRow label={props.t("seller.products.newPlant.currentHeightLabel")} value={variant.currentHeight} />
+                </Show>
+                <Show when={variant.currentSpread}>
+                  <PreviewRow label={props.t("seller.products.newPlant.currentSpreadLabel")} value={variant.currentSpread} />
+                </Show>
+                <Show when={variant.propagationType}>
+                  <PreviewRow label={props.t("seller.products.newPlant.propagationTypeLabel")} value={variant.propagationType} />
+                </Show>
+                <Show when={variant.containerType}>
+                  <PreviewRow label={props.t("seller.products.newPlant.containerTypeLabel")} value={variant.containerType} />
+                </Show>
+                <Show when={variant.containerSize}>
+                  <PreviewRow label={props.t("seller.products.newPlant.containerSizeLabel")} value={variant.containerSize} />
+                </Show>
+                <Show when={variant.bundleType}>
+                  <PreviewRow label={props.t("seller.products.newPlant.bundleTypeLabel")} value={variant.bundleType} />
                 </Show>
               </dl>
             </div>
