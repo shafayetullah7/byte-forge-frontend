@@ -3,13 +3,10 @@ import { createStore } from "solid-js/store";
 import { A, createAsync } from "@solidjs/router";
 import { getCategoryTree, getTags } from "~/lib/api/endpoints/public";
 import type { CategoryTree } from "~/lib/api/endpoints/public/categories.api";
-import type { TagGroup } from "~/lib/api/endpoints/public/tags.api";
 import { useI18n } from "~/i18n";
 import { slugify } from "~/lib/utils/slugify";
 import Button from "~/components/ui/Button";
 import { type SelectOption } from "~/components/ui/Select";
-import { TagMultiSelect } from "~/components/ui/TagMultiSelect";
-import { ImageUpload } from "~/components/ui/ImageUpload";
 import { useImageUpload } from "~/lib/hooks/useImageUpload";
 import { toaster } from "~/components/ui/Toast";
 import { plantsApi } from "~/lib/api/endpoints/seller/plants.api";
@@ -23,7 +20,7 @@ import { Step5CareProfile } from "./Step5CareProfile";
 import { Step6Care } from "./Step6Care";
 import { Step7Preview } from "./Step7Preview";
 import type { PlantFormState } from "~/lib/types/plant-form";
-import { createEmptyVariant, toCreatePlantDto } from "~/lib/types/plant-form";
+import { createEmptyVariant, toCreatePlantDto, createEmptyForm } from "~/lib/types/plant-form";
 
 // ========================
 // Types
@@ -148,55 +145,7 @@ export default function NewPlantPage() {
   const [isSlugManual, setIsSlugManual] = createSignal(false);
 
   // Single form store
-  const [form, setForm] = createStore<PlantFormState>({
-    thumbnail: { id: null, url: null },
-    status: "DRAFT",
-    slug: "",
-    translations: {
-      en: { name: "", shortDescription: "", description: "" },
-      bn: { name: "", shortDescription: "", description: "" },
-    },
-    plantDetails: {
-      categoryId: "",
-      tagIds: [],
-      scientificName: "",
-      lightRequirement: "",
-      wateringFrequency: "",
-      humidityLevel: "",
-      temperatureRange: "",
-      careDifficulty: "",
-      growthRate: "",
-      matureHeight: "",
-      matureSpread: "",
-      translations: {
-        en: { commonNames: "", origin: "", soilType: "", toxicityInfo: "" },
-        bn: { commonNames: "", origin: "", soilType: "", toxicityInfo: "" },
-      },
-    },
-    variants: [createEmptyVariant()],
-    careGuide: {
-      en: {
-        lightInstructions: "",
-        wateringInstructions: "",
-        humidityInstructions: "",
-        fertilizerSchedule: "",
-        repottingFrequency: "",
-        pruningNotes: "",
-        commonProblems: "",
-        seasonalCare: "",
-      },
-      bn: {
-        lightInstructions: "",
-        wateringInstructions: "",
-        humidityInstructions: "",
-        fertilizerSchedule: "",
-        repottingFrequency: "",
-        pruningNotes: "",
-        commonProblems: "",
-        seasonalCare: "",
-      },
-    },
-  });
+  const [form, setForm] = createStore<PlantFormState>(createEmptyForm());
 
   // Thumbnail upload — hook handles upload logic, state syncs to form
   const thumbnailUpload = useImageUpload({
@@ -276,19 +225,8 @@ export default function NewPlantPage() {
     });
   }
 
-  // ---- Tag toggle ----
-  function toggleTag(tagId: string) {
-    const current = [...form.plantDetails.tagIds];
-    const idx = current.indexOf(tagId);
-    if (idx >= 0) {
-      setForm("plantDetails", "tagIds", current.filter((id) => id !== tagId));
-    } else if (current.length < 20) {
-      setForm("plantDetails", "tagIds", [...current, tagId]);
-    }
-  }
-
   // ---- Step Indicator Data ----
-  const stepTitles = [
+  const stepTitles = createMemo(() => [
     t("seller.products.newPlant.step1Title"),
     t("seller.products.newPlant.step2Title"),
     t("seller.products.newPlant.step3Title"),
@@ -296,7 +234,7 @@ export default function NewPlantPage() {
     t("seller.products.newPlant.step5Title"),
     t("seller.products.newPlant.step6Title"),
     t("seller.products.newPlant.step7Title"),
-  ];
+  ]);
 
   const stepInfo = createMemo(() =>
     Array.from({ length: totalSteps }, (_, i) => {
@@ -304,26 +242,29 @@ export default function NewPlantPage() {
       const warning = stepWarnings[stepNum];
       const isCurrent = currentStep() === stepNum;
       const isPast = stepNum < currentStep();
-      const isOptional = stepNum === 6;
       const isPreview = stepNum === 7;
       const hasNoWarnings = !warning.hasWarning;
       return {
         number: stepNum,
-        title: stepTitles[i],
+        title: stepTitles()[i],
         isComplete: isPast && hasNoWarnings,
         hasWarning: !isPast && warning.hasWarning,
-        warningCount: warning.missing.length,
         isCurrent,
-        isOptional,
         isPreview,
       };
     })
   );
 
   // ---- Step Warning Callback ----
-  const handleWarningChange = (step: number) => (hasWarning: boolean, missingFields: string[]) => {
-    setStepWarnings(step, { hasWarning, missing: missingFields });
-  };
+  const warningCallbacks = createMemo(() => {
+    const callbacks: Record<number, (hasWarning: boolean, missingFields: string[]) => void> = {};
+    for (let i = 1; i <= totalSteps; i++) {
+      callbacks[i] = (hasWarning, missingFields) => {
+        setStepWarnings(i, { hasWarning, missing: missingFields });
+      };
+    }
+    return callbacks;
+  });
 
   // ---- Navigation ----
   const goToStep = (step: number) => {
@@ -429,33 +370,7 @@ export default function NewPlantPage() {
       toaster.success(t("seller.products.newPlant.plantCreated"));
 
       setTimeout(() => {
-        setForm({
-          thumbnail: { id: null, url: null },
-          status: "DRAFT",
-          slug: "",
-          translations: {
-            en: { name: "", shortDescription: "", description: "" },
-            bn: { name: "", shortDescription: "", description: "" },
-          },
-          plantDetails: {
-            categoryId: "", tagIds: [], scientificName: "", lightRequirement: "",
-            wateringFrequency: "", humidityLevel: "", temperatureRange: "",
-            careDifficulty: "", growthRate: "", matureHeight: "", matureSpread: "",
-            translations: {
-              en: { commonNames: "", origin: "", soilType: "", toxicityInfo: "" },
-              bn: { commonNames: "", origin: "", soilType: "", toxicityInfo: "" },
-            },
-          },
-          variants: [createEmptyVariant()],
-          careGuide: {
-            en: { lightInstructions: "", wateringInstructions: "", humidityInstructions: "",
-              fertilizerSchedule: "", repottingFrequency: "", pruningNotes: "",
-              commonProblems: "", seasonalCare: "" },
-            bn: { lightInstructions: "", wateringInstructions: "", humidityInstructions: "",
-              fertilizerSchedule: "", repottingFrequency: "", pruningNotes: "",
-              commonProblems: "", seasonalCare: "" },
-          },
-        });
+        setForm(createEmptyForm());
         thumbnailUpload.clear();
         setIsSlugManual(false);
         setCurrentStep(1);
@@ -470,8 +385,13 @@ export default function NewPlantPage() {
   };
 
   // ---- Step Titles for Navigation ----
-  const stepTitle = () => stepTitles[currentStep() - 1];
-  const hasAnyWarnings = () => Object.values(stepWarnings).some(w => w.hasWarning);
+  const stepTitle = () => stepTitles()[currentStep() - 1];
+  const hasAnyWarnings = () => {
+    for (let i = 1; i < currentStep(); i++) {
+      if (stepWarnings[i].hasWarning) return true;
+    }
+    return false;
+  };
 
   return (
     <div class="max-w-5xl mx-auto space-y-4 pb-12">
@@ -565,7 +485,7 @@ export default function NewPlantPage() {
                 onScientificNameChange={(v) => setForm("plantDetails", "scientificName", v)}
                 errors={errors()}
                 t={t}
-                onWarningChange={handleWarningChange(1)}
+                onWarningChange={warningCallbacks()[1]}
               />
             </Show>
 
@@ -588,7 +508,7 @@ export default function NewPlantPage() {
                 categoryTree={categoryTree}
                 tags={tags}
                 t={t}
-                onWarningChange={handleWarningChange(2)}
+                onWarningChange={warningCallbacks()[2]}
               />
             </Show>
 
@@ -612,7 +532,6 @@ export default function NewPlantPage() {
                 bnToxicityInfo={form.plantDetails.translations.bn.toxicityInfo}
                 onBnToxicityInfoChange={(v) => setForm("plantDetails", "translations", "bn", "toxicityInfo", v)}
                 t={t}
-                onWarningChange={handleWarningChange(3)}
               />
             </Show>
 
@@ -632,7 +551,7 @@ export default function NewPlantPage() {
                 propagationTypeOptions={propagationTypeOptions()}
                 containerTypeOptions={containerTypeOptions()}
                 t={t}
-                onWarningChange={handleWarningChange(4)}
+                onWarningChange={warningCallbacks()[4]}
               />
             </Show>
 
@@ -662,7 +581,7 @@ export default function NewPlantPage() {
                 careDifficultyOptions={careDifficultyOptions()}
                 growthRateOptions={growthRateOptions()}
                 t={t}
-                onWarningChange={handleWarningChange(5)}
+                onWarningChange={warningCallbacks()[5]}
               />
             </Show>
 
@@ -702,7 +621,6 @@ export default function NewPlantPage() {
                 bnSeasonalCare={form.careGuide.bn.seasonalCare}
                 onBnSeasonalCareChange={(v) => setForm("careGuide", "bn", "seasonalCare", v)}
                 t={t}
-                onWarningChange={handleWarningChange(6)}
               />
             </Show>
 

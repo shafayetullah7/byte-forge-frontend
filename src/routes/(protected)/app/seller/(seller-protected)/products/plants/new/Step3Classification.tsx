@@ -19,10 +19,7 @@ export function Step3Classification(props: {
   bnToxicityInfo: string;
   onBnToxicityInfoChange: (v: string) => void;
   t: (key: string) => string;
-  onWarningChange: (hasWarning: boolean, missingFields: string[]) => void;
 }) {
-  props.onWarningChange(false, []);
-
   return (
     <div class="space-y-6">
       {/* Description */}

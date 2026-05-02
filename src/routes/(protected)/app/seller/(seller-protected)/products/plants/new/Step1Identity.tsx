@@ -1,6 +1,6 @@
 import { createEffect, Show, createMemo } from "solid-js";
 import { CheckCircleIcon } from "~/components/icons";
-import { Select, type SelectOption } from "~/components/ui/Select";
+import { Select } from "~/components/ui/Select";
 import { ImageUpload } from "~/components/ui/ImageUpload";
 import { Input, Textarea } from "~/components/ui";
 
@@ -72,6 +72,15 @@ export function Step1Identity(props: {
       missing.push(props.t("seller.products.newPlant.thumbnailRequired"));
     }
     if (!props.enName.trim()) missing.push(props.t("seller.products.newPlant.nameRequired"));
+    else if (props.enName.length > 255) missing.push(props.t("seller.products.newPlant.nameTooLong"));
+    if (props.enShortDesc.length > 500) missing.push(props.t("seller.products.newPlant.shortDescriptionTooLong"));
+    if (props.bnName.trim() && props.bnName.length > 255) missing.push(props.t("seller.products.newPlant.nameTooLong"));
+    if (props.bnShortDesc.length > 500) missing.push(props.t("seller.products.newPlant.shortDescriptionTooLong"));
+    const slug = props.slug.trim();
+    if (slug) {
+      if (slug.length < 3) missing.push(props.t("seller.products.newPlant.slugTooShort"));
+      else if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) missing.push(props.t("seller.products.newPlant.slugInvalid"));
+    }
     props.onWarningChange(missing.length > 0, missing);
   });
 

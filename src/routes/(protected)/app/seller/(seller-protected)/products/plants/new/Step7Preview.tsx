@@ -1,18 +1,6 @@
 import { Show, For } from "solid-js";
 import type { VariantStore } from "./Step4Variants";
-
-type PlantStatus = "DRAFT" | "ACTIVE" | "ARCHIVED";
-
-interface CareGuideData {
-  lightInstructions: string;
-  wateringInstructions: string;
-  humidityInstructions: string;
-  fertilizerSchedule: string;
-  repottingFrequency: string;
-  pruningNotes: string;
-  commonProblems: string;
-  seasonalCare: string;
-}
+import type { CareGuideSection } from "~/lib/types/plant-form";
 
 interface TagInfo {
   id: string;
@@ -84,7 +72,7 @@ function BilingualSection(props: {
 
 export function Step7Preview(props: {
   thumbnailPreview: string | null;
-  status: PlantStatus;
+  status: string;
   slug: string;
   enName: string;
   enShortDesc: string;
@@ -114,8 +102,8 @@ export function Step7Preview(props: {
   bnSoilType: string;
   bnToxicityInfo: string;
   variants: VariantStore[];
-  careGuideEn: CareGuideData;
-  careGuideBn: CareGuideData;
+  careGuideEn: CareGuideSection;
+  careGuideBn: CareGuideSection;
   t: (key: string) => string;
 }) {
   const hasCareGuide = () =>

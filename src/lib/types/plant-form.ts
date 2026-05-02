@@ -114,6 +114,51 @@ export function createEmptyVariant(): PlantVariantForm {
   };
 }
 
+const emptyCareGuideSection: CareGuideSection = {
+  lightInstructions: "",
+  wateringInstructions: "",
+  humidityInstructions: "",
+  fertilizerSchedule: "",
+  repottingFrequency: "",
+  pruningNotes: "",
+  commonProblems: "",
+  seasonalCare: "",
+};
+
+export function createEmptyForm(): PlantFormState {
+  return {
+    thumbnail: { id: null, url: null },
+    status: "DRAFT",
+    slug: "",
+    translations: {
+      en: { name: "", shortDescription: "", description: "" },
+      bn: { name: "", shortDescription: "", description: "" },
+    },
+    plantDetails: {
+      categoryId: "",
+      tagIds: [],
+      scientificName: "",
+      lightRequirement: "",
+      wateringFrequency: "",
+      humidityLevel: "",
+      temperatureRange: "",
+      careDifficulty: "",
+      growthRate: "",
+      matureHeight: "",
+      matureSpread: "",
+      translations: {
+        en: { commonNames: "", origin: "", soilType: "", toxicityInfo: "" },
+        bn: { commonNames: "", origin: "", soilType: "", toxicityInfo: "" },
+      },
+    },
+    variants: [createEmptyVariant()],
+    careGuide: {
+      en: { ...emptyCareGuideSection },
+      bn: { ...emptyCareGuideSection },
+    },
+  };
+}
+
 // ========================
 // Helpers
 // ========================

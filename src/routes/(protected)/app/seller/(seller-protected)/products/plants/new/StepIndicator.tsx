@@ -5,9 +5,7 @@ export interface StepInfo {
   title: string;
   isComplete: boolean;
   hasWarning: boolean;
-  warningCount: number;
   isCurrent: boolean;
-  isOptional: boolean;
   isPreview: boolean;
 }
 
@@ -33,8 +31,6 @@ export function StepIndicator(props: {
                   ? "bg-amber-100 text-amber-700 hover:bg-amber-200 cursor-pointer"
                   : step.isPreview
                   ? "bg-purple-100 text-purple-700 hover:bg-purple-200 cursor-pointer"
-                  : step.isOptional
-                  ? "bg-cream-100 text-gray-400 hover:bg-cream-200 cursor-pointer"
                   : "bg-cream-200 text-gray-400 hover:bg-cream-300 cursor-pointer"
               }`}
             >
