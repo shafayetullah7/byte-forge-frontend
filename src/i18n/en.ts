@@ -908,6 +908,7 @@ export const dict = {
         slugHint: "Auto-generated from plant name. Must be 3+ characters, lowercase letters, numbers, and hyphens only.",
         // Validation
         nameRequired: "Plant name is required",
+        nameTooShort: "Plant name must be at least 3 characters",
         nameTooLong: "Plant name must be at most 255 characters",
         shortDescriptionTooLong: "Short summary must be at most 500 characters",
         descriptionRequired: "Detailed description is required",

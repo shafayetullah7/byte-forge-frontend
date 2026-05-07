@@ -1,4 +1,4 @@
-import { createSignal, createMemo, Show, createEffect, ErrorBoundary, Suspense } from "solid-js";
+import { createSignal, createMemo, Show, createEffect, ErrorBoundary, Suspense, For } from "solid-js";
 import { createStore } from "solid-js/store";
 import { A, createAsync, action, useAction, useSubmission } from "@solidjs/router";
 import { getCategoryTree, getTags } from "~/lib/api/endpoints/public";
@@ -50,12 +50,13 @@ const createPlantAction = action(async (data: CreatePlantActionData) => {
     await plantsApi.create(data.dto as unknown as import("~/lib/api/types/seller.types").CreatePlantRequest);
     return { success: true };
   } catch (error: any) {
+    const response = error.response || error;
     return {
       success: false,
       error: {
         message: error.message || "Failed to create plant",
         statusCode: error.statusCode,
-        validationErrors: error.response?.validationErrors,
+        validationErrors: response?.error?.validationErrors || response?.validationErrors,
       },
     };
   }
@@ -76,80 +77,80 @@ export default function NewPlantPage() {
 
   // ---- Translated Select Options ----
   const lightOptions = createMemo<SelectOption[]>(() => [
-    { value: "low", label: t("seller.products.newPlant.lightLow") },
-    { value: "medium", label: t("seller.products.newPlant.lightMedium") },
-    { value: "bright_indirect", label: t("seller.products.newPlant.lightBrightIndirect") },
-    { value: "direct", label: t("seller.products.newPlant.lightDirect") },
+    { value: "LOW", label: t("seller.products.newPlant.lightLow") },
+    { value: "MEDIUM", label: t("seller.products.newPlant.lightMedium") },
+    { value: "BRIGHT_INDIRECT", label: t("seller.products.newPlant.lightBrightIndirect") },
+    { value: "DIRECT", label: t("seller.products.newPlant.lightDirect") },
   ]);
 
   const wateringOptions = createMemo<SelectOption[]>(() => [
-    { value: "daily", label: t("seller.products.newPlant.wateringDaily") },
-    { value: "weekly", label: t("seller.products.newPlant.wateringWeekly") },
-    { value: "bi_weekly", label: t("seller.products.newPlant.wateringBiWeekly") },
-    { value: "monthly", label: t("seller.products.newPlant.wateringMonthly") },
+    { value: "DAILY", label: t("seller.products.newPlant.wateringDaily") },
+    { value: "WEEKLY", label: t("seller.products.newPlant.wateringWeekly") },
+    { value: "BI_WEEKLY", label: t("seller.products.newPlant.wateringBiWeekly") },
+    { value: "MONTHLY", label: t("seller.products.newPlant.wateringMonthly") },
   ]);
 
   const humidityOptions = createMemo<SelectOption[]>(() => [
-    { value: "low", label: t("seller.products.newPlant.humidityLow") },
-    { value: "medium", label: t("seller.products.newPlant.humidityMedium") },
-    { value: "high", label: t("seller.products.newPlant.humidityHigh") },
+    { value: "LOW", label: t("seller.products.newPlant.humidityLow") },
+    { value: "MEDIUM", label: t("seller.products.newPlant.humidityMedium") },
+    { value: "HIGH", label: t("seller.products.newPlant.humidityHigh") },
   ]);
 
   const careDifficultyOptions = createMemo<SelectOption[]>(() => [
-    { value: "beginner", label: t("seller.products.newPlant.careBeginner") },
-    { value: "intermediate", label: t("seller.products.newPlant.careIntermediate") },
-    { value: "expert", label: t("seller.products.newPlant.careExpert") },
+    { value: "BEGINNER", label: t("seller.products.newPlant.careBeginner") },
+    { value: "INTERMEDIATE", label: t("seller.products.newPlant.careIntermediate") },
+    { value: "EXPERT", label: t("seller.products.newPlant.careExpert") },
   ]);
 
   const growthRateOptions = createMemo<SelectOption[]>(() => [
-    { value: "slow", label: t("seller.products.newPlant.growthSlow") },
-    { value: "moderate", label: t("seller.products.newPlant.growthModerate") },
-    { value: "fast", label: t("seller.products.newPlant.growthFast") },
+    { value: "SLOW", label: t("seller.products.newPlant.growthSlow") },
+    { value: "MODERATE", label: t("seller.products.newPlant.growthModerate") },
+    { value: "FAST", label: t("seller.products.newPlant.growthFast") },
   ]);
 
   const growthStageOptions = createMemo<SelectOption[]>(() => [
-    { value: "seedling", label: t("seller.products.newPlant.stageSeedling") },
-    { value: "juvenile", label: t("seller.products.newPlant.stageJuvenile") },
-    { value: "mature", label: t("seller.products.newPlant.stageMature") },
-    { value: "cutting", label: t("seller.products.newPlant.stageCutting") },
+    { value: "SEEDLING", label: t("seller.products.newPlant.stageSeedling") },
+    { value: "JUVENILE", label: t("seller.products.newPlant.stageJuvenile") },
+    { value: "MATURE", label: t("seller.products.newPlant.stageMature") },
+    { value: "CUTTING", label: t("seller.products.newPlant.stageCutting") },
   ]);
 
   const plantFormOptions = createMemo<SelectOption[]>(() => [
-    { value: "upright", label: t("seller.products.newPlant.formUpright") },
-    { value: "trailing", label: t("seller.products.newPlant.formTrailing") },
-    { value: "bushy", label: t("seller.products.newPlant.formBushy") },
-    { value: "climbing", label: t("seller.products.newPlant.formClimbing") },
-    { value: "rosette", label: t("seller.products.newPlant.formRosette") },
+    { value: "UPRIGHT", label: t("seller.products.newPlant.formUpright") },
+    { value: "TRAILING", label: t("seller.products.newPlant.formTrailing") },
+    { value: "BUSHY", label: t("seller.products.newPlant.formBushy") },
+    { value: "CLIMBING", label: t("seller.products.newPlant.formClimbing") },
+    { value: "ROSETTE", label: t("seller.products.newPlant.formRosette") },
   ]);
 
   const variegationOptions = createMemo<SelectOption[]>(() => [
-    { value: "none", label: t("seller.products.newPlant.varNone") },
-    { value: "variegated", label: t("seller.products.newPlant.varVariegated") },
-    { value: "semi_variegated", label: t("seller.products.newPlant.varSemiVariegated") },
-    { value: "albo", label: t("seller.products.newPlant.varAlbo") },
-    { value: "aureo", label: t("seller.products.newPlant.varAureo") },
+    { value: "NONE", label: t("seller.products.newPlant.varNone") },
+    { value: "VARIEGATED", label: t("seller.products.newPlant.varVariegated") },
+    { value: "SEMI_VARIEGATED", label: t("seller.products.newPlant.varSemiVariegated") },
+    { value: "ALBO", label: t("seller.products.newPlant.varAlbo") },
+    { value: "AUREO", label: t("seller.products.newPlant.varAureo") },
   ]);
 
   const leafDensityOptions = createMemo<SelectOption[]>(() => [
-    { value: "sparse", label: t("seller.products.newPlant.densitySparse") },
-    { value: "moderate", label: t("seller.products.newPlant.densityModerate") },
-    { value: "dense", label: t("seller.products.newPlant.densityDense") },
+    { value: "SPARSE", label: t("seller.products.newPlant.densitySparse") },
+    { value: "MODERATE", label: t("seller.products.newPlant.densityModerate") },
+    { value: "DENSE", label: t("seller.products.newPlant.densityDense") },
   ]);
 
   const propagationTypeOptions = createMemo<SelectOption[]>(() => [
-    { value: "cutting", label: t("seller.products.newPlant.propCutting") },
-    { value: "seed", label: t("seller.products.newPlant.propSeed") },
-    { value: "tissue_culture", label: t("seller.products.newPlant.propTissueCulture") },
-    { value: "air_layer", label: t("seller.products.newPlant.propAirLayer") },
-    { value: "division", label: t("seller.products.newPlant.propDivision") },
+    { value: "CUTTING", label: t("seller.products.newPlant.propCutting") },
+    { value: "SEED", label: t("seller.products.newPlant.propSeed") },
+    { value: "TISSUE_CULTURE", label: t("seller.products.newPlant.propTissueCulture") },
+    { value: "AIR_LAYER", label: t("seller.products.newPlant.propAirLayer") },
+    { value: "DIVISION", label: t("seller.products.newPlant.propDivision") },
   ]);
 
   const containerTypeOptions = createMemo<SelectOption[]>(() => [
-    { value: "nursery_pot", label: t("seller.products.newPlant.contNurseryPot") },
-    { value: "decorative_pot", label: t("seller.products.newPlant.contDecorativePot") },
-    { value: "hanging_basket", label: t("seller.products.newPlant.contHangingBasket") },
-    { value: "terrarium", label: t("seller.products.newPlant.contTerrarium") },
-    { value: "grow_bag", label: t("seller.products.newPlant.contGrowBag") },
+    { value: "NURSERY_POT", label: t("seller.products.newPlant.contNurseryPot") },
+    { value: "DECORATIVE_POT", label: t("seller.products.newPlant.contDecorativePot") },
+    { value: "HANGING_BASKET", label: t("seller.products.newPlant.contHangingBasket") },
+    { value: "TERRARIUM", label: t("seller.products.newPlant.contTerrarium") },
+    { value: "GROW_BAG", label: t("seller.products.newPlant.contGrowBag") },
   ]);
 
   // ---- Wizard State ----
@@ -170,6 +171,7 @@ export default function NewPlantPage() {
   // ---- Form State ----
   const [errors, setErrors] = createSignal<FormErrors>({});
   const [isSlugManual, setIsSlugManual] = createSignal(false);
+  const [validationErrors, setValidationErrors] = createSignal<{ field: string; message: string }[]>([]);
 
   // ---- Server Action ----
   const createPlantTrigger = useAction(createPlantAction);
@@ -201,6 +203,7 @@ export default function NewPlantPage() {
     if (!result) return;
 
     if (result.success === true) {
+      setValidationErrors([]);
       toaster.success(t("seller.products.newPlant.plantCreated"));
       setTimeout(() => {
         setForm(createEmptyForm());
@@ -209,8 +212,14 @@ export default function NewPlantPage() {
         setCurrentStep(1);
       }, 1500);
     } else if (result.success === false && result.error) {
-      const msg = result.error.message || t("seller.products.newPlant.createFailed");
-      toaster.error(msg);
+      const errs = result.error.validationErrors;
+      if (errs && errs.length > 0) {
+        setValidationErrors(errs);
+      } else {
+        setValidationErrors([]);
+        const msg = result.error.message || t("seller.products.newPlant.createFailed");
+        toaster.error(msg);
+      }
     }
   });
 
@@ -344,10 +353,14 @@ export default function NewPlantPage() {
       newErrors["thumbnail"] = t("seller.products.newPlant.thumbnailRequired");
     }
     if (!form.translations.en.name.trim()) newErrors["en.name"] = t("seller.products.newPlant.nameRequired");
+    else if (form.translations.en.name.length < 3) newErrors["en.name"] = t("seller.products.newPlant.nameTooShort");
     else if (form.translations.en.name.length > 255) newErrors["en.name"] = t("seller.products.newPlant.nameTooLong");
     if (form.translations.en.shortDescription.length > 500) newErrors["en.shortDescription"] = t("seller.products.newPlant.shortDescriptionTooLong");
 
-    if (form.translations.bn.name.trim() && form.translations.bn.name.length > 255) newErrors["bn.name"] = t("seller.products.newPlant.nameTooLong");
+    if (form.translations.bn.name.trim()) {
+      if (form.translations.bn.name.length < 3) newErrors["bn.name"] = t("seller.products.newPlant.nameTooShort");
+      else if (form.translations.bn.name.length > 255) newErrors["bn.name"] = t("seller.products.newPlant.nameTooLong");
+    }
     if (form.translations.bn.shortDescription.length > 500) newErrors["bn.shortDescription"] = t("seller.products.newPlant.shortDescriptionTooLong");
 
     const currentSlug = effectiveSlug().trim();
@@ -366,7 +379,7 @@ export default function NewPlantPage() {
       if (v.isBase) baseCount++;
       if (v.price === "" || v.price <= 0) newErrors[`variants.${i}.price`] = t("seller.products.newPlant.priceRequired");
     });
-    if (form.variants.length > 1 && baseCount !== 1) newErrors["baseVariant"] = t("seller.products.newPlant.exactlyOneBase");
+    if (baseCount !== 1) newErrors["baseVariant"] = t("seller.products.newPlant.exactlyOneBase");
 
     // Step 5: Care profile
     if (!form.plantDetails.lightRequirement) newErrors["lightRequirement"] = t("seller.products.newPlant.lightRequired");
@@ -493,6 +506,40 @@ export default function NewPlantPage() {
 
           {/* Step Indicator */}
           <StepIndicator steps={stepInfo()} onStepClick={goToStep} />
+
+          {/* Validation Error Banner */}
+          <Show when={validationErrors().length > 0}>
+            <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-5">
+              <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div class="flex-1">
+                  <p class="text-sm font-semibold text-red-800 dark:text-red-300 mb-2">
+                    {validationErrors().length} {t("seller.products.newPlant.fieldsNeedAttention")}
+                  </p>
+                  <ul class="space-y-1">
+                    <For each={validationErrors()}>
+                      {(err) => (
+                        <li class="text-sm text-red-700 dark:text-red-400">
+                          {err.message}
+                        </li>
+                      )}
+                    </For>
+                  </ul>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setValidationErrors([])}
+                  class="text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-300 transition-colors"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </Show>
 
       {/* Success Banner */}
       <Show when={plantSubmission.result?.success === true}>

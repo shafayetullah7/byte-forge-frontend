@@ -72,9 +72,11 @@ export function Step1Identity(props: {
       missing.push(props.t("seller.products.newPlant.thumbnailRequired"));
     }
     if (!props.enName.trim()) missing.push(props.t("seller.products.newPlant.nameRequired"));
+    else if (props.enName.length < 3) missing.push(props.t("seller.products.newPlant.nameTooShort"));
     else if (props.enName.length > 255) missing.push(props.t("seller.products.newPlant.nameTooLong"));
     if (props.enShortDesc.length > 500) missing.push(props.t("seller.products.newPlant.shortDescriptionTooLong"));
-    if (props.bnName.trim() && props.bnName.length > 255) missing.push(props.t("seller.products.newPlant.nameTooLong"));
+    if (props.bnName.trim() && props.bnName.length < 3) missing.push(props.t("seller.products.newPlant.nameTooShort"));
+    else if (props.bnName.trim() && props.bnName.length > 255) missing.push(props.t("seller.products.newPlant.nameTooLong"));
     if (props.bnShortDesc.length > 500) missing.push(props.t("seller.products.newPlant.shortDescriptionTooLong"));
     const slug = props.slug.trim();
     if (slug) {

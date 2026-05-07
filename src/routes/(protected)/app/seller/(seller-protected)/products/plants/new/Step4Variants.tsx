@@ -436,13 +436,26 @@ export function Step4Variants(props: {
                     checked={variant().trackInventory}
                     onChange={(v) => props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, trackInventory: v } : item))}
                   />
-                  <CheckboxField
-                    id={`variant-${i}-base`}
-                    label={props.t("seller.products.newPlant.isBaseLabel")}
-                    checked={variant().isBase}
-                    disabled={isLastBase}
-                    onChange={(v) => props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, isBase: v } : item))}
-                  />
+                  <label for={`variant-${i}-base`} class="flex items-center gap-2.5 cursor-pointer group">
+                    <div class="relative">
+                      <input
+                        type="radio"
+                        name="baseVariant"
+                        id={`variant-${i}-base`}
+                        checked={variant().isBase}
+                        onChange={() => props.setVariants(vr => vr.map((item, idx) => ({ ...item, isBase: idx === i })))}
+                        class="sr-only peer"
+                      />
+                      <div class="w-5 h-5 rounded-full border-2 border-cream-200 dark:border-forest-700 bg-white dark:bg-forest-900/30 peer-checked:bg-forest-600 peer-checked:border-forest-600 transition-colors flex items-center justify-center">
+                        <Show when={variant().isBase}>
+                          <div class="w-2 h-2 rounded-full bg-white" />
+                        </Show>
+                      </div>
+                    </div>
+                    <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-forest-700 dark:group-hover:text-cream-100 transition-colors">
+                      {props.t("seller.products.newPlant.isBaseLabel")}
+                    </span>
+                  </label>
                   <Show when={isLastBase}>
                     <span class="text-xs text-gray-400 dark:text-gray-500 self-center">
                       ({props.t("seller.products.newPlant.atLeastOneBase") || "At least one base required"})
