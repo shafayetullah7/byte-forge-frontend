@@ -47,6 +47,7 @@ export const dict = {
     viewDocument: "View document",
     total: "Total",
     archived: "Archived",
+    retry: "Retry",
     hero: {
       title: "Cultivate Your Digital Sanctuary",
       subtitle:
@@ -932,6 +933,10 @@ export const dict = {
         previewVariants: "Variants",
         namesAndDescriptionsSection: "Names & Descriptions",
         categoryAndTagsSection: "Category & Tags",
+        // Error & Loading states
+        loadFailed: "Failed to Load",
+        loadFailedDesc: "Unable to load the plant creation form.",
+        loadingData: "Loading...",
       },
     },
     orders: {

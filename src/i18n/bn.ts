@@ -47,6 +47,7 @@ export const dict = {
     viewDocument: "নথি দেখুন",
     total: "মোট",
     archived: "আর্কাইভ",
+    retry: "আবার চেষ্টা করুন",
     hero: {
       title: "আপনার ডিজিটাল বিশ্বে প্রকৃতিকে নিয়ে আসুন",
       subtitle:
@@ -935,6 +936,10 @@ export const dict = {
         previewVariants: "ভেরিয়েন্ট",
         namesAndDescriptionsSection: "নাম ও বিবরণ",
         categoryAndTagsSection: "ক্যাটাগরি ও ট্যাগ",
+        // Error & Loading states
+        loadFailed: "লোড করতে ব্যর্থ",
+        loadFailedDesc: "গাছ তৈরির ফর্ম লোড করা যায়নি।",
+        loadingData: "লোড হচ্ছে...",
       },
     },
     orders: {

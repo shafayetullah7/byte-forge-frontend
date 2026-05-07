@@ -1,3 +1,4 @@
+import { createEffect } from "solid-js";
 import { Textarea } from "~/components/ui";
 
 export function Step6Care(props: {
@@ -34,7 +35,12 @@ export function Step6Care(props: {
   bnSeasonalCare: string;
   onBnSeasonalCareChange: (v: string) => void;
   t: (key: string) => string;
+  onWarningChange: (hasWarning: boolean, missingFields: string[]) => void;
 }) {
+  createEffect(() => {
+    props.onWarningChange(false, []);
+  });
+
   return (
     <div class="space-y-6">
       {/* General Care Instructions */}
