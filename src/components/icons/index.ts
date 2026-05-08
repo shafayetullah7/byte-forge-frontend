@@ -50,6 +50,12 @@ export { HashtagIcon } from "./HashtagIcon";
 export { ChatBubbleLeftRightIcon } from "./ChatBubbleLeftRightIcon";
 export { CheckBadgeIcon } from "./CheckBadgeIcon";
 export { HashIcon } from "./HashIcon";
+export { DropletIcon } from "./DropletIcon";
+export { ThermometerIcon } from "./ThermometerIcon";
+export { TrendingUpIcon } from "./TrendingUpIcon";
+export { ShareIcon } from "./ShareIcon";
+export { ScissorsIcon } from "./ScissorsIcon";
+export { StarIcon } from "./StarIcon";
 
 export * from './TagIcon';
 export * from './ArrowsRightLeftIcon';

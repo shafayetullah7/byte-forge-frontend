@@ -1,5 +1,5 @@
 import { createSignal, createMemo, For, Show, Suspense, createEffect } from "solid-js";
-import { A, createAsync } from "@solidjs/router";
+import { A, createAsync, useNavigate } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import { getPlants } from "~/lib/api/endpoints/seller/plants.api";
 import { getCategoryTree, getTags } from "~/lib/api/endpoints/public";
@@ -96,6 +96,7 @@ function getPageNumbers(current: number, total: number): (number | "...")[] {
 
 export default function PlantsPage() {
   const { t } = useI18n();
+  const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = createSignal("");
   const [statusFilter, setStatusFilter] = createSignal("");
@@ -716,7 +717,10 @@ export default function PlantsPage() {
                     {(product) => {
                       const inventory = getInventoryStatus(product.inventoryCount);
                       return (
-                        <tr class="border-b border-cream-100 dark:border-forest-700/50 hover:bg-cream-50 dark:hover:bg-forest-900/30 transition-colors">
+                        <tr
+                          class="border-b border-cream-100 dark:border-forest-700/50 hover:bg-cream-50 dark:hover:bg-forest-900/30 transition-colors cursor-pointer"
+                          onClick={() => navigate(`/app/seller/products/plants/${product.id}`)}
+                        >
                           <td class="px-4 py-3">
                             <div>
                               <p class="font-semibold text-forest-800 dark:text-cream-50">
@@ -787,7 +791,10 @@ export default function PlantsPage() {
                 {(product) => {
                   const inventory = getInventoryStatus(product.inventoryCount);
                   return (
-                    <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm p-5">
+                    <div
+                      class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm p-5 hover:bg-cream-50 dark:hover:bg-forest-900/30 transition-colors cursor-pointer"
+                      onClick={() => navigate(`/app/seller/products/plants/${product.id}`)}
+                    >
                       <div class="flex items-start justify-between mb-3">
                         <div class="flex-1 min-w-0">
                           <div class="flex items-center gap-2 mb-1">
