@@ -22,7 +22,6 @@ export const getPlants = query(
       if (filter.search !== undefined) params.search = filter.search;
       if (filter.status !== undefined) params.status = filter.status;
       if (filter.categoryId !== undefined) params.categoryId = filter.categoryId;
-      if (filter.locale !== undefined) params.locale = filter.locale;
       if (filter.sortBy !== undefined) params.sortBy = filter.sortBy;
       if (filter.sortOrder !== undefined) params.sortOrder = filter.sortOrder;
       if (filter.tagIds && filter.tagIds.length > 0) {

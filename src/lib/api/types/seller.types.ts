@@ -191,7 +191,6 @@ export interface PlantFilter {
   status?: PlantStatus;
   categoryId?: string;
   tagIds?: string[];
-  locale?: "en" | "bn";
   sortBy?: "createdAt" | "updatedAt" | "name" | "price" | "inventory";
   sortOrder?: "asc" | "desc";
 }
