@@ -9,7 +9,7 @@ import Button from "~/components/ui/Button";
 import { type SelectOption } from "~/components/ui/Select";
 import { useImageUpload } from "~/lib/hooks/useImageUpload";
 import { toaster } from "~/components/ui/Toast";
-import { plantsApi } from "~/lib/api/endpoints/seller/plants.api";
+import { createPlant } from "~/lib/api/endpoints/seller/plants.api";
 import { SunIcon, ChevronLeftIcon, SpinnerIcon } from "~/components/icons";
 import { StepIndicator } from "./StepIndicator";
 import { Step1Identity } from "./Step1Identity";
@@ -47,7 +47,7 @@ const createPlantAction = action(async (data: CreatePlantActionData) => {
     if (data.saveAsDraft) {
       (data.dto as any).status = "DRAFT";
     }
-    await plantsApi.create(data.dto as unknown as import("~/lib/api/types/seller.types").CreatePlantRequest);
+    await createPlant(data.dto as unknown as import("~/lib/api/types/seller.types").CreatePlantRequest);
     return { success: true };
   } catch (error: any) {
     const response = error.response || error;

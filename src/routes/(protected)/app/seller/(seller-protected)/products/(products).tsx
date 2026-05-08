@@ -831,7 +831,7 @@ export default function ProductsPage() {
               }
             >
               {/* Desktop Table */}
-              <div class="hidden lg:block bg-white dark:bg-forest-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+              <div class="hidden lg:block bg-white dark:bg-forest-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-x-auto">
                 <table class="w-full">
                   <thead>
                     <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-forest-900/50">
@@ -949,7 +949,7 @@ export default function ProductsPage() {
                                 <button class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-forest-700 transition-colors">
                                   <DotsVerticalIcon class="w-5 h-5 text-gray-500 dark:text-gray-400" />
                                 </button>
-                                <div class="absolute right-0 mt-1 w-40 bg-white dark:bg-forest-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                                <div class="absolute right-0 mt-1 w-40 bg-white dark:bg-forest-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
                                   <div class="py-1">
                                     <button class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-forest-700 flex items-center gap-2">
                                       <PencilIcon class="w-4 h-4" />
@@ -996,7 +996,7 @@ export default function ProductsPage() {
                             <button class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-forest-700 transition-colors">
                               <DotsVerticalIcon class="w-5 h-5 text-gray-500 dark:text-gray-400" />
                             </button>
-                            <div class="absolute right-0 mt-1 w-36 bg-white dark:bg-forest-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                            <div class="absolute right-0 mt-1 w-36 bg-white dark:bg-forest-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
                               <div class="py-1">
                                 <button class="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-forest-700 flex items-center gap-2">
                                   <PencilIcon class="w-4 h-4" />

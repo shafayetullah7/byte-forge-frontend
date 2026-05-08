@@ -128,7 +128,24 @@ export type PlantStatus = (typeof PLANT_STATUS)[keyof typeof PLANT_STATUS];
 export interface PlantCategory {
   id: string;
   slug: string;
-  name?: string;
+  name: string | null;
+}
+
+/**
+ * Plant tag (from list response)
+ */
+export interface PlantTag {
+  id: string;
+  slug: string;
+  name: string | null;
+}
+
+/**
+ * Plant thumbnail (from list response)
+ */
+export interface PlantThumbnail {
+  id: string;
+  url: string;
 }
 
 /**
@@ -138,13 +155,13 @@ export interface PlantListItem {
   id: string;
   slug: string;
   status: PlantStatus;
-  thumbnailId?: string;
-  name?: string;
-  shortDescription?: string;
-  price?: number;
-  salePrice?: number;
+  thumbnail: PlantThumbnail | null;
+  name: string | null;
+  shortDescription: string | null;
+  price: string | null;
   inventoryCount: number;
-  category?: PlantCategory;
+  category: PlantCategory | null;
+  tags: PlantTag[];
   createdAt: string;
   updatedAt: string;
 }
@@ -160,7 +177,7 @@ export interface PlantListResponse {
     total: number;
     page: number;
     limit: number;
-    totalPages: number;
+    pages: number;
   };
 }
 

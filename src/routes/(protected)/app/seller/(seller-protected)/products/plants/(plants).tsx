@@ -1,231 +1,19 @@
-import { createSignal, createMemo, For, Show } from "solid-js";
-import { A } from "@solidjs/router";
+import { createSignal, createMemo, For, Show, Suspense, createEffect } from "solid-js";
+import { A, createAsync } from "@solidjs/router";
 import { useI18n } from "~/i18n";
-import { FilterIcon, DotsVerticalIcon, PencilIcon, TrashIcon, ChevronLeftIcon, ChevronRightIcon, ArchiveIcon, SortIcon, PackageIcon, PlusIcon, XIcon, MagnifyingGlassIcon, FolderIcon, DollarSignIcon, CubeIcon, ClockIcon, CheckCircleIcon, Squares2x2Icon, TagIcon } from "~/components/icons";
+import { getPlants } from "~/lib/api/endpoints/seller/plants.api";
+import { getCategoryTree, getTags } from "~/lib/api/endpoints/public";
+import type { PlantFilter } from "~/lib/api/types/seller.types";
+import type { CategoryTree } from "~/lib/api/endpoints/public/categories.api";
+import { FilterIcon, ChevronLeftIcon, ChevronRightIcon, ArchiveIcon, SortIcon, PackageIcon, PlusIcon, XIcon, MagnifyingGlassIcon, FolderIcon, DollarSignIcon, CubeIcon, ClockIcon, CheckCircleIcon, Squares2x2Icon, TagIcon } from "~/components/icons";
 import Badge from "~/components/ui/Badge";
 import { FilterSelect } from "~/components/ui/FilterSelect";
-import { TagMultiSelect } from "~/components/ui/TagMultiSelect";
-import { CategorySearchSelect } from "~/components/seller/CategorySearchSelect";
-import type { CategoryOption } from "~/components/seller/CategorySearchSelect";
+import { TagMultiSelect, type TagGroupOption } from "~/components/ui/TagMultiSelect";
+import { CategorySearchSelect, type CategoryOption } from "~/components/seller/CategorySearchSelect";
 
 // ========================
-// Types
+// Constants
 // ========================
-
-interface Product {
-  id: string;
-  slug: string;
-  name: string;
-  shortDescription: string | null;
-  price: number;
-  salePrice: number | null;
-  inventoryCount: number;
-  status: "DRAFT" | "ACTIVE" | "ARCHIVED";
-  category: {
-    id: string;
-    slug: string;
-    name: string;
-  } | null;
-  tags: string[];
-  thumbnailUrl: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// ========================
-// Static Data
-// ========================
-
-const TAG_GROUPS = [
-  {
-    id: "group-1",
-    slug: "size",
-    name: "Pot Size",
-    tags: [
-      { id: "tag-1", slug: "4-inch", name: "4 inch" },
-      { id: "tag-2", slug: "6-inch", name: "6 inch" },
-      { id: "tag-3", slug: "8-inch", name: "8 inch" },
-      { id: "tag-4", slug: "10-inch", name: "10 inch" },
-    ],
-  },
-  {
-    id: "group-2",
-    slug: "growth-stage",
-    name: "Growth Stage",
-    tags: [
-      { id: "tag-5", slug: "seedling", name: "Seedling" },
-      { id: "tag-6", slug: "mature", name: "Mature" },
-      { id: "tag-7", slug: "cutting", name: "Cutting" },
-    ],
-  },
-  {
-    id: "group-3",
-    slug: "care-level",
-    name: "Care Level",
-    tags: [
-      { id: "tag-8", slug: "beginner", name: "Beginner Friendly" },
-      { id: "tag-9", slug: "intermediate", name: "Intermediate" },
-      { id: "tag-10", slug: "expert", name: "Expert" },
-    ],
-  },
-  {
-    id: "group-4",
-    slug: "light",
-    name: "Light Requirements",
-    tags: [
-      { id: "tag-11", slug: "low-light", name: "Low Light" },
-      { id: "tag-12", slug: "bright-indirect", name: "Bright Indirect" },
-      { id: "tag-13", slug: "direct-sun", name: "Direct Sun" },
-    ],
-  },
-];
-
-const getTagName = (tagId: string): string => {
-  for (const group of TAG_GROUPS) {
-    const tag = group.tags.find((t) => t.id === tagId);
-    if (tag) return tag.name;
-  }
-  return tagId;
-};
-
-const staticProducts: Product[] = [
-  {
-    id: "plant-001",
-    slug: "monstera-deliciosa",
-    name: "Monstera Deliciosa",
-    shortDescription: "Popular tropical plant with distinctive split leaves",
-    price: 850,
-    salePrice: 750,
-    inventoryCount: 25,
-    status: "ACTIVE",
-    category: { id: "cat-1", slug: "indoor-plants", name: "Indoor Plants" },
-    tags: ["tag-2", "tag-6", "tag-9", "tag-12"],
-    thumbnailUrl: null,
-    createdAt: "2025-01-15T10:30:00Z",
-    updatedAt: "2025-02-20T14:45:00Z",
-  },
-  {
-    id: "plant-002",
-    slug: "snake-plant-sansevieria",
-    name: "Snake Plant (Sansevieria)",
-    shortDescription: "Low-maintenance air-purifying plant",
-    price: 450,
-    salePrice: null,
-    inventoryCount: 40,
-    status: "ACTIVE",
-    category: { id: "cat-1", slug: "indoor-plants", name: "Indoor Plants" },
-    tags: ["tag-1", "tag-6", "tag-8", "tag-11"],
-    thumbnailUrl: null,
-    createdAt: "2025-01-20T09:15:00Z",
-    updatedAt: "2025-01-20T09:15:00Z",
-  },
-  {
-    id: "plant-003",
-    slug: "fiddle-leaf-fig",
-    name: "Fiddle Leaf Fig",
-    shortDescription: "Elegant statement plant with large violin-shaped leaves",
-    price: 1200,
-    salePrice: 1100,
-    inventoryCount: 8,
-    status: "ACTIVE",
-    category: { id: "cat-2", slug: "statement-plants", name: "Statement Plants" },
-    tags: ["tag-3", "tag-6", "tag-10", "tag-13"],
-    thumbnailUrl: null,
-    createdAt: "2025-02-01T11:00:00Z",
-    updatedAt: "2025-02-10T16:30:00Z",
-  },
-  {
-    id: "plant-004",
-    slug: "pothos-golden",
-    name: "Golden Pothos",
-    shortDescription: "Trailing vine with heart-shaped variegated leaves",
-    price: 350,
-    salePrice: null,
-    inventoryCount: 60,
-    status: "ACTIVE",
-    category: { id: "cat-3", slug: "trailing-plants", name: "Trailing Plants" },
-    tags: ["tag-1", "tag-5", "tag-8", "tag-11"],
-    thumbnailUrl: null,
-    createdAt: "2025-02-05T08:45:00Z",
-    updatedAt: "2025-02-05T08:45:00Z",
-  },
-  {
-    id: "plant-005",
-    slug: "peace-lily",
-    name: "Peace Lily",
-    shortDescription: "Elegant flowering plant with white spathes",
-    price: 650,
-    salePrice: 580,
-    inventoryCount: 15,
-    status: "DRAFT",
-    category: { id: "cat-1", slug: "indoor-plants", name: "Indoor Plants" },
-    tags: ["tag-2", "tag-6", "tag-8", "tag-11"],
-    thumbnailUrl: null,
-    createdAt: "2025-02-10T13:20:00Z",
-    updatedAt: "2025-02-15T10:00:00Z",
-  },
-  {
-    id: "plant-006",
-    slug: "rubber-plant-burgundy",
-    name: "Rubber Plant (Burgundy)",
-    shortDescription: "Bold foliage plant with dark burgundy leaves",
-    price: 900,
-    salePrice: null,
-    inventoryCount: 0,
-    status: "ACTIVE",
-    category: { id: "cat-1", slug: "indoor-plants", name: "Indoor Plants" },
-    tags: ["tag-3", "tag-6", "tag-9", "tag-12"],
-    thumbnailUrl: null,
-    createdAt: "2025-02-12T07:30:00Z",
-    updatedAt: "2025-03-01T09:15:00Z",
-  },
-  {
-    id: "plant-007",
-    slug: "alocasia-polly",
-    name: "Alocasia Polly",
-    shortDescription: "Striking arrow-shaped leaves with dramatic contrast",
-    price: 1500,
-    salePrice: 1350,
-    inventoryCount: 5,
-    status: "ACTIVE",
-    category: { id: "cat-4", slug: "exotic-plants", name: "Exotic Plants" },
-    tags: ["tag-2", "tag-6", "tag-10", "tag-12"],
-    thumbnailUrl: null,
-    createdAt: "2025-02-18T15:45:00Z",
-    updatedAt: "2025-02-25T11:30:00Z",
-  },
-  {
-    id: "plant-008",
-    slug: "zz-plant",
-    name: "ZZ Plant",
-    shortDescription: "Nearly indestructible low-light plant",
-    price: 550,
-    salePrice: null,
-    inventoryCount: 30,
-    status: "ARCHIVED",
-    category: { id: "cat-1", slug: "indoor-plants", name: "Indoor Plants" },
-    tags: ["tag-1", "tag-6", "tag-8", "tag-11"],
-    thumbnailUrl: null,
-    createdAt: "2025-01-10T12:00:00Z",
-    updatedAt: "2025-03-10T08:00:00Z",
-  },
-];
-
-const STATIC_CATEGORIES: CategoryOption[] = [
-  { id: "cat-1", slug: "indoor-plants", name: "Indoor Plants", parentId: null, childrenCount: 3 },
-  { id: "cat-1-1", slug: "succulents", name: "Succulents", parentId: "cat-1", childrenCount: 0 },
-  { id: "cat-1-2", slug: "ferns", name: "Ferns", parentId: "cat-1", childrenCount: 0 },
-  { id: "cat-1-3", slug: "tropical", name: "Tropical", parentId: "cat-1", childrenCount: 0 },
-  { id: "cat-2", slug: "statement-plants", name: "Statement Plants", parentId: null, childrenCount: 2 },
-  { id: "cat-2-1", slug: "large-leaf", name: "Large Leaf", parentId: "cat-2", childrenCount: 0 },
-  { id: "cat-2-2", slug: "architectural", name: "Architectural", parentId: "cat-2", childrenCount: 0 },
-  { id: "cat-3", slug: "trailing-plants", name: "Trailing Plants", parentId: null, childrenCount: 2 },
-  { id: "cat-3-1", slug: "vining", name: "Vining", parentId: "cat-3", childrenCount: 0 },
-  { id: "cat-3-2", slug: "hanging", name: "Hanging", parentId: "cat-3", childrenCount: 0 },
-  { id: "cat-4", slug: "exotic-plants", name: "Exotic Plants", parentId: null, childrenCount: 2 },
-  { id: "cat-4-1", slug: "rare", name: "Rare", parentId: "cat-4", childrenCount: 0 },
-  { id: "cat-4-2", slug: "variegated", name: "Variegated", parentId: "cat-4", childrenCount: 0 },
-];
 
 const SORT_OPTIONS = [
   { value: "createdAt", label: "Date Created" },
@@ -248,8 +36,10 @@ function getStatusVariant(status: string): "forest" | "sage" | "cream" | "terrac
   }
 }
 
-function formatPrice(price: number): string {
-  return `৳${price.toLocaleString("en-BD")}`;
+function formatPrice(price: string | number | null | undefined): string {
+  if (!price) return "—";
+  const num = typeof price === "string" ? parseFloat(price) : price;
+  return `৳${num.toLocaleString("en-BD", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 function formatDateTime(dateStr: string): string {
@@ -287,6 +77,19 @@ function FilterChip(props: { label: string; onRemove: () => void }) {
   );
 }
 
+function getPageNumbers(current: number, total: number): (number | "...")[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages: (number | "...")[] = [];
+  pages.push(1);
+  const start = Math.max(2, current - 1);
+  const end = Math.min(total - 1, current + 1);
+  if (start > 2) pages.push("...");
+  for (let i = start; i <= end; i++) pages.push(i);
+  if (end < total - 1) pages.push("...");
+  pages.push(total);
+  return pages;
+}
+
 // ========================
 // Main Page
 // ========================
@@ -304,7 +107,18 @@ export default function PlantsPage() {
   const [showSortPanel, setShowSortPanel] = createSignal(false);
 
   const [currentPage, setCurrentPage] = createSignal(1);
-  const ITEMS_PER_PAGE = 5;
+  const ITEMS_PER_PAGE = 10;
+
+  createEffect(() => {
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest("[data-sort-panel]")) {
+        setShowSortPanel(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  });
 
   const toggleTag = (tagId: string) => {
     const current = selectedTagIds();
@@ -321,71 +135,90 @@ export default function PlantsPage() {
     setCurrentPage(1);
   };
 
-  const filteredProducts = createMemo(() => {
-    let result = [...staticProducts];
+  const filterParams = createMemo<PlantFilter>(() => ({
+    page: currentPage(),
+    limit: ITEMS_PER_PAGE,
+    search: searchQuery() || undefined,
+    status: (statusFilter() || undefined) as PlantFilter["status"],
+    categoryId: categoryFilter() || undefined,
+    tagIds: selectedTagIds().length > 0 ? selectedTagIds() : undefined,
+    sortBy: sortBy() as PlantFilter["sortBy"],
+    sortOrder: sortOrder(),
+  }));
 
-    const query = searchQuery().toLowerCase();
-    if (query) {
-      result = result.filter(
-        (p) =>
-          p.name.toLowerCase().includes(query) ||
-          p.slug.toLowerCase().includes(query)
-      );
-    }
-
-    const status = statusFilter();
-    if (status) {
-      result = result.filter((p) => p.status === status);
-    }
-
-    const category = categoryFilter();
-    if (category) {
-      result = result.filter((p) => p.category?.slug === category);
-    }
-
-    const tags = selectedTagIds();
-    if (tags.length > 0) {
-      result = result.filter((p) => tags.every((tagId) => p.tags.includes(tagId)));
-    }
-
-    const sortField = sortBy();
-    const order = sortOrder();
-    const sortMultiplier = order === "asc" ? 1 : -1;
-
-    result.sort((a, b) => {
-      switch (sortField) {
-        case "name":
-          return a.name.localeCompare(b.name) * sortMultiplier;
-        case "price":
-          return (a.price - b.price) * sortMultiplier;
-        case "inventory":
-          return (a.inventoryCount - b.inventoryCount) * sortMultiplier;
-        case "updatedAt":
-          return (new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()) * sortMultiplier;
-        case "createdAt":
-        default:
-          return (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) * sortMultiplier;
-      }
-    });
-
-    return result;
-  });
-
-  const totalPages = createMemo(() =>
-    Math.max(1, Math.ceil(filteredProducts().length / ITEMS_PER_PAGE))
+  const apiData = createAsync(
+    () => getPlants(filterParams()),
+    { deferStream: true }
   );
 
-  const paginatedProducts = createMemo(() => {
-    const start = (currentPage() - 1) * ITEMS_PER_PAGE;
-    return filteredProducts().slice(start, start + ITEMS_PER_PAGE);
+  const statsData = createAsync(
+    () => getPlants({ limit: 100 }),
+    { deferStream: true }
+  );
+
+  const categoryTreeData = createAsync(() => getCategoryTree(), { deferStream: true });
+  const tagGroupsData = createAsync(() => getTags(), { deferStream: true });
+
+  const flatCategories = createMemo<CategoryOption[]>(() => {
+    const tree = categoryTreeData();
+    if (!tree) return [];
+    const flat: CategoryOption[] = [];
+    const flatten = (cats: CategoryTree[]) => {
+      for (const cat of cats) {
+        flat.push({
+          id: cat.id,
+          slug: cat.slug,
+          name: cat.name,
+          parentId: cat.parentId,
+          childrenCount: cat.childrenCount,
+        });
+        if (cat.children && cat.children.length > 0) {
+          flatten(cat.children);
+        }
+      }
+    };
+    flatten(tree);
+    return flat;
   });
 
-  const stats = createMemo(() => ({
-    total: staticProducts.length,
-    active: staticProducts.filter((p) => p.status === "ACTIVE").length,
-    draft: staticProducts.filter((p) => p.status === "DRAFT").length,
-    archived: staticProducts.filter((p) => p.status === "ARCHIVED").length,
-  }));
+  const tagGroupOptions = createMemo<TagGroupOption[]>(() => {
+    const groups = tagGroupsData();
+    if (!groups) return [];
+    return groups.map((g) => ({
+      id: g.id,
+      slug: g.slug,
+      name: g.name,
+      tags: g.tags.map((t) => ({ id: t.id, slug: t.slug, name: t.name })),
+    }));
+  });
+
+  const tagIdToName = createMemo<Record<string, string>>(() => {
+    const groups = tagGroupsData();
+    if (!groups) return {};
+    const map: Record<string, string> = {};
+    for (const group of groups) {
+      for (const tag of group.tags) {
+        map[tag.id] = tag.name;
+      }
+    }
+    return map;
+  });
+
+  const products = createMemo(() => apiData()?.data ?? []);
+  const meta = createMemo(() => apiData()?.meta);
+
+  const totalPages = createMemo(() => meta()?.pages ?? 1);
+  const totalItems = createMemo(() => meta()?.total ?? 0);
+
+  const stats = createMemo(() => {
+    const allItems = statsData()?.data ?? [];
+    return {
+      total: allItems.length,
+      active: allItems.filter((p) => p.status === "ACTIVE").length,
+      draft: allItems.filter((p) => p.status === "DRAFT").length,
+      archived: allItems.filter((p) => p.status === "ARCHIVED").length,
+    };
+  });
 
   const handleFilterChange = (setter: (val: string) => void, value: string) => {
     setter(value);
@@ -419,6 +252,21 @@ export default function PlantsPage() {
   });
 
   return (
+    <Suspense
+      fallback={
+        <div class="space-y-6">
+          <div class="h-20 bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 animate-pulse" />
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+            <div class="h-24 bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 animate-pulse" />
+            <div class="h-24 bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 animate-pulse" />
+            <div class="h-24 bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 animate-pulse" />
+            <div class="h-24 bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 animate-pulse" />
+          </div>
+          <div class="h-40 bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 animate-pulse" />
+          <div class="h-64 bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 animate-pulse" />
+        </div>
+      }
+    >
     <>
         {/* Page Header */}
         <div class="mb-8">
@@ -436,11 +284,12 @@ export default function PlantsPage() {
                 </p>
               </div>
             </div>
-            <A href="/app/seller/products/plants/new">
-              <button class="inline-flex items-center gap-2 px-5 py-2.5 bg-forest-600 hover:bg-forest-700 text-white rounded-lg font-semibold shadow-sm hover:shadow-md transition-colors">
-                <PlusIcon class="w-5 h-5" />
-                {t("seller.products.addPlant")}
-              </button>
+            <A
+              href="/app/seller/products/plants/new"
+              class="inline-flex items-center gap-2 px-5 py-2.5 bg-forest-600 hover:bg-forest-700 text-white rounded-lg font-semibold shadow-sm hover:shadow-md transition-colors"
+            >
+              <PlusIcon class="w-5 h-5" />
+              {t("seller.products.addPlant")}
             </A>
           </div>
         </div>
@@ -522,7 +371,7 @@ export default function PlantsPage() {
               />
 
               {/* Sort Button (Desktop) */}
-              <div class="hidden lg:block relative">
+              <div data-sort-panel class="hidden lg:block relative">
                 <button
                   onClick={() => setShowSortPanel(!showSortPanel())}
                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-cream-200 dark:border-forest-700 focus:border-forest-500 dark:focus:border-forest-400 bg-white dark:bg-forest-800 text-forest-800 dark:text-cream-50 transition-standard focus-ring-flat min-w-[200px]"
@@ -610,7 +459,7 @@ export default function PlantsPage() {
             </div>
 
             {/* Advanced Filters Panel */}
-            <Show when={showFilters() || true}>
+            <Show when={showFilters()}>
               <div class="mt-4 pt-4 border-t border-cream-200 dark:border-forest-700">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {/* Category Filter */}
@@ -621,7 +470,7 @@ export default function PlantsPage() {
                     <CategorySearchSelect
                       value={categoryFilter()}
                       onChange={(val) => handleFilterChange(setCategoryFilter, val)}
-                      categories={STATIC_CATEGORIES}
+                      categories={flatCategories()}
                     />
                   </div>
 
@@ -633,7 +482,7 @@ export default function PlantsPage() {
                     <TagMultiSelect
                       selectedTags={selectedTagIds()}
                       onToggle={toggleTag}
-                      groups={TAG_GROUPS}
+                      groups={tagGroupOptions()}
                     />
                   </div>
 
@@ -667,6 +516,32 @@ export default function PlantsPage() {
               </div>
             </Show>
 
+            {/* Category & Tag Filters (Desktop) */}
+            <div class="hidden lg:block mt-4 pt-4 border-t border-cream-200 dark:border-forest-700">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Category
+                  </label>
+                  <CategorySearchSelect
+                    value={categoryFilter()}
+                    onChange={(val) => handleFilterChange(setCategoryFilter, val)}
+                    categories={flatCategories()}
+                  />
+                </div>
+                <div data-tag-dropdown>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Tags
+                  </label>
+                  <TagMultiSelect
+                    selectedTags={selectedTagIds()}
+                    onToggle={toggleTag}
+                    groups={tagGroupOptions()}
+                  />
+                </div>
+              </div>
+            </div>
+
             {/* Active Filters */}
             <Show when={hasActiveFilters()}>
               <div class="mt-4 pt-4 border-t border-cream-200 dark:border-forest-700">
@@ -697,14 +572,14 @@ export default function PlantsPage() {
                   </Show>
                   <Show when={categoryFilter()}>
                     <FilterChip
-                      label={`Category: ${STATIC_CATEGORIES.find((c) => c.slug === categoryFilter())?.name}`}
+                      label={`Category: ${flatCategories().find((c) => c.id === categoryFilter())?.name}`}
                       onRemove={() => handleFilterChange(setCategoryFilter, "")}
                     />
                   </Show>
                   <For each={selectedTagIds()}>
                     {(tagId) => (
                       <FilterChip
-                        label={getTagName(tagId)}
+                        label={tagIdToName()[tagId] || tagId}
                         onRemove={() => removeTag(tagId)}
                       />
                     )}
@@ -718,8 +593,8 @@ export default function PlantsPage() {
         {/* Results Count */}
         <div class="flex items-center justify-between mb-4">
           <p class="text-sm text-gray-500 dark:text-gray-400">
-            Showing <span class="font-semibold text-forest-800 dark:text-cream-50">{filteredProducts().length}</span> of{" "}
-            <span class="font-semibold text-forest-800 dark:text-cream-50">{staticProducts.length}</span> products
+            Showing <span class="font-semibold text-forest-800 dark:text-cream-50">{products().length}</span> of{" "}
+            <span class="font-semibold text-forest-800 dark:text-cream-50">{totalItems()}</span> products
           </p>
           <Show when={hasActiveFilters()}>
             <button
@@ -734,7 +609,7 @@ export default function PlantsPage() {
 
         {/* Products Table / Cards */}
         <Show
-          when={filteredProducts().length > 0}
+          when={products().length > 0}
           fallback={
             <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 py-12 px-4 text-center shadow-sm">
               <PackageIcon class="w-10 h-10 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
@@ -757,18 +632,19 @@ export default function PlantsPage() {
                   </button>
                 }
               >
-                <A href="/app/seller/products/plants/new">
-                  <button class="inline-flex items-center gap-2 px-5 py-2.5 bg-forest-600 hover:bg-forest-700 text-white rounded-lg font-semibold shadow-sm hover:shadow-md transition-colors">
-                    <PlusIcon class="w-5 h-5" />
-                    {t("seller.products.addPlant")}
-                  </button>
+                <A
+                  href="/app/seller/products/plants/new"
+                  class="inline-flex items-center gap-2 px-5 py-2.5 bg-forest-600 hover:bg-forest-700 text-white rounded-lg font-semibold shadow-sm hover:shadow-md transition-colors"
+                >
+                  <PlusIcon class="w-5 h-5" />
+                  {t("seller.products.addPlant")}
                 </A>
               </Show>
             </div>
           }
         >
           {/* Desktop Table */}
-          <div class="hidden lg:block bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm overflow-hidden">
+          <div class="hidden lg:block bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm overflow-x-auto">
             <table class="w-full">
               <thead>
                 <tr class="border-b border-cream-200 dark:border-forest-700 bg-cream-50 dark:bg-forest-900/50">
@@ -809,11 +685,10 @@ export default function PlantsPage() {
                       Updated
                     </div>
                   </th>
-                  <th class="text-right px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                <For each={paginatedProducts()}>
+                <For each={products()}>
                   {(product) => {
                     const inventory = getInventoryStatus(product.inventoryCount);
                     return (
@@ -841,9 +716,9 @@ export default function PlantsPage() {
                         <td class="px-4 py-3">
                           <div class="flex flex-wrap gap-1 max-w-[200px]">
                             <For each={product.tags.slice(0, 3)}>
-                              {(tagId) => (
+                              {(tag) => (
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cream-200 text-cream-800 dark:bg-cream-900/40 dark:text-cream-300">
-                                  {getTagName(tagId)}
+                                  {tag.name}
                                 </span>
                               )}
                             </For>
@@ -855,16 +730,9 @@ export default function PlantsPage() {
                           </div>
                         </td>
                         <td class="px-4 py-3">
-                          <div>
-                            <span class="font-semibold text-forest-800 dark:text-cream-50">
-                              {formatPrice(product.price)}
-                            </span>
-                            <Show when={product.salePrice}>
-                              <span class="ml-2 text-sm text-terracotta-600 dark:text-terracotta-400 line-through">
-                                {formatPrice(product.salePrice!)}
-                              </span>
-                            </Show>
-                          </div>
+                          <span class="font-semibold text-forest-800 dark:text-cream-50">
+                            {formatPrice(product.price)}
+                          </span>
                         </td>
                         <td class="px-4 py-3">
                           <Badge variant={inventory.variant}>
@@ -881,25 +749,6 @@ export default function PlantsPage() {
                             {formatDateTime(product.updatedAt)}
                           </span>
                         </td>
-                        <td class="px-4 py-3 text-right">
-                          <div class="relative group">
-                            <button class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-forest-700 transition-colors">
-                              <DotsVerticalIcon class="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                            </button>
-                            <div class="absolute right-0 mt-1 w-40 bg-white dark:bg-forest-800 rounded-lg border border-cream-200 dark:border-forest-700 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 z-10">
-                              <div class="py-1">
-                                <button class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-forest-700 flex items-center gap-2">
-                                  <PencilIcon class="w-4 h-4" />
-                                  {t("common.edit")}
-                                </button>
-                                <button class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-forest-700 flex items-center gap-2">
-                                  <TrashIcon class="w-4 h-4" />
-                                  {t("common.delete")}
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </td>
                       </tr>
                     );
                   }}
@@ -910,7 +759,7 @@ export default function PlantsPage() {
 
           {/* Mobile Cards */}
           <div class="lg:hidden space-y-4">
-            <For each={paginatedProducts()}>
+            <For each={products()}>
               {(product) => {
                 const inventory = getInventoryStatus(product.inventoryCount);
                 return (
@@ -928,23 +777,6 @@ export default function PlantsPage() {
                         <p class="text-sm text-gray-500 dark:text-gray-400 truncate">
                           {product.shortDescription}
                         </p>
-                      </div>
-                      <div class="relative group ml-3 flex-shrink-0">
-                        <button class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-forest-700 transition-colors">
-                          <DotsVerticalIcon class="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                        </button>
-                        <div class="absolute right-0 mt-1 w-36 bg-white dark:bg-forest-800 rounded-lg border border-cream-200 dark:border-forest-700 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 z-10">
-                          <div class="py-1">
-                            <button class="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-forest-700 flex items-center gap-2">
-                              <PencilIcon class="w-4 h-4" />
-                              {t("common.edit")}
-                            </button>
-                            <button class="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-forest-700 flex items-center gap-2">
-                              <TrashIcon class="w-4 h-4" />
-                              {t("common.delete")}
-                            </button>
-                          </div>
-                        </div>
                       </div>
                     </div>
 
@@ -964,11 +796,6 @@ export default function PlantsPage() {
                           <p class="text-gray-500 dark:text-gray-400">Price</p>
                           <p class="font-semibold text-forest-800 dark:text-cream-50">
                             {formatPrice(product.price)}
-                            <Show when={product.salePrice}>
-                              <span class="ml-1 text-xs text-terracotta-600 dark:text-terracotta-400 line-through">
-                                {formatPrice(product.salePrice!)}
-                              </span>
-                            </Show>
                           </p>
                         </div>
                       </div>
@@ -995,9 +822,9 @@ export default function PlantsPage() {
                     {/* Tags */}
                     <div class="flex flex-wrap gap-1">
                       <For each={product.tags}>
-                        {(tagId) => (
+                        {(tag) => (
                           <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cream-200 text-cream-800 dark:bg-cream-900/40 dark:text-cream-300">
-                            {getTagName(tagId)}
+                            {tag.name}
                           </span>
                         )}
                       </For>
@@ -1009,14 +836,14 @@ export default function PlantsPage() {
           </div>
 
           {/* Pagination */}
-          <Show when={totalPages() > 1}>
-            <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm px-6 py-4 mt-6">
-              <div class="flex items-center justify-between">
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                  Showing {(currentPage() - 1) * ITEMS_PER_PAGE + 1} to{" "}
-                  {Math.min(currentPage() * ITEMS_PER_PAGE, filteredProducts().length)} of{" "}
-                  {filteredProducts().length} results
-                </p>
+          <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm px-6 py-4 mt-6">
+            <div class="flex items-center justify-between">
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Showing {(currentPage() - 1) * ITEMS_PER_PAGE + 1} to{" "}
+                {Math.min(currentPage() * ITEMS_PER_PAGE, totalItems())} of{" "}
+                {totalItems()} results
+              </p>
+              <Show when={totalPages() > 1}>
                 <div class="flex items-center gap-2">
                   <button
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
@@ -1025,18 +852,22 @@ export default function PlantsPage() {
                   >
                     <ChevronLeftIcon class="w-5 h-5 text-gray-700 dark:text-gray-300" />
                   </button>
-                  <For each={Array.from({ length: totalPages() }, (_, i) => i + 1)}>
+                  <For each={getPageNumbers(currentPage(), totalPages())}>
                     {(page) => (
-                      <button
-                        onClick={() => setCurrentPage(page)}
-                        class={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
-                          currentPage() === page
-                            ? "bg-forest-600 text-white"
-                            : "border border-cream-200 dark:border-forest-700 text-gray-700 dark:text-gray-300 hover:bg-cream-50 dark:hover:bg-forest-700"
-                        }`}
-                      >
-                        {page}
-                      </button>
+                      page === "..." ? (
+                        <span class="w-9 h-9 flex items-center justify-center text-sm text-gray-400 dark:text-gray-500 select-none">…</span>
+                      ) : (
+                        <button
+                          onClick={() => setCurrentPage(page as number)}
+                          class={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
+                            currentPage() === page
+                              ? "bg-forest-600 text-white"
+                              : "border border-cream-200 dark:border-forest-700 text-gray-700 dark:text-gray-300 hover:bg-cream-50 dark:hover:bg-forest-700"
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      )
                     )}
                   </For>
                   <button
@@ -1047,10 +878,11 @@ export default function PlantsPage() {
                     <ChevronRightIcon class="w-5 h-5 text-gray-700 dark:text-gray-300" />
                   </button>
                 </div>
-              </div>
+              </Show>
             </div>
-          </Show>
+          </div>
         </Show>
     </>
+    </Suspense>
   );
 }

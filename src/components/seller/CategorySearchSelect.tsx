@@ -78,7 +78,7 @@ export function CategorySearchSelect(props: CategorySearchSelectProps) {
   const selectedLabel = createMemo(() => {
     const val = props.value;
     if (!val) return "All Categories";
-    const cat = categories().find((c) => c.slug === val);
+    const cat = categories().find((c) => c.id === val);
     return cat ? cat.name : "All Categories";
   });
 
@@ -143,12 +143,12 @@ export function CategorySearchSelect(props: CategorySearchSelectProps) {
           <div class="max-h-64 overflow-y-auto">
             <For each={filteredCategories()}>
               {({ cat, depth }) => {
-                const isSelected = props.value === cat.slug;
+                const isSelected = props.value === cat.id;
                 return (
                   <button
                     type="button"
                     onClick={() => {
-                      props.onChange(cat.slug);
+                      props.onChange(cat.id);
                       setIsOpen(false);
                       setSearchQuery("");
                     }}

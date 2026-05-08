@@ -1,3 +1,4 @@
+import { query } from "@solidjs/router";
 import { fetcher } from "../../api-client";
 import type {
   PlantListItem,
@@ -8,24 +9,11 @@ import type {
 } from "../../types/seller.types";
 
 /**
- * Plant/Product API endpoints
+ * Get all plants (paginated, with filtering)
+ * Returns full response with data array and pagination meta
  */
-export const plantsApi = {
-  /**
-   * Create a new plant
-   */
-  create: async (data: CreatePlantRequest): Promise<CreatePlantResponse> => {
-    return fetcher<CreatePlantResponse>("/api/v1/user/seller/plants", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
-  },
-
-  /**
-   * Get all plants (paginated, with filtering)
-   * Returns full response with data array and pagination meta
-   */
-  getAll: async (filter?: PlantFilter): Promise<PlantListResponse> => {
+export const getPlants = query(
+  async (filter?: PlantFilter) => {
     const params: Record<string, string | number | boolean | undefined> = {};
 
     if (filter) {
@@ -47,30 +35,55 @@ export const plantsApi = {
       unwrapData: false,
     });
   },
+  "seller-plants"
+);
 
-  /**
-   * Get plant by ID
-   */
-  getById: async (id: string): Promise<PlantListItem> => {
+/**
+ * Get plant by ID
+ */
+export const getPlantById = query(
+  async (id: string) => {
     return fetcher<PlantListItem>(`/api/v1/user/seller/plants/${id}`);
   },
+  "seller-plant-detail"
+);
 
-  /**
-   * Update plant details
-   */
-  update: async (id: string, data: Partial<CreatePlantRequest>): Promise<PlantListItem> => {
-    return fetcher<PlantListItem>(`/api/v1/user/seller/plants/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify(data),
-    });
-  },
+/**
+ * Create a new plant
+ */
+export const createPlant = async (data: CreatePlantRequest): Promise<CreatePlantResponse> => {
+  return fetcher<CreatePlantResponse>("/api/v1/user/seller/plants", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+};
 
-  /**
-   * Delete a plant
-   */
-  delete: async (id: string): Promise<void> => {
-    return fetcher<void>(`/api/v1/user/seller/plants/${id}`, {
-      method: "DELETE",
-    });
-  },
+/**
+ * Update plant details
+ */
+export const updatePlant = async (id: string, data: Partial<CreatePlantRequest>): Promise<PlantListItem> => {
+  return fetcher<PlantListItem>(`/api/v1/user/seller/plants/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+};
+
+/**
+ * Delete a plant
+ */
+export const deletePlant = async (id: string): Promise<void> => {
+  return fetcher<void>(`/api/v1/user/seller/plants/${id}`, {
+    method: "DELETE",
+  });
+};
+
+/**
+ * Plant/Product API endpoints
+ */
+export const plantsApi = {
+  getAll: getPlants,
+  getById: getPlantById,
+  create: createPlant,
+  update: updatePlant,
+  delete: deletePlant,
 };

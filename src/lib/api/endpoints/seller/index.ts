@@ -1,8 +1,9 @@
 import { sellerShopsApi } from "./shops.api";
 import { sellerVerificationApi } from "./verification.api";
-import { plantsApi } from "./plants.api";
+import { plantsApi, getPlants, getPlantById, createPlant, updatePlant, deletePlant } from "./plants.api";
 
 export { sellerShopApi } from "./shop-detail.api";
+export { getPlants, getPlantById, createPlant, updatePlant, deletePlant };
 export type {
   Shop,
   ShopStatus,
