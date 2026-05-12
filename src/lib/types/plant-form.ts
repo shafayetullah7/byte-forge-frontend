@@ -24,6 +24,10 @@ export interface PlantVariantForm {
   containerType: string;
   containerSize: string;
   bundleType: string;
+  translations: {
+    en: { title: string };
+    bn: { title: string };
+  };
 }
 
 export interface CareGuideSection {
@@ -111,6 +115,10 @@ export function createEmptyVariant(): PlantVariantForm {
     containerType: "NURSERY_POT",
     containerSize: "",
     bundleType: "",
+    translations: {
+      en: { title: "" },
+      bn: { title: "" },
+    },
   };
 }
 
@@ -240,6 +248,13 @@ export function toCreatePlantDto(form: PlantFormState): Record<string, unknown> 
 
     if (v.mediaIds.length > 0) {
       variant.mediaIds = v.mediaIds;
+    }
+
+    if (v.translations.en.title.trim() || v.translations.bn.title.trim()) {
+      variant.translations = {
+        en: { title: v.translations.en.title.trim() },
+        bn: { title: v.translations.bn.title.trim() },
+      };
     }
 
     return variant;

@@ -60,6 +60,10 @@ export interface VariantStore {
   containerType: string;
   containerSize: string;
   bundleType: string;
+  translations: {
+    en: { title: string };
+    bn: { title: string };
+  };
 }
 
 function VariantImageUpload(props: {
@@ -413,6 +417,24 @@ export function Step4Variants(props: {
                       props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, inventoryCount: v === "" ? "" : parseFloat(v) } : item));
                     }}
                     min={0}
+                  />
+                </div>
+
+                {/* Variant Title (Bilingual) */}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Input
+                    id={`variant-${i}-title-en`}
+                    label={`${props.t("seller.products.newPlant.variantTitleLabel")} (EN)`}
+                    placeholder={props.t("seller.products.newPlant.variantTitlePlaceholder")}
+                    value={variant().translations.en.title}
+                    onInput={(e) => props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, translations: { ...item.translations, en: { title: e.currentTarget.value } } } : item))}
+                  />
+                  <Input
+                    id={`variant-${i}-title-bn`}
+                    label={`${props.t("seller.products.newPlant.variantTitleLabel")} (BN)`}
+                    placeholder={props.t("seller.products.newPlant.variantTitlePlaceholderBn")}
+                    value={variant().translations.bn.title}
+                    onInput={(e) => props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, translations: { ...item.translations, bn: { title: e.currentTarget.value } } } : item))}
                   />
                 </div>
 

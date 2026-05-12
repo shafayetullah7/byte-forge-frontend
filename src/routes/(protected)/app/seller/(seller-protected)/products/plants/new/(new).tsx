@@ -277,6 +277,10 @@ export default function NewPlantPage() {
       isBase: false,
       mediaIds: [...source.mediaIds],
       mediaUrls: [...source.mediaUrls],
+      translations: {
+        en: { ...source.translations.en },
+        bn: { ...source.translations.bn },
+      },
     };
     setForm("variants", (v) => {
       const newArr = [...v];
