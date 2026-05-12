@@ -1,4 +1,4 @@
-import { createMemo, For, Show, createSignal, type Accessor } from "solid-js";
+import { createMemo, For, Show, createSignal, type Accessor, type Component } from "solid-js";
 import { TagIcon, XIcon, MagnifyingGlassIcon } from "~/components/icons";
 
 export interface TagGroupOption {
@@ -31,6 +31,58 @@ function getGroupColorIndex(groupName: string): number {
   }
   return Math.abs(hash) % GROUP_COLORS.length;
 }
+
+const TagButton: Component<{
+  tagId: string;
+  tagName: string;
+  isSelected: () => boolean;
+  onToggle: (tagId: string) => void;
+}> = (props) => {
+  const isSel = createMemo(() => props.isSelected());
+  return (
+    <button
+      type="button"
+      onClick={() => props.onToggle(props.tagId)}
+      class={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+        isSel()
+          ? "bg-forest-100 text-forest-800 dark:bg-forest-800 dark:text-forest-100 ring-1 ring-inset ring-forest-300 dark:ring-forest-600"
+          : "bg-white dark:bg-forest-800/50 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-200 dark:ring-gray-700 hover:ring-forest-300 dark:hover:ring-forest-600 hover:bg-gray-50 dark:hover:bg-forest-800"
+      }`}
+    >
+      <span class="truncate">{props.tagName}</span>
+    </button>
+  );
+};
+
+const TagButtonWithGroup: Component<{
+  tagId: string;
+  tagName: string;
+  groupName: string;
+  colorIndex: number;
+  isSelected: () => boolean;
+  onToggle: (tagId: string) => void;
+}> = (props) => {
+  const isSel = createMemo(() => props.isSelected());
+  return (
+    <button
+      type="button"
+      onClick={() => props.onToggle(props.tagId)}
+      title={props.groupName}
+      class={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+        isSel()
+          ? "bg-forest-100 text-forest-800 dark:bg-forest-800 dark:text-forest-100 ring-1 ring-inset ring-forest-300 dark:ring-forest-600"
+          : "bg-white dark:bg-forest-800/50 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-200 dark:ring-gray-700 hover:ring-forest-300 dark:hover:ring-forest-600 hover:bg-gray-50 dark:hover:bg-forest-800"
+      }`}
+    >
+      <span class={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${
+        GROUP_COLORS[props.colorIndex]
+      }`}>
+        {props.groupName}
+      </span>
+      <span class="truncate">{props.tagName}</span>
+    </button>
+  );
+};
 
 export function TagGroupSelector(props: TagGroupSelectorProps) {
   const [localSearch, setLocalSearch] = createSignal("");
@@ -165,22 +217,14 @@ export function TagGroupSelector(props: TagGroupSelectorProps) {
                         <div class="p-3">
                           <div class="flex flex-wrap gap-2">
                             <For each={group.tags}>
-                              {(tag) => {
-                                const isSelected = props.selectedTags().includes(tag.id);
-                                return (
-                                  <button
-                                    type="button"
-                                    onClick={() => props.onToggle(tag.id)}
-                                    class={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                                      isSelected
-                                        ? "bg-forest-100 text-forest-800 dark:bg-forest-800 dark:text-forest-100 ring-1 ring-inset ring-forest-300 dark:ring-forest-600"
-                                        : "bg-white dark:bg-forest-800/50 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-200 dark:ring-gray-700 hover:ring-forest-300 dark:hover:ring-forest-600 hover:bg-gray-50 dark:hover:bg-forest-800"
-                                    }`}
-                                  >
-                                    <span class="truncate">{tag.name}</span>
-                                  </button>
-                                );
-                              }}
+                              {(tag) => (
+                                <TagButton
+                                  tagId={tag.id}
+                                  tagName={tag.name}
+                                  isSelected={() => props.selectedTags().includes(tag.id)}
+                                  onToggle={props.onToggle}
+                                />
+                              )}
                             </For>
                           </div>
                         </div>
@@ -192,28 +236,16 @@ export function TagGroupSelector(props: TagGroupSelectorProps) {
             >
               <div class="flex flex-wrap gap-2">
                 <For each={filteredTags()}>
-                  {(tag) => {
-                    const isSelected = props.selectedTags().includes(tag.id);
-                    return (
-                      <button
-                        type="button"
-                        onClick={() => props.onToggle(tag.id)}
-                        title={tag.groupName}
-                        class={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                          isSelected
-                            ? "bg-forest-100 text-forest-800 dark:bg-forest-800 dark:text-forest-100 ring-1 ring-inset ring-forest-300 dark:ring-forest-600"
-                            : "bg-white dark:bg-forest-800/50 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-200 dark:ring-gray-700 hover:ring-forest-300 dark:hover:ring-forest-600 hover:bg-gray-50 dark:hover:bg-forest-800"
-                        }`}
-                      >
-                        <span class={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${
-                          GROUP_COLORS[tag.colorIndex]
-                        }`}>
-                          {tag.groupName}
-                        </span>
-                        <span class="truncate">{tag.name}</span>
-                      </button>
-                    );
-                  }}
+                  {(tag) => (
+                    <TagButtonWithGroup
+                      tagId={tag.id}
+                      tagName={tag.name}
+                      groupName={tag.groupName}
+                      colorIndex={tag.colorIndex}
+                      isSelected={() => props.selectedTags().includes(tag.id)}
+                      onToggle={props.onToggle}
+                    />
+                  )}
                 </For>
               </div>
             </Show>
