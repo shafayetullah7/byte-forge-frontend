@@ -30,15 +30,24 @@ export function Step6Care(props: {
 
   return (
     <div class="space-y-6">
-      {/* English Care Instructions */}
-      <div>
-        <div class="flex items-center gap-2 mb-4">
+      {/* Column Headers */}
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="flex items-center gap-2">
           <span class="text-lg">🇬🇧</span>
           <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">{props.t("seller.products.newPlant.englishLabel")}</h4>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <For each={CARE_FIELDS}>
-            {(field) => (
+        <div class="flex items-center gap-2">
+          <span class="text-lg">🇧🇩</span>
+          <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">{props.t("seller.products.newPlant.bengaliLabel")}</h4>
+          <span class="text-xs text-gray-400 dark:text-gray-500">({props.t("common.optional")})</span>
+        </div>
+      </div>
+
+      {/* Fields side by side */}
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <For each={CARE_FIELDS}>
+          {(field) => (
+            <>
               <Textarea
                 label={props.t(`seller.products.newPlant.${field.label}`)}
                 placeholder={props.t(`seller.products.newPlant.${field.placeholder}`)}
@@ -46,21 +55,6 @@ export function Step6Care(props: {
                 onInput={(e) => props.onEnChange(field.key, (e.currentTarget as HTMLTextAreaElement).value)}
                 rows={3}
               />
-            )}
-          </For>
-        </div>
-      </div>
-
-      {/* Bengali Care Translations */}
-      <div class="border-t border-cream-200 dark:border-forest-700 pt-6">
-        <div class="flex items-center gap-2 mb-4">
-          <span class="text-lg">🇧🇩</span>
-          <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">{props.t("seller.products.newPlant.bengaliLabel")}</h4>
-          <span class="text-xs text-gray-400 dark:text-gray-500">({props.t("common.optional")})</span>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <For each={CARE_FIELDS}>
-            {(field) => (
               <Textarea
                 label={props.t(`seller.products.newPlant.${field.label}`)}
                 placeholder={props.t(`seller.products.newPlant.${field.placeholderBn}`)}
@@ -69,9 +63,9 @@ export function Step6Care(props: {
                 rows={3}
                 dir="auto"
               />
-            )}
-          </For>
-        </div>
+            </>
+          )}
+        </For>
       </div>
     </div>
   );
