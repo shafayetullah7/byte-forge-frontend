@@ -711,38 +711,9 @@ export default function NewPlantPage() {
                 {/* Step 6: Care Guide */}
                 <Show when={currentStep() === 6}>
                   <Step6Care
-                    lightInstructions={form.careGuide.en.lightInstructions}
-                    onLightInstructionsChange={(v) => setForm("careGuide", "en", "lightInstructions", v)}
-                    wateringInstructions={form.careGuide.en.wateringInstructions}
-                    onWateringInstructionsChange={(v) => setForm("careGuide", "en", "wateringInstructions", v)}
-                    humidityInstructions={form.careGuide.en.humidityInstructions}
-                    onHumidityInstructionsChange={(v) => setForm("careGuide", "en", "humidityInstructions", v)}
-                    fertilizerSchedule={form.careGuide.en.fertilizerSchedule}
-                    onFertilizerScheduleChange={(v) => setForm("careGuide", "en", "fertilizerSchedule", v)}
-                    repottingFrequency={form.careGuide.en.repottingFrequency}
-                    onRepottingFrequencyChange={(v) => setForm("careGuide", "en", "repottingFrequency", v)}
-                    pruningNotes={form.careGuide.en.pruningNotes}
-                    onPruningNotesChange={(v) => setForm("careGuide", "en", "pruningNotes", v)}
-                    commonProblems={form.careGuide.en.commonProblems}
-                    onCommonProblemsChange={(v) => setForm("careGuide", "en", "commonProblems", v)}
-                    seasonalCare={form.careGuide.en.seasonalCare}
-                    onSeasonalCareChange={(v) => setForm("careGuide", "en", "seasonalCare", v)}
-                    bnLightInstructions={form.careGuide.bn.lightInstructions}
-                    onBnLightInstructionsChange={(v) => setForm("careGuide", "bn", "lightInstructions", v)}
-                    bnWateringInstructions={form.careGuide.bn.wateringInstructions}
-                    onBnWateringInstructionsChange={(v) => setForm("careGuide", "bn", "wateringInstructions", v)}
-                    bnHumidityInstructions={form.careGuide.bn.humidityInstructions}
-                    onBnHumidityInstructionsChange={(v) => setForm("careGuide", "bn", "humidityInstructions", v)}
-                    bnFertilizerSchedule={form.careGuide.bn.fertilizerSchedule}
-                    onBnFertilizerScheduleChange={(v) => setForm("careGuide", "bn", "fertilizerSchedule", v)}
-                    bnRepottingFrequency={form.careGuide.bn.repottingFrequency}
-                    onBnRepottingFrequencyChange={(v) => setForm("careGuide", "bn", "repottingFrequency", v)}
-                    bnPruningNotes={form.careGuide.bn.pruningNotes}
-                    onBnPruningNotesChange={(v) => setForm("careGuide", "bn", "pruningNotes", v)}
-                    bnCommonProblems={form.careGuide.bn.commonProblems}
-                    onBnCommonProblemsChange={(v) => setForm("careGuide", "bn", "commonProblems", v)}
-                    bnSeasonalCare={form.careGuide.bn.seasonalCare}
-                    onBnSeasonalCareChange={(v) => setForm("careGuide", "bn", "seasonalCare", v)}
+                    careGuide={form.careGuide}
+                    onEnChange={(key, v) => setForm("careGuide", "en", key, v)}
+                    onBnChange={(key, v) => setForm("careGuide", "bn", key, v)}
                     t={t}
                     onWarningChange={warningCallbacks()[6]}
                   />
