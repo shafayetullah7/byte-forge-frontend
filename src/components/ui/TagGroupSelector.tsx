@@ -1,4 +1,4 @@
-import { createMemo, For, Show, createSignal } from "solid-js";
+import { createMemo, For, Show, createSignal, type Accessor } from "solid-js";
 import { TagIcon, XIcon, MagnifyingGlassIcon } from "~/components/icons";
 
 export interface TagGroupOption {
@@ -10,7 +10,7 @@ export interface TagGroupOption {
 }
 
 export interface TagGroupSelectorProps {
-  selectedTags: string[];
+  selectedTags: Accessor<string[]>;
   onToggle: (tagId: string) => void;
   groups: TagGroupOption[];
   isLoading?: boolean;
@@ -34,7 +34,7 @@ function getGroupColorIndex(groupName: string): number {
 
 export function TagGroupSelector(props: TagGroupSelectorProps) {
   const [localSearch, setLocalSearch] = createSignal("");
-  const selectedCount = createMemo(() => props.selectedTags.length);
+  const selectedCount = createMemo(() => props.selectedTags().length);
 
   const allFlattenedTags = createMemo(() => {
     const result: { id: string; name: string; groupName: string; colorIndex: number }[] = [];
@@ -86,7 +86,7 @@ export function TagGroupSelector(props: TagGroupSelectorProps) {
       {/* Selected Tags Pills */}
       <Show when={selectedCount() > 0}>
         <div class="flex flex-wrap items-center gap-2">
-          <For each={props.selectedTags}>
+          <For each={props.selectedTags()}>
             {(tagId) => {
               const tagInfo = allFlattenedTags().find((t) => t.id === tagId);
               return (
@@ -110,7 +110,7 @@ export function TagGroupSelector(props: TagGroupSelectorProps) {
           <button
             type="button"
             onClick={() => {
-              const ids = [...props.selectedTags];
+              const ids = [...props.selectedTags()];
               ids.forEach((id) => props.onToggle(id));
             }}
             class="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-terracotta-600 dark:hover:text-terracotta-400 hover:bg-terracotta-50 dark:hover:bg-terracotta-900/20 transition-colors"
@@ -166,7 +166,7 @@ export function TagGroupSelector(props: TagGroupSelectorProps) {
                           <div class="flex flex-wrap gap-2">
                             <For each={group.tags}>
                               {(tag) => {
-                                const isSelected = props.selectedTags.includes(tag.id);
+                                const isSelected = props.selectedTags().includes(tag.id);
                                 return (
                                   <button
                                     type="button"
@@ -193,7 +193,7 @@ export function TagGroupSelector(props: TagGroupSelectorProps) {
               <div class="flex flex-wrap gap-2">
                 <For each={filteredTags()}>
                   {(tag) => {
-                    const isSelected = props.selectedTags.includes(tag.id);
+                    const isSelected = props.selectedTags().includes(tag.id);
                     return (
                       <button
                         type="button"

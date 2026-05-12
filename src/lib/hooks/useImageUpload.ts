@@ -66,6 +66,7 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
     }
 
     setIsUploading(true);
+    const oldMediaId = mediaId();
 
     try {
       // Direct API call - 401 handled by API client
@@ -79,6 +80,11 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
       setPreview(mediaUrl);
       toaster.success("Image uploaded successfully");
       onSuccess?.(uploadedMediaId, mediaUrl);
+
+      // Delete previous media in background
+      if (oldMediaId) {
+        mediaApi.delete(oldMediaId).catch(() => {});
+      }
     } catch (error: any) {
       const err = error instanceof Error ? error : new Error(error.message || "Failed to upload image");
       toaster.error(err.message);

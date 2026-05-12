@@ -616,7 +616,7 @@ export default function NewPlantPage() {
                   <Step2CategoryTags
                     categoryId={form.plantDetails.categoryId}
                     onCategoryIdChange={(v) => setForm("plantDetails", "categoryId", v)}
-                    tagIds={form.plantDetails.tagIds}
+                    tagIds={() => form.plantDetails.tagIds}
                     onTagToggle={(tagId) => {
                       const current = [...form.plantDetails.tagIds];
                       const idx = current.indexOf(tagId);

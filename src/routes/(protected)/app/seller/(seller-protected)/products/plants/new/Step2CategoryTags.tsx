@@ -7,7 +7,7 @@ import type { TagGroup } from "~/lib/api/endpoints/public/tags.api";
 export function Step2CategoryTags(props: {
   categoryId: string;
   onCategoryIdChange: (v: string) => void;
-  tagIds: string[];
+  tagIds: Accessor<string[]>;
   onTagToggle: (tagId: string) => void;
   errors: Record<string, string>;
   categoryTree: Accessor<CategoryTree[] | undefined>;
