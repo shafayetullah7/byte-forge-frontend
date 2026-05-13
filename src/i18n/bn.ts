@@ -628,6 +628,7 @@ export const dict = {
       title: "পণ্য",
       allProducts: "সকল পণ্য",
       addProduct: "পণ্য যোগ করুন",
+      manageProducts: "একই জায়গায় আপনার সকল পণ্যের ধরন পরিচালনা করুন",
       categories: "ক্যাটাগরি",
       tags: "ট্যাগ",
       types: {
@@ -635,6 +636,106 @@ export const dict = {
         pots: "কুঁজ",
         seeds: "বীজ",
         fertilizer: "সার",
+      },
+      // Products page - Stats
+      stats: {
+        totalProducts: "মোট পণ্য",
+        active: "সক্রিয়",
+        draft: "খসড়া",
+        archived: "আর্কাইভ",
+      },
+      // Products page - Product Type Cards
+      productTypes: "পণ্যের ধরন",
+      productCount: (count: number) => `${count} পণ্য`,
+      cardStats: {
+        active: "সক্রিয়",
+        draft: "খসড়া",
+        archived: "আর্কাইভ",
+      },
+      // Products page - Filters
+      searchPlaceholder: "নাম বা স্লগ দ্বারা অনুসন্ধান করুন...",
+      filters: {
+        allStatus: "সকল অবস্থা",
+        statusActive: "সক্রিয়",
+        statusDraft: "খসড়া",
+        statusArchived: "আর্কাইভ",
+        allTypes: "সকল ধরন",
+        typePlants: "গাছপালা",
+        typePots: "কুঁজ",
+        typeSeeds: "বীজ",
+        typeFertilizers: "সার",
+      },
+      // Products page - Sort
+      sort: {
+        sortBy: "সাজান",
+        dateCreated: "তৈরির তারিখ",
+        dateUpdated: "আপডেটের তারিখ",
+        name: "নাম",
+        price: "মূল্য",
+        inventory: "ইনভেন্টরি",
+        asc: "আরোহী",
+        desc: "অবরোহী",
+        resetToDefault: "ডিফলতে রিসেট করুন",
+      },
+      // Products page - Active Filters
+      activeFilters: "সক্রিয় ফিল্টার",
+      clearAll: "সব মুছুন",
+      clearAllFilters: "সব ফিল্টার মুছুন",
+      filterLabels: {
+        search: (query: string) => `অনুসন্ধান: "${query}"`,
+        status: (status: string) => `অবস্থা: ${status}`,
+        type: (type: string) => `ধরন: ${type}`,
+      },
+      // Products page - Results
+      resultsCount: (showing: number, total: number) => `${showing} থেকে ${total} পণ্য দেখানো হচ্ছে`,
+      // Products page - Empty/Loading states
+      loading: "পণ্য লোড হচ্ছে...",
+      loadingDescription: "আপনার পণ্য আনতে অনুগ্রহ করে অপেক্ষা করুন।",
+      noProductsFound: "কোনো পণ্য পাওয়া যায়নি",
+      noProductsAdjustFilters: "আপনার ফিল্টার বা অনুসন্ধান প্রশ্ন পরিবর্তন করে দেখুন",
+      noProductsStart: "আপনার প্রথম পণ্য যোগ করে শুরু করুন",
+      clearFilters: "ফিল্টার মুছুন",
+      // Products page - Table headers
+      tableHeaders: {
+        product: "পণ্য",
+        type: "ধরন",
+        price: "মূল্য",
+        inventory: "ইনভেন্টরি",
+        status: "অবস্থা",
+        updated: "আপডেট",
+      },
+      // Products page - Status labels
+      statusLabels: {
+        active: "সক্রিয়",
+        draft: "খসড়া",
+        archived: "আর্কাইভ",
+      },
+      // Products page - Mobile card labels
+      mobileLabels: {
+        type: "ধরন",
+        price: "মূল্য",
+        inventory: "ইনভেন্টরি",
+      },
+      // Products page - Updated label
+      updated: "আপডেট",
+      // Products page - Pagination
+      pagination: {
+        showing: (start: number, end: number, total: number) => `${start} থেকে ${end} ফলাফল দেখানো হচ্ছে, মোট ${total}`,
+        results: "ফলাফল",
+      },
+      // Products page - Loading overlay
+      updating: "আপডেট হচ্ছে...",
+      // Products page - Error
+      error: {
+        failedToLoad: "পণ্য লোড করতে ব্যর্থ",
+        unexpectedError: "একটি অপ্রত্যাশিত ত্রুটি ঘটেছে",
+        retry: "আবার চেষ্টা করুন",
+      },
+      // Products page - Inventory
+      inventory: {
+        outOfStock: "স্টক নেই",
+        left: (count: number) => `${count} বাকি`,
+        inStock: (count: number) => `${count} স্টকে আছে`,
       },
       managePlantProducts: "আপনার গাছপালা পণ্য পরিচালনা করুন",
       managePotProducts: "আপনার কুঁজ পণ্য পরিচালনা করুন",

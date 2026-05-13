@@ -624,6 +624,7 @@ export const dict = {
       title: "Products",
       allProducts: "All Products",
       addProduct: "Add Product",
+      manageProducts: "Manage all your product types in one place",
       categories: "Categories",
       tags: "Tags",
       types: {
@@ -631,6 +632,106 @@ export const dict = {
         pots: "Pots",
         seeds: "Seeds",
         fertilizer: "Fertilizer",
+      },
+      // Products page - Stats
+      stats: {
+        totalProducts: "Total Products",
+        active: "Active",
+        draft: "Draft",
+        archived: "Archived",
+      },
+      // Products page - Product Type Cards
+      productTypes: "Product Types",
+      productCount: (count: number) => `${count} product${count !== 1 ? "s" : ""}`,
+      cardStats: {
+        active: "Active",
+        draft: "Draft",
+        archived: "Archived",
+      },
+      // Products page - Filters
+      searchPlaceholder: "Search by name or slug...",
+      filters: {
+        allStatus: "All Status",
+        statusActive: "Active",
+        statusDraft: "Draft",
+        statusArchived: "Archived",
+        allTypes: "All Types",
+        typePlants: "Plants",
+        typePots: "Pots",
+        typeSeeds: "Seeds",
+        typeFertilizers: "Fertilizers",
+      },
+      // Products page - Sort
+      sort: {
+        sortBy: "Sort By",
+        dateCreated: "Date Created",
+        dateUpdated: "Date Updated",
+        name: "Name",
+        price: "Price",
+        inventory: "Inventory",
+        asc: "Asc",
+        desc: "Desc",
+        resetToDefault: "Reset to default",
+      },
+      // Products page - Active Filters
+      activeFilters: "Active Filters",
+      clearAll: "Clear all",
+      clearAllFilters: "Clear all filters",
+      filterLabels: {
+        search: (query: string) => `Search: "${query}"`,
+        status: (status: string) => `Status: ${status}`,
+        type: (type: string) => `Type: ${type}`,
+      },
+      // Products page - Results
+      resultsCount: (showing: number, total: number) => `Showing ${showing} of ${total} products`,
+      // Products page - Empty/Loading states
+      loading: "Loading products...",
+      loadingDescription: "Please wait while we fetch your products.",
+      noProductsFound: "No products found",
+      noProductsAdjustFilters: "Try adjusting your filters or search query",
+      noProductsStart: "Start by adding your first product",
+      clearFilters: "Clear Filters",
+      // Products page - Table headers
+      tableHeaders: {
+        product: "Product",
+        type: "Type",
+        price: "Price",
+        inventory: "Inventory",
+        status: "Status",
+        updated: "Updated",
+      },
+      // Products page - Status labels
+      statusLabels: {
+        active: "Active",
+        draft: "Draft",
+        archived: "Archived",
+      },
+      // Products page - Mobile card labels
+      mobileLabels: {
+        type: "Type",
+        price: "Price",
+        inventory: "Inventory",
+      },
+      // Products page - Updated label
+      updated: "Updated",
+      // Products page - Pagination
+      pagination: {
+        showing: (start: number, end: number, total: number) => `Showing ${start} to ${end} of ${total} results`,
+        results: "results",
+      },
+      // Products page - Loading overlay
+      updating: "Updating...",
+      // Products page - Error
+      error: {
+        failedToLoad: "Failed to Load Products",
+        unexpectedError: "An unexpected error occurred",
+        retry: "Retry",
+      },
+      // Products page - Inventory
+      inventory: {
+        outOfStock: "Out of Stock",
+        left: (count: number) => `${count} left`,
+        inStock: (count: number) => `${count} in stock`,
       },
       managePlantProducts: "Manage your plant products",
       managePotProducts: "Manage your pot products",

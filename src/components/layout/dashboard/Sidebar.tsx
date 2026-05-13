@@ -116,29 +116,18 @@ const ParentNavItem: Component<{
 
     return (
         <div class="mb-1">
-            <div
-                class={`group flex items-center justify-between px-3 py-3 text-sm font-semibold rounded-lg transition-standard cursor-pointer ${
-                    isActive()
-                        ? activeStyles()
-                        : "text-forest-700/80 dark:text-cream-100/80 hover:bg-forest-50 dark:hover:bg-forest-900/30 hover:text-forest-800 dark:hover:text-cream-100"
-                }`}
-                onClick={props.onToggle}
-                onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        props.onToggle();
-                    }
-                    if (e.key === 'Escape' && props.isExpanded) {
-                        e.preventDefault();
-                        props.onToggle();
-                    }
-                }}
-                role="button"
-                tabIndex={0}
-                aria-expanded={props.isExpanded}
-                aria-haspopup="true"
-            >
-                <div class="flex items-center min-w-0 flex-1">
+            <div class={`group flex items-center justify-between rounded-lg transition-standard ${
+                isActive()
+                    ? activeStyles()
+                    : "text-forest-700/80 dark:text-cream-100/80 hover:bg-forest-50 dark:hover:bg-forest-900/30 hover:text-forest-800 dark:hover:text-cream-100"
+            }`}>
+                {/* Clickable link area: icon + label */}
+                <A
+                    href={props.link.href}
+                    class="flex items-center min-w-0 flex-1 px-3 py-3 text-sm font-semibold cursor-pointer"
+                    onClick={props.onClick}
+                    aria-current={isActive() ? "page" : undefined}
+                >
                     <props.link.icon
                         class={`mr-3 shrink-0 h-5 w-5 transition-colors ${
                             isActive()
@@ -147,13 +136,33 @@ const ParentNavItem: Component<{
                         }`}
                     />
                     <span class="whitespace-nowrap">{props.link.label}</span>
-                </div>
-                <ChevronDownIcon
-                    class={`shrink-0 h-4 w-4 transition-transform duration-200 text-forest-500 dark:text-forest-400 ${
-                        props.isExpanded ? "rotate-0" : "-rotate-90"
-                    }`}
-                    aria-hidden="true"
-                />
+                </A>
+
+                {/* Chevron toggle button: click only toggles, does not navigate */}
+                <button
+                    type="button"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        props.onToggle();
+                    }}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            props.onToggle();
+                        }
+                    }}
+                    class="shrink-0 flex items-center justify-center w-8 h-8 mr-1 rounded-md transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+                    aria-expanded={props.isExpanded}
+                    aria-haspopup="true"
+                    aria-label={`${props.isExpanded ? "Collapse" : "Expand"} ${props.link.label}`}
+                >
+                    <ChevronDownIcon
+                        class={`h-4 w-4 transition-transform duration-200 text-forest-500 dark:text-forest-400 ${
+                            props.isExpanded ? "rotate-0" : "-rotate-90"
+                        }`}
+                        aria-hidden="true"
+                    />
+                </button>
             </div>
             <Show when={props.isExpanded}>
                 <div
