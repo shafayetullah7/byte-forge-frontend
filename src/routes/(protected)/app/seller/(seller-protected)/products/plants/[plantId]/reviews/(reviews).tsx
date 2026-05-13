@@ -3,6 +3,7 @@ import { ErrorBoundary } from "solid-js";
 import { UserIcon, CheckBadgeIcon, StarIcon, HeartIcon, ChatBubbleLeftRightIcon } from "~/components/icons";
 import { SectionCard } from "../components/SectionCard";
 import { StarRatingDisplay } from "../components/StarRatingDisplay";
+import { SectionErrorFallback } from "~/components/seller/SectionErrorFallback";
 import { formatDate } from "../helpers";
 import { MOCK_REVIEWS, MOCK_REVIEWS_SUMMARY } from "../mock-data";
 
@@ -74,7 +75,7 @@ export default function ReviewsRoute() {
       <div class="lg:col-span-2 space-y-4">
         <For each={filteredReviews()}>
           {(review) => (
-            <ErrorBoundary fallback={(error) => <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4"><p class="text-sm text-amber-700 dark:text-amber-300">Failed to load review: {error.message}</p></div>}>
+            <ErrorBoundary fallback={(error) => <SectionErrorFallback error={error} title="review" />}>
               <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm p-5">
                 <div class="flex items-start justify-between mb-3">
                   <div class="flex items-center gap-3">

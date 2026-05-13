@@ -14,7 +14,10 @@ export default function ProductActivityRoute() {
             {(item) => (
               <div class="relative flex items-start gap-4 pb-6 last:pb-0">
                 <div class="relative z-10 w-10 h-10 rounded-full bg-white dark:bg-forest-800 border-2 border-cream-200 dark:border-forest-700 flex items-center justify-center flex-shrink-0">
-                  {ACTIVITY_ICON_MAP[item.icon] || <ClockIcon class="w-4 h-4 text-gray-400" />}
+                  {(() => {
+                    const IconComponent = ACTIVITY_ICON_MAP[item.icon] || ClockIcon;
+                    return <IconComponent class="w-4 h-4 text-gray-400" />;
+                  })()}
                 </div>
                 <div class="flex-1 pt-0.5">
                   <p class="text-sm text-gray-700 dark:text-gray-300">{item.description}</p>

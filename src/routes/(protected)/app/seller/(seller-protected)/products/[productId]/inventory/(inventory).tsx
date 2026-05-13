@@ -1,15 +1,15 @@
 import { createMemo, For } from "solid-js";
 import { ErrorBoundary } from "solid-js";
 import Badge from "~/components/ui/Badge";
+import { SectionErrorFallback } from "~/components/seller/SectionErrorFallback";
 import { CubeIcon, ArrowUpIcon, ArrowDownIcon, ClockIcon, AlertTriangleIcon } from "~/components/icons";
 import { SectionCard } from "../components/SectionCard";
 import { DetailRow } from "../components/DetailRow";
-import { formatPrice, formatDate, formatDateTime, getStockMovementTypeLabel, getStockMovementTypeVariant } from "../helpers";
-import { MOCK_INVENTORY, MOCK_PRODUCT } from "../mock-data";
+import { formatPrice, formatDate, formatDateTime, getStockMovementTypeLabel, getStockMovementTypeVariant, getInventoryLabel } from "../helpers";
+import { MOCK_INVENTORY } from "../mock-data";
 
 export default function ProductInventoryRoute() {
   const inventory = MOCK_INVENTORY;
-  const product = MOCK_PRODUCT;
 
   const totalReserved = createMemo(() => inventory.variants.reduce((sum, v) => sum + v.reservedStock, 0));
   const totalAvailable = createMemo(() => inventory.variants.reduce((sum, v) => sum + v.availableStock, 0));
@@ -56,13 +56,15 @@ export default function ProductInventoryRoute() {
                 const isLowStock = variant.availableStock <= variant.lowStockThreshold;
                 const isOutOfStock = variant.availableStock === 0;
 
+                const inventory = getInventoryLabel(variant.availableStock, variant.lowStockThreshold);
+
                 return (
                   <div class="p-4 rounded-lg border border-cream-200 dark:border-forest-700">
                     <div class="flex items-center justify-between mb-3">
                       <div class="flex items-center gap-3">
                         <h4 class="text-sm font-semibold text-forest-800 dark:text-cream-50">{variant.name}</h4>
-                        <Badge variant={isOutOfStock ? "terracotta" : isLowStock ? "cream" : "forest"} class="text-xs">
-                          {isOutOfStock ? "Out of Stock" : isLowStock ? "Low Stock" : "In Stock"}
+                        <Badge variant={inventory.variant} class="text-xs">
+                          {inventory.label}
                         </Badge>
                       </div>
                       <span class="text-xs font-mono text-gray-500 dark:text-gray-400">{variant.sku}</span>
@@ -126,11 +128,7 @@ export default function ProductInventoryRoute() {
                 const isPositive = movement.quantity > 0;
 
                 return (
-                  <ErrorBoundary fallback={(error) => (
-                    <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3">
-                      <p class="text-xs text-amber-700 dark:text-amber-300">Failed to load movement: {error.message}</p>
-                    </div>
-                  )}>
+                  <ErrorBoundary fallback={(error) => <SectionErrorFallback error={error} title="stock movement" />}>
                     <div class="py-3 border-b border-cream-100 dark:border-forest-700/50 last:border-b-0">
                       <div class="flex items-start gap-3">
                         <div class={`mt-0.5 w-7 h-7 rounded-lg ${typeVariant.bg} flex items-center justify-center flex-shrink-0`}>

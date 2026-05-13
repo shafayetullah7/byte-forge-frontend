@@ -169,31 +169,7 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
                     value={formatPrice(stats.totalRevenue)}
                     change={"+31%"}
                     changeType="positive"
-                    color="terracotta"
-                  />
-                  <StatCard
-                    icon={<StarIcon class="w-5 h-5 text-cream-500" />}
-                    label="Avg. Rating"
-                    value={`${stats.avgRating} (${stats.totalReviews} reviews)`}
-                    color="sage"
-                  />
-                </div>
-
-                {/* Tab Nav */}
-                <div class="mb-6">
-                  <div class="border-b border-cream-200 dark:border-forest-700">
-                    <nav class="flex gap-0 -mb-px overflow-x-auto">
-                      <For each={tabs}>
-                        {(tab) => (
-                          <A
-                            href={`/app/seller/products/plants/${plantData().id}/${tab.path}`}
-                            class={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                              isActiveTab(tab.path)
-                                ? "border-forest-600 text-forest-600 dark:border-forest-400 dark:text-forest-400"
-                                : "border-transparent text-gray-500 dark:text-gray-400 hover:text-forest-600 dark:hover:text-forest-400 hover:border-forest-300 dark:hover:border-forest-600"
-                            }`}
-                          >
-                            {tab.label}
+                    color                            {tab.label}
                           </A>
                         )}
                       </For>

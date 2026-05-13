@@ -1,16 +1,101 @@
-import { PackageIcon, TagIcon, DollarSignIcon, CubeIcon, CalendarIcon, CheckBadgeIcon, ClockIcon, TrendingUpIcon, ClipboardListIcon, PencilIcon, ArchiveIcon, ArrowPathIcon, TrashIcon } from "~/components/icons";
+import { PackageIcon, TagIcon, DollarSignIcon, CubeIcon, CalendarIcon, CheckBadgeIcon, ClockIcon, TrendingUpIcon, ClipboardListIcon, PencilIcon, ArchiveIcon, ArrowPathIcon, TrashIcon, EyeIcon, ShoppingBagIcon, StarIcon } from "~/components/icons";
 import { SectionCard } from "./components/SectionCard";
 import { DetailRow } from "./components/DetailRow";
-import { getStatusVariant, formatPrice, formatDateTime, formatNumber, getStatusLabel } from "./helpers";
+import { StatCard } from "./components/StatCard";
+import { getStatusVariant, formatPrice, formatDateTime, formatNumber, getStatusLabel, getProductTypeLabel, getInventoryLabel } from "./helpers";
 import { MOCK_PRODUCT, MOCK_PRODUCT_STATS } from "./mock-data";
 import Badge from "~/components/ui/Badge";
 
 export default function ProductOverviewRoute() {
   const product = MOCK_PRODUCT;
   const stats = MOCK_PRODUCT_STATS;
+  const inventory = getInventoryLabel(product.inventoryCount);
 
   return (
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <>
+      {/* Product Thumbnail + Quick Info Card */}
+      <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm mb-6 overflow-hidden">
+        <div class="flex flex-col sm:flex-row">
+          {/* Thumbnail */}
+          <div class="sm:w-48 md:w-56 h-48 sm:h-auto bg-cream-100 dark:bg-forest-900/50 flex items-center justify-center flex-shrink-0 border-b sm:border-b-0 sm:border-r border-cream-200 dark:border-forest-700">
+            <div class="w-full h-full flex items-center justify-center">
+              <PackageIcon class="w-16 h-16 text-gray-300 dark:text-gray-600" />
+            </div>
+          </div>
+
+          {/* Quick Info */}
+          <div class="flex-1 p-5">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Price</p>
+                <p class="text-lg font-bold text-forest-800 dark:text-cream-50 mt-1">
+                  {formatPrice(product.price)}
+                </p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Inventory</p>
+                <p class="text-lg font-bold text-forest-800 dark:text-cream-50 mt-1">
+                  {product.inventoryCount}
+                </p>
+                <p class="text-xs text-gray-400 dark:text-gray-500">units total</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Variants</p>
+                <p class="text-lg font-bold text-forest-800 dark:text-cream-50 mt-1">
+                  {product.totalVariants}
+                </p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Created</p>
+                <p class="text-sm font-medium text-forest-800 dark:text-cream-50 mt-1">
+                  {new Date(product.createdAt).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Performance Stats */}
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <StatCard
+          icon={<EyeIcon class="w-5 h-5 text-forest-600 dark:text-forest-400" />}
+          label="Total Views"
+          value={stats.totalViews.toLocaleString()}
+          change={`+${stats.viewsThisMonth} this month`}
+          changeType="positive"
+          color="forest"
+        />
+        <StatCard
+          icon={<ShoppingBagIcon class="w-5 h-5 text-cream-600 dark:text-cream-400" />}
+          label="Total Orders"
+          value={stats.totalOrders}
+          change={`+${stats.ordersThisMonth} this month`}
+          changeType="positive"
+          color="cream"
+        />
+        <StatCard
+          icon={<DollarSignIcon class="w-5 h-5 text-terracotta-600 dark:text-terracotta-400" />}
+          label="Total Revenue"
+          value={formatPrice(stats.totalRevenue)}
+          change={`+${formatPrice(stats.revenueThisMonth)} this month`}
+          changeType="positive"
+          color="terracotta"
+        />
+        <StatCard
+          icon={<StarIcon class="w-5 h-5 text-cream-500" />}
+          label="Avg. Rating"
+          value={`${stats.avgRating} (${stats.totalReviews} reviews)`}
+          color="sage"
+        />
+      </div>
+
+      {/* Content Grid */}
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Left Column - Product Info */}
       <div class="lg:col-span-2 space-y-6">
         {/* Description */}
@@ -41,8 +126,8 @@ export default function ProductOverviewRoute() {
                 <p class="text-2xl font-bold text-forest-800 dark:text-cream-50">
                   {product.inventoryCount}
                 </p>
-                <Badge variant={product.inventoryCount === 0 ? "terracotta" : product.inventoryCount <= 10 ? "cream" : "forest"} class="text-xs">
-                  {product.inventoryCount === 0 ? "Out of Stock" : product.inventoryCount <= 10 ? "Low Stock" : "In Stock"}
+                <Badge variant={inventory.variant} class="text-xs">
+                  {inventory.label}
                 </Badge>
               </div>
             </div>
@@ -119,7 +204,7 @@ export default function ProductOverviewRoute() {
           />
           <DetailRow
             label="Product Type"
-            value={product.productType.charAt(0).toUpperCase() + product.productType.slice(1)}
+            value={getProductTypeLabel(product.productType)}
             icon={<CubeIcon class="w-4 h-4" />}
           />
           <DetailRow
@@ -194,5 +279,7 @@ export default function ProductOverviewRoute() {
         </div>
       </div>
     </div>
+
+    </>
   );
 }

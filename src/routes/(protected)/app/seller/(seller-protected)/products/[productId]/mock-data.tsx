@@ -1,5 +1,6 @@
-import { ShoppingBagIcon, StarIcon, CubeIcon, PencilIcon, CheckCircleIcon, PackageIcon, PlusIcon, EyeIcon, ArrowUpIcon, ArrowDownIcon } from "~/components/icons";
+import { ShoppingBagIcon, StarIcon, CubeIcon, PencilIcon, CheckCircleIcon, PackageIcon, PlusIcon } from "~/components/icons";
 import { PRODUCT_STATUS, PRODUCT_TYPE, type ProductStatus, type ProductType } from "~/lib/api/types/seller.types";
+import { Component } from "solid-js";
 
 export const MOCK_PRODUCT = {
   id: "prod-001",
@@ -390,12 +391,12 @@ export const MOCK_ACTIVITY = [
   },
 ];
 
-export const ACTIVITY_ICON_MAP: Record<string, any> = {
-  "shopping-bag": <ShoppingBagIcon class="w-4 h-4 text-cream-600 dark:text-cream-400" />,
-  "star": <StarIcon class="w-4 h-4 text-cream-500" />,
-  "cube": <CubeIcon class="w-4 h-4 text-gray-500 dark:text-gray-400" />,
-  "pencil": <PencilIcon class="w-4 h-4 text-forest-600 dark:text-forest-400" />,
-  "check-circle": <CheckCircleIcon class="w-4 h-4 text-forest-600 dark:text-forest-400" />,
-  "image": <PackageIcon class="w-4 h-4 text-sage-600 dark:text-sage-400" />,
-  "plus": <PlusIcon class="w-4 h-4 text-forest-600 dark:text-forest-400" />,
+export const ACTIVITY_ICON_MAP: Record<string, Component<{ class?: string }>> = {
+  "shopping-bag": ShoppingBagIcon,
+  "star": StarIcon,
+  "cube": CubeIcon,
+  "pencil": PencilIcon,
+  "check-circle": CheckCircleIcon,
+  "image": PackageIcon,
+  "plus": PlusIcon,
 };

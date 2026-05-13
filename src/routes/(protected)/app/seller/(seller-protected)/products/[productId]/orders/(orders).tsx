@@ -1,6 +1,7 @@
 import { createSignal, createMemo, For } from "solid-js";
 import { ErrorBoundary } from "solid-js";
 import Badge from "~/components/ui/Badge";
+import { SectionErrorFallback } from "~/components/seller/SectionErrorFallback";
 import { MagnifyingGlassIcon } from "~/components/icons";
 import { getOrderStatusVariant, getOrderStatusLabel, formatPrice, formatDate } from "../helpers";
 import { StarRatingDisplay } from "../components/StarRatingDisplay";
@@ -21,11 +22,7 @@ export default function ProductOrdersRoute() {
   });
 
   return (
-    <ErrorBoundary fallback={(error) => (
-      <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
-        <p class="text-sm text-amber-700 dark:text-amber-300">Failed to load orders: {error.message}</p>
-      </div>
-    )}>
+    <ErrorBoundary fallback={(error) => <SectionErrorFallback error={error} title="orders" />}>
       <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm">
         <div class="px-6 py-4 border-b border-cream-200 dark:border-forest-700">
           <div class="flex flex-col sm:flex-row gap-3">

@@ -49,6 +49,7 @@ export function getInventoryLabel(count: number, threshold = 10): { label: strin
 export function formatPrice(price: string | number | null | undefined): string {
   if (!price) return "\u2014";
   const num = typeof price === "string" ? parseFloat(price) : price;
+  if (isNaN(num)) return "\u2014";
   return `\u09f3${num.toLocaleString("en-BD", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
