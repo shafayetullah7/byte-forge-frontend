@@ -318,6 +318,71 @@ export interface CreatePlantResponse {
 }
 
 /**
+ * Product type constants
+ */
+export const PRODUCT_TYPE = {
+  PLANT: "plant",
+  POT: "pot",
+  SEED: "seed",
+  FERTILIZER: "fertilizer",
+} as const;
+
+export type ProductType = (typeof PRODUCT_TYPE)[keyof typeof PRODUCT_TYPE];
+
+/**
+ * Product thumbnail (from list response)
+ */
+export interface ProductThumbnail {
+  id: string;
+  url: string;
+}
+
+/**
+ * Product list item (matches backend ProductListItemResponseDto)
+ */
+export interface ProductListItem {
+  id: string;
+  slug: string;
+  productType: ProductType;
+  status: PlantStatus;
+  thumbnail: ProductThumbnail | null;
+  name: string | null;
+  shortDescription: string | null;
+  price: string | null;
+  inventoryCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Product list response with pagination (matches backend paginated response)
+ */
+export interface ProductListResponse {
+  success: boolean;
+  message: string;
+  data: ProductListItem[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+}
+
+/**
+ * Product filter options (matches backend ListProductsQueryDto)
+ */
+export interface ProductFilter {
+  page?: number;
+  limit?: number;
+  search?: string;
+  productType?: ProductType;
+  status?: PlantStatus;
+  sortBy?: "createdAt" | "updatedAt" | "name" | "price" | "inventory";
+  sortOrder?: "asc" | "desc";
+}
+
+/**
  * Shop Verification Status (matches backend VerificationStatus)
  */
 export interface VerificationStatus {

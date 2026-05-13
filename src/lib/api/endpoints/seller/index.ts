@@ -1,9 +1,11 @@
 import { sellerShopsApi } from "./shops.api";
 import { sellerVerificationApi } from "./verification.api";
 import { plantsApi, getPlants, getPlantById, createPlant, updatePlant, deletePlant } from "./plants.api";
+import { productsApi, getProducts } from "./products.api";
 
 export { sellerShopApi } from "./shop-detail.api";
 export { getPlants, getPlantById, createPlant, updatePlant, deletePlant };
+export { getProducts };
 export type {
   Shop,
   ShopStatus,
@@ -15,6 +17,10 @@ export type {
   CreatePlantResponse,
   VerificationStatus,
   UpdateVerificationRequest,
+  ProductType,
+  ProductListItem,
+  ProductListResponse,
+  ProductFilter,
 } from "../../types/seller.types";
 
 /**
@@ -37,4 +43,9 @@ export const sellerApi = {
    * Plant/Product management
    */
   plants: plantsApi,
+
+  /**
+   * All Products management
+   */
+  products: productsApi,
 };
