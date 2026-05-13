@@ -13,6 +13,7 @@ import {
   ShoppingBagIcon,
   DollarSignIcon,
   StarIcon,
+  ExclamationCircleIcon,
 } from "~/components/icons";
 import { getStatusVariant, formatPrice, getStatusLabel } from "./[plantId]/helpers";
 import { StatCard } from "./[plantId]/components/StatCard";
@@ -51,11 +52,7 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
           <div class="min-h-screen flex items-center justify-center p-6">
             <div class="bg-red-50 border border-red-200 rounded-xl p-8 max-w-md w-full">
               <div class="flex items-center gap-3 mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-red-600">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="8" x2="12" y2="12"></line>
-                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
+                <ExclamationCircleIcon class="w-6 h-6 text-red-600" />
                 <h2 class="text-lg font-semibold text-red-900">Failed to Load Plant Details</h2>
               </div>
               <p class="text-sm text-red-700 mb-4">{error.toString()}</p>
