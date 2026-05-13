@@ -6,7 +6,7 @@ import { useI18n } from "~/i18n";
 import { PackageIcon, DollarSignIcon, CubeIcon, EyeIcon, ShoppingBagIcon, StarIcon, AlertTriangleIcon, ClipboardListIcon, CheckCircleIcon, XCircleIcon, PencilIcon, ArchiveIcon, ArrowPathIcon, TrashIcon, ArrowTopRightOnSquareIcon } from "~/components/icons";
 import { StatCard } from "./components/StatCard";
 import { getStatusVariant, formatPrice, formatNumber, formatCurrency, getOrderStatusVariant, getOrderStatusLabel, getStatusLabel } from "./helpers";
-import { MOCK_PRODUCT_STATS, MOCK_INVENTORY, MOCK_ORDERS, MOCK_REVIEWS_SUMMARY } from "./mock-data";
+import { MOCK_PRODUCT_STATS, MOCK_ORDERS, MOCK_REVIEWS_SUMMARY } from "./mock-data";
 import Badge from "~/components/ui/Badge";
 
 const ORDER_STATUS_ICONS: Record<string, any> = {
@@ -40,16 +40,21 @@ export default function ProductOverviewRoute() {
   const translation = createMemo(() => getProductTranslation(product(), locale()));
 
   const productName = createMemo(() => translation()?.name || "");
-  const productShortDescription = createMemo(() => translation()?.shortDescription || "");
 
   const thumbnailUrl = createMemo(() => product()?.thumbnail?.url);
 
   const stats = MOCK_PRODUCT_STATS;
-  const inventory = MOCK_INVENTORY;
   const recentOrders = MOCK_ORDERS.slice(0, 5);
 
-  const lowStockVariants = () => inventory.variants.filter((v) => v.status === "LOW_STOCK");
-  const outOfStockVariants = () => inventory.variants.filter((v) => v.availableStock === 0);
+  const variants = createMemo(() => product()?.variants ?? []);
+  const stock = createMemo(() => product()?.stockBreakdown ?? { totalStock: 0, availableStock: 0, reservedStock: 0, lowStockCount: 0 });
+
+  const lowStockVariants = createMemo(() =>
+    variants().filter((v) => v.inventoryCount > 0 && v.inventoryCount <= v.lowStockThreshold),
+  );
+  const outOfStockVariants = createMemo(() =>
+    variants().filter((v) => v.inventoryCount === 0),
+  );
 
   return (
     <>
@@ -77,14 +82,14 @@ export default function ProductOverviewRoute() {
               <div>
                 <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Inventory</p>
                 <p class="text-lg font-bold text-forest-800 dark:text-cream-50 mt-1">
-                  {product()?.inventoryCount ?? 0}
+                  {stock().totalStock}
                 </p>
                 <p class="text-xs text-gray-400 dark:text-gray-500">units total</p>
               </div>
               <div>
                 <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Variants</p>
                 <p class="text-lg font-bold text-forest-800 dark:text-cream-50 mt-1">
-                  {product()?.totalVariants ?? 0}
+                  {variants().length}
                 </p>
               </div>
               <div>
@@ -156,7 +161,7 @@ export default function ProductOverviewRoute() {
               <div class="flex items-center gap-2">
                 <CubeIcon class="w-4 h-4 text-gray-400" />
                 <h3 class="text-base font-semibold text-forest-800 dark:text-cream-50">
-                  Variants ({inventory.variants.length})
+                  Variants ({variants().length})
                 </h3>
               </div>
             </div>
@@ -172,27 +177,29 @@ export default function ProductOverviewRoute() {
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-cream-100 dark:divide-forest-700/50">
-                  <For each={inventory.variants}>
+                  <For each={variants()}>
                     {(variant) => (
                       <tr class="hover:bg-cream-50 dark:hover:bg-forest-700/30 transition-colors">
-                        <td class="px-6 py-3 font-mono text-xs text-gray-600 dark:text-gray-400">{variant.sku}</td>
-                        <td class="px-6 py-3 font-medium text-forest-800 dark:text-cream-50">{variant.name}</td>
-                        <td class="px-6 py-3 text-forest-800 dark:text-cream-50">{formatCurrency(variant.price)}</td>
+                        <td class="px-6 py-3 font-mono text-xs text-gray-600 dark:text-gray-400">{variant.sku || "—"}</td>
+                        <td class="px-6 py-3 font-medium text-forest-800 dark:text-cream-50">
+                          {variant.isBase ? "Base" : variant.sku || variant.id}
+                        </td>
+                        <td class="px-6 py-3 text-forest-800 dark:text-cream-50">{formatPrice(variant.price)}</td>
                         <td class="px-6 py-3">
-                          <span class={variant.availableStock === 0
+                          <span class={variant.inventoryCount === 0
                             ? "text-terracotta-600 dark:text-terracotta-400 font-semibold"
-                            : variant.availableStock <= variant.lowStockThreshold
+                            : variant.inventoryCount <= variant.lowStockThreshold
                               ? "text-cream-600 dark:text-cream-400 font-semibold"
                               : "text-forest-800 dark:text-cream-50"
                           }>
-                            {variant.availableStock}/{variant.totalStock}
+                            {variant.inventoryCount}
                           </span>
                         </td>
                         <td class="px-6 py-3">
                           <Badge
-                            variant={variant.status === "IN_STOCK" ? "forest" : variant.status === "LOW_STOCK" ? "cream" : "terracotta"}
+                            variant={variant.inventoryCount === 0 ? "terracotta" : variant.inventoryCount <= variant.lowStockThreshold ? "cream" : "forest"}
                           >
-                            {variant.status === "IN_STOCK" ? "In Stock" : variant.status === "LOW_STOCK" ? "Low Stock" : "Out of Stock"}
+                            {variant.inventoryCount === 0 ? "Out of Stock" : variant.inventoryCount <= variant.lowStockThreshold ? "Low Stock" : "In Stock"}
                           </Badge>
                         </td>
                       </tr>
@@ -263,16 +270,16 @@ export default function ProductOverviewRoute() {
             <div class="space-y-3">
               <div class="flex items-center justify-between">
                 <span class="text-sm text-gray-500 dark:text-gray-400">Available</span>
-                <span class="text-lg font-bold text-forest-800 dark:text-cream-50">{inventory.availableStock}</span>
+                <span class="text-lg font-bold text-forest-800 dark:text-cream-50">{stock().availableStock}</span>
               </div>
               <div class="flex items-center justify-between">
                 <span class="text-sm text-gray-500 dark:text-gray-400">Reserved</span>
-                <span class="text-lg font-bold text-cream-600 dark:text-cream-400">{inventory.reservedStock}</span>
+                <span class="text-lg font-bold text-cream-600 dark:text-cream-400">{stock().reservedStock}</span>
               </div>
               <div class="border-t border-cream-200 dark:border-forest-700 pt-3">
                 <div class="flex items-center justify-between">
                   <span class="text-sm text-gray-500 dark:text-gray-400">Total</span>
-                  <span class="text-lg font-bold text-forest-800 dark:text-cream-50">{inventory.totalStock}</span>
+                  <span class="text-lg font-bold text-forest-800 dark:text-cream-50">{stock().totalStock}</span>
                 </div>
               </div>
             </div>
@@ -290,7 +297,7 @@ export default function ProductOverviewRoute() {
                       <For each={[...outOfStockVariants(), ...lowStockVariants()]}>
                         {(v) => (
                           <p class="text-xs text-cream-700 dark:text-cream-400">
-                            {v.sku} — {v.availableStock}/{v.totalStock} remaining
+                            {v.sku || v.id} — {v.inventoryCount} remaining
                           </p>
                         )}
                       </For>

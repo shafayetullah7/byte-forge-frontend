@@ -535,8 +535,21 @@ export interface ProductDetail {
     description: string | null;
     shortDescription: string | null;
   }>;
-  inventoryCount: number;
-  totalVariants: number;
+  variants: Array<{
+    id: string;
+    sku: string | null;
+    price: string;
+    inventoryCount: number;
+    lowStockThreshold: number;
+    isBase: boolean;
+    isActive: boolean;
+  }>;
+  stockBreakdown: {
+    totalStock: number;
+    availableStock: number;
+    reservedStock: number;
+    lowStockCount: number;
+  };
   createdAt: string;
   updatedAt: string;
 }
