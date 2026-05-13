@@ -98,16 +98,6 @@ export default function ProductOverviewRoute() {
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Left Column - Product Info */}
       <div class="lg:col-span-2 space-y-6">
-        {/* Description */}
-        <SectionCard
-          title="Description"
-          icon={<PackageIcon class="w-4 h-4 text-gray-400" />}
-        >
-          <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-            {product.description}
-          </p>
-        </SectionCard>
-
         {/* Pricing & Inventory */}
         <SectionCard
           title="Pricing & Inventory"
@@ -233,7 +223,7 @@ export default function ProductOverviewRoute() {
           />
         </SectionCard>
 
-        {/* Quick Stats */}
+        {/* Recent Activity */}
         <SectionCard
           title="Recent Activity"
           icon={<ClockIcon class="w-4 h-4 text-gray-400" />}

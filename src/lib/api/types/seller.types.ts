@@ -521,6 +521,42 @@ export interface ProductListItem {
 }
 
 /**
+ * Product detail response (matches backend ProductDetailResponseDto)
+ */
+export interface ProductDetail {
+  id: string;
+  slug: string;
+  productType: ProductType;
+  status: PlantStatus;
+  thumbnail: ProductThumbnail | null;
+  translations: Array<{
+    locale: "en" | "bn";
+    name: string;
+    description: string | null;
+    shortDescription: string | null;
+  }>;
+  inventoryCount: number;
+  totalVariants: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Helper to extract a locale-specific translation from a ProductDetail
+ */
+export function getProductTranslation(
+  product: ProductDetail | undefined | null,
+  locale: string = "en"
+) {
+  if (!product) return null;
+  return (
+    product.translations.find((t) => t.locale === locale) ??
+    product.translations[0] ??
+    null
+  );
+}
+
+/**
  * Product list response with pagination (matches backend paginated response)
  */
 export interface ProductListResponse {

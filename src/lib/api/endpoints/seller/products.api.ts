@@ -4,6 +4,7 @@ import type {
   ProductListItem,
   ProductListResponse,
   ProductFilter,
+  ProductDetail,
 } from "../../types/seller.types";
 
 /**
@@ -33,8 +34,19 @@ export const getProducts = query(
 );
 
 /**
+ * Get product by ID
+ */
+export const getProductById = query(
+  async (id: string) => {
+    return fetcher<ProductDetail>(`/api/v1/user/seller/products/${id}`);
+  },
+  "seller-product-detail"
+);
+
+/**
  * Products API endpoints
  */
 export const productsApi = {
   getAll: getProducts,
+  getById: getProductById,
 };

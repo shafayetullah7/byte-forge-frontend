@@ -1,7 +1,10 @@
-import { ErrorBoundary, Suspense, For } from "solid-js";
-import { A, useParams, useLocation, type RouteSectionProps } from "@solidjs/router";
+import { ErrorBoundary, Suspense, For, createMemo } from "solid-js";
+import { A, useParams, useLocation, createAsync, type RouteSectionProps } from "@solidjs/router";
 import Badge from "~/components/ui/Badge";
 import { PageErrorFallback } from "~/components/seller/PageErrorFallback";
+import { getProductById } from "~/lib/api/endpoints/seller/products.api";
+import { getProductTranslation } from "~/lib/api/types/seller.types";
+import { useI18n } from "~/i18n";
 import {
   ChevronLeftIcon,
   PencilIcon,
@@ -10,7 +13,6 @@ import {
   ChevronRightIcon,
 } from "~/components/icons";
 import { getStatusVariant, getProductTypeLabel, getProductTypeColor, getStatusLabel } from "./[productId]/helpers";
-import { MOCK_PRODUCT } from "./[productId]/mock-data";
 
 const tabs = [
   { id: "overview", label: "Overview", path: "" },
@@ -24,8 +26,23 @@ export default function ProductDetailLayout(props: RouteSectionProps) {
   const params = useParams();
   const location = useLocation();
 
-  const product = MOCK_PRODUCT;
-  const typeColors = getProductTypeColor(product.productType);
+  const product = createAsync(
+    () => getProductById(params.productId as string),
+    { deferStream: true },
+  );
+
+  const { locale } = useI18n();
+
+  const translation = createMemo(() => getProductTranslation(product(), locale()));
+
+  const productName = createMemo(() => translation()?.name || "Product");
+  const productShortDescription = createMemo(() => translation()?.shortDescription || "");
+
+  const productType = createMemo(() => product()?.productType || "plant");
+  const productStatus = createMemo(() => product()?.status || "DRAFT");
+  const productId = createMemo(() => product()?.id || params.productId);
+
+  const typeColors = createMemo(() => getProductTypeColor(productType()));
 
   const isActiveTab = (path: string) => {
     if (path === "") {
@@ -59,7 +76,7 @@ export default function ProductDetailLayout(props: RouteSectionProps) {
                 Products
               </A>
               <ChevronRightIcon class="w-4 h-4" />
-              <span class="text-forest-800 dark:text-cream-50 font-medium truncate">{product.name}</span>
+              <span class="text-forest-800 dark:text-cream-50 font-medium truncate">{productName()}</span>
             </nav>
 
             <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
@@ -74,20 +91,20 @@ export default function ProductDetailLayout(props: RouteSectionProps) {
                 <div>
                   <div class="flex items-center gap-3 flex-wrap mb-2">
                     <h1 class="text-2xl md:text-3xl font-bold text-forest-800 dark:text-cream-50">
-                      {product.name}
+                      {productName()}
                     </h1>
-                    <Badge variant={getStatusVariant(product.status)}>
-                      {getStatusLabel(product.status)}
+                    <Badge variant={getStatusVariant(productStatus())}>
+                      {getStatusLabel(productStatus())}
                     </Badge>
-                    <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${typeColors.bg} ${typeColors.text} ${typeColors.border}`}>
-                      {getProductTypeLabel(product.productType)}
+                    <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${typeColors().bg} ${typeColors().text} ${typeColors().border}`}>
+                      {getProductTypeLabel(productType())}
                     </span>
                   </div>
                   <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    {product.shortDescription}
+                    {productShortDescription()}
                   </p>
                   <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                    Slug: <span class="font-mono text-xs">{product.slug}</span>
+                    Slug: <span class="font-mono text-xs">{product()?.slug}</span>
                   </p>
                 </div>
               </div>
@@ -95,7 +112,7 @@ export default function ProductDetailLayout(props: RouteSectionProps) {
               {/* Right: Actions */}
               <div class="flex items-center gap-2 flex-shrink-0">
                 <A
-                  href={`/app/seller/products/${product.id}/edit`}
+                  href={`/app/seller/products/${productId()}/edit`}
                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-forest-600 hover:bg-forest-700 text-white rounded-lg font-semibold shadow-sm hover:shadow-md transition-colors"
                 >
                   <PencilIcon class="w-4 h-4" />
@@ -124,7 +141,7 @@ export default function ProductDetailLayout(props: RouteSectionProps) {
                 <For each={tabs}>
                   {(tab) => (
                     <A
-                      href={`/app/seller/products/${product.id}/${tab.path}`}
+                      href={`/app/seller/products/${productId()}/${tab.path}`}
                       class={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                         isActiveTab(tab.path)
                           ? "border-forest-600 text-forest-600 dark:border-forest-400 dark:text-forest-400"
