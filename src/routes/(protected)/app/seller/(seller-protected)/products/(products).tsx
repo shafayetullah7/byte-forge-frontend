@@ -2,7 +2,8 @@ import { createMemo, createSignal, For, Show, Suspense, ErrorBoundary, createEff
 import { A, createAsync, useNavigate } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import { getProducts } from "~/lib/api/endpoints/seller/products.api";
-import type { ProductListItem, ProductType, ProductFilter } from "~/lib/api/types/seller.types";
+import type { ProductListItem, ProductType, ProductFilter, ProductStatus } from "~/lib/api/types/seller.types";
+import { PRODUCT_STATUS } from "~/lib/api/types/seller.types";
 import {
   PackageIcon,
   PlusIcon,
@@ -294,9 +295,9 @@ export default function ProductsPage() {
   );
 
   const totalProducts = createMemo(() => statsData()?.data?.length ?? 0);
-  const totalActive = createMemo(() => (statsData()?.data ?? []).filter((p) => p.status === "ACTIVE").length);
-  const totalDraft = createMemo(() => (statsData()?.data ?? []).filter((p) => p.status === "DRAFT").length);
-  const totalArchived = createMemo(() => (statsData()?.data ?? []).filter((p) => p.status === "ARCHIVED").length);
+  const totalActive = createMemo(() => (statsData()?.data ?? []).filter((p) => p.status === PRODUCT_STATUS.ACTIVE).length);
+  const totalDraft = createMemo(() => (statsData()?.data ?? []).filter((p) => p.status === PRODUCT_STATUS.DRAFT).length);
+  const totalArchived = createMemo(() => (statsData()?.data ?? []).filter((p) => p.status === PRODUCT_STATUS.ARCHIVED).length);
 
   // Per-type stats
   const typeStats = createMemo(() =>
@@ -305,9 +306,9 @@ export default function ProductsPage() {
       return {
         ...config,
         total: typeProducts.length,
-        active: typeProducts.filter((p) => p.status === "ACTIVE").length,
-        draft: typeProducts.filter((p) => p.status === "DRAFT").length,
-        archived: typeProducts.filter((p) => p.status === "ARCHIVED").length,
+        active: typeProducts.filter((p) => p.status === PRODUCT_STATUS.ACTIVE).length,
+        draft: typeProducts.filter((p) => p.status === PRODUCT_STATUS.DRAFT).length,
+        archived: typeProducts.filter((p) => p.status === PRODUCT_STATUS.ARCHIVED).length,
       };
     })
   );
@@ -769,9 +770,7 @@ export default function ProductsPage() {
                         <tr
                           class="border-b border-cream-100 dark:border-forest-700/50 hover:bg-cream-50 dark:hover:bg-forest-900/30 transition-colors cursor-pointer"
                           onClick={() => {
-                            if (product.productType === "plant") {
-                              navigate(`/app/seller/products/plants/${product.id}`);
-                            }
+                            navigate(`/app/seller/products/${product.id}`);
                           }}
                         >
                           <td class="px-5 py-3.5">
@@ -801,7 +800,7 @@ export default function ProductsPage() {
                           </td>
                           <td class="px-5 py-3.5">
                             <Badge variant={getStatusVariant(product.status)}>
-                              {product.status === "ACTIVE" ? t("seller.products.statusLabels.active") : product.status === "DRAFT" ? t("seller.products.statusLabels.draft") : t("seller.products.statusLabels.archived")}
+                              {product.status === PRODUCT_STATUS.ACTIVE ? t("seller.products.statusLabels.active") : product.status === PRODUCT_STATUS.DRAFT ? t("seller.products.statusLabels.draft") : t("seller.products.statusLabels.archived")}
                             </Badge>
                           </td>
                           <td class="px-5 py-3.5">
@@ -829,9 +828,7 @@ export default function ProductsPage() {
                     <div
                       class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm p-4 hover:bg-cream-50 dark:hover:bg-forest-900/30 transition-colors cursor-pointer"
                       onClick={() => {
-                        if (product.productType === "plant") {
-                          navigate(`/app/seller/products/plants/${product.id}`);
-                        }
+                        navigate(`/app/seller/products/${product.id}`);
                       }}
                     >
                       <div class="flex items-start justify-between mb-3">
@@ -841,7 +838,7 @@ export default function ProductsPage() {
                               {product.name || product.slug}
                             </h3>
                             <Badge variant={getStatusVariant(product.status)} class="flex-shrink-0">
-                              {product.status === "ACTIVE" ? t("seller.products.statusLabels.active") : product.status === "DRAFT" ? t("seller.products.statusLabels.draft") : t("seller.products.statusLabels.archived")}
+                              {product.status === PRODUCT_STATUS.ACTIVE ? t("seller.products.statusLabels.active") : product.status === PRODUCT_STATUS.DRAFT ? t("seller.products.statusLabels.draft") : t("seller.products.statusLabels.archived")}
                             </Badge>
                           </div>
                           <p class="text-sm text-gray-500 dark:text-gray-400 truncate">

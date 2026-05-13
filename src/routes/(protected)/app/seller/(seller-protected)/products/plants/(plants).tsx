@@ -3,7 +3,8 @@ import { A, createAsync, useNavigate } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import { getPlants } from "~/lib/api/endpoints/seller/plants.api";
 import { getCategoryTree, getTags } from "~/lib/api/endpoints/public";
-import type { PlantFilter, PlantListResponse } from "~/lib/api/types/seller.types";
+import type { PlantFilter, PlantListResponse, PlantStatus } from "~/lib/api/types/seller.types";
+import { PRODUCT_STATUS } from "~/lib/api/types/seller.types";
 import type { CategoryTree } from "~/lib/api/endpoints/public/categories.api";
 import { FilterIcon, ChevronLeftIcon, ChevronRightIcon, ArchiveIcon, SortIcon, PackageIcon, PlusIcon, XIcon, MagnifyingGlassIcon, FolderIcon, DollarSignIcon, CubeIcon, ClockIcon, CheckCircleIcon, Squares2x2Icon, TagIcon } from "~/components/icons";
 import Badge from "~/components/ui/Badge";
@@ -230,9 +231,9 @@ export default function PlantsPage() {
     const allItems = statsData()?.data ?? [];
     return {
       total: allItems.length,
-      active: allItems.filter((p) => p.status === "ACTIVE").length,
-      draft: allItems.filter((p) => p.status === "DRAFT").length,
-      archived: allItems.filter((p) => p.status === "ARCHIVED").length,
+      active: allItems.filter((p) => p.status === PRODUCT_STATUS.ACTIVE).length,
+      draft: allItems.filter((p) => p.status === PRODUCT_STATUS.DRAFT).length,
+      archived: allItems.filter((p) => p.status === PRODUCT_STATUS.ARCHIVED).length,
     };
   });
 
@@ -374,9 +375,9 @@ export default function PlantsPage() {
             <FilterSelect
               options={[
                 { value: "", label: "All Status" },
-                { value: "ACTIVE", label: "Active", dotColor: "bg-forest-500" },
-                { value: "DRAFT", label: "Draft", dotColor: "bg-cream-500" },
-                { value: "ARCHIVED", label: "Archived", dotColor: "bg-terracotta-500" },
+                { value: PRODUCT_STATUS.ACTIVE, label: "Active", dotColor: "bg-forest-500" },
+                { value: PRODUCT_STATUS.DRAFT, label: "Draft", dotColor: "bg-cream-500" },
+                { value: PRODUCT_STATUS.ARCHIVED, label: "Archived", dotColor: "bg-terracotta-500" },
               ]}
               value={statusFilter()}
               onChange={(val) => handleFilterChange(setStatusFilter, val)}
@@ -578,7 +579,7 @@ export default function PlantsPage() {
                 </Show>
                 <Show when={statusFilter()}>
                   <FilterChip
-                    label={`Status: ${statusFilter() === "ACTIVE" ? "Active" : statusFilter() === "DRAFT" ? "Draft" : "Archived"}`}
+                    label={`Status: ${statusFilter() === PRODUCT_STATUS.ACTIVE ? "Active" : statusFilter() === PRODUCT_STATUS.DRAFT ? "Draft" : "Archived"}`}
                     onRemove={() => handleFilterChange(setStatusFilter, "")}
                   />
                 </Show>
@@ -769,7 +770,7 @@ export default function PlantsPage() {
                           </td>
                           <td class="px-4 py-3">
                             <Badge variant={getStatusVariant(product.status)}>
-                              {product.status === "ACTIVE" ? "Active" : product.status === "DRAFT" ? "Draft" : "Archived"}
+                              {product.status === PRODUCT_STATUS.ACTIVE ? "Active" : product.status === PRODUCT_STATUS.DRAFT ? "Draft" : "Archived"}
                             </Badge>
                           </td>
                           <td class="px-4 py-3">
@@ -802,7 +803,7 @@ export default function PlantsPage() {
                               {product.name}
                             </h3>
                             <Badge variant={getStatusVariant(product.status)} class="flex-shrink-0">
-                              {product.status === "ACTIVE" ? "Active" : product.status === "DRAFT" ? "Draft" : "Archived"}
+                              {product.status === PRODUCT_STATUS.ACTIVE ? "Active" : product.status === PRODUCT_STATUS.DRAFT ? "Draft" : "Archived"}
                             </Badge>
                           </div>
                           <p class="text-sm text-gray-500 dark:text-gray-400 truncate">

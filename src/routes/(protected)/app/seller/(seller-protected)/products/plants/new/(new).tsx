@@ -21,12 +21,11 @@ import { Step6Care } from "./Step6Care";
 import { Step7Preview } from "./Step7Preview";
 import type { PlantFormState } from "~/lib/types/plant-form";
 import { createEmptyVariant, toCreatePlantDto, createEmptyForm } from "~/lib/types/plant-form";
+import { PRODUCT_STATUS, type PlantStatus } from "~/lib/api/types/seller.types";
 
 // ========================
 // Types
 // ========================
-
-type PlantStatus = "DRAFT" | "ACTIVE" | "ARCHIVED";
 
 interface FormErrors {
   [key: string]: string;
@@ -45,7 +44,7 @@ const createPlantAction = action(async (data: CreatePlantActionData) => {
   "use server";
   try {
     if (data.saveAsDraft) {
-      (data.dto as any).status = "DRAFT";
+      (data.dto as any).status = PRODUCT_STATUS.DRAFT;
     }
     await createPlant(data.dto as unknown as import("~/lib/api/types/seller.types").CreatePlantRequest);
     return { success: true };

@@ -67,7 +67,7 @@ export interface Shop {
   slug: string;
   logoId: string | null;
   bannerId: string | null;
-  status: string;
+  status: ShopStatusType;
   createdAt: string;
   updatedAt: string;
   name: string;
@@ -86,7 +86,7 @@ export interface Shop {
 export interface ShopStatus {
   id: string;
   slug: string;
-  status: string;
+  status: ShopStatusType;
   hasTranslations: boolean;
   rejectionReason: string | null;
 }
@@ -112,15 +112,21 @@ export interface ApplyAsSellerRequest {
 }
 
 /**
- * Plant status constants
+ * Product status constants (matches backend ProductStatusEnum)
  */
-export const PLANT_STATUS = {
+export const PRODUCT_STATUS = {
   DRAFT: "DRAFT",
   ACTIVE: "ACTIVE",
   ARCHIVED: "ARCHIVED",
 } as const;
 
-export type PlantStatus = (typeof PLANT_STATUS)[keyof typeof PLANT_STATUS];
+export type ProductStatus = (typeof PRODUCT_STATUS)[keyof typeof PRODUCT_STATUS];
+
+/**
+ * @deprecated Use PRODUCT_STATUS instead
+ */
+export const PLANT_STATUS = PRODUCT_STATUS;
+export type PlantStatus = ProductStatus;
 
 /**
  * Plant product category (from list response)
@@ -318,7 +324,7 @@ export interface CreatePlantResponse {
 }
 
 /**
- * Product type constants
+ * Product type constants (matches backend ProductTypeEnum)
  */
 export const PRODUCT_TYPE = {
   PLANT: "plant",
@@ -328,6 +334,166 @@ export const PRODUCT_TYPE = {
 } as const;
 
 export type ProductType = (typeof PRODUCT_TYPE)[keyof typeof PRODUCT_TYPE];
+
+/**
+ * Shop status constants (matches backend ShopStatusEnum)
+ */
+export const SHOP_STATUS = {
+  DRAFT: "DRAFT",
+  PENDING_VERIFICATION: "PENDING_VERIFICATION",
+  APPROVED: "APPROVED",
+  ACTIVE: "ACTIVE",
+  INACTIVE: "INACTIVE",
+  REJECTED: "REJECTED",
+  SUSPENDED: "SUSPENDED",
+  DELETED: "DELETED",
+} as const;
+
+export type ShopStatusType = (typeof SHOP_STATUS)[keyof typeof SHOP_STATUS];
+
+/**
+ * Shop verification status constants (matches backend ShopVerificationStatusEnum)
+ */
+export const SHOP_VERIFICATION_STATUS = {
+  PENDING: "PENDING",
+  REVIEWING: "REVIEWING",
+  APPROVED: "APPROVED",
+  REJECTED: "REJECTED",
+} as const;
+
+export type ShopVerificationStatusType = (typeof SHOP_VERIFICATION_STATUS)[keyof typeof SHOP_VERIFICATION_STATUS];
+
+/**
+ * Light requirement constants (matches backend LightRequirementEnum)
+ */
+export const LIGHT_REQUIREMENT = {
+  LOW: "LOW",
+  MEDIUM: "MEDIUM",
+  BRIGHT_INDIRECT: "BRIGHT_INDIRECT",
+  DIRECT: "DIRECT",
+} as const;
+
+export type LightRequirement = (typeof LIGHT_REQUIREMENT)[keyof typeof LIGHT_REQUIREMENT];
+
+/**
+ * Watering frequency constants (matches backend WateringFrequencyEnum)
+ */
+export const WATERING_FREQUENCY = {
+  DAILY: "DAILY",
+  WEEKLY: "WEEKLY",
+  BI_WEEKLY: "BI_WEEKLY",
+  MONTHLY: "MONTHLY",
+} as const;
+
+export type WateringFrequency = (typeof WATERING_FREQUENCY)[keyof typeof WATERING_FREQUENCY];
+
+/**
+ * Humidity level constants (matches backend HumidityLevelEnum)
+ */
+export const HUMIDITY_LEVEL = {
+  LOW: "LOW",
+  MEDIUM: "MEDIUM",
+  HIGH: "HIGH",
+} as const;
+
+export type HumidityLevel = (typeof HUMIDITY_LEVEL)[keyof typeof HUMIDITY_LEVEL];
+
+/**
+ * Care difficulty constants (matches backend CareDifficultyEnum)
+ */
+export const CARE_DIFFICULTY = {
+  BEGINNER: "BEGINNER",
+  INTERMEDIATE: "INTERMEDIATE",
+  EXPERT: "EXPERT",
+} as const;
+
+export type CareDifficulty = (typeof CARE_DIFFICULTY)[keyof typeof CARE_DIFFICULTY];
+
+/**
+ * Growth rate constants (matches backend GrowthRateEnum)
+ */
+export const GROWTH_RATE = {
+  SLOW: "SLOW",
+  MODERATE: "MODERATE",
+  FAST: "FAST",
+} as const;
+
+export type GrowthRate = (typeof GROWTH_RATE)[keyof typeof GROWTH_RATE];
+
+/**
+ * Growth stage constants (matches backend GrowthStageEnum)
+ */
+export const GROWTH_STAGE = {
+  SEEDLING: "SEEDLING",
+  JUVENILE: "JUVENILE",
+  MATURE: "MATURE",
+  CUTTING: "CUTTING",
+} as const;
+
+export type GrowthStage = (typeof GROWTH_STAGE)[keyof typeof GROWTH_STAGE];
+
+/**
+ * Plant form constants (matches backend PlantFormEnum)
+ */
+export const PLANT_FORM = {
+  UPRIGHT: "UPRIGHT",
+  TRAILING: "TRAILING",
+  BUSHY: "BUSHY",
+  CLIMBING: "CLIMBING",
+  ROSETTE: "ROSETTE",
+} as const;
+
+export type PlantForm = (typeof PLANT_FORM)[keyof typeof PLANT_FORM];
+
+/**
+ * Leaf density constants (matches backend LeafDensityEnum)
+ */
+export const LEAF_DENSITY = {
+  SPARSE: "SPARSE",
+  MODERATE: "MODERATE",
+  DENSE: "DENSE",
+} as const;
+
+export type LeafDensity = (typeof LEAF_DENSITY)[keyof typeof LEAF_DENSITY];
+
+/**
+ * Variegation constants (matches backend VariegationEnum)
+ */
+export const VARIEGATION = {
+  NONE: "NONE",
+  VARIEGATED: "VARIEGATED",
+  SEMI_VARIEGATED: "SEMI_VARIEGATED",
+  ALBO: "ALBO",
+  AUREO: "AUREO",
+} as const;
+
+export type Variegation = (typeof VARIEGATION)[keyof typeof VARIEGATION];
+
+/**
+ * Propagation type constants (matches backend PropagationTypeEnum)
+ */
+export const PROPAGATION_TYPE = {
+  CUTTING: "CUTTING",
+  SEED: "SEED",
+  TISSUE_CULTURE: "TISSUE_CULTURE",
+  AIR_LAYER: "AIR_LAYER",
+  DIVISION: "DIVISION",
+} as const;
+
+export type PropagationType = (typeof PROPAGATION_TYPE)[keyof typeof PROPAGATION_TYPE];
+
+/**
+ * Container type constants (matches backend ContainerTypeEnum)
+ */
+export const CONTAINER_TYPE = {
+  NURSERY_POT: "NURSERY_POT",
+  DECORATIVE_POT: "DECORATIVE_POT",
+  HANGING_BASKET: "HANGING_BASKET",
+  TERRARIUM: "TERRARIUM",
+  GROW_BAG: "GROW_BAG",
+} as const;
+
+export type ContainerType = (typeof CONTAINER_TYPE)[keyof typeof CONTAINER_TYPE];
 
 /**
  * Product thumbnail (from list response)
@@ -388,7 +554,7 @@ export interface ProductFilter {
 export interface VerificationStatus {
   id: string;
   shopId: string;
-  status: "PENDING" | "REVIEWING" | "APPROVED" | "REJECTED";
+  status: ShopVerificationStatusType;
   tradeLicenseNumber: string | null;
   tinNumber: string | null;
   rejectionReason: string | null;

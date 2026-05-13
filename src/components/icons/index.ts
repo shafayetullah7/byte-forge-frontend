@@ -56,6 +56,9 @@ export { TrendingUpIcon } from "./TrendingUpIcon";
 export { ShareIcon } from "./ShareIcon";
 export { ScissorsIcon } from "./ScissorsIcon";
 export { StarIcon } from "./StarIcon";
+export { ArrowUpIcon } from "./ArrowUpIcon";
+export { ArrowDownIcon } from "./ArrowDownIcon";
+export { AlertTriangleIcon } from "./AlertTriangleIcon";
 
 export * from './TagIcon';
 export * from './ArrowsRightLeftIcon';
