@@ -16,6 +16,7 @@ export default function ProductReviewsRoute() {
   });
 
   return (
+    <ErrorBoundary fallback={(error) => <SectionErrorFallback error={error} title="reviews" />}>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div class="space-y-6">
         <SectionCard title="Rating Summary">
@@ -146,5 +147,6 @@ export default function ProductReviewsRoute() {
         )}
       </div>
     </div>
+    </ErrorBoundary>
   );
 }

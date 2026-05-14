@@ -5,6 +5,8 @@ import type {
   ProductListResponse,
   ProductFilter,
   ProductDetail,
+  ProductSummary,
+  ProductOverview,
 } from "../../types/seller.types";
 
 /**
@@ -34,7 +36,7 @@ export const getProducts = query(
 );
 
 /**
- * Get product by ID
+ * Get product by ID (full detail)
  */
 export const getProductById = query(
   async (id: string) => {
@@ -44,9 +46,33 @@ export const getProductById = query(
 );
 
 /**
+ * Get product summary (lightweight - for layout header)
+ */
+export const getProductSummary = query(
+  async (id: string) => {
+    const response = await fetcher<ProductSummary>(`/api/v1/user/seller/products/${id}/summary`);
+    console.log("[ProductSummary API Response]", response);
+    return response;
+  },
+  "seller-product-summary"
+);
+
+/**
+ * Get product overview (thumbnail, variants, stock - for overview tab)
+ */
+export const getProductOverview = query(
+  async (id: string) => {
+    return fetcher<ProductOverview>(`/api/v1/user/seller/products/${id}/overview`);
+  },
+  "seller-product-overview"
+);
+
+/**
  * Products API endpoints
  */
 export const productsApi = {
   getAll: getProducts,
   getById: getProductById,
+  getSummary: getProductSummary,
+  getOverview: getProductOverview,
 };

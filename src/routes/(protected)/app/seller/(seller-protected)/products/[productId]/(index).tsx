@@ -1,13 +1,13 @@
 import { For, createMemo } from "solid-js";
+import { ErrorBoundary } from "solid-js";
 import { useParams, createAsync } from "@solidjs/router";
-import { getProductById } from "~/lib/api/endpoints/seller/products.api";
-import { getProductTranslation } from "~/lib/api/types/seller.types";
-import { useI18n } from "~/i18n";
-import { PackageIcon, DollarSignIcon, CubeIcon, EyeIcon, ShoppingBagIcon, StarIcon, AlertTriangleIcon, ClipboardListIcon, CheckCircleIcon, XCircleIcon, PencilIcon, ArchiveIcon, ArrowPathIcon, TrashIcon, ArrowTopRightOnSquareIcon } from "~/components/icons";
-import { StatCard } from "./components/StatCard";
+import { getProductSummary, getProductOverview } from "~/lib/api/endpoints/seller/products.api";
 import { getStatusVariant, formatPrice, formatNumber, formatCurrency, getOrderStatusVariant, getOrderStatusLabel, getStatusLabel } from "./helpers";
 import { MOCK_PRODUCT_STATS, MOCK_ORDERS, MOCK_REVIEWS_SUMMARY } from "./mock-data";
 import Badge from "~/components/ui/Badge";
+import { PackageIcon, DollarSignIcon, CubeIcon, EyeIcon, ShoppingBagIcon, StarIcon, AlertTriangleIcon, ClipboardListIcon, CheckCircleIcon, XCircleIcon, PencilIcon, ArchiveIcon, ArrowPathIcon, TrashIcon, ArrowTopRightOnSquareIcon } from "~/components/icons";
+import { StatCard } from "./components/StatCard";
+import { SectionErrorFallback } from "~/components/seller/SectionErrorFallback";
 
 const ORDER_STATUS_ICONS: Record<string, any> = {
   DELIVERED: CheckCircleIcon,
@@ -30,33 +30,28 @@ function timeAgo(dateStr: string): string {
 export default function ProductOverviewRoute() {
   const params = useParams();
 
-  const product = createAsync(
-    () => getProductById(params.productId as string),
+  const summary = createAsync(
+    () => getProductSummary(params.productId as string),
     { deferStream: true },
   );
 
-  const { locale } = useI18n();
-
-  const translation = createMemo(() => getProductTranslation(product(), locale()));
-
-  const productName = createMemo(() => translation()?.name || "");
-
-  const thumbnailUrl = createMemo(() => product()?.thumbnail?.url);
+  const overview = createAsync(
+    () => getProductOverview(params.productId as string),
+    { deferStream: true },
+  );
 
   const stats = MOCK_PRODUCT_STATS;
   const recentOrders = MOCK_ORDERS.slice(0, 5);
 
-  const variants = createMemo(() => product()?.variants ?? []);
-  const stock = createMemo(() => product()?.stockBreakdown ?? { totalStock: 0, availableStock: 0, reservedStock: 0, lowStockCount: 0 });
-
   const lowStockVariants = createMemo(() =>
-    variants().filter((v) => v.inventoryCount > 0 && v.inventoryCount <= v.lowStockThreshold),
+    (overview()?.variants ?? []).filter((v) => v.inventoryCount > 0 && v.inventoryCount <= v.lowStockThreshold),
   );
   const outOfStockVariants = createMemo(() =>
-    variants().filter((v) => v.inventoryCount === 0),
+    (overview()?.variants ?? []).filter((v) => v.inventoryCount === 0),
   );
 
   return (
+    <ErrorBoundary fallback={(error) => <SectionErrorFallback error={error} title="product overview" />}>
     <>
       {/* Product Thumbnail + Quick Info Card */}
       <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm mb-6 overflow-hidden">
@@ -64,10 +59,10 @@ export default function ProductOverviewRoute() {
           {/* Thumbnail */}
           <div class="sm:w-48 md:w-56 h-48 sm:h-auto bg-cream-100 dark:bg-forest-900/50 flex items-center justify-center flex-shrink-0 border-b sm:border-b-0 sm:border-r border-cream-200 dark:border-forest-700">
             <div class="w-full h-full flex items-center justify-center">
-              {thumbnailUrl() ? (
+              {overview()?.thumbnail?.url ? (
                 <img
-                  src={thumbnailUrl()!}
-                  alt={productName()}
+                  src={overview()!.thumbnail!.url}
+                  alt={summary()?.name ?? ""}
                   class="w-full h-full object-cover"
                 />
               ) : (
@@ -82,21 +77,21 @@ export default function ProductOverviewRoute() {
               <div>
                 <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Inventory</p>
                 <p class="text-lg font-bold text-forest-800 dark:text-cream-50 mt-1">
-                  {stock().totalStock}
+                  {overview()?.stockBreakdown?.totalStock ?? 0}
                 </p>
                 <p class="text-xs text-gray-400 dark:text-gray-500">units total</p>
               </div>
               <div>
                 <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Variants</p>
                 <p class="text-lg font-bold text-forest-800 dark:text-cream-50 mt-1">
-                  {variants().length}
+{overview()?.variants?.length ?? 0}
                 </p>
               </div>
-              <div>
+                <div>
                 <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Created</p>
                 <p class="text-sm font-medium text-forest-800 dark:text-cream-50 mt-1">
-                  {product()?.createdAt
-                    ? new Date(product()!.createdAt).toLocaleDateString("en-US", {
+                  {overview()?.createdAt
+                    ? new Date(overview()!.createdAt).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
                         year: "numeric",
@@ -107,8 +102,8 @@ export default function ProductOverviewRoute() {
               <div>
                 <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Status</p>
                 <div class="mt-1">
-                  <Badge variant={getStatusVariant(product()?.status || "DRAFT")}>
-                    {getStatusLabel(product()?.status || "DRAFT")}
+                  <Badge variant={getStatusVariant(summary()?.status || "DRAFT")}>
+                    {getStatusLabel(summary()?.status || "DRAFT")}
                   </Badge>
                 </div>
               </div>
@@ -161,7 +156,7 @@ export default function ProductOverviewRoute() {
               <div class="flex items-center gap-2">
                 <CubeIcon class="w-4 h-4 text-gray-400" />
                 <h3 class="text-base font-semibold text-forest-800 dark:text-cream-50">
-                  Variants ({variants().length})
+                  Variants ({overview()?.variants?.length ?? 0})
                 </h3>
               </div>
             </div>
@@ -177,7 +172,7 @@ export default function ProductOverviewRoute() {
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-cream-100 dark:divide-forest-700/50">
-                  <For each={variants()}>
+                  <For each={overview()?.variants ?? []}>
                     {(variant) => (
                       <tr class="hover:bg-cream-50 dark:hover:bg-forest-700/30 transition-colors">
                         <td class="px-6 py-3 font-mono text-xs text-gray-600 dark:text-gray-400">{variant.sku || "—"}</td>
@@ -219,7 +214,7 @@ export default function ProductOverviewRoute() {
                   Recent Orders
                 </h3>
               </div>
-              <a href={`/app/seller/products/${product()?.id || params.productId}/orders`} class="text-xs text-forest-600 dark:text-forest-400 hover:underline">
+              <a href={`/app/seller/products/${summary()?.id || params.productId}/orders`} class="text-xs text-forest-600 dark:text-forest-400 hover:underline">
                 View All
               </a>
             </div>
@@ -270,16 +265,16 @@ export default function ProductOverviewRoute() {
             <div class="space-y-3">
               <div class="flex items-center justify-between">
                 <span class="text-sm text-gray-500 dark:text-gray-400">Available</span>
-                <span class="text-lg font-bold text-forest-800 dark:text-cream-50">{stock().availableStock}</span>
+                <span class="text-lg font-bold text-forest-800 dark:text-cream-50">{overview()?.stockBreakdown?.availableStock ?? 0}</span>
               </div>
               <div class="flex items-center justify-between">
                 <span class="text-sm text-gray-500 dark:text-gray-400">Reserved</span>
-                <span class="text-lg font-bold text-cream-600 dark:text-cream-400">{stock().reservedStock}</span>
+                <span class="text-lg font-bold text-cream-600 dark:text-cream-400">{overview()?.stockBreakdown?.reservedStock ?? 0}</span>
               </div>
               <div class="border-t border-cream-200 dark:border-forest-700 pt-3">
                 <div class="flex items-center justify-between">
                   <span class="text-sm text-gray-500 dark:text-gray-400">Total</span>
-                  <span class="text-lg font-bold text-forest-800 dark:text-cream-50">{stock().totalStock}</span>
+                  <span class="text-lg font-bold text-forest-800 dark:text-cream-50">{overview()?.stockBreakdown?.totalStock ?? 0}</span>
                 </div>
               </div>
             </div>
@@ -315,7 +310,7 @@ export default function ProductOverviewRoute() {
                 <StarIcon class="w-4 h-4 text-cream-500" />
                 <h3 class="text-sm font-semibold text-forest-800 dark:text-cream-50">Reviews</h3>
               </div>
-              <a href={`/app/seller/products/${product()?.id || params.productId}/reviews`} class="text-xs text-forest-600 dark:text-forest-400 hover:underline">
+              <a href={`/app/seller/products/${summary()?.id || params.productId}/reviews`} class="text-xs text-forest-600 dark:text-forest-400 hover:underline">
                 View All
               </a>
             </div>
@@ -392,5 +387,6 @@ export default function ProductOverviewRoute() {
         </div>
       </div>
     </>
+    </ErrorBoundary>
   );
 }

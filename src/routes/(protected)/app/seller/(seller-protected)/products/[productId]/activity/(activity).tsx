@@ -1,11 +1,13 @@
-import { For } from "solid-js";
+import { For, ErrorBoundary } from "solid-js";
 import { ClockIcon } from "~/components/icons";
 import { SectionCard } from "../components/SectionCard";
+import { SectionErrorFallback } from "~/components/seller/SectionErrorFallback";
 import { formatDateTime } from "../helpers";
 import { ACTIVITY_ICON_MAP, MOCK_ACTIVITY } from "../mock-data";
 
 export default function ProductActivityRoute() {
   return (
+    <ErrorBoundary fallback={(error) => <SectionErrorFallback error={error} title="activity" />}>
     <SectionCard title="Activity History" icon={<ClockIcon class="w-4 h-4 text-gray-400" />}>
       <div class="relative">
         <div class="absolute left-5 top-0 bottom-0 w-px bg-cream-200 dark:bg-forest-700" />
@@ -31,5 +33,6 @@ export default function ProductActivityRoute() {
         </div>
       </div>
     </SectionCard>
+    </ErrorBoundary>
   );
 }

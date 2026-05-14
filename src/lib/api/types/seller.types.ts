@@ -570,6 +570,45 @@ export function getProductTranslation(
 }
 
 /**
+ * Product summary response (matches backend ProductSummaryResponseDto)
+ * Lightweight data for layout header - localized by x-locale header
+ */
+export interface ProductSummary {
+  id: string;
+  slug: string;
+  productType: ProductType;
+  status: PlantStatus;
+  name: string;
+  shortDescription: string | null;
+}
+
+/**
+ * Product overview response (matches backend ProductOverviewResponseDto)
+ * Data for overview/tab content
+ */
+export interface ProductOverview {
+  id: string;
+  status: PlantStatus;
+  createdAt: string;
+  thumbnail: ProductThumbnail | null;
+  variants: Array<{
+    id: string;
+    sku: string | null;
+    price: string;
+    inventoryCount: number;
+    lowStockThreshold: number;
+    isBase: boolean;
+    isActive: boolean;
+  }>;
+  stockBreakdown: {
+    totalStock: number;
+    availableStock: number;
+    reservedStock: number;
+    lowStockCount: number;
+  };
+}
+
+/**
  * Product list response with pagination (matches backend paginated response)
  */
 export interface ProductListResponse {

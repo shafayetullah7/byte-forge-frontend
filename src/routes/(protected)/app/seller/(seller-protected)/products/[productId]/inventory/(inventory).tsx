@@ -15,6 +15,7 @@ export default function ProductInventoryRoute() {
   const totalAvailable = createMemo(() => inventory.variants.reduce((sum, v) => sum + v.availableStock, 0));
 
   return (
+    <ErrorBoundary fallback={(error) => <SectionErrorFallback error={error} title="inventory" />}>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Left Column - Inventory Summary & Variants */}
       <div class="lg:col-span-2 space-y-6">
@@ -162,5 +163,6 @@ export default function ProductInventoryRoute() {
         </SectionCard>
       </div>
     </div>
+    </ErrorBoundary>
   );
 }
