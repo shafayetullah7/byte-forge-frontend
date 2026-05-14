@@ -661,3 +661,114 @@ export interface UpdateVerificationRequest {
   tinDocumentId?: string;
   utilityBillDocumentId?: string;
 }
+
+/**
+ * Plant detail response (matches backend PlantDetailResult)
+ * Full plant data with translations, plant details, care instructions, and variants
+ */
+export interface PlantDetail {
+  id: string;
+  slug: string;
+  status: ProductStatus;
+  thumbnail: { id: string; url: string } | null;
+  translations: Array<{
+    locale: string;
+    name: string;
+    description: string | null;
+    shortDescription: string | null;
+  }>;
+  plantDetails: {
+    id: string;
+    categoryId: string | null;
+    scientificName: string | null;
+    commonNames: string | null;
+    origin: string | null;
+    lightRequirement: string | null;
+    wateringFrequency: string | null;
+    humidityLevel: string | null;
+    temperatureRange: string | null;
+    soilType: string | null;
+    careDifficulty: string | null;
+    growthRate: string | null;
+    matureHeight: string | null;
+    matureSpread: string | null;
+    toxicityInfo: string | null;
+    category: {
+      id: string;
+      slug: string;
+      translations: Array<{ locale: string; name: string }>;
+    } | null;
+    tags: Array<{
+      id: string;
+      slug: string;
+      translations: Array<{ locale: string; name: string }>;
+    }>;
+    translations: Array<{
+      locale: string;
+      commonNames: string | null;
+      origin: string | null;
+      soilType: string | null;
+      toxicityInfo: string | null;
+    }>;
+  } | null;
+  careInstructions: {
+    id: string;
+    lightInstructions: string | null;
+    wateringInstructions: string | null;
+    humidityInstructions: string | null;
+    fertilizerSchedule: string | null;
+    repottingFrequency: string | null;
+    pruningNotes: string | null;
+    commonProblems: string | null;
+    seasonalCare: string | null;
+    translations: Array<{
+      locale: string;
+      lightInstructions: string | null;
+      wateringInstructions: string | null;
+      humidityInstructions: string | null;
+      fertilizerSchedule: string | null;
+      repottingFrequency: string | null;
+      pruningNotes: string | null;
+      commonProblems: string | null;
+      seasonalCare: string | null;
+    }>;
+  } | null;
+  variants: Array<{
+    id: string;
+    sku: string | null;
+    price: string;
+    inventoryCount: number;
+    lowStockThreshold: number;
+    trackInventory: boolean;
+    displayOrder: number;
+    isBase: boolean;
+    isActive: boolean;
+    plantAttributes: {
+      id: string;
+      growthStage: string;
+      plantForm: string;
+      variegation: string;
+      leafDensity: string;
+      stemCount: number;
+      currentHeight: string | null;
+      currentSpread: string | null;
+      propagationType: string;
+      containerType: string;
+      containerSize: string | null;
+      bundleType: string | null;
+    } | null;
+    translations: Array<{
+      locale: string;
+      title: string;
+    }>;
+    media: Array<{
+      id: string;
+      mediaId: string;
+      displayOrder: number;
+      type: string;
+      url: string;
+    }>;
+  }>;
+  createdAt: string;
+  updatedAt: string;
+}

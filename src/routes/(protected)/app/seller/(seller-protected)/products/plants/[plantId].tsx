@@ -1,5 +1,5 @@
 import { ErrorBoundary, Suspense, Show, For } from "solid-js";
-import { A, useParams, useLocation, type RouteSectionProps } from "@solidjs/router";
+import { A, useParams, useLocation, createAsync, type RouteSectionProps } from "@solidjs/router";
 import Badge from "~/components/ui/Badge";
 import {
   ChevronLeftIcon,
@@ -10,7 +10,7 @@ import {
   ExclamationCircleIcon,
 } from "~/components/icons";
 import { getStatusVariant, getStatusLabel } from "./[plantId]/helpers";
-import { MOCK_PLANT } from "./[plantId]/mock-data";
+import { getPlantById } from "~/lib/api/endpoints/seller/plants.api";
 
 const tabs = [
   { id: "overview", label: "Overview", path: "" },
@@ -22,12 +22,28 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
   const params = useParams();
   const location = useLocation();
 
-  const plant = MOCK_PLANT;
+  const plant = createAsync(
+    () => getPlantById(params.plantId as string),
+    { deferStream: true }
+  );
+
+  // Get localized name from translations
+  const getPlantName = () => {
+    const p = plant();
+    if (!p?.translations) return "";
+    return p.translations.find(t => t.locale === "en")?.name
+      ?? p.translations[0]?.name ?? "";
+  };
+
+  // Get localized scientific name from plantDetails
+  const getScientificName = () => {
+    return plant()?.plantDetails?.scientificName ?? "";
+  };
 
   const isActiveTab = (path: string) => {
     if (path === "") {
       return location.pathname === `/app/seller/products/plants/${params.plantId}` ||
-             location.pathname === `/app/seller/products/plants/${params.plantId}/`;
+              location.pathname === `/app/seller/products/plants/${params.plantId}/`;
     }
     return location.pathname.startsWith(`/app/seller/products/plants/${params.plantId}/${path}`);
   };
@@ -63,7 +79,7 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
         )}
       >
         <Suspense fallback={<div class="p-6">Loading plant details...</div>}>
-          <Show when={plant}>
+          <Show when={plant()}>
             {(plantData) => (
               <>
                 {/* Breadcrumb & Header */}
@@ -77,7 +93,7 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
                       Plants
                     </A>
                     <ChevronRightIcon class="w-4 h-4" />
-                    <span class="text-forest-800 dark:text-cream-50 font-medium truncate">{plantData().name}</span>
+                    <span class="text-forest-800 dark:text-cream-50 font-medium truncate">{getPlantName()}</span>
                   </nav>
 
                   <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
@@ -91,14 +107,14 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
                       <div>
                         <div class="flex items-center gap-3 flex-wrap">
                           <h1 class="text-2xl md:text-3xl font-bold text-forest-800 dark:text-cream-50">
-                            {plantData().name}
+                            {getPlantName()}
                           </h1>
                           <Badge variant={getStatusVariant(plantData().status)}>
                             {getStatusLabel(plantData().status)}
                           </Badge>
                         </div>
                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                          {plantData().scientificName}
+                          {getScientificName()}
                         </p>
                         <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">
                           Slug: <span class="font-mono text-xs">{plantData().slug}</span>

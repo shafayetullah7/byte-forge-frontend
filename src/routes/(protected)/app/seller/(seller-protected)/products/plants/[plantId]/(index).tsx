@@ -1,5 +1,7 @@
-import { For, Show } from "solid-js";
+import { For, Show, createMemo } from "solid-js";
 import { ErrorBoundary } from "solid-js";
+import { useParams, createAsync } from "@solidjs/router";
+import { getPlantById } from "~/lib/api/endpoints/seller/plants.api";
 import {
   PackageIcon,
   FolderIcon,
@@ -53,7 +55,6 @@ import {
   getPropagationLabel,
   getContainerTypeLabel,
 } from "./helpers";
-import { MOCK_PLANT } from "./mock-data";
 import Badge from "~/components/ui/Badge";
 
 // ─── Care Card Component ────────────────────────────────────────────
@@ -87,14 +88,14 @@ function InstructionRow(props: {
   iconColor: string;
   bgColor: string;
   title: string;
-  description: string;
+  description: string | null;
 }) {
   return (
     <div class={`flex gap-4 p-4 rounded-lg ${props.bgColor}`}>
       <div class={`${props.iconColor} flex-shrink-0 mt-0.5`}>{props.icon}</div>
       <div>
         <h4 class="text-sm font-semibold text-forest-800 dark:text-cream-50 mb-1">{props.title}</h4>
-        <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{props.description}</p>
+        <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{props.description || "—"}</p>
       </div>
     </div>
   );
@@ -103,8 +104,72 @@ function InstructionRow(props: {
 // ─── Main Overview Route ────────────────────────────────────────────
 
 export default function OverviewRoute() {
-  const plant = MOCK_PLANT;
-  const inventory = getInventoryStatus(plant.inventoryCount);
+  const params = useParams();
+
+  const plant = createAsync(
+    () => getPlantById(params.plantId as string),
+    { deferStream: true }
+  );
+
+  // Get localized translation
+  const enTranslation = createMemo(() => {
+    const p = plant();
+    if (!p?.translations) return null;
+    return p.translations.find(t => t.locale === "en") ?? p.translations[0] ?? null;
+  });
+
+  const bnTranslation = createMemo(() => {
+    const p = plant();
+    if (!p?.translations) return null;
+    return p.translations.find(t => t.locale === "bn") ?? null;
+  });
+
+  // Get plant details translation
+  const plantDetailsEn = createMemo(() => {
+    const pd = plant()?.plantDetails;
+    if (!pd?.translations) return null;
+    return pd.translations.find(t => t.locale === "en") ?? pd.translations[0] ?? null;
+  });
+
+  // Get care instructions
+  const careInstructions = createMemo(() => {
+    const ci = plant()?.careInstructions;
+    if (!ci) return null;
+    const en = ci.translations?.find(t => t.locale === "en");
+    return en || ci;
+  });
+
+  // Get category name
+  const categoryName = createMemo(() => {
+    const cat = plant()?.plantDetails?.category;
+    if (!cat?.translations) return "—";
+    return cat.translations.find(t => t.locale === "en")?.name
+      ?? cat.translations[0]?.name ?? "—";
+  });
+
+  // Get tag names
+  const tagNames = createMemo(() => {
+    return (plant()?.plantDetails?.tags ?? []).map(tag => {
+      const name = tag.translations?.find(t => t.locale === "en")?.name
+        ?? tag.translations?.[0]?.name ?? tag.slug;
+      return { id: tag.id, slug: tag.slug, name };
+    });
+  });
+
+  // Calculate total inventory
+  const totalInventory = createMemo(() => {
+    return (plant()?.variants ?? []).reduce((sum, v) => sum + v.inventoryCount, 0);
+  });
+
+  // Calculate price range
+  const priceRange = createMemo(() => {
+    const variants = plant()?.variants ?? [];
+    if (variants.length === 0) return "—";
+    const prices = variants.map(v => parseFloat(v.price));
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    return min === max ? formatPrice(min) : `${formatPrice(min)} - ${formatPrice(max)}`;
+  });
 
   return (
     <ErrorBoundary fallback={(error) => (
@@ -114,444 +179,497 @@ export default function OverviewRoute() {
         </p>
       </div>
     )}>
-      <div class="space-y-6">
-
-        {/* ─── Thumbnail + Translations Card ─── */}
-        <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm overflow-hidden">
-          <div class="flex flex-col sm:flex-row">
-            {/* Thumbnail */}
-            <div class="sm:w-64 md:w-72 h-56 sm:h-auto bg-cream-100 dark:bg-forest-900/50 flex items-center justify-center flex-shrink-0 border-b sm:border-b-0 sm:border-r border-cream-200 dark:border-forest-700">
-              {plant.thumbnail?.url ? (
-                <img
-                  src={plant.thumbnail.url}
-                  alt={plant.name}
-                  class="w-full h-full object-cover"
-                />
-              ) : (
-                <LeafIcon class="w-20 h-20 text-gray-300 dark:text-gray-600" />
-              )}
-            </div>
-
-            {/* Translations & Info */}
-            <div class="flex-1 p-6">
-              <h2 class="text-lg font-bold text-forest-800 dark:text-cream-50 mb-1">English</h2>
-              <p class="text-xl font-semibold text-forest-800 dark:text-cream-50 mb-2">{plant.name}</p>
-              <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{plant.shortDescription}</p>
-
-              <div class="mt-4 pt-4 border-t border-cream-200 dark:border-forest-700">
-                <h2 class="text-lg font-bold text-forest-800 dark:text-cream-50 mb-1">বাংলা</h2>
-                <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{plant.description}</p>
-              </div>
-
-              <div class="mt-4 pt-4 border-t border-cream-200 dark:border-forest-700">
-                <p class="text-xs text-gray-500 dark:text-gray-400">
-                  Scientific Name: <span class="text-gray-700 dark:text-gray-300 italic">{plant.scientificName}</span>
-                </p>
-              </div>
-            </div>
-          </div>
+      <Show when={plant()} fallback={
+        <div class="flex items-center justify-center py-12">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-forest-600"></div>
+          <span class="ml-3 text-gray-600 dark:text-gray-400">Loading plant details...</span>
         </div>
+      }>
+        {(plantData) => {
+          const inventory = getInventoryStatus(totalInventory());
+          const pd = plantData().plantDetails;
 
-        {/* ─── Two-Column Layout ─── */}
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          return (
+            <div class="space-y-6">
 
-          {/* Left Column (2/3) */}
-          <div class="lg:col-span-2 space-y-6">
-
-            {/* ─── Classification & Details ─── */}
-            <SectionCard
-              title="Classification & Details"
-              icon={<SproutIcon class="w-4 h-4 text-gray-400" />}
-            >
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8">
-                <div>
-                  <DetailRow
-                    label="Category"
-                    value={plant.category.name}
-                    icon={<FolderIcon class="w-4 h-4" />}
-                  />
-                  <DetailRow
-                    label="Scientific Name"
-                    value={plant.scientificName}
-                    icon={<InfoCircleIcon class="w-4 h-4" />}
-                  />
-                  <DetailRow
-                    label="Common Names (EN)"
-                    value={plant.plantDetails.translations.en.commonNames}
-                    icon={<ChatBubbleLeftRightIcon class="w-4 h-4" />}
-                  />
-                  <DetailRow
-                    label="Common Names (BN)"
-                    value={plant.plantDetails.translations.bn.commonNames}
-                    icon={<ChatBubbleLeftRightIcon class="w-4 h-4" />}
-                  />
-                  <DetailRow
-                    label="Origin"
-                    value={plant.plantDetails.translations.en.origin}
-                    icon={<GlobeAltIcon class="w-4 h-4" />}
-                  />
-                </div>
-                <div>
-                  <DetailRow
-                    label="Soil Type"
-                    value={plant.plantDetails.translations.en.soilType}
-                    icon={<BeakerIcon class="w-4 h-4" />}
-                  />
-                  <DetailRow
-                    label="Mature Height"
-                    value={plant.plantDetails.matureHeight}
-                    icon={<RulerIcon class="w-4 h-4" />}
-                  />
-                  <DetailRow
-                    label="Mature Spread"
-                    value={plant.plantDetails.matureSpread}
-                    icon={<RulerIcon class="w-4 h-4" />}
-                  />
-                  <DetailRow
-                    label="Toxicity"
-                    value={plant.plantDetails.translations.en.toxicityInfo}
-                    icon={<ExclamationCircleIcon class="w-4 h-4" />}
-                  />
-                </div>
-              </div>
-
-              {/* Tags */}
-              <div class="mt-4 pt-4 border-t border-cream-100 dark:border-forest-700/50">
-                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Tags</p>
-                <div class="flex flex-wrap gap-2">
-                  <For each={plant.tags}>
-                    {(tag) => (
-                      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 rounded-full text-xs font-medium border border-forest-200 dark:border-forest-700">
-                        <TagIcon class="w-3 h-3" />
-                        {tag.name}
-                      </span>
+              {/* ─── Thumbnail + Translations Card ─── */}
+              <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm overflow-hidden">
+                <div class="flex flex-col sm:flex-row">
+                  {/* Thumbnail */}
+                  <div class="sm:w-64 md:w-72 h-56 sm:h-auto bg-cream-100 dark:bg-forest-900/50 flex items-center justify-center flex-shrink-0 border-b sm:border-b-0 sm:border-r border-cream-200 dark:border-forest-700">
+                    {plantData().thumbnail?.url ? (
+                      <img
+                        src={plantData().thumbnail!.url}
+                        alt={enTranslation()?.name ?? ""}
+                        class="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <LeafIcon class="w-20 h-20 text-gray-300 dark:text-gray-600" />
                     )}
-                  </For>
-                </div>
-              </div>
-            </SectionCard>
+                  </div>
 
-            {/* ─── Care Requirements (Cards) ─── */}
-            <SectionCard
-              title="Care Requirements"
-              icon={<CloudIcon class="w-4 h-4 text-gray-400" />}
-            >
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <CareCard
-                  icon={<SunIcon class="w-5 h-5 text-forest-600 dark:text-forest-400" />}
-                  title="Light"
-                  badge={{
-                    text: getLightLabel(plant.plantDetails.lightRequirement),
-                    ...getLightColor(plant.plantDetails.lightRequirement),
-                  }}
-                  description="Bright, indirect light. Avoid direct sunlight which can scorch variegated leaves."
-                />
-                <CareCard
-                  icon={<DropletIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" />}
-                  title="Watering"
-                  badge={{
-                    text: getWateringLabel(plant.plantDetails.wateringFrequency),
-                    ...getWateringColor(plant.plantDetails.wateringFrequency),
-                  }}
-                  description="Water when top 2-3 inches of soil are dry. Ensure thorough drainage."
-                />
-                <CareCard
-                  icon={<CloudIcon class="w-5 h-5 text-sky-600 dark:text-sky-400" />}
-                  title="Humidity"
-                  badge={{
-                    text: getHumidityLabel(plant.plantDetails.humidityLevel),
-                    ...getHumidityColor(plant.plantDetails.humidityLevel),
-                  }}
-                  description="Maintain 60-80% humidity for optimal growth and variegation."
-                />
-                <CareCard
-                  icon={<ThermometerIcon class="w-5 h-5 text-red-600 dark:text-red-400" />}
-                  title="Temperature"
-                  badge={{
-                    text: plant.plantDetails.temperatureRange,
-                    bg: "bg-red-100 dark:bg-red-900/40",
-                    textColor: "text-red-700 dark:text-red-300",
-                  }}
-                  description="Keep between 18°C - 27°C. Protect from cold drafts and sudden changes."
-                />
-                <CareCard
-                  icon={<SparklesIcon class="w-5 h-5 text-cream-600 dark:text-cream-400" />}
-                  title="Care Difficulty"
-                  badge={{
-                    text: getDifficultyLabel(plant.plantDetails.careDifficulty),
-                    ...getDifficultyColor(plant.plantDetails.careDifficulty),
-                  }}
-                  description="Intermediate level care. Requires some experience with tropical plants."
-                />
-                <CareCard
-                  icon={<SproutIcon class="w-5 h-5 text-sage-600 dark:text-sage-400" />}
-                  title="Growth Rate"
-                  badge={{
-                    text: getGrowthRateLabel(plant.plantDetails.growthRate!),
-                    bg: "bg-sage-100 dark:bg-sage-900/40",
-                    textColor: "text-sage-700 dark:text-sage-300",
-                  }}
-                  description="Moderate growth. New leaves appear every 4-6 weeks during growing season."
-                />
-              </div>
-            </SectionCard>
+                  {/* Translations & Info */}
+                  <div class="flex-1 p-6">
+                    <h2 class="text-lg font-bold text-forest-800 dark:text-cream-50 mb-1">English</h2>
+                    <p class="text-xl font-semibold text-forest-800 dark:text-cream-50 mb-2">{enTranslation()?.name}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{enTranslation()?.shortDescription}</p>
 
-            {/* ─── Care Instructions ─── */}
-            <SectionCard
-              title="Care Instructions"
-              icon={<ClockIcon class="w-4 h-4 text-gray-400" />}
-            >
-              <div class="space-y-4">
-                <InstructionRow
-                  icon={<SunIcon class="w-5 h-5" />}
-                  iconColor="text-cream-600 dark:text-cream-400"
-                  bgColor="bg-cream-50 dark:bg-forest-900/30"
-                  title="Light Care"
-                  description={plant.careGuide.en.lightInstructions}
-                />
-                <InstructionRow
-                  icon={<DropletIcon class="w-5 h-5" />}
-                  iconColor="text-blue-600 dark:text-blue-400"
-                  bgColor="bg-blue-50 dark:bg-blue-900/20"
-                  title="Watering Guide"
-                  description={plant.careGuide.en.wateringInstructions}
-                />
-                <InstructionRow
-                  icon={<CloudIcon class="w-5 h-5" />}
-                  iconColor="text-sky-600 dark:text-sky-400"
-                  bgColor="bg-sky-50 dark:bg-sky-900/20"
-                  title="Humidity Care"
-                  description={plant.careGuide.en.humidityInstructions}
-                />
-                <InstructionRow
-                  icon={<BeakerIcon class="w-5 h-5" />}
-                  iconColor="text-sage-600 dark:text-sage-400"
-                  bgColor="bg-sage-50 dark:bg-sage-900/20"
-                  title="Fertilizer Schedule"
-                  description={plant.careGuide.en.fertilizerSchedule}
-                />
-                <InstructionRow
-                  icon={<SproutIcon class="w-5 h-5" />}
-                  iconColor="text-forest-600 dark:text-forest-400"
-                  bgColor="bg-forest-50 dark:bg-forest-900/20"
-                  title="Repotting"
-                  description={plant.careGuide.en.repottingFrequency}
-                />
-                <InstructionRow
-                  icon={<ScissorsIcon class="w-5 h-5" />}
-                  iconColor="text-purple-600 dark:text-purple-400"
-                  bgColor="bg-purple-50 dark:bg-purple-900/20"
-                  title="Pruning"
-                  description={plant.careGuide.en.pruningNotes}
-                />
-                <InstructionRow
-                  icon={<ExclamationCircleIcon class="w-5 h-5" />}
-                  iconColor="text-red-600 dark:text-red-400"
-                  bgColor="bg-red-50 dark:bg-red-900/20"
-                  title="Common Problems"
-                  description={plant.careGuide.en.commonProblems}
-                />
-                <InstructionRow
-                  icon={<CalendarIcon class="w-5 h-5" />}
-                  iconColor="text-amber-600 dark:text-amber-400"
-                  bgColor="bg-amber-50 dark:bg-amber-900/20"
-                  title="Seasonal Care"
-                  description={plant.careGuide.en.seasonalCare}
-                />
-              </div>
-            </SectionCard>
+                    {bnTranslation() && (
+                      <div class="mt-4 pt-4 border-t border-cream-200 dark:border-forest-700">
+                        <h2 class="text-lg font-bold text-forest-800 dark:text-cream-50 mb-1">বাংলা</h2>
+                        <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{bnTranslation()?.description}</p>
+                      </div>
+                    )}
 
-            {/* ─── Pricing & Inventory ─── */}
-            <SectionCard
-              title="Pricing & Inventory"
-              icon={<DollarSignIcon class="w-4 h-4 text-gray-400" />}
-            >
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">Base Price</p>
-                  <p class="text-2xl font-bold text-forest-800 dark:text-cream-50 mt-1">
-                    {formatPrice(plant.price)}
-                  </p>
-                </div>
-                <div>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">Total Inventory</p>
-                  <div class="flex items-center gap-2 mt-1">
-                    <p class="text-2xl font-bold text-forest-800 dark:text-cream-50">
-                      {plant.inventoryCount}
-                    </p>
-                    <Badge variant={inventory.variant} class="text-xs">
-                      {inventory.label}
-                    </Badge>
+                    <div class="mt-4 pt-4 border-t border-cream-200 dark:border-forest-700">
+                      <p class="text-xs text-gray-500 dark:text-gray-400">
+                        Scientific Name: <span class="text-gray-700 dark:text-gray-300 italic">{pd?.scientificName ?? "—"}</span>
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">Variants</p>
-                  <p class="text-2xl font-bold text-forest-800 dark:text-cream-50 mt-1">
-                    {plant.variants.length}
-                  </p>
-                </div>
               </div>
-            </SectionCard>
-          </div>
 
-          {/* Right Column (1/3) */}
-          <div class="space-y-6">
+              {/* ─── Two-Column Layout ─── */}
+              <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            {/* ─── Care Profile ─── */}
-            <SectionCard
-              title="Care Profile"
-              icon={<SunIcon class="w-4 h-4 text-gray-400" />}
-            >
-              <DetailRow
-                label="Light"
-                value={getLightLabel(plant.plantDetails.lightRequirement)}
-                icon={<SunIcon class="w-4 h-4" />}
-              />
-              <DetailRow
-                label="Watering"
-                value={getWateringLabel(plant.plantDetails.wateringFrequency)}
-                icon={<DropletIcon class="w-4 h-4" />}
-              />
-              <DetailRow
-                label="Humidity"
-                value={getHumidityLabel(plant.plantDetails.humidityLevel)}
-                icon={<MoonIcon class="w-4 h-4" />}
-              />
-              <DetailRow
-                label="Temperature"
-                value={plant.plantDetails.temperatureRange}
-                icon={<ThermometerIcon class="w-4 h-4" />}
-              />
-              <DetailRow
-                label="Difficulty"
-                value={getDifficultyLabel(plant.plantDetails.careDifficulty)}
-                icon={<TrendingUpIcon class="w-4 h-4" />}
-              />
-              <DetailRow
-                label="Growth Rate"
-                value={getGrowthRateLabel(plant.plantDetails.growthRate!)}
-                icon={<TrendingUpIcon class="w-4 h-4" />}
-              />
-              <DetailRow
-                label="Mature Height"
-                value={plant.plantDetails.matureHeight}
-                icon={<RulerIcon class="w-4 h-4" />}
-              />
-              <DetailRow
-                label="Mature Spread"
-                value={plant.plantDetails.matureSpread}
-                icon={<RulerIcon class="w-4 h-4" />}
-              />
-            </SectionCard>
+                {/* Left Column (2/3) */}
+                <div class="lg:col-span-2 space-y-6">
 
-            {/* ─── Variant Preview ─── */}
-            <SectionCard
-              title={`Variants (${plant.variants.length})`}
-              icon={<CubeIcon class="w-4 h-4 text-gray-400" />}
-              action={
-                <a href={`/app/seller/products/plants/${plant.id}/variants`} class="text-xs text-forest-600 dark:text-forest-400 hover:underline">
-                  View All
-                </a>
-              }
-            >
-              <div class="space-y-3">
-                <For each={plant.variants.slice(0, 2)}>
-                  {(variant) => {
-                    const inv = getInventoryStatus(variant.inventoryCount);
-                    return (
-                      <div class="border border-cream-200 dark:border-forest-700 rounded-lg p-4 hover:bg-cream-50 dark:hover:bg-forest-700/30 transition-colors">
-                        <div class="flex items-start justify-between mb-2">
-                          <div>
-                            <p class="text-sm font-semibold text-forest-800 dark:text-cream-50">{variant.title}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 font-mono">{variant.sku}</p>
-                          </div>
-                          <Badge variant={inv.variant} class="text-xs">
-                            {inv.label}
-                          </Badge>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2 mb-2">
-                          <div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Price</p>
-                            <p class="text-sm font-bold text-forest-800 dark:text-cream-50">{formatPrice(variant.price)}</p>
-                          </div>
-                          <div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Stock</p>
-                            <p class="text-sm font-bold text-forest-800 dark:text-cream-50">{variant.inventoryCount}</p>
-                          </div>
-                        </div>
-                        <div class="flex flex-wrap gap-1.5 pt-2 border-t border-cream-200 dark:border-forest-700">
-                          <span class="text-xs px-2 py-0.5 bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 rounded-full">
-                            {getGrowthStageLabel(variant.attributes.growthStage)}
-                          </span>
-                          <span class="text-xs px-2 py-0.5 bg-cream-50 dark:bg-cream-900/30 text-cream-700 dark:text-cream-300 rounded-full">
-                            {getPlantFormLabel(variant.attributes.plantForm)}
-                          </span>
-                          <span class="text-xs px-2 py-0.5 bg-terracotta-50 dark:bg-terracotta-900/30 text-terracotta-700 dark:text-terracotta-300 rounded-full">
-                            {getVariegationLabel(variant.attributes.variegation)}
-                          </span>
-                          {variant.images.length > 0 && (
-                            <span class="text-xs px-2 py-0.5 bg-sage-50 dark:bg-sage-900/30 text-sage-700 dark:text-sage-300 rounded-full flex items-center gap-1">
-                              <ImageIcon class="w-3 h-3" />
-                              {variant.images.length}
-                            </span>
-                          )}
+                  {/* ─── Classification & Details ─── */}
+                  <SectionCard
+                    title="Classification & Details"
+                    icon={<SproutIcon class="w-4 h-4 text-gray-400" />}
+                  >
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8">
+                      <div>
+                        <DetailRow
+                          label="Category"
+                          value={categoryName()}
+                          icon={<FolderIcon class="w-4 h-4" />}
+                        />
+                        <DetailRow
+                          label="Scientific Name"
+                          value={pd?.scientificName ?? "—"}
+                          icon={<InfoCircleIcon class="w-4 h-4" />}
+                        />
+                        <DetailRow
+                          label="Common Names (EN)"
+                          value={plantDetailsEn()?.commonNames ?? "—"}
+                          icon={<ChatBubbleLeftRightIcon class="w-4 h-4" />}
+                        />
+                        <DetailRow
+                          label="Origin"
+                          value={plantDetailsEn()?.origin ?? "—"}
+                          icon={<GlobeAltIcon class="w-4 h-4" />}
+                        />
+                      </div>
+                      <div>
+                        <DetailRow
+                          label="Soil Type"
+                          value={plantDetailsEn()?.soilType ?? "—"}
+                          icon={<BeakerIcon class="w-4 h-4" />}
+                        />
+                        <DetailRow
+                          label="Mature Height"
+                          value={pd?.matureHeight ?? "—"}
+                          icon={<RulerIcon class="w-4 h-4" />}
+                        />
+                        <DetailRow
+                          label="Mature Spread"
+                          value={pd?.matureSpread ?? "—"}
+                          icon={<RulerIcon class="w-4 h-4" />}
+                        />
+                        <DetailRow
+                          label="Toxicity"
+                          value={plantDetailsEn()?.toxicityInfo ?? "—"}
+                          icon={<ExclamationCircleIcon class="w-4 h-4" />}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Tags */}
+                    <Show when={tagNames().length > 0}>
+                      <div class="mt-4 pt-4 border-t border-cream-100 dark:border-forest-700/50">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Tags</p>
+                        <div class="flex flex-wrap gap-2">
+                          <For each={tagNames()}>
+                            {(tag) => (
+                              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 rounded-full text-xs font-medium border border-forest-200 dark:border-forest-700">
+                                <TagIcon class="w-3 h-3" />
+                                {tag.name}
+                              </span>
+                            )}
+                          </For>
                         </div>
                       </div>
-                    );
-                  }}
-                </For>
-              </div>
-            </SectionCard>
+                    </Show>
+                  </SectionCard>
 
-            {/* ─── Timestamps ─── */}
-            <SectionCard
-              title="Details"
-              icon={<ClockIcon class="w-4 h-4 text-gray-400" />}
-            >
-              <DetailRow
-                label="Created"
-                value={formatDateTime(plant.createdAt)}
-                icon={<CalendarIcon class="w-4 h-4" />}
-              />
-              <DetailRow
-                label="Last Updated"
-                value={formatDateTime(plant.updatedAt)}
-                icon={<ClockIcon class="w-4 h-4" />}
-              />
-              <DetailRow
-                label="Plant ID"
-                value={plant.id}
-                icon={<CheckBadgeIcon class="w-4 h-4" />}
-              />
-            </SectionCard>
+                  {/* ─── Care Requirements (Cards) ─── */}
+                  <Show when={pd}>
+                    <SectionCard
+                      title="Care Requirements"
+                      icon={<CloudIcon class="w-4 h-4 text-gray-400" />}
+                    >
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <Show when={pd!.lightRequirement}>
+                          {(light) => (
+                            <CareCard
+                              icon={<SunIcon class="w-5 h-5 text-forest-600 dark:text-forest-400" />}
+                              title="Light"
+                              badge={{
+                                text: getLightLabel(light() as any),
+                                ...getLightColor(light() as any),
+                              }}
+                              description="Bright, indirect light. Avoid direct sunlight which can scorch variegated leaves."
+                            />
+                          )}
+                        </Show>
+                        <Show when={pd!.wateringFrequency}>
+                          {(watering) => (
+                            <CareCard
+                              icon={<DropletIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" />}
+                              title="Watering"
+                              badge={{
+                                text: getWateringLabel(watering() as any),
+                                ...getWateringColor(watering() as any),
+                              }}
+                              description="Water when top 2-3 inches of soil are dry. Ensure thorough drainage."
+                            />
+                          )}
+                        </Show>
+                        <Show when={pd!.humidityLevel}>
+                          {(humidity) => (
+                            <CareCard
+                              icon={<CloudIcon class="w-5 h-5 text-sky-600 dark:text-sky-400" />}
+                              title="Humidity"
+                              badge={{
+                                text: getHumidityLabel(humidity() as any),
+                                ...getHumidityColor(humidity() as any),
+                              }}
+                              description="Maintain optimal humidity for growth."
+                            />
+                          )}
+                        </Show>
+                        <Show when={pd!.temperatureRange}>
+                          {(temp) => (
+                            <CareCard
+                              icon={<ThermometerIcon class="w-5 h-5 text-red-600 dark:text-red-400" />}
+                              title="Temperature"
+                              badge={{
+                                text: temp(),
+                                bg: "bg-red-100 dark:bg-red-900/40",
+                                textColor: "text-red-700 dark:text-red-300",
+                              }}
+                              description="Maintain temperature within range. Protect from cold drafts."
+                            />
+                          )}
+                        </Show>
+                        <Show when={pd!.careDifficulty}>
+                          {(difficulty) => (
+                            <CareCard
+                              icon={<SparklesIcon class="w-5 h-5 text-cream-600 dark:text-cream-400" />}
+                              title="Care Difficulty"
+                              badge={{
+                                text: getDifficultyLabel(difficulty() as any),
+                                ...getDifficultyColor(difficulty() as any),
+                              }}
+                              description="Care level required for this plant."
+                            />
+                          )}
+                        </Show>
+                        <Show when={pd!.growthRate}>
+                          {(growth) => (
+                            <CareCard
+                              icon={<SproutIcon class="w-5 h-5 text-sage-600 dark:text-sage-400" />}
+                              title="Growth Rate"
+                              badge={{
+                                text: getGrowthRateLabel(growth() as any),
+                                bg: "bg-sage-100 dark:bg-sage-900/40",
+                                textColor: "text-sage-700 dark:text-sage-300",
+                              }}
+                              description="Expected growth rate under optimal conditions."
+                            />
+                          )}
+                        </Show>
+                      </div>
+                    </SectionCard>
+                  </Show>
 
-            {/* ─── Quick Actions ─── */}
-            <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm">
-              <div class="px-6 py-4 border-b border-cream-200 dark:border-forest-700">
-                <h3 class="text-base font-semibold text-forest-800 dark:text-cream-50">Quick Actions</h3>
-              </div>
-              <div class="p-4 space-y-1">
-                <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors text-gray-700 dark:text-gray-300">
-                  <PencilIcon class="w-4 h-4" />
-                  Edit Plant
-                </button>
-                <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors text-gray-700 dark:text-gray-300">
-                  <ArchiveIcon class="w-4 h-4" />
-                  Archive Plant
-                </button>
-                <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors text-gray-700 dark:text-gray-300">
-                  <ArrowPathIcon class="w-4 h-4" />
-                  Duplicate Plant
-                </button>
-                <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-terracotta-600 dark:text-terracotta-400">
-                  <TrashIcon class="w-4 h-4" />
-                  Delete Plant
-                </button>
+                  {/* ─── Care Instructions ─── */}
+                  <Show when={careInstructions()}>
+                    {(ci) => (
+                      <SectionCard
+                        title="Care Instructions"
+                        icon={<ClockIcon class="w-4 h-4 text-gray-400" />}
+                      >
+                        <div class="space-y-4">
+                          <InstructionRow
+                            icon={<SunIcon class="w-5 h-5" />}
+                            iconColor="text-cream-600 dark:text-cream-400"
+                            bgColor="bg-cream-50 dark:bg-forest-900/30"
+                            title="Light Care"
+                            description={ci().lightInstructions}
+                          />
+                          <InstructionRow
+                            icon={<DropletIcon class="w-5 h-5" />}
+                            iconColor="text-blue-600 dark:text-blue-400"
+                            bgColor="bg-blue-50 dark:bg-blue-900/20"
+                            title="Watering Guide"
+                            description={ci().wateringInstructions}
+                          />
+                          <InstructionRow
+                            icon={<CloudIcon class="w-5 h-5" />}
+                            iconColor="text-sky-600 dark:text-sky-400"
+                            bgColor="bg-sky-50 dark:bg-sky-900/20"
+                            title="Humidity Care"
+                            description={ci().humidityInstructions}
+                          />
+                          <InstructionRow
+                            icon={<BeakerIcon class="w-5 h-5" />}
+                            iconColor="text-sage-600 dark:text-sage-400"
+                            bgColor="bg-sage-50 dark:bg-sage-900/20"
+                            title="Fertilizer Schedule"
+                            description={ci().fertilizerSchedule}
+                          />
+                          <InstructionRow
+                            icon={<SproutIcon class="w-5 h-5" />}
+                            iconColor="text-forest-600 dark:text-forest-400"
+                            bgColor="bg-forest-50 dark:bg-forest-900/20"
+                            title="Repotting"
+                            description={ci().repottingFrequency}
+                          />
+                          <InstructionRow
+                            icon={<ScissorsIcon class="w-5 h-5" />}
+                            iconColor="text-purple-600 dark:text-purple-400"
+                            bgColor="bg-purple-50 dark:bg-purple-900/20"
+                            title="Pruning"
+                            description={ci().pruningNotes}
+                          />
+                          <InstructionRow
+                            icon={<ExclamationCircleIcon class="w-5 h-5" />}
+                            iconColor="text-red-600 dark:text-red-400"
+                            bgColor="bg-red-50 dark:bg-red-900/20"
+                            title="Common Problems"
+                            description={ci().commonProblems}
+                          />
+                          <InstructionRow
+                            icon={<CalendarIcon class="w-5 h-5" />}
+                            iconColor="text-amber-600 dark:text-amber-400"
+                            bgColor="bg-amber-50 dark:bg-amber-900/20"
+                            title="Seasonal Care"
+                            description={ci().seasonalCare}
+                          />
+                        </div>
+                      </SectionCard>
+                    )}
+                  </Show>
+
+                  {/* ─── Pricing & Inventory ─── */}
+                  <SectionCard
+                    title="Pricing & Inventory"
+                    icon={<DollarSignIcon class="w-4 h-4 text-gray-400" />}
+                  >
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Price Range</p>
+                        <p class="text-2xl font-bold text-forest-800 dark:text-cream-50 mt-1">
+                          {priceRange()}
+                        </p>
+                      </div>
+                      <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Total Inventory</p>
+                        <div class="flex items-center gap-2 mt-1">
+                          <p class="text-2xl font-bold text-forest-800 dark:text-cream-50">
+                            {totalInventory()}
+                          </p>
+                          <Badge variant={inventory.variant} class="text-xs">
+                            {inventory.label}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Variants</p>
+                        <p class="text-2xl font-bold text-forest-800 dark:text-cream-50 mt-1">
+                          {plantData().variants.length}
+                        </p>
+                      </div>
+                    </div>
+                  </SectionCard>
+                </div>
+
+                {/* Right Column (1/3) */}
+                <div class="space-y-6">
+
+                  {/* ─── Care Profile ─── */}
+                  <Show when={pd}>
+                    <SectionCard
+                      title="Care Profile"
+                      icon={<SunIcon class="w-4 h-4 text-gray-400" />}
+                    >
+                      <DetailRow
+                        label="Light"
+                        value={pd!.lightRequirement ? getLightLabel(pd!.lightRequirement as any) : "—"}
+                        icon={<SunIcon class="w-4 h-4" />}
+                      />
+                      <DetailRow
+                        label="Watering"
+                        value={pd!.wateringFrequency ? getWateringLabel(pd!.wateringFrequency as any) : "—"}
+                        icon={<DropletIcon class="w-4 h-4" />}
+                      />
+                      <DetailRow
+                        label="Humidity"
+                        value={pd!.humidityLevel ? getHumidityLabel(pd!.humidityLevel as any) : "—"}
+                        icon={<MoonIcon class="w-4 h-4" />}
+                      />
+                      <DetailRow
+                        label="Temperature"
+                        value={pd!.temperatureRange ?? "—"}
+                        icon={<ThermometerIcon class="w-4 h-4" />}
+                      />
+                      <DetailRow
+                        label="Difficulty"
+                        value={pd!.careDifficulty ? getDifficultyLabel(pd!.careDifficulty as any) : "—"}
+                        icon={<TrendingUpIcon class="w-4 h-4" />}
+                      />
+                      <DetailRow
+                        label="Growth Rate"
+                        value={pd!.growthRate ? getGrowthRateLabel(pd!.growthRate as any) : "—"}
+                        icon={<TrendingUpIcon class="w-4 h-4" />}
+                      />
+                      <DetailRow
+                        label="Mature Height"
+                        value={pd!.matureHeight ?? "—"}
+                        icon={<RulerIcon class="w-4 h-4" />}
+                      />
+                      <DetailRow
+                        label="Mature Spread"
+                        value={pd!.matureSpread ?? "—"}
+                        icon={<RulerIcon class="w-4 h-4" />}
+                      />
+                    </SectionCard>
+                  </Show>
+
+                  {/* ─── Variant Preview ─── */}
+                  <Show when={plantData().variants.length > 0}>
+                    <SectionCard
+                      title={`Variants (${plantData().variants.length})`}
+                      icon={<CubeIcon class="w-4 h-4 text-gray-400" />}
+                      action={
+                        <a href={`/app/seller/products/plants/${plantData().id}/variants`} class="text-xs text-forest-600 dark:text-forest-400 hover:underline">
+                          View All
+                        </a>
+                      }
+                    >
+                      <div class="space-y-3">
+                        <For each={plantData().variants.slice(0, 2)}>
+                          {(variant) => {
+                            const inv = getInventoryStatus(variant.inventoryCount);
+                            const title = variant.translations?.find(t => t.locale === "en")?.title
+                              ?? variant.translations?.[0]?.title ?? `Variant ${variant.id}`;
+                            const attrs = variant.plantAttributes;
+
+                            return (
+                              <div class="border border-cream-200 dark:border-forest-700 rounded-lg p-4 hover:bg-cream-50 dark:hover:bg-forest-700/30 transition-colors">
+                                <div class="flex items-start justify-between mb-2">
+                                  <div>
+                                    <p class="text-sm font-semibold text-forest-800 dark:text-cream-50">{title}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 font-mono">{variant.sku ?? "—"}</p>
+                                  </div>
+                                  <Badge variant={inv.variant} class="text-xs">
+                                    {inv.label}
+                                  </Badge>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 mb-2">
+                                  <div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Price</p>
+                                    <p class="text-sm font-bold text-forest-800 dark:text-cream-50">{formatPrice(variant.price)}</p>
+                                  </div>
+                                  <div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Stock</p>
+                                    <p class="text-sm font-bold text-forest-800 dark:text-cream-50">{variant.inventoryCount}</p>
+                                  </div>
+                                </div>
+                                <Show when={attrs}>
+                                  <div class="flex flex-wrap gap-1.5 pt-2 border-t border-cream-200 dark:border-forest-700">
+                                    <span class="text-xs px-2 py-0.5 bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 rounded-full">
+                                      {getGrowthStageLabel(attrs!.growthStage as any)}
+                                    </span>
+                                    <span class="text-xs px-2 py-0.5 bg-cream-50 dark:bg-cream-900/30 text-cream-700 dark:text-cream-300 rounded-full">
+                                      {getPlantFormLabel(attrs!.plantForm as any)}
+                                    </span>
+                                    <span class="text-xs px-2 py-0.5 bg-terracotta-50 dark:bg-terracotta-900/30 text-terracotta-700 dark:text-terracotta-300 rounded-full">
+                                      {getVariegationLabel(attrs!.variegation as any)}
+                                    </span>
+                                    <Show when={variant.media.length > 0}>
+                                      <span class="text-xs px-2 py-0.5 bg-sage-50 dark:bg-sage-900/30 text-sage-700 dark:text-sage-300 rounded-full flex items-center gap-1">
+                                        <ImageIcon class="w-3 h-3" />
+                                        {variant.media.length}
+                                      </span>
+                                    </Show>
+                                  </div>
+                                </Show>
+                              </div>
+                            );
+                          }}
+                        </For>
+                      </div>
+                    </SectionCard>
+                  </Show>
+
+                  {/* ─── Timestamps ─── */}
+                  <SectionCard
+                    title="Details"
+                    icon={<ClockIcon class="w-4 h-4 text-gray-400" />}
+                  >
+                    <DetailRow
+                      label="Created"
+                      value={formatDateTime(plantData().createdAt)}
+                      icon={<CalendarIcon class="w-4 h-4" />}
+                    />
+                    <DetailRow
+                      label="Last Updated"
+                      value={formatDateTime(plantData().updatedAt)}
+                      icon={<ClockIcon class="w-4 h-4" />}
+                    />
+                    <DetailRow
+                      label="Plant ID"
+                      value={plantData().id}
+                      icon={<CheckBadgeIcon class="w-4 h-4" />}
+                    />
+                  </SectionCard>
+
+                  {/* ─── Quick Actions ─── */}
+                  <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm">
+                    <div class="px-6 py-4 border-b border-cream-200 dark:border-forest-700">
+                      <h3 class="text-base font-semibold text-forest-800 dark:text-cream-50">Quick Actions</h3>
+                    </div>
+                    <div class="p-4 space-y-1">
+                      <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors text-gray-700 dark:text-gray-300">
+                        <PencilIcon class="w-4 h-4" />
+                        Edit Plant
+                      </button>
+                      <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors text-gray-700 dark:text-gray-300">
+                        <ArchiveIcon class="w-4 h-4" />
+                        Archive Plant
+                      </button>
+                      <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors text-gray-700 dark:text-gray-300">
+                        <ArrowPathIcon class="w-4 h-4" />
+                        Duplicate Plant
+                      </button>
+                      <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-terracotta-600 dark:text-terracotta-400">
+                        <TrashIcon class="w-4 h-4" />
+                        Delete Plant
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
+          );
+        }}
+      </Show>
     </ErrorBoundary>
   );
 }

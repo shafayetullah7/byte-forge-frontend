@@ -1,4 +1,4 @@
-import { query } from "@solidjs/router";
+import { query, revalidate } from "@solidjs/router";
 import { fetcher } from "../../api-client";
 import type {
   PlantListItem,
@@ -6,6 +6,7 @@ import type {
   PlantFilter,
   CreatePlantRequest,
   CreatePlantResponse,
+  PlantDetail,
 } from "../../types/seller.types";
 
 /**
@@ -38,14 +39,20 @@ export const getPlants = query(
 );
 
 /**
- * Get plant by ID
+ * Get plant by ID (full detail with translations, plant details, care instructions, variants)
  */
 export const getPlantById = query(
   async (id: string) => {
-    return fetcher<PlantListItem>(`/api/v1/user/seller/plants/${id}`);
+    return fetcher<PlantDetail>(`/api/v1/user/seller/plants/${id}`);
   },
   "seller-plant-detail"
 );
+
+/**
+ * Invalidate/revalidate a specific plant's cached data
+ */
+export const invalidatePlant = (id: string) =>
+  revalidate(getPlantById.keyFor(id));
 
 /**
  * Create a new plant
