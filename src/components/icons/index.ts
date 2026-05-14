@@ -59,6 +59,13 @@ export { StarIcon } from "./StarIcon";
 export { ArrowUpIcon } from "./ArrowUpIcon";
 export { ArrowDownIcon } from "./ArrowDownIcon";
 export { AlertTriangleIcon } from "./AlertTriangleIcon";
+export { BeakerIcon } from "./BeakerIcon";
+export { CloudIcon } from "./CloudIcon";
+export { ImageIcon } from "./ImageIcon";
+export { LeafIcon } from "./LeafIcon";
+export { RulerIcon } from "./RulerIcon";
+export { SparklesIcon } from "./SparklesIcon";
+export { SproutIcon } from "./SproutIcon";
 
 export * from './TagIcon';
 export * from './ArrowsRightLeftIcon';

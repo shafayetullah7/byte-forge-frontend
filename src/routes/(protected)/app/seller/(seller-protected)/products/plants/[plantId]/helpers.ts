@@ -98,6 +98,16 @@ export function getLightLabel(value: LightRequirement): string {
   return labels[value];
 }
 
+export function getLightColor(value: LightRequirement): { bg: string; textColor: string } {
+  const colors: Record<LightRequirement, { bg: string; textColor: string }> = {
+    [LIGHT_REQUIREMENT.LOW]: { bg: "bg-sage-100 dark:bg-sage-900/40", textColor: "text-sage-700 dark:text-sage-300" },
+    [LIGHT_REQUIREMENT.MEDIUM]: { bg: "bg-cream-100 dark:bg-cream-900/40", textColor: "text-cream-700 dark:text-cream-300" },
+    [LIGHT_REQUIREMENT.BRIGHT_INDIRECT]: { bg: "bg-forest-100 dark:bg-forest-900/40", textColor: "text-forest-700 dark:text-forest-300" },
+    [LIGHT_REQUIREMENT.DIRECT]: { bg: "bg-terracotta-100 dark:bg-terracotta-900/40", textColor: "text-terracotta-700 dark:text-terracotta-300" },
+  };
+  return colors[value];
+}
+
 export function getWateringLabel(value: WateringFrequency): string {
   const labels: Record<WateringFrequency, string> = {
     [WATERING_FREQUENCY.DAILY]: "Daily",
@@ -106,6 +116,16 @@ export function getWateringLabel(value: WateringFrequency): string {
     [WATERING_FREQUENCY.MONTHLY]: "Monthly",
   };
   return labels[value];
+}
+
+export function getWateringColor(value: WateringFrequency): { bg: string; textColor: string } {
+  const colors: Record<WateringFrequency, { bg: string; textColor: string }> = {
+    [WATERING_FREQUENCY.DAILY]: { bg: "bg-blue-100 dark:bg-blue-900/40", textColor: "text-blue-700 dark:text-blue-300" },
+    [WATERING_FREQUENCY.WEEKLY]: { bg: "bg-sky-100 dark:bg-sky-900/40", textColor: "text-sky-700 dark:text-sky-300" },
+    [WATERING_FREQUENCY.BI_WEEKLY]: { bg: "bg-cream-100 dark:bg-cream-900/40", textColor: "text-cream-700 dark:text-cream-300" },
+    [WATERING_FREQUENCY.MONTHLY]: { bg: "bg-sage-100 dark:bg-sage-900/40", textColor: "text-sage-700 dark:text-sage-300" },
+  };
+  return colors[value];
 }
 
 export function getHumidityLabel(value: HumidityLevel): string {
@@ -117,6 +137,15 @@ export function getHumidityLabel(value: HumidityLevel): string {
   return labels[value];
 }
 
+export function getHumidityColor(value: HumidityLevel): { bg: string; textColor: string } {
+  const colors: Record<HumidityLevel, { bg: string; textColor: string }> = {
+    [HUMIDITY_LEVEL.LOW]: { bg: "bg-cream-100 dark:bg-cream-900/40", textColor: "text-cream-700 dark:text-cream-300" },
+    [HUMIDITY_LEVEL.MEDIUM]: { bg: "bg-forest-100 dark:bg-forest-900/40", textColor: "text-forest-700 dark:text-forest-300" },
+    [HUMIDITY_LEVEL.HIGH]: { bg: "bg-sky-100 dark:bg-sky-900/40", textColor: "text-sky-700 dark:text-sky-300" },
+  };
+  return colors[value];
+}
+
 export function getDifficultyLabel(value: CareDifficulty): string {
   const labels: Record<CareDifficulty, string> = {
     [CARE_DIFFICULTY.BEGINNER]: "Beginner",
@@ -124,6 +153,15 @@ export function getDifficultyLabel(value: CareDifficulty): string {
     [CARE_DIFFICULTY.EXPERT]: "Expert",
   };
   return labels[value];
+}
+
+export function getDifficultyColor(value: CareDifficulty): { bg: string; textColor: string } {
+  const colors: Record<CareDifficulty, { bg: string; textColor: string }> = {
+    [CARE_DIFFICULTY.BEGINNER]: { bg: "bg-forest-100 dark:bg-forest-900/40", textColor: "text-forest-700 dark:text-forest-300" },
+    [CARE_DIFFICULTY.INTERMEDIATE]: { bg: "bg-cream-100 dark:bg-cream-900/40", textColor: "text-cream-700 dark:text-cream-300" },
+    [CARE_DIFFICULTY.EXPERT]: { bg: "bg-terracotta-100 dark:bg-terracotta-900/40", textColor: "text-terracotta-700 dark:text-terracotta-300" },
+  };
+  return colors[value];
 }
 
 export function getGrowthRateLabel(value: GrowthRate): string {

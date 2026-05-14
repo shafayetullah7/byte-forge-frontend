@@ -1,8 +1,16 @@
 import { For } from "solid-js";
 import { ErrorBoundary } from "solid-js";
 import Badge from "~/components/ui/Badge";
-import { PencilIcon, PackageIcon } from "~/components/icons";
-import { formatPrice, getGrowthStageLabel, getPlantFormLabel, getVariegationLabel, getLeafDensityLabel, getPropagationLabel, getContainerTypeLabel } from "../helpers";
+import { PencilIcon, PackageIcon, ImageIcon } from "~/components/icons";
+import {
+  formatPrice,
+  getGrowthStageLabel,
+  getPlantFormLabel,
+  getVariegationLabel,
+  getLeafDensityLabel,
+  getPropagationLabel,
+  getContainerTypeLabel,
+} from "../helpers";
 import { DetailRow } from "../components/DetailRow";
 import { MOCK_PLANT } from "../mock-data";
 
@@ -24,7 +32,7 @@ export default function VariantsRoute() {
               <div class="px-6 py-4 border-b border-cream-200 dark:border-forest-700 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                   <h3 class="text-base font-semibold text-forest-800 dark:text-cream-50">
-                    Variant {index() + 1}
+                    {variant.title}
                   </h3>
                   {variant.isBase && (
                     <Badge variant="forest" class="text-xs">Base</Badge>
@@ -76,20 +84,33 @@ export default function VariantsRoute() {
                     <DetailRow label="Container" value={`${getContainerTypeLabel(variant.attributes.containerType)} (${variant.attributes.containerSize})`} />
                   </div>
                 </div>
+
+                {/* Media Thumbnails */}
                 <div class="mt-6 pt-4 border-t border-cream-100 dark:border-forest-700/50">
-                  <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Images ({variant.images.length})</p>
+                  <div class="flex items-center gap-2 mb-3">
+                    <ImageIcon class="w-4 h-4 text-gray-400" />
+                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Images ({variant.images.length})</p>
+                  </div>
                   {variant.images.length > 0 ? (
                     <div class="flex gap-3">
                       <For each={variant.images}>
                         {(img) => (
-                          <div class="w-20 h-20 rounded-lg bg-cream-100 dark:bg-forest-700 border border-cream-200 dark:border-forest-600 flex items-center justify-center">
-                            <PackageIcon class="w-6 h-6 text-gray-400" />
+                          <div class="w-20 h-20 rounded-lg overflow-hidden border border-cream-200 dark:border-forest-600">
+                            <img
+                              src={img.url || ""}
+                              alt={img.alt}
+                              class="w-full h-full object-cover"
+                            />
                           </div>
                         )}
                       </For>
                     </div>
                   ) : (
-                    <p class="text-sm text-gray-400 dark:text-gray-500">No images uploaded for this variant.</p>
+                    <div class="flex gap-3">
+                      <div class="w-20 h-20 rounded-lg bg-cream-100 dark:bg-forest-700 border border-cream-200 dark:border-forest-600 flex items-center justify-center">
+                        <PackageIcon class="w-6 h-6 text-gray-400" />
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>

@@ -20,7 +20,7 @@ export const MOCK_PLANT = {
   status: PRODUCT_STATUS.ACTIVE,
   thumbnail: {
     id: "media-001",
-    url: null as string | null,
+    url: "https://images.unsplash.com/photo-1614594975575-559a29a2e4a8?w=400&h=400&fit=crop",
   },
   name: "Monstera Deliciosa Albo",
   shortDescription: "Stunning variegated Monstera with white-marbled leaves. A true collector's piece.",
@@ -30,12 +30,14 @@ export const MOCK_PLANT = {
     id: "cat-001",
     slug: "indoor-plants",
     name: "Indoor Plants",
+    description: "Tropical houseplants that thrive in indoor environments",
   },
   tags: [
     { id: "tag-001", slug: "variegated", name: "Variegated" },
     { id: "tag-002", slug: "rare", name: "Rare" },
     { id: "tag-003", slug: "collector-item", name: "Collector's Item" },
     { id: "tag-004", slug: "indoor", name: "Indoor" },
+    { id: "tag-005", slug: "pet-toxic", name: "Pet-Toxic" },
   ],
   price: "4500.00",
   inventoryCount: 12,
@@ -77,6 +79,8 @@ export const MOCK_PLANT = {
       lowStockThreshold: 3,
       isBase: true,
       isActive: true,
+      title: "Mature Albo (15cm pot)",
+      titleBn: "পূর্ণাঙ্গ আলবো (১৫সেমি গমলা)",
       attributes: {
         growthStage: GROWTH_STAGE.MATURE,
         plantForm: PLANT_FORM.UPRIGHT,
@@ -90,9 +94,9 @@ export const MOCK_PLANT = {
         containerSize: "15cm",
       },
       images: [
-        { id: "img-001", url: null, alt: "Front view" },
-        { id: "img-002", url: null, alt: "Side view" },
-        { id: "img-003", url: null, alt: "Leaf detail" },
+        { id: "img-001", url: "https://images.unsplash.com/photo-1614594975575-559a29a2e4a8?w=200&h=200&fit=crop", alt: "Front view" },
+        { id: "img-002", url: "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=200&h=200&fit=crop", alt: "Side view" },
+        { id: "img-003", url: "https://images.unsplash.com/photo-1614594975575-559a29a2e4a8?w=200&h=200&fit=crop", alt: "Leaf detail" },
       ],
     },
     {
@@ -104,6 +108,8 @@ export const MOCK_PLANT = {
       lowStockThreshold: 2,
       isBase: false,
       isActive: true,
+      title: "Juvenile Albo (10cm pot)",
+      titleBn: "কিশোর আলবো (১০সেমি গমলা)",
       attributes: {
         growthStage: GROWTH_STAGE.JUVENILE,
         plantForm: PLANT_FORM.UPRIGHT,
@@ -116,7 +122,7 @@ export const MOCK_PLANT = {
         containerType: CONTAINER_TYPE.NURSERY_POT,
         containerSize: "10cm",
       },
-      images: [] as { id: string; url: null; alt: string }[],
+      images: [] as { id: string; url: string | null; alt: string }[],
     },
   ],
 

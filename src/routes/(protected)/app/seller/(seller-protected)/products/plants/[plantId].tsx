@@ -1,6 +1,5 @@
 import { ErrorBoundary, Suspense, Show, For } from "solid-js";
 import { A, useParams, useLocation, type RouteSectionProps } from "@solidjs/router";
-import { useI18n } from "~/i18n";
 import Badge from "~/components/ui/Badge";
 import {
   ChevronLeftIcon,
@@ -8,33 +7,22 @@ import {
   ShareIcon,
   DotsVerticalIcon,
   ChevronRightIcon,
-  PackageIcon,
-  EyeIcon,
-  ShoppingBagIcon,
-  DollarSignIcon,
-  StarIcon,
   ExclamationCircleIcon,
 } from "~/components/icons";
-import { getStatusVariant, formatPrice, getStatusLabel } from "./[plantId]/helpers";
-import { StatCard } from "./[plantId]/components/StatCard";
-import { MOCK_PLANT, MOCK_STATS } from "./[plantId]/mock-data";
+import { getStatusVariant, getStatusLabel } from "./[plantId]/helpers";
+import { MOCK_PLANT } from "./[plantId]/mock-data";
 
 const tabs = [
   { id: "overview", label: "Overview", path: "" },
   { id: "variants", label: "Variants", path: "variants" },
   { id: "care", label: "Care Guide", path: "care" },
-  { id: "orders", label: "Orders", path: "orders" },
-  { id: "reviews", label: "Reviews", path: "reviews" },
-  { id: "activity", label: "Activity", path: "activity" },
 ];
 
 export default function PlantDetailLayout(props: RouteSectionProps) {
-  const { t } = useI18n();
   const params = useParams();
   const location = useLocation();
 
   const plant = MOCK_PLANT;
-  const stats = MOCK_STATS;
 
   const isActiveTab = (path: string) => {
     if (path === "") {
@@ -140,40 +128,6 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
                       </button>
                     </div>
                   </div>
-                </div>
-
-                {/* Quick Stats */}
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                  <StatCard
-                    icon={<EyeIcon class="w-5 h-5 text-forest-600 dark:text-forest-400" />}
-                    label="Total Views"
-                    value={stats.totalViews.toLocaleString()}
-                    change={"+8%"}
-                    changeType="positive"
-                    color="forest"
-                  />
-                  <StatCard
-                    icon={<ShoppingBagIcon class="w-5 h-5 text-cream-600 dark:text-cream-400" />}
-                    label="Total Orders"
-                    value={stats.totalOrders}
-                    change={"+15%"}
-                    changeType="positive"
-                    color="cream"
-                  />
-                  <StatCard
-                    icon={<DollarSignIcon class="w-5 h-5 text-terracotta-600 dark:text-terracotta-400" />}
-                    label="Total Revenue"
-                    value={formatPrice(stats.totalRevenue)}
-                    change={"+31%"}
-                    changeType="positive"
-                    color="terracotta"
-                  />
-                  <StatCard
-                    icon={<StarIcon class="w-5 h-5 text-cream-500" />}
-                    label="Avg. Rating"
-                    value={`${stats.avgRating} (${stats.totalReviews} reviews)`}
-                    color="sage"
-                  />
                 </div>
 
                 {/* Tab Navigation */}
