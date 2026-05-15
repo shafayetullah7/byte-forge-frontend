@@ -135,7 +135,7 @@ export function TagMultiSelect(props: TagMultiSelectProps) {
                                   : "border-gray-300 dark:border-gray-600"
                               }`}
                             >
-                              {isSelected && <CheckIcon class="w-3 h-3 text-white" />}
+                              <Show when={isSelected}><CheckIcon class="w-3 h-3 text-white" /></Show>
                             </div>
                             {tag.name}
                           </button>

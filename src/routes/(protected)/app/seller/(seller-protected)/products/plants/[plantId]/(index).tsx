@@ -191,12 +191,12 @@ export default function OverviewRoute() {
                             plantData().plantDetails?.category?.translations?.find(t => t.locale === "en")?.name
                               ?? plantData().plantDetails?.category?.translations?.[0]?.name ?? "—"
                           }
-                          icon={<FolderIcon class="w-4 h-4" />}
+                          icon={() => <FolderIcon class="w-4 h-4" />}
                         />
                         <DetailRow
                           label="Scientific Name"
                           value={plantData().plantDetails?.scientificName ?? "—"}
-                          icon={<InfoCircleIcon class="w-4 h-4" />}
+                          icon={() => <InfoCircleIcon class="w-4 h-4" />}
                         />
                         <DetailRow
                           label="Common Names (EN)"
@@ -204,7 +204,7 @@ export default function OverviewRoute() {
                             plantData().plantDetails?.translations?.find(t => t.locale === "en")?.commonNames
                               ?? plantData().plantDetails?.translations?.[0]?.commonNames ?? "—"
                           }
-                          icon={<ChatBubbleLeftRightIcon class="w-4 h-4" />}
+                          icon={() => <ChatBubbleLeftRightIcon class="w-4 h-4" />}
                         />
                         <DetailRow
                           label="Origin"
@@ -212,7 +212,7 @@ export default function OverviewRoute() {
                             plantData().plantDetails?.translations?.find(t => t.locale === "en")?.origin
                               ?? plantData().plantDetails?.translations?.[0]?.origin ?? "—"
                           }
-                          icon={<GlobeAltIcon class="w-4 h-4" />}
+                          icon={() => <GlobeAltIcon class="w-4 h-4" />}
                         />
                       </div>
                       <div>
@@ -222,17 +222,17 @@ export default function OverviewRoute() {
                             plantData().plantDetails?.translations?.find(t => t.locale === "en")?.soilType
                               ?? plantData().plantDetails?.translations?.[0]?.soilType ?? "—"
                           }
-                          icon={<BeakerIcon class="w-4 h-4" />}
+                          icon={() => <BeakerIcon class="w-4 h-4" />}
                         />
                         <DetailRow
                           label="Mature Height"
                           value={plantData().plantDetails?.matureHeight ?? "—"}
-                          icon={<RulerIcon class="w-4 h-4" />}
+                          icon={() => <RulerIcon class="w-4 h-4" />}
                         />
                         <DetailRow
                           label="Mature Spread"
                           value={plantData().plantDetails?.matureSpread ?? "—"}
-                          icon={<RulerIcon class="w-4 h-4" />}
+                          icon={() => <RulerIcon class="w-4 h-4" />}
                         />
                         <DetailRow
                           label="Toxicity"
@@ -240,7 +240,7 @@ export default function OverviewRoute() {
                             plantData().plantDetails?.translations?.find(t => t.locale === "en")?.toxicityInfo
                               ?? plantData().plantDetails?.translations?.[0]?.toxicityInfo ?? "—"
                           }
-                          icon={<ExclamationCircleIcon class="w-4 h-4" />}
+                          icon={() => <ExclamationCircleIcon class="w-4 h-4" />}
                         />
                       </div>
                     </div>
@@ -485,42 +485,42 @@ export default function OverviewRoute() {
                         <DetailRow
                           label="Light"
                           value={pd().lightRequirement ? getLightLabel(pd().lightRequirement as any) : "—"}
-                          icon={<SunIcon class="w-4 h-4" />}
+                          icon={() => <SunIcon class="w-4 h-4" />}
                         />
                         <DetailRow
                           label="Watering"
                           value={pd().wateringFrequency ? getWateringLabel(pd().wateringFrequency as any) : "—"}
-                          icon={<DropletIcon class="w-4 h-4" />}
+                          icon={() => <DropletIcon class="w-4 h-4" />}
                         />
                         <DetailRow
                           label="Humidity"
                           value={pd().humidityLevel ? getHumidityLabel(pd().humidityLevel as any) : "—"}
-                          icon={<MoonIcon class="w-4 h-4" />}
+                          icon={() => <MoonIcon class="w-4 h-4" />}
                         />
                         <DetailRow
                           label="Temperature"
                           value={pd().temperatureRange ?? "—"}
-                          icon={<ThermometerIcon class="w-4 h-4" />}
+                          icon={() => <ThermometerIcon class="w-4 h-4" />}
                         />
                         <DetailRow
                           label="Difficulty"
                           value={pd().careDifficulty ? getDifficultyLabel(pd().careDifficulty as any) : "—"}
-                          icon={<TrendingUpIcon class="w-4 h-4" />}
+                          icon={() => <TrendingUpIcon class="w-4 h-4" />}
                         />
                         <DetailRow
                           label="Growth Rate"
                           value={pd().growthRate ? getGrowthRateLabel(pd().growthRate as any) : "—"}
-                          icon={<TrendingUpIcon class="w-4 h-4" />}
+                          icon={() => <TrendingUpIcon class="w-4 h-4" />}
                         />
                         <DetailRow
                           label="Mature Height"
                           value={pd().matureHeight ?? "—"}
-                          icon={<RulerIcon class="w-4 h-4" />}
+                          icon={() => <RulerIcon class="w-4 h-4" />}
                         />
                         <DetailRow
                           label="Mature Spread"
                           value={pd().matureSpread ?? "—"}
-                          icon={<RulerIcon class="w-4 h-4" />}
+                          icon={() => <RulerIcon class="w-4 h-4" />}
                         />
                       </SectionCard>
                     )}
@@ -603,17 +603,17 @@ export default function OverviewRoute() {
                     <DetailRow
                       label="Created"
                       value={formatDateTime(plantData().createdAt)}
-                      icon={<CalendarIcon class="w-4 h-4" />}
+                      icon={() => <CalendarIcon class="w-4 h-4" />}
                     />
                     <DetailRow
                       label="Last Updated"
                       value={formatDateTime(plantData().updatedAt)}
-                      icon={<ClockIcon class="w-4 h-4" />}
+                      icon={() => <ClockIcon class="w-4 h-4" />}
                     />
                     <DetailRow
                       label="Plant ID"
                       value={plantData().id}
-                      icon={<CheckBadgeIcon class="w-4 h-4" />}
+                      icon={() => <CheckBadgeIcon class="w-4 h-4" />}
                     />
                   </SectionCard>
 

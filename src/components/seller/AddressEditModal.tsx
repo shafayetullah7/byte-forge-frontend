@@ -1,4 +1,4 @@
-import { createSignal } from "solid-js";
+import { createSignal, Show } from "solid-js";
 import { Modal } from "~/components/ui/Modal";
 import Input from "~/components/ui/Input";
 import Button from "~/components/ui/Button";
@@ -125,7 +125,7 @@ export default function AddressEditModal(props: AddressEditModalProps) {
                 <div class="px-3 py-2 border border-gray-200 dark:border-forest-600 rounded-lg bg-gray-50 dark:bg-forest-800 text-gray-900 dark:text-gray-100 cursor-not-allowed">
                   Bangladesh
                 </div>
-                {errors().enCountry && <p class="text-sm text-red-600 dark:text-red-400">{errors().enCountry}</p>}
+                <Show when={errors().enCountry}><p class="text-sm text-red-600 dark:text-red-400">{errors().enCountry}</p></Show>
               </div>
 
               {/* Division Selector */}
@@ -155,7 +155,7 @@ export default function AddressEditModal(props: AddressEditModalProps) {
                     <option value={d.en}>{d.en}</option>
                   ))}
                 </select>
-                {errors().enDivision && <p class="text-sm text-red-600 dark:text-red-400">{errors().enDivision}</p>}
+                <Show when={errors().enDivision}><p class="text-sm text-red-600 dark:text-red-400">{errors().enDivision}</p></Show>
               </div>
 
               {/* District Selector */}
@@ -184,7 +184,7 @@ export default function AddressEditModal(props: AddressEditModalProps) {
                     <option value={d.en}>{d.en}</option>
                   ))}
                 </select>
-                {errors().enDistrict && <p class="text-sm text-red-600 dark:text-red-400">{errors().enDistrict}</p>}
+                <Show when={errors().enDistrict}><p class="text-sm text-red-600 dark:text-red-400">{errors().enDistrict}</p></Show>
               </div>
 
               {/* Street Input */}
@@ -215,7 +215,7 @@ export default function AddressEditModal(props: AddressEditModalProps) {
                 <div class="px-3 py-2 border border-gray-200 dark:border-forest-600 rounded-lg bg-gray-50 dark:bg-forest-800 text-gray-900 dark:text-gray-100 cursor-not-allowed">
                   বাংলাদেশ
                 </div>
-                {errors().bnCountry && <p class="text-sm text-red-600 dark:text-red-400">{errors().bnCountry}</p>}
+                <Show when={errors().bnCountry}><p class="text-sm text-red-600 dark:text-red-400">{errors().bnCountry}</p></Show>
               </div>
 
               {/* Division Selector */}
@@ -245,7 +245,7 @@ export default function AddressEditModal(props: AddressEditModalProps) {
                     <option value={d.bn}>{d.bn}</option>
                   ))}
                 </select>
-                {errors().bnDivision && <p class="text-sm text-red-600 dark:text-red-400">{errors().bnDivision}</p>}
+                <Show when={errors().bnDivision}><p class="text-sm text-red-600 dark:text-red-400">{errors().bnDivision}</p></Show>
               </div>
 
               {/* District Selector */}
@@ -274,7 +274,7 @@ export default function AddressEditModal(props: AddressEditModalProps) {
                     <option value={d.bn}>{d.bn}</option>
                   ))}
                 </select>
-                {errors().bnDistrict && <p class="text-sm text-red-600 dark:text-red-400">{errors().bnDistrict}</p>}
+                <Show when={errors().bnDistrict}><p class="text-sm text-red-600 dark:text-red-400">{errors().bnDistrict}</p></Show>
               </div>
 
               {/* Street Input */}

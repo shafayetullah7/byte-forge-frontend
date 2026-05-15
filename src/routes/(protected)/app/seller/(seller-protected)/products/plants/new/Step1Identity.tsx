@@ -15,7 +15,7 @@ function InlineFieldset(props: {
     <div>
       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
         {props.label}
-        {props.required && <span class="text-red-500 ml-1">*</span>}
+        <Show when={props.required}><span class="text-red-500 ml-1">*</span></Show>
       </label>
       {props.children}
       <Show when={props.error}>

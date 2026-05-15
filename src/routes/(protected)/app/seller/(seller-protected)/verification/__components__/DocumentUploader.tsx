@@ -98,7 +98,7 @@ export function DocumentUploader(props: DocumentUploaderProps) {
         <div class="space-y-2">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {props.label}
-                {props.required && <span class="text-red-500 ml-1">*</span>}
+                <Show when={props.required}><span class="text-red-500 ml-1">*</span></Show>
             </label>
             
             <Show when={props.description}>

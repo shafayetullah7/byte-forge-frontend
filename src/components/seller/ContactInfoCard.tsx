@@ -1,3 +1,4 @@
+import { Show } from "solid-js";
 import type { ShopContact } from "~/lib/api/endpoints/seller/shop-detail.api";
 import { useI18n } from "~/i18n";
 import { EnvelopeIcon, PhoneIcon, PencilIcon, ArrowTopRightOnSquareIcon, ChatBubbleLeftRightIcon } from "~/components/icons";
@@ -51,7 +52,7 @@ function ContactItem(props: ContactItemProps) {
           {props.value}
         </p>
       </div>
-      {props.isExternal && <ArrowTopRightOnSquareIcon class="w-4 h-4 text-gray-400 flex-shrink-0" />}
+      <Show when={props.isExternal}><ArrowTopRightOnSquareIcon class="w-4 h-4 text-gray-400 flex-shrink-0" /></Show>
     </a>
   );
 }
