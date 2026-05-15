@@ -54,10 +54,17 @@ export default function VariantsRoute() {
                     <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm">
                       <div class="px-6 py-4 border-b border-cream-200 dark:border-forest-700 flex items-center justify-between">
                         <div class="flex items-center gap-3">
-                          <h3 class="text-base font-semibold text-forest-800 dark:text-cream-50">
-                            {variant.translations?.find(t => t.locale === "en")?.title
-                              ?? variant.translations?.[0]?.title ?? `Variant ${variant.id}`}
-                          </h3>
+                          <div>
+                            <h3 class="text-base font-semibold text-forest-800 dark:text-cream-50">
+                              {variant.translations?.find(t => t.locale === "en")?.title
+                                ?? variant.translations?.[0]?.title ?? `Variant ${variant.id}`}
+                            </h3>
+                            <Show when={variant.translations?.find(t => t.locale === "bn")?.title}>
+                              {(titleBn) => (
+                                <p class="text-sm font-medium text-forest-600 dark:text-forest-400">{titleBn()}</p>
+                              )}
+                            </Show>
+                          </div>
                           {variant.isBase && (
                             <Badge variant="forest" class="text-xs">Base</Badge>
                           )}
