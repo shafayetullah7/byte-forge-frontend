@@ -3,7 +3,6 @@ import { ErrorBoundary } from "solid-js";
 import { useParams, createAsync } from "@solidjs/router";
 import { getPlantById } from "~/lib/api/endpoints/seller/plants.api";
 import {
-  PackageIcon,
   FolderIcon,
   InfoCircleIcon,
   ChatBubbleLeftRightIcon,
@@ -51,9 +50,6 @@ import {
   getGrowthStageLabel,
   getPlantFormLabel,
   getVariegationLabel,
-  getLeafDensityLabel,
-  getPropagationLabel,
-  getContainerTypeLabel,
 } from "./helpers";
 import Badge from "~/components/ui/Badge";
 
