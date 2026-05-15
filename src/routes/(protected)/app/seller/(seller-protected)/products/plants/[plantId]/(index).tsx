@@ -1,4 +1,4 @@
-import { For, Show, createMemo } from "solid-js";
+import { For, Show, type JSX } from "solid-js";
 import { ErrorBoundary } from "solid-js";
 import { useParams, createAsync } from "@solidjs/router";
 import { getPlantById } from "~/lib/api/endpoints/seller/plants.api";
@@ -56,7 +56,7 @@ import Badge from "~/components/ui/Badge";
 // ─── Care Card Component ────────────────────────────────────────────
 
 function CareCard(props: {
-  icon: any;
+  icon: JSX.Element;
   title: string;
   badge: { text: string; bg: string; textColor: string };
   description: string;
@@ -80,7 +80,7 @@ function CareCard(props: {
 // ─── Instruction Row Component ──────────────────────────────────────
 
 function InstructionRow(props: {
-  icon: any;
+  icon: JSX.Element;
   iconColor: string;
   bgColor: string;
   title: string;
@@ -107,66 +107,6 @@ export default function OverviewRoute() {
     { deferStream: true }
   );
 
-  // Get localized translation
-  const enTranslation = createMemo(() => {
-    const p = plant();
-    if (!p?.translations) return null;
-    return p.translations.find(t => t.locale === "en") ?? p.translations[0] ?? null;
-  });
-
-  const bnTranslation = createMemo(() => {
-    const p = plant();
-    if (!p?.translations) return null;
-    return p.translations.find(t => t.locale === "bn") ?? null;
-  });
-
-  // Get plant details translation
-  const plantDetailsEn = createMemo(() => {
-    const pd = plant()?.plantDetails;
-    if (!pd?.translations) return null;
-    return pd.translations.find(t => t.locale === "en") ?? pd.translations[0] ?? null;
-  });
-
-  // Get care instructions
-  const careInstructions = createMemo(() => {
-    const ci = plant()?.careInstructions;
-    if (!ci) return null;
-    const en = ci.translations?.find(t => t.locale === "en");
-    return en || ci;
-  });
-
-  // Get category name
-  const categoryName = createMemo(() => {
-    const cat = plant()?.plantDetails?.category;
-    if (!cat?.translations) return "—";
-    return cat.translations.find(t => t.locale === "en")?.name
-      ?? cat.translations[0]?.name ?? "—";
-  });
-
-  // Get tag names
-  const tagNames = createMemo(() => {
-    return (plant()?.plantDetails?.tags ?? []).map(tag => {
-      const name = tag.translations?.find(t => t.locale === "en")?.name
-        ?? tag.translations?.[0]?.name ?? tag.slug;
-      return { id: tag.id, slug: tag.slug, name };
-    });
-  });
-
-  // Calculate total inventory
-  const totalInventory = createMemo(() => {
-    return (plant()?.variants ?? []).reduce((sum, v) => sum + v.inventoryCount, 0);
-  });
-
-  // Calculate price range
-  const priceRange = createMemo(() => {
-    const variants = plant()?.variants ?? [];
-    if (variants.length === 0) return "—";
-    const prices = variants.map(v => parseFloat(v.price));
-    const min = Math.min(...prices);
-    const max = Math.max(...prices);
-    return min === max ? formatPrice(min) : `${formatPrice(min)} - ${formatPrice(max)}`;
-  });
-
   return (
     <ErrorBoundary fallback={(error) => (
       <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
@@ -175,15 +115,10 @@ export default function OverviewRoute() {
         </p>
       </div>
     )}>
-      <Show when={plant()} fallback={
-        <div class="flex items-center justify-center py-12">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-forest-600"></div>
-          <span class="ml-3 text-gray-600 dark:text-gray-400">Loading plant details...</span>
-        </div>
-      }>
+      <Show when={plant()}>
         {(plantData) => {
-          const inventory = getInventoryStatus(totalInventory());
-          const pd = plantData().plantDetails;
+          const totalStock = (plantData().variants ?? []).reduce((sum, v) => sum + v.inventoryCount, 0);
+          const inventory = getInventoryStatus(totalStock);
 
           return (
             <div class="space-y-6">
@@ -196,7 +131,10 @@ export default function OverviewRoute() {
                     {plantData().thumbnail?.url ? (
                       <img
                         src={plantData().thumbnail!.url}
-                        alt={enTranslation()?.name ?? ""}
+                        alt={
+                          plantData().translations?.find(t => t.locale === "en")?.name
+                            ?? plantData().translations?.[0]?.name ?? ""
+                        }
                         class="w-full h-full object-cover"
                       />
                     ) : (
@@ -207,19 +145,27 @@ export default function OverviewRoute() {
                   {/* Translations & Info */}
                   <div class="flex-1 p-6">
                     <h2 class="text-lg font-bold text-forest-800 dark:text-cream-50 mb-1">English</h2>
-                    <p class="text-xl font-semibold text-forest-800 dark:text-cream-50 mb-2">{enTranslation()?.name}</p>
-                    <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{enTranslation()?.shortDescription}</p>
+                    <p class="text-xl font-semibold text-forest-800 dark:text-cream-50 mb-2">
+                      {plantData().translations?.find(t => t.locale === "en")?.name
+                        ?? plantData().translations?.[0]?.name ?? ""}
+                    </p>
+                    <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                      {plantData().translations?.find(t => t.locale === "en")?.shortDescription
+                        ?? plantData().translations?.[0]?.shortDescription ?? ""}
+                    </p>
 
-                    {bnTranslation() && (
+                    {plantData().translations?.find(t => t.locale === "bn") && (
                       <div class="mt-4 pt-4 border-t border-cream-200 dark:border-forest-700">
                         <h2 class="text-lg font-bold text-forest-800 dark:text-cream-50 mb-1">বাংলা</h2>
-                        <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{bnTranslation()?.description}</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                          {plantData().translations?.find(t => t.locale === "bn")?.description ?? ""}
+                        </p>
                       </div>
                     )}
 
                     <div class="mt-4 pt-4 border-t border-cream-200 dark:border-forest-700">
                       <p class="text-xs text-gray-500 dark:text-gray-400">
-                        Scientific Name: <span class="text-gray-700 dark:text-gray-300 italic">{pd?.scientificName ?? "—"}</span>
+                        Scientific Name: <span class="text-gray-700 dark:text-gray-300 italic">{plantData().plantDetails?.scientificName ?? "—"}</span>
                       </p>
                     </div>
                   </div>
@@ -241,61 +187,80 @@ export default function OverviewRoute() {
                       <div>
                         <DetailRow
                           label="Category"
-                          value={categoryName()}
+                          value={
+                            plantData().plantDetails?.category?.translations?.find(t => t.locale === "en")?.name
+                              ?? plantData().plantDetails?.category?.translations?.[0]?.name ?? "—"
+                          }
                           icon={<FolderIcon class="w-4 h-4" />}
                         />
                         <DetailRow
                           label="Scientific Name"
-                          value={pd?.scientificName ?? "—"}
+                          value={plantData().plantDetails?.scientificName ?? "—"}
                           icon={<InfoCircleIcon class="w-4 h-4" />}
                         />
                         <DetailRow
                           label="Common Names (EN)"
-                          value={plantDetailsEn()?.commonNames ?? "—"}
+                          value={
+                            plantData().plantDetails?.translations?.find(t => t.locale === "en")?.commonNames
+                              ?? plantData().plantDetails?.translations?.[0]?.commonNames ?? "—"
+                          }
                           icon={<ChatBubbleLeftRightIcon class="w-4 h-4" />}
                         />
                         <DetailRow
                           label="Origin"
-                          value={plantDetailsEn()?.origin ?? "—"}
+                          value={
+                            plantData().plantDetails?.translations?.find(t => t.locale === "en")?.origin
+                              ?? plantData().plantDetails?.translations?.[0]?.origin ?? "—"
+                          }
                           icon={<GlobeAltIcon class="w-4 h-4" />}
                         />
                       </div>
                       <div>
                         <DetailRow
                           label="Soil Type"
-                          value={plantDetailsEn()?.soilType ?? "—"}
+                          value={
+                            plantData().plantDetails?.translations?.find(t => t.locale === "en")?.soilType
+                              ?? plantData().plantDetails?.translations?.[0]?.soilType ?? "—"
+                          }
                           icon={<BeakerIcon class="w-4 h-4" />}
                         />
                         <DetailRow
                           label="Mature Height"
-                          value={pd?.matureHeight ?? "—"}
+                          value={plantData().plantDetails?.matureHeight ?? "—"}
                           icon={<RulerIcon class="w-4 h-4" />}
                         />
                         <DetailRow
                           label="Mature Spread"
-                          value={pd?.matureSpread ?? "—"}
+                          value={plantData().plantDetails?.matureSpread ?? "—"}
                           icon={<RulerIcon class="w-4 h-4" />}
                         />
                         <DetailRow
                           label="Toxicity"
-                          value={plantDetailsEn()?.toxicityInfo ?? "—"}
+                          value={
+                            plantData().plantDetails?.translations?.find(t => t.locale === "en")?.toxicityInfo
+                              ?? plantData().plantDetails?.translations?.[0]?.toxicityInfo ?? "—"
+                          }
                           icon={<ExclamationCircleIcon class="w-4 h-4" />}
                         />
                       </div>
                     </div>
 
                     {/* Tags */}
-                    <Show when={tagNames().length > 0}>
+                    <Show when={(plantData().plantDetails?.tags ?? []).length > 0}>
                       <div class="mt-4 pt-4 border-t border-cream-100 dark:border-forest-700/50">
                         <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Tags</p>
                         <div class="flex flex-wrap gap-2">
-                          <For each={tagNames()}>
-                            {(tag) => (
-                              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 rounded-full text-xs font-medium border border-forest-200 dark:border-forest-700">
-                                <TagIcon class="w-3 h-3" />
-                                {tag.name}
-                              </span>
-                            )}
+                          <For each={plantData().plantDetails?.tags ?? []}>
+                            {(tag) => {
+                              const name = tag.translations?.find(t => t.locale === "en")?.name
+                                ?? tag.translations?.[0]?.name ?? tag.slug;
+                              return (
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 rounded-full text-xs font-medium border border-forest-200 dark:border-forest-700">
+                                  <TagIcon class="w-3 h-3" />
+                                  {name}
+                                </span>
+                              );
+                            }}
                           </For>
                         </div>
                       </div>
@@ -303,163 +268,168 @@ export default function OverviewRoute() {
                   </SectionCard>
 
                   {/* ─── Care Requirements (Cards) ─── */}
-                  <Show when={pd}>
-                    <SectionCard
-                      title="Care Requirements"
-                      icon={<CloudIcon class="w-4 h-4 text-gray-400" />}
-                    >
-                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <Show when={pd!.lightRequirement}>
-                          {(light) => (
-                            <CareCard
-                              icon={<SunIcon class="w-5 h-5 text-forest-600 dark:text-forest-400" />}
-                              title="Light"
-                              badge={{
-                                text: getLightLabel(light() as any),
-                                ...getLightColor(light() as any),
-                              }}
-                              description="Bright, indirect light. Avoid direct sunlight which can scorch variegated leaves."
-                            />
-                          )}
-                        </Show>
-                        <Show when={pd!.wateringFrequency}>
-                          {(watering) => (
-                            <CareCard
-                              icon={<DropletIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" />}
-                              title="Watering"
-                              badge={{
-                                text: getWateringLabel(watering() as any),
-                                ...getWateringColor(watering() as any),
-                              }}
-                              description="Water when top 2-3 inches of soil are dry. Ensure thorough drainage."
-                            />
-                          )}
-                        </Show>
-                        <Show when={pd!.humidityLevel}>
-                          {(humidity) => (
-                            <CareCard
-                              icon={<CloudIcon class="w-5 h-5 text-sky-600 dark:text-sky-400" />}
-                              title="Humidity"
-                              badge={{
-                                text: getHumidityLabel(humidity() as any),
-                                ...getHumidityColor(humidity() as any),
-                              }}
-                              description="Maintain optimal humidity for growth."
-                            />
-                          )}
-                        </Show>
-                        <Show when={pd!.temperatureRange}>
-                          {(temp) => (
-                            <CareCard
-                              icon={<ThermometerIcon class="w-5 h-5 text-red-600 dark:text-red-400" />}
-                              title="Temperature"
-                              badge={{
-                                text: temp(),
-                                bg: "bg-red-100 dark:bg-red-900/40",
-                                textColor: "text-red-700 dark:text-red-300",
-                              }}
-                              description="Maintain temperature within range. Protect from cold drafts."
-                            />
-                          )}
-                        </Show>
-                        <Show when={pd!.careDifficulty}>
-                          {(difficulty) => (
-                            <CareCard
-                              icon={<SparklesIcon class="w-5 h-5 text-cream-600 dark:text-cream-400" />}
-                              title="Care Difficulty"
-                              badge={{
-                                text: getDifficultyLabel(difficulty() as any),
-                                ...getDifficultyColor(difficulty() as any),
-                              }}
-                              description="Care level required for this plant."
-                            />
-                          )}
-                        </Show>
-                        <Show when={pd!.growthRate}>
-                          {(growth) => (
-                            <CareCard
-                              icon={<SproutIcon class="w-5 h-5 text-sage-600 dark:text-sage-400" />}
-                              title="Growth Rate"
-                              badge={{
-                                text: getGrowthRateLabel(growth() as any),
-                                bg: "bg-sage-100 dark:bg-sage-900/40",
-                                textColor: "text-sage-700 dark:text-sage-300",
-                              }}
-                              description="Expected growth rate under optimal conditions."
-                            />
-                          )}
-                        </Show>
-                      </div>
-                    </SectionCard>
-                  </Show>
-
-                  {/* ─── Care Instructions ─── */}
-                  <Show when={careInstructions()}>
-                    {(ci) => (
+                  <Show when={plantData().plantDetails}>
+                    {(pd) => (
                       <SectionCard
-                        title="Care Instructions"
-                        icon={<ClockIcon class="w-4 h-4 text-gray-400" />}
+                        title="Care Requirements"
+                        icon={<CloudIcon class="w-4 h-4 text-gray-400" />}
                       >
-                        <div class="space-y-4">
-                          <InstructionRow
-                            icon={<SunIcon class="w-5 h-5" />}
-                            iconColor="text-cream-600 dark:text-cream-400"
-                            bgColor="bg-cream-50 dark:bg-forest-900/30"
-                            title="Light Care"
-                            description={ci().lightInstructions}
-                          />
-                          <InstructionRow
-                            icon={<DropletIcon class="w-5 h-5" />}
-                            iconColor="text-blue-600 dark:text-blue-400"
-                            bgColor="bg-blue-50 dark:bg-blue-900/20"
-                            title="Watering Guide"
-                            description={ci().wateringInstructions}
-                          />
-                          <InstructionRow
-                            icon={<CloudIcon class="w-5 h-5" />}
-                            iconColor="text-sky-600 dark:text-sky-400"
-                            bgColor="bg-sky-50 dark:bg-sky-900/20"
-                            title="Humidity Care"
-                            description={ci().humidityInstructions}
-                          />
-                          <InstructionRow
-                            icon={<BeakerIcon class="w-5 h-5" />}
-                            iconColor="text-sage-600 dark:text-sage-400"
-                            bgColor="bg-sage-50 dark:bg-sage-900/20"
-                            title="Fertilizer Schedule"
-                            description={ci().fertilizerSchedule}
-                          />
-                          <InstructionRow
-                            icon={<SproutIcon class="w-5 h-5" />}
-                            iconColor="text-forest-600 dark:text-forest-400"
-                            bgColor="bg-forest-50 dark:bg-forest-900/20"
-                            title="Repotting"
-                            description={ci().repottingFrequency}
-                          />
-                          <InstructionRow
-                            icon={<ScissorsIcon class="w-5 h-5" />}
-                            iconColor="text-purple-600 dark:text-purple-400"
-                            bgColor="bg-purple-50 dark:bg-purple-900/20"
-                            title="Pruning"
-                            description={ci().pruningNotes}
-                          />
-                          <InstructionRow
-                            icon={<ExclamationCircleIcon class="w-5 h-5" />}
-                            iconColor="text-red-600 dark:text-red-400"
-                            bgColor="bg-red-50 dark:bg-red-900/20"
-                            title="Common Problems"
-                            description={ci().commonProblems}
-                          />
-                          <InstructionRow
-                            icon={<CalendarIcon class="w-5 h-5" />}
-                            iconColor="text-amber-600 dark:text-amber-400"
-                            bgColor="bg-amber-50 dark:bg-amber-900/20"
-                            title="Seasonal Care"
-                            description={ci().seasonalCare}
-                          />
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <Show when={pd().lightRequirement}>
+                            {(light) => (
+                              <CareCard
+                                icon={<SunIcon class="w-5 h-5 text-forest-600 dark:text-forest-400" />}
+                                title="Light"
+                                badge={{
+                                  text: getLightLabel(light() as any),
+                                  ...getLightColor(light() as any),
+                                }}
+                                description="Bright, indirect light. Avoid direct sunlight which can scorch variegated leaves."
+                              />
+                            )}
+                          </Show>
+                          <Show when={pd().wateringFrequency}>
+                            {(watering) => (
+                              <CareCard
+                                icon={<DropletIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" />}
+                                title="Watering"
+                                badge={{
+                                  text: getWateringLabel(watering() as any),
+                                  ...getWateringColor(watering() as any),
+                                }}
+                                description="Water when top 2-3 inches of soil are dry. Ensure thorough drainage."
+                              />
+                            )}
+                          </Show>
+                          <Show when={pd().humidityLevel}>
+                            {(humidity) => (
+                              <CareCard
+                                icon={<CloudIcon class="w-5 h-5 text-sky-600 dark:text-sky-400" />}
+                                title="Humidity"
+                                badge={{
+                                  text: getHumidityLabel(humidity() as any),
+                                  ...getHumidityColor(humidity() as any),
+                                }}
+                                description="Maintain optimal humidity for growth."
+                              />
+                            )}
+                          </Show>
+                          <Show when={pd().temperatureRange}>
+                            {(temp) => (
+                              <CareCard
+                                icon={<ThermometerIcon class="w-5 h-5 text-red-600 dark:text-red-400" />}
+                                title="Temperature"
+                                badge={{
+                                  text: temp(),
+                                  bg: "bg-red-100 dark:bg-red-900/40",
+                                  textColor: "text-red-700 dark:text-red-300",
+                                }}
+                                description="Maintain temperature within range. Protect from cold drafts."
+                              />
+                            )}
+                          </Show>
+                          <Show when={pd().careDifficulty}>
+                            {(difficulty) => (
+                              <CareCard
+                                icon={<SparklesIcon class="w-5 h-5 text-cream-600 dark:text-cream-400" />}
+                                title="Care Difficulty"
+                                badge={{
+                                  text: getDifficultyLabel(difficulty() as any),
+                                  ...getDifficultyColor(difficulty() as any),
+                                }}
+                                description="Care level required for this plant."
+                              />
+                            )}
+                          </Show>
+                          <Show when={pd().growthRate}>
+                            {(growth) => (
+                              <CareCard
+                                icon={<SproutIcon class="w-5 h-5 text-sage-600 dark:text-sage-400" />}
+                                title="Growth Rate"
+                                badge={{
+                                  text: getGrowthRateLabel(growth() as any),
+                                  bg: "bg-sage-100 dark:bg-sage-900/40",
+                                  textColor: "text-sage-700 dark:text-sage-300",
+                                }}
+                                description="Expected growth rate under optimal conditions."
+                              />
+                            )}
+                          </Show>
                         </div>
                       </SectionCard>
                     )}
+                  </Show>
+
+                  {/* ─── Care Instructions ─── */}
+                  <Show when={plantData().careInstructions}>
+                    {(ci) => {
+                      const careEn = ci().translations?.find(t => t.locale === "en") || ci();
+                      return (
+                        <SectionCard
+                          title="Care Instructions"
+                          icon={<ClockIcon class="w-4 h-4 text-gray-400" />}
+                        >
+                          <div class="space-y-4">
+                            <InstructionRow
+                              icon={<SunIcon class="w-5 h-5" />}
+                              iconColor="text-cream-600 dark:text-cream-400"
+                              bgColor="bg-cream-50 dark:bg-forest-900/30"
+                              title="Light Care"
+                              description={careEn.lightInstructions}
+                            />
+                            <InstructionRow
+                              icon={<DropletIcon class="w-5 h-5" />}
+                              iconColor="text-blue-600 dark:text-blue-400"
+                              bgColor="bg-blue-50 dark:bg-blue-900/20"
+                              title="Watering Guide"
+                              description={careEn.wateringInstructions}
+                            />
+                            <InstructionRow
+                              icon={<CloudIcon class="w-5 h-5" />}
+                              iconColor="text-sky-600 dark:text-sky-400"
+                              bgColor="bg-sky-50 dark:bg-sky-900/20"
+                              title="Humidity Care"
+                              description={careEn.humidityInstructions}
+                            />
+                            <InstructionRow
+                              icon={<BeakerIcon class="w-5 h-5" />}
+                              iconColor="text-sage-600 dark:text-sage-400"
+                              bgColor="bg-sage-50 dark:bg-sage-900/20"
+                              title="Fertilizer Schedule"
+                              description={careEn.fertilizerSchedule}
+                            />
+                            <InstructionRow
+                              icon={<SproutIcon class="w-5 h-5" />}
+                              iconColor="text-forest-600 dark:text-forest-400"
+                              bgColor="bg-forest-50 dark:bg-forest-900/20"
+                              title="Repotting"
+                              description={careEn.repottingFrequency}
+                            />
+                            <InstructionRow
+                              icon={<ScissorsIcon class="w-5 h-5" />}
+                              iconColor="text-purple-600 dark:text-purple-400"
+                              bgColor="bg-purple-50 dark:bg-purple-900/20"
+                              title="Pruning"
+                              description={careEn.pruningNotes}
+                            />
+                            <InstructionRow
+                              icon={<ExclamationCircleIcon class="w-5 h-5" />}
+                              iconColor="text-red-600 dark:text-red-400"
+                              bgColor="bg-red-50 dark:bg-red-900/20"
+                              title="Common Problems"
+                              description={careEn.commonProblems}
+                            />
+                            <InstructionRow
+                              icon={<CalendarIcon class="w-5 h-5" />}
+                              iconColor="text-amber-600 dark:text-amber-400"
+                              bgColor="bg-amber-50 dark:bg-amber-900/20"
+                              title="Seasonal Care"
+                              description={careEn.seasonalCare}
+                            />
+                          </div>
+                        </SectionCard>
+                      );
+                    }}
                   </Show>
 
                   {/* ─── Pricing & Inventory ─── */}
@@ -471,14 +441,21 @@ export default function OverviewRoute() {
                       <div>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Price Range</p>
                         <p class="text-2xl font-bold text-forest-800 dark:text-cream-50 mt-1">
-                          {priceRange()}
+                          {(() => {
+                            const variants = plantData().variants ?? [];
+                            if (variants.length === 0) return "—";
+                            const prices = variants.map(v => parseFloat(v.price));
+                            const min = Math.min(...prices);
+                            const max = Math.max(...prices);
+                            return min === max ? formatPrice(min) : `${formatPrice(min)} - ${formatPrice(max)}`;
+                          })()}
                         </p>
                       </div>
                       <div>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Total Inventory</p>
                         <div class="flex items-center gap-2 mt-1">
                           <p class="text-2xl font-bold text-forest-800 dark:text-cream-50">
-                            {totalInventory()}
+                            {totalStock}
                           </p>
                           <Badge variant={inventory.variant} class="text-xs">
                             {inventory.label}
@@ -488,7 +465,7 @@ export default function OverviewRoute() {
                       <div>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Variants</p>
                         <p class="text-2xl font-bold text-forest-800 dark:text-cream-50 mt-1">
-                          {plantData().variants.length}
+                          {plantData().variants?.length ?? 0}
                         </p>
                       </div>
                     </div>
@@ -499,58 +476,60 @@ export default function OverviewRoute() {
                 <div class="space-y-6">
 
                   {/* ─── Care Profile ─── */}
-                  <Show when={pd}>
-                    <SectionCard
-                      title="Care Profile"
-                      icon={<SunIcon class="w-4 h-4 text-gray-400" />}
-                    >
-                      <DetailRow
-                        label="Light"
-                        value={pd!.lightRequirement ? getLightLabel(pd!.lightRequirement as any) : "—"}
-                        icon={<SunIcon class="w-4 h-4" />}
-                      />
-                      <DetailRow
-                        label="Watering"
-                        value={pd!.wateringFrequency ? getWateringLabel(pd!.wateringFrequency as any) : "—"}
-                        icon={<DropletIcon class="w-4 h-4" />}
-                      />
-                      <DetailRow
-                        label="Humidity"
-                        value={pd!.humidityLevel ? getHumidityLabel(pd!.humidityLevel as any) : "—"}
-                        icon={<MoonIcon class="w-4 h-4" />}
-                      />
-                      <DetailRow
-                        label="Temperature"
-                        value={pd!.temperatureRange ?? "—"}
-                        icon={<ThermometerIcon class="w-4 h-4" />}
-                      />
-                      <DetailRow
-                        label="Difficulty"
-                        value={pd!.careDifficulty ? getDifficultyLabel(pd!.careDifficulty as any) : "—"}
-                        icon={<TrendingUpIcon class="w-4 h-4" />}
-                      />
-                      <DetailRow
-                        label="Growth Rate"
-                        value={pd!.growthRate ? getGrowthRateLabel(pd!.growthRate as any) : "—"}
-                        icon={<TrendingUpIcon class="w-4 h-4" />}
-                      />
-                      <DetailRow
-                        label="Mature Height"
-                        value={pd!.matureHeight ?? "—"}
-                        icon={<RulerIcon class="w-4 h-4" />}
-                      />
-                      <DetailRow
-                        label="Mature Spread"
-                        value={pd!.matureSpread ?? "—"}
-                        icon={<RulerIcon class="w-4 h-4" />}
-                      />
-                    </SectionCard>
+                  <Show when={plantData().plantDetails}>
+                    {(pd) => (
+                      <SectionCard
+                        title="Care Profile"
+                        icon={<SunIcon class="w-4 h-4 text-gray-400" />}
+                      >
+                        <DetailRow
+                          label="Light"
+                          value={pd().lightRequirement ? getLightLabel(pd().lightRequirement as any) : "—"}
+                          icon={<SunIcon class="w-4 h-4" />}
+                        />
+                        <DetailRow
+                          label="Watering"
+                          value={pd().wateringFrequency ? getWateringLabel(pd().wateringFrequency as any) : "—"}
+                          icon={<DropletIcon class="w-4 h-4" />}
+                        />
+                        <DetailRow
+                          label="Humidity"
+                          value={pd().humidityLevel ? getHumidityLabel(pd().humidityLevel as any) : "—"}
+                          icon={<MoonIcon class="w-4 h-4" />}
+                        />
+                        <DetailRow
+                          label="Temperature"
+                          value={pd().temperatureRange ?? "—"}
+                          icon={<ThermometerIcon class="w-4 h-4" />}
+                        />
+                        <DetailRow
+                          label="Difficulty"
+                          value={pd().careDifficulty ? getDifficultyLabel(pd().careDifficulty as any) : "—"}
+                          icon={<TrendingUpIcon class="w-4 h-4" />}
+                        />
+                        <DetailRow
+                          label="Growth Rate"
+                          value={pd().growthRate ? getGrowthRateLabel(pd().growthRate as any) : "—"}
+                          icon={<TrendingUpIcon class="w-4 h-4" />}
+                        />
+                        <DetailRow
+                          label="Mature Height"
+                          value={pd().matureHeight ?? "—"}
+                          icon={<RulerIcon class="w-4 h-4" />}
+                        />
+                        <DetailRow
+                          label="Mature Spread"
+                          value={pd().matureSpread ?? "—"}
+                          icon={<RulerIcon class="w-4 h-4" />}
+                        />
+                      </SectionCard>
+                    )}
                   </Show>
 
                   {/* ─── Variant Preview ─── */}
-                  <Show when={plantData().variants.length > 0}>
+                  <Show when={(plantData().variants ?? []).length > 0}>
                     <SectionCard
-                      title={`Variants (${plantData().variants.length})`}
+                      title={`Variants (${plantData().variants?.length ?? 0})`}
                       icon={<CubeIcon class="w-4 h-4 text-gray-400" />}
                       action={
                         <a href={`/app/seller/products/plants/${plantData().id}/variants`} class="text-xs text-forest-600 dark:text-forest-400 hover:underline">
@@ -559,7 +538,7 @@ export default function OverviewRoute() {
                       }
                     >
                       <div class="space-y-3">
-                        <For each={plantData().variants.slice(0, 2)}>
+                        <For each={(plantData().variants ?? []).slice(0, 2)}>
                           {(variant) => {
                             const inv = getInventoryStatus(variant.inventoryCount);
                             const title = variant.translations?.find(t => t.locale === "en")?.title
@@ -588,23 +567,25 @@ export default function OverviewRoute() {
                                   </div>
                                 </div>
                                 <Show when={attrs}>
-                                  <div class="flex flex-wrap gap-1.5 pt-2 border-t border-cream-200 dark:border-forest-700">
-                                    <span class="text-xs px-2 py-0.5 bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 rounded-full">
-                                      {getGrowthStageLabel(attrs!.growthStage as any)}
-                                    </span>
-                                    <span class="text-xs px-2 py-0.5 bg-cream-50 dark:bg-cream-900/30 text-cream-700 dark:text-cream-300 rounded-full">
-                                      {getPlantFormLabel(attrs!.plantForm as any)}
-                                    </span>
-                                    <span class="text-xs px-2 py-0.5 bg-terracotta-50 dark:bg-terracotta-900/30 text-terracotta-700 dark:text-terracotta-300 rounded-full">
-                                      {getVariegationLabel(attrs!.variegation as any)}
-                                    </span>
-                                    <Show when={variant.media.length > 0}>
-                                      <span class="text-xs px-2 py-0.5 bg-sage-50 dark:bg-sage-900/30 text-sage-700 dark:text-sage-300 rounded-full flex items-center gap-1">
-                                        <ImageIcon class="w-3 h-3" />
-                                        {variant.media.length}
+                                  {(a) => (
+                                    <div class="flex flex-wrap gap-1.5 pt-2 border-t border-cream-200 dark:border-forest-700">
+                                      <span class="text-xs px-2 py-0.5 bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 rounded-full">
+                                        {getGrowthStageLabel(a().growthStage as any)}
                                       </span>
-                                    </Show>
-                                  </div>
+                                      <span class="text-xs px-2 py-0.5 bg-cream-50 dark:bg-cream-900/30 text-cream-700 dark:text-cream-300 rounded-full">
+                                        {getPlantFormLabel(a().plantForm as any)}
+                                      </span>
+                                      <span class="text-xs px-2 py-0.5 bg-terracotta-50 dark:bg-terracotta-900/30 text-terracotta-700 dark:text-terracotta-300 rounded-full">
+                                        {getVariegationLabel(a().variegation as any)}
+                                      </span>
+                                      <Show when={variant.media.length > 0}>
+                                        <span class="text-xs px-2 py-0.5 bg-sage-50 dark:bg-sage-900/30 text-sage-700 dark:text-sage-300 rounded-full flex items-center gap-1">
+                                          <ImageIcon class="w-3 h-3" />
+                                          {variant.media.length}
+                                        </span>
+                                      </Show>
+                                    </div>
+                                  )}
                                 </Show>
                               </div>
                             );

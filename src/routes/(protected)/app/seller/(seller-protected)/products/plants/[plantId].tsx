@@ -1,15 +1,6 @@
 import { ErrorBoundary, Suspense, Show, For } from "solid-js";
-import { A, useParams, useLocation, createAsync, type RouteSectionProps } from "@solidjs/router";
-import Badge from "~/components/ui/Badge";
-import {
-  ChevronLeftIcon,
-  PencilIcon,
-  ShareIcon,
-  DotsVerticalIcon,
-  ChevronRightIcon,
-  ExclamationCircleIcon,
-} from "~/components/icons";
-import { getStatusVariant, getStatusLabel } from "./[plantId]/helpers";
+import { A, useParams, useLocation, createAsync, type RouteSectionProps, type RouteDefinition } from "@solidjs/router";
+import { ChevronLeftIcon, ChevronRightIcon, ExclamationCircleIcon } from "~/components/icons";
 import { getPlantById } from "~/lib/api/endpoints/seller/plants.api";
 
 const tabs = [
@@ -17,6 +8,10 @@ const tabs = [
   { id: "variants", label: "Variants", path: "variants" },
   { id: "care", label: "Care Guide", path: "care" },
 ];
+
+export const route = {
+  preload: ({ params }) => getPlantById(params.plantId as string),
+} satisfies RouteDefinition;
 
 export default function PlantDetailLayout(props: RouteSectionProps) {
   const params = useParams();
@@ -26,19 +21,6 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
     () => getPlantById(params.plantId as string),
     { deferStream: true }
   );
-
-  // Get localized name from translations
-  const getPlantName = () => {
-    const p = plant();
-    if (!p?.translations) return "";
-    return p.translations.find(t => t.locale === "en")?.name
-      ?? p.translations[0]?.name ?? "";
-  };
-
-  // Get localized scientific name from plantDetails
-  const getScientificName = () => {
-    return plant()?.plantDetails?.scientificName ?? "";
-  };
 
   const isActiveTab = (path: string) => {
     if (path === "") {
@@ -50,7 +32,6 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
 
   return (
     <div class="px-6 py-8 mx-auto max-w-[1400px]">
-      {/* Critical error boundary - plant data is required for entire page */}
       <ErrorBoundary
         fallback={(error) => (
           <div class="min-h-screen flex items-center justify-center p-6">
@@ -82,7 +63,6 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
           <Show when={plant()}>
             {(plantData) => (
               <>
-                {/* Breadcrumb & Header */}
                 <div class="mb-6">
                   <nav class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
                     <A href="/app/seller" class="hover:text-forest-600 dark:hover:text-forest-400 transition-colors">
@@ -93,7 +73,10 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
                       Plants
                     </A>
                     <ChevronRightIcon class="w-4 h-4" />
-                    <span class="text-forest-800 dark:text-cream-50 font-medium truncate">{getPlantName()}</span>
+                    <span class="text-forest-800 dark:text-cream-50 font-medium truncate">
+                      {plantData().translations?.find(t => t.locale === "en")?.name
+                        ?? plantData().translations?.[0]?.name ?? ""}
+                    </span>
                   </nav>
 
                   <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
@@ -105,48 +88,21 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
                         <ChevronLeftIcon class="w-5 h-5 text-gray-600 dark:text-gray-400" />
                       </A>
                       <div>
-                        <div class="flex items-center gap-3 flex-wrap">
-                          <h1 class="text-2xl md:text-3xl font-bold text-forest-800 dark:text-cream-50">
-                            {getPlantName()}
-                          </h1>
-                          <Badge variant={getStatusVariant(plantData().status)}>
-                            {getStatusLabel(plantData().status)}
-                          </Badge>
-                        </div>
+                        <h1 class="text-2xl md:text-3xl font-bold text-forest-800 dark:text-cream-50">
+                          {plantData().translations?.find(t => t.locale === "en")?.name
+                            ?? plantData().translations?.[0]?.name ?? ""}
+                        </h1>
                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                          {getScientificName()}
+                          {plantData().plantDetails?.scientificName ?? ""}
                         </p>
                         <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">
                           Slug: <span class="font-mono text-xs">{plantData().slug}</span>
                         </p>
                       </div>
                     </div>
-
-                    <div class="flex items-center gap-2 flex-shrink-0">
-                      <A
-                        href={`/app/seller/products/plants/${plantData().id}/edit`}
-                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-forest-600 hover:bg-forest-700 text-white rounded-lg font-semibold shadow-sm hover:shadow-md transition-colors"
-                      >
-                        <PencilIcon class="w-4 h-4" />
-                        Edit Plant
-                      </A>
-                      <button
-                        class="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg border border-cream-200 dark:border-forest-700 text-gray-700 dark:text-gray-300 hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors"
-                        title="Share"
-                      >
-                        <ShareIcon class="w-4 h-4" />
-                      </button>
-                      <button
-                        class="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg border border-cream-200 dark:border-forest-700 text-gray-700 dark:text-gray-300 hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors"
-                        title="More actions"
-                      >
-                        <DotsVerticalIcon class="w-4 h-4" />
-                      </button>
-                    </div>
                   </div>
                 </div>
 
-                {/* Tab Navigation */}
                 <div class="mb-6">
                   <div class="border-b border-cream-200 dark:border-forest-700">
                     <nav class="flex gap-0 -mb-px overflow-x-auto">
@@ -168,7 +124,6 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
                   </div>
                 </div>
 
-                {/* Each child route has its own ErrorBoundary for route-specific errors */}
                 {props.children}
               </>
             )}
