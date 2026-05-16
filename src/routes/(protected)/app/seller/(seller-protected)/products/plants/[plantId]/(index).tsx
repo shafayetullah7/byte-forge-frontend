@@ -52,6 +52,7 @@ import {
   getVariegationLabel,
 } from "./helpers";
 import Badge from "~/components/ui/Badge";
+import { useI18n } from "~/i18n";
 
 // ─── Care Card Component ────────────────────────────────────────────
 
@@ -119,6 +120,7 @@ function InstructionRow(props: {
 // ─── Main Overview Route ────────────────────────────────────────────
 
 export default function OverviewRoute() {
+  const { t } = useI18n();
   const params = useParams();
 
   const plant = createAsync(
@@ -130,14 +132,14 @@ export default function OverviewRoute() {
     <ErrorBoundary fallback={(error) => (
       <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
         <p class="text-sm text-amber-700 dark:text-amber-300">
-          Failed to load plant details: {error.message}
+          {t("seller.products.plantDetail.loadFailed")}: {error.message}
         </p>
       </div>
     )}>
       <Show when={plant()}>
         {(plantData) => {
           const totalStock = (plantData().variants ?? []).reduce((sum, v) => sum + v.inventoryCount, 0);
-          const inventory = getInventoryStatus(totalStock);
+          const inventory = getInventoryStatus(totalStock, t as (key: string, ...args: any[]) => string);
 
           return (
             <div class="space-y-6">
@@ -163,7 +165,7 @@ export default function OverviewRoute() {
 
                   {/* Translations & Info */}
                   <div class="flex-1 p-6">
-                    <h2 class="text-lg font-bold text-forest-800 dark:text-cream-50 mb-1">English</h2>
+                    <h2 class="text-lg font-bold text-forest-800 dark:text-cream-50 mb-1">{t("seller.products.plantOverview.english")}</h2>
                     <p class="text-xl font-semibold text-forest-800 dark:text-cream-50 mb-2">
                       {plantData().translations?.find(t => t.locale === "en")?.name
                         ?? plantData().translations?.[0]?.name ?? ""}
@@ -175,7 +177,7 @@ export default function OverviewRoute() {
 
                     {plantData().translations?.find(t => t.locale === "bn") && (
                       <div class="mt-4 pt-4 border-t border-cream-200 dark:border-forest-700">
-                        <h2 class="text-lg font-bold text-forest-800 dark:text-cream-50 mb-1">বাংলা</h2>
+                        <h2 class="text-lg font-bold text-forest-800 dark:text-cream-50 mb-1">{t("seller.products.plantOverview.bengali")}</h2>
                         <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                           {plantData().translations?.find(t => t.locale === "bn")?.description ?? ""}
                         </p>
@@ -184,7 +186,7 @@ export default function OverviewRoute() {
 
                     <div class="mt-4 pt-4 border-t border-cream-200 dark:border-forest-700">
                       <p class="text-xs text-gray-500 dark:text-gray-400">
-                        Scientific Name: <span class="text-gray-700 dark:text-gray-300 italic">{plantData().plantDetails?.scientificName ?? "—"}</span>
+                        {t("seller.products.plantOverview.scientificName")}: <span class="text-gray-700 dark:text-gray-300 italic">{plantData().plantDetails?.scientificName ?? "—"}</span>
                       </p>
                     </div>
                   </div>
@@ -199,13 +201,13 @@ export default function OverviewRoute() {
 
                   {/* ─── Classification & Details ─── */}
                   <SectionCard
-                    title="Classification & Details"
+                    title={t("seller.products.plantOverview.classificationDetails")}
                     icon={<SproutIcon class="w-4 h-4 text-gray-400" />}
                   >
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8">
                       <div>
                         <DetailRow
-                          label="Category (EN)"
+                          label={t("seller.products.plantOverview.categoryEn")}
                           value={
                             plantData().plantDetails?.category?.translations?.find(t => t.locale === "en")?.name
                               ?? plantData().plantDetails?.category?.translations?.[0]?.name ?? "—"
@@ -213,7 +215,7 @@ export default function OverviewRoute() {
                           icon={() => <FolderIcon class="w-4 h-4" />}
                         />
                         <DetailRow
-                          label="শ্রেণী (BN)"
+                          label={t("seller.products.plantOverview.categoryBn")}
                           value={
                             plantData().plantDetails?.category?.translations?.find(t => t.locale === "bn")?.name
                               ?? "—"
@@ -221,12 +223,12 @@ export default function OverviewRoute() {
                           icon={() => <FolderIcon class="w-4 h-4" />}
                         />
                         <DetailRow
-                          label="Scientific Name"
+                          label={t("seller.products.plantOverview.scientificName")}
                           value={plantData().plantDetails?.scientificName ?? "—"}
                           icon={() => <InfoCircleIcon class="w-4 h-4" />}
                         />
                         <DetailRow
-                          label="Common Names (EN)"
+                          label={t("seller.products.plantOverview.commonNamesEn")}
                           value={
                             plantData().plantDetails?.translations?.find(t => t.locale === "en")?.commonNames
                               ?? plantData().plantDetails?.translations?.[0]?.commonNames ?? "—"
@@ -234,7 +236,7 @@ export default function OverviewRoute() {
                           icon={() => <ChatBubbleLeftRightIcon class="w-4 h-4" />}
                         />
                         <DetailRow
-                          label="সাধারণ নাম (BN)"
+                          label={t("seller.products.plantOverview.commonNamesBn")}
                           value={
                             plantData().plantDetails?.translations?.find(t => t.locale === "bn")?.commonNames
                               ?? "—"
@@ -242,7 +244,7 @@ export default function OverviewRoute() {
                           icon={() => <ChatBubbleLeftRightIcon class="w-4 h-4" />}
                         />
                         <DetailRow
-                          label="Origin (EN)"
+                          label={t("seller.products.plantOverview.originEn")}
                           value={
                             plantData().plantDetails?.translations?.find(t => t.locale === "en")?.origin
                               ?? plantData().plantDetails?.translations?.[0]?.origin ?? "—"
@@ -250,7 +252,7 @@ export default function OverviewRoute() {
                           icon={() => <GlobeAltIcon class="w-4 h-4" />}
                         />
                         <DetailRow
-                          label="উৎপত্তি (BN)"
+                          label={t("seller.products.plantOverview.originBn")}
                           value={
                             plantData().plantDetails?.translations?.find(t => t.locale === "bn")?.origin
                               ?? "—"
@@ -260,7 +262,7 @@ export default function OverviewRoute() {
                       </div>
                       <div>
                         <DetailRow
-                          label="Soil Type (EN)"
+                          label={t("seller.products.plantOverview.soilTypeEn")}
                           value={
                             plantData().plantDetails?.translations?.find(t => t.locale === "en")?.soilType
                               ?? plantData().plantDetails?.translations?.[0]?.soilType ?? "—"
@@ -268,7 +270,7 @@ export default function OverviewRoute() {
                           icon={() => <BeakerIcon class="w-4 h-4" />}
                         />
                         <DetailRow
-                          label="মাটির ধরন (BN)"
+                          label={t("seller.products.plantOverview.soilTypeBn")}
                           value={
                             plantData().plantDetails?.translations?.find(t => t.locale === "bn")?.soilType
                               ?? "—"
@@ -276,17 +278,17 @@ export default function OverviewRoute() {
                           icon={() => <BeakerIcon class="w-4 h-4" />}
                         />
                         <DetailRow
-                          label="Mature Height"
+                          label={t("seller.products.plantOverview.matureHeight")}
                           value={plantData().plantDetails?.matureHeight ?? "—"}
                           icon={() => <RulerIcon class="w-4 h-4" />}
                         />
                         <DetailRow
-                          label="Mature Spread"
+                          label={t("seller.products.plantOverview.matureSpread")}
                           value={plantData().plantDetails?.matureSpread ?? "—"}
                           icon={() => <RulerIcon class="w-4 h-4" />}
                         />
                         <DetailRow
-                          label="Toxicity (EN)"
+                          label={t("seller.products.plantOverview.toxicityEn")}
                           value={
                             plantData().plantDetails?.translations?.find(t => t.locale === "en")?.toxicityInfo
                               ?? plantData().plantDetails?.translations?.[0]?.toxicityInfo ?? "—"
@@ -294,7 +296,7 @@ export default function OverviewRoute() {
                           icon={() => <ExclamationCircleIcon class="w-4 h-4" />}
                         />
                         <DetailRow
-                          label="বিষাক্ততা (BN)"
+                          label={t("seller.products.plantOverview.toxicityBn")}
                           value={
                             plantData().plantDetails?.translations?.find(t => t.locale === "bn")?.toxicityInfo
                               ?? "—"
@@ -307,7 +309,7 @@ export default function OverviewRoute() {
                     {/* Tags */}
                     <Show when={(plantData().plantDetails?.tags ?? []).length > 0}>
                       <div class="mt-4 pt-4 border-t border-cream-100 dark:border-forest-700/50">
-                        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Tags</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">{t("seller.products.plantOverview.tags")}</p>
                         <div class="flex flex-wrap gap-2">
                           <For each={plantData().plantDetails?.tags ?? []}>
                             {(tag) => {
@@ -334,7 +336,7 @@ export default function OverviewRoute() {
                   <Show when={plantData().plantDetails}>
                     {(pd) => (
                       <SectionCard
-                        title="Care Requirements"
+                        title={t("seller.products.plantOverview.careRequirements")}
                         icon={<CloudIcon class="w-4 h-4 text-gray-400" />}
                       >
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -342,13 +344,13 @@ export default function OverviewRoute() {
                             {(light) => (
                               <CareCard
                                 icon={<SunIcon class="w-5 h-5 text-forest-600 dark:text-forest-400" />}
-                                titleEn="Light"
+                                titleEn={t("seller.products.plantOverview.light")}
                                 titleBn="আলো"
                                 badge={{
                                   text: getLightLabel(light() as any),
                                   ...getLightColor(light() as any),
                                 }}
-                                description="Bright, indirect light. Avoid direct sunlight which can scorch variegated leaves."
+                                description={t("seller.products.plantOverview.lightDescription")}
                               />
                             )}
                           </Show>
@@ -356,13 +358,13 @@ export default function OverviewRoute() {
                             {(watering) => (
                               <CareCard
                                 icon={<DropletIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" />}
-                                titleEn="Watering"
+                                titleEn={t("seller.products.plantOverview.watering")}
                                 titleBn="পানি"
                                 badge={{
                                   text: getWateringLabel(watering() as any),
                                   ...getWateringColor(watering() as any),
                                 }}
-                                description="Water when top 2-3 inches of soil are dry. Ensure thorough drainage."
+                                description={t("seller.products.plantOverview.wateringDescription")}
                               />
                             )}
                           </Show>
@@ -370,13 +372,13 @@ export default function OverviewRoute() {
                             {(humidity) => (
                               <CareCard
                                 icon={<CloudIcon class="w-5 h-5 text-sky-600 dark:text-sky-400" />}
-                                titleEn="Humidity"
+                                titleEn={t("seller.products.plantOverview.humidity")}
                                 titleBn="আর্দ্রতা"
                                 badge={{
                                   text: getHumidityLabel(humidity() as any),
                                   ...getHumidityColor(humidity() as any),
                                 }}
-                                description="Maintain optimal humidity for growth."
+                                description={t("seller.products.plantOverview.humidityDescription")}
                               />
                             )}
                           </Show>
@@ -384,14 +386,14 @@ export default function OverviewRoute() {
                             {(temp) => (
                               <CareCard
                                 icon={<ThermometerIcon class="w-5 h-5 text-red-600 dark:text-red-400" />}
-                                titleEn="Temperature"
+                                titleEn={t("seller.products.plantOverview.temperature")}
                                 titleBn="তাপমাত্রা"
                                 badge={{
                                   text: temp(),
                                   bg: "bg-red-100 dark:bg-red-900/40",
                                   textColor: "text-red-700 dark:text-red-300",
                                 }}
-                                description="Maintain temperature within range. Protect from cold drafts."
+                                description={t("seller.products.plantOverview.temperatureDescription")}
                               />
                             )}
                           </Show>
@@ -399,13 +401,13 @@ export default function OverviewRoute() {
                             {(difficulty) => (
                               <CareCard
                                 icon={<SparklesIcon class="w-5 h-5 text-cream-600 dark:text-cream-400" />}
-                                titleEn="Care Difficulty"
+                                titleEn={t("seller.products.plantOverview.careDifficulty")}
                                 titleBn="যত্নের জটিলতা"
                                 badge={{
                                   text: getDifficultyLabel(difficulty() as any),
                                   ...getDifficultyColor(difficulty() as any),
                                 }}
-                                description="Care level required for this plant."
+                                description={t("seller.products.plantOverview.careDifficultyDescription")}
                               />
                             )}
                           </Show>
@@ -413,14 +415,14 @@ export default function OverviewRoute() {
                             {(growth) => (
                               <CareCard
                                 icon={<SproutIcon class="w-5 h-5 text-sage-600 dark:text-sage-400" />}
-                                titleEn="Growth Rate"
+                                titleEn={t("seller.products.plantOverview.growthRate")}
                                 titleBn="বৃদ্ধির হার"
                                 badge={{
                                   text: getGrowthRateLabel(growth() as any),
                                   bg: "bg-sage-100 dark:bg-sage-900/40",
                                   textColor: "text-sage-700 dark:text-sage-300",
                                 }}
-                                description="Expected growth rate under optimal conditions."
+                                description={t("seller.products.plantOverview.growthRateDescription")}
                               />
                             )}
                           </Show>
@@ -436,7 +438,7 @@ export default function OverviewRoute() {
                       const careBn = ci().translations?.find(t => t.locale === "bn") || careEn;
                       return (
                         <SectionCard
-                          title="Care Instructions"
+                          title={t("seller.products.plantOverview.careInstructions")}
                           icon={<ClockIcon class="w-4 h-4 text-gray-400" />}
                         >
                           <div class="space-y-4">
@@ -444,7 +446,7 @@ export default function OverviewRoute() {
                               icon={<SunIcon class="w-5 h-5" />}
                               iconColor="text-cream-600 dark:text-cream-400"
                               bgColor="bg-cream-50 dark:bg-forest-900/30"
-                              titleEn="Light Care"
+                              titleEn={t("seller.products.plantOverview.lightCare")}
                               titleBn="আলোর যত্ন"
                               descEn={careEn.lightInstructions}
                               descBn={careBn.lightInstructions}
@@ -453,7 +455,7 @@ export default function OverviewRoute() {
                               icon={<DropletIcon class="w-5 h-5" />}
                               iconColor="text-blue-600 dark:text-blue-400"
                               bgColor="bg-blue-50 dark:bg-blue-900/20"
-                              titleEn="Watering Guide"
+                              titleEn={t("seller.products.plantOverview.wateringGuide")}
                               titleBn="পানির নির্দেশিকা"
                               descEn={careEn.wateringInstructions}
                               descBn={careBn.wateringInstructions}
@@ -462,7 +464,7 @@ export default function OverviewRoute() {
                               icon={<CloudIcon class="w-5 h-5" />}
                               iconColor="text-sky-600 dark:text-sky-400"
                               bgColor="bg-sky-50 dark:bg-sky-900/20"
-                              titleEn="Humidity Care"
+                              titleEn={t("seller.products.plantOverview.humidityCare")}
                               titleBn="আর্দ্রতার যত্ন"
                               descEn={careEn.humidityInstructions}
                               descBn={careBn.humidityInstructions}
@@ -471,7 +473,7 @@ export default function OverviewRoute() {
                               icon={<BeakerIcon class="w-5 h-5" />}
                               iconColor="text-sage-600 dark:text-sage-400"
                               bgColor="bg-sage-50 dark:bg-sage-900/20"
-                              titleEn="Fertilizer Schedule"
+                              titleEn={t("seller.products.plantOverview.fertilizerSchedule")}
                               titleBn="সারের সময়সূচী"
                               descEn={careEn.fertilizerSchedule}
                               descBn={careBn.fertilizerSchedule}
@@ -480,7 +482,7 @@ export default function OverviewRoute() {
                               icon={<SproutIcon class="w-5 h-5" />}
                               iconColor="text-forest-600 dark:text-forest-400"
                               bgColor="bg-forest-50 dark:bg-forest-900/20"
-                              titleEn="Repotting"
+                              titleEn={t("seller.products.plantOverview.repotting")}
                               titleBn="পুনরায় পট"
                               descEn={careEn.repottingFrequency}
                               descBn={careBn.repottingFrequency}
@@ -489,7 +491,7 @@ export default function OverviewRoute() {
                               icon={<ScissorsIcon class="w-5 h-5" />}
                               iconColor="text-purple-600 dark:text-purple-400"
                               bgColor="bg-purple-50 dark:bg-purple-900/20"
-                              titleEn="Pruning"
+                              titleEn={t("seller.products.plantOverview.pruning")}
                               titleBn="ছাঁটাই"
                               descEn={careEn.pruningNotes}
                               descBn={careBn.pruningNotes}
@@ -498,7 +500,7 @@ export default function OverviewRoute() {
                               icon={<ExclamationCircleIcon class="w-5 h-5" />}
                               iconColor="text-red-600 dark:text-red-400"
                               bgColor="bg-red-50 dark:bg-red-900/20"
-                              titleEn="Common Problems"
+                              titleEn={t("seller.products.plantOverview.commonProblems")}
                               titleBn="সাধারণ সমস্যা"
                               descEn={careEn.commonProblems}
                               descBn={careBn.commonProblems}
@@ -507,7 +509,7 @@ export default function OverviewRoute() {
                               icon={<CalendarIcon class="w-5 h-5" />}
                               iconColor="text-amber-600 dark:text-amber-400"
                               bgColor="bg-amber-50 dark:bg-amber-900/20"
-                              titleEn="Seasonal Care"
+                              titleEn={t("seller.products.plantOverview.seasonalCare")}
                               titleBn="মৌসুমি যত্ন"
                               descEn={careEn.seasonalCare}
                               descBn={careBn.seasonalCare}
@@ -520,12 +522,12 @@ export default function OverviewRoute() {
 
                   {/* ─── Pricing & Inventory ─── */}
                   <SectionCard
-                    title="Pricing & Inventory"
+                    title={t("seller.products.plantOverview.pricingInventory")}
                     icon={<DollarSignIcon class="w-4 h-4 text-gray-400" />}
                   >
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Price Range</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{t("seller.products.plantOverview.priceRange")}</p>
                         <p class="text-2xl font-bold text-forest-800 dark:text-cream-50 mt-1">
                           {(() => {
                             const variants = plantData().variants ?? [];
@@ -538,7 +540,7 @@ export default function OverviewRoute() {
                         </p>
                       </div>
                       <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Total Inventory</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{t("seller.products.plantOverview.totalInventory")}</p>
                         <div class="flex items-center gap-2 mt-1">
                           <p class="text-2xl font-bold text-forest-800 dark:text-cream-50">
                             {totalStock}
@@ -549,7 +551,7 @@ export default function OverviewRoute() {
                         </div>
                       </div>
                       <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Variants</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{t("seller.products.plantOverview.variants")}</p>
                         <p class="text-2xl font-bold text-forest-800 dark:text-cream-50 mt-1">
                           {plantData().variants?.length ?? 0}
                         </p>
@@ -565,46 +567,46 @@ export default function OverviewRoute() {
                   <Show when={plantData().plantDetails}>
                     {(pd) => (
                       <SectionCard
-                        title="Care Profile"
+                        title={t("seller.products.plantOverview.careProfile")}
                         icon={<SunIcon class="w-4 h-4 text-gray-400" />}
                       >
                         <DetailRow
-                          label="Light"
+                          label={t("seller.products.plantOverview.light")}
                           value={pd().lightRequirement ? getLightLabel(pd().lightRequirement as any) : "—"}
                           icon={() => <SunIcon class="w-4 h-4" />}
                         />
                         <DetailRow
-                          label="Watering"
+                          label={t("seller.products.plantOverview.watering")}
                           value={pd().wateringFrequency ? getWateringLabel(pd().wateringFrequency as any) : "—"}
                           icon={() => <DropletIcon class="w-4 h-4" />}
                         />
                         <DetailRow
-                          label="Humidity"
+                          label={t("seller.products.plantOverview.humidity")}
                           value={pd().humidityLevel ? getHumidityLabel(pd().humidityLevel as any) : "—"}
                           icon={() => <MoonIcon class="w-4 h-4" />}
                         />
                         <DetailRow
-                          label="Temperature"
+                          label={t("seller.products.plantOverview.temperature")}
                           value={pd().temperatureRange ?? "—"}
                           icon={() => <ThermometerIcon class="w-4 h-4" />}
                         />
                         <DetailRow
-                          label="Difficulty"
+                          label={t("seller.products.plantOverview.difficulty")}
                           value={pd().careDifficulty ? getDifficultyLabel(pd().careDifficulty as any) : "—"}
                           icon={() => <TrendingUpIcon class="w-4 h-4" />}
                         />
                         <DetailRow
-                          label="Growth Rate"
+                          label={t("seller.products.plantOverview.growthRate")}
                           value={pd().growthRate ? getGrowthRateLabel(pd().growthRate as any) : "—"}
                           icon={() => <TrendingUpIcon class="w-4 h-4" />}
                         />
                         <DetailRow
-                          label="Mature Height"
+                          label={t("seller.products.plantOverview.matureHeight")}
                           value={pd().matureHeight ?? "—"}
                           icon={() => <RulerIcon class="w-4 h-4" />}
                         />
                         <DetailRow
-                          label="Mature Spread"
+                          label={t("seller.products.plantOverview.matureSpread")}
                           value={pd().matureSpread ?? "—"}
                           icon={() => <RulerIcon class="w-4 h-4" />}
                         />
@@ -615,20 +617,20 @@ export default function OverviewRoute() {
                    {/* ─── Variant Preview ─── */}
                    <Show when={(plantData().variants ?? []).length > 0}>
                      <SectionCard
-                       title={`Variants (${plantData().variants?.length ?? 0})`}
+                       title={`${t("seller.products.plantOverview.variants")} (${plantData().variants?.length ?? 0})`}
                        icon={<CubeIcon class="w-4 h-4 text-gray-400" />}
                        action={
                          <a href={`/app/seller/products/plants/${plantData().id}/variants`} class="text-xs text-forest-600 dark:text-forest-400 hover:underline">
-                           View All
+                           {t("seller.products.plantOverview.viewAll")}
                          </a>
                        }
                      >
                        <div class="space-y-3">
                          <For each={(plantData().variants ?? []).slice(0, 2)}>
                            {(variant) => {
-                             const inv = getInventoryStatus(variant.inventoryCount);
+                              const inv = getInventoryStatus(variant.inventoryCount, t as (key: string, ...args: any[]) => string);
                              const titleEn = variant.translations?.find(t => t.locale === "en")?.title
-                               ?? variant.translations?.[0]?.title ?? `Variant ${variant.id}`;
+                               ?? variant.translations?.[0]?.title ?? t("seller.products.plantOverview.variant", variant.id);
                              const titleBn = variant.translations?.find(t => t.locale === "bn")?.title;
                              const attrs = variant.plantAttributes;
 
@@ -648,11 +650,11 @@ export default function OverviewRoute() {
                                  </div>
                                  <div class="grid grid-cols-2 gap-2 mb-2">
                                    <div>
-                                     <p class="text-xs text-gray-500 dark:text-gray-400">Price</p>
+                                     <p class="text-xs text-gray-500 dark:text-gray-400">{t("seller.products.plantOverview.price")}</p>
                                      <p class="text-sm font-bold text-forest-800 dark:text-cream-50">{formatPrice(variant.price)}</p>
                                    </div>
                                    <div>
-                                     <p class="text-xs text-gray-500 dark:text-gray-400">Stock</p>
+                                     <p class="text-xs text-gray-500 dark:text-gray-400">{t("seller.products.plantOverview.stock")}</p>
                                      <p class="text-sm font-bold text-forest-800 dark:text-cream-50">{variant.inventoryCount}</p>
                                    </div>
                                  </div>
@@ -687,21 +689,21 @@ export default function OverviewRoute() {
 
                   {/* ─── Timestamps ─── */}
                   <SectionCard
-                    title="Details"
+                    title={t("seller.products.plantOverview.details")}
                     icon={<ClockIcon class="w-4 h-4 text-gray-400" />}
                   >
                     <DetailRow
-                      label="Created"
+                      label={t("seller.products.plantOverview.created")}
                       value={formatDateTime(plantData().createdAt)}
                       icon={() => <CalendarIcon class="w-4 h-4" />}
                     />
                     <DetailRow
-                      label="Last Updated"
+                      label={t("seller.products.plantOverview.lastUpdated")}
                       value={formatDateTime(plantData().updatedAt)}
                       icon={() => <ClockIcon class="w-4 h-4" />}
                     />
                     <DetailRow
-                      label="Plant ID"
+                      label={t("seller.products.plantOverview.plantId")}
                       value={plantData().id}
                       icon={() => <CheckBadgeIcon class="w-4 h-4" />}
                     />
@@ -710,24 +712,24 @@ export default function OverviewRoute() {
                   {/* ─── Quick Actions ─── */}
                   <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm">
                     <div class="px-6 py-4 border-b border-cream-200 dark:border-forest-700">
-                      <h3 class="text-base font-semibold text-forest-800 dark:text-cream-50">Quick Actions</h3>
+                      <h3 class="text-base font-semibold text-forest-800 dark:text-cream-50">{t("seller.products.plantOverview.quickActions")}</h3>
                     </div>
                     <div class="p-4 space-y-1">
                       <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors text-gray-700 dark:text-gray-300">
                         <PencilIcon class="w-4 h-4" />
-                        Edit Plant
+                        {t("seller.products.plantOverview.editPlant")}
                       </button>
                       <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors text-gray-700 dark:text-gray-300">
                         <ArchiveIcon class="w-4 h-4" />
-                        Archive Plant
+                        {t("seller.products.plantOverview.archivePlant")}
                       </button>
                       <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors text-gray-700 dark:text-gray-300">
                         <ArrowPathIcon class="w-4 h-4" />
-                        Duplicate Plant
+                        {t("seller.products.plantOverview.duplicatePlant")}
                       </button>
                       <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-terracotta-600 dark:text-terracotta-400">
                         <TrashIcon class="w-4 h-4" />
-                        Delete Plant
+                        {t("seller.products.plantOverview.deletePlant")}
                       </button>
                     </div>
                   </div>

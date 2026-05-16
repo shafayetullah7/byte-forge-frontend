@@ -40,10 +40,10 @@ export function getProductTypeColor(type: ProductType): { bg: string; text: stri
   return colors[type];
 }
 
-export function getInventoryLabel(count: number, threshold = 10): { label: string; variant: "forest" | "cream" | "terracotta" } {
-  if (count === 0) return { label: "Out of Stock", variant: "terracotta" };
-  if (count <= threshold) return { label: `Low Stock (${count})`, variant: "cream" };
-  return { label: `In Stock (${count})`, variant: "forest" };
+export function getInventoryLabel(count: number, threshold = 10, t?: (key: string, ...args: any[]) => string): { label: string; variant: "forest" | "cream" | "terracotta" } {
+  if (count === 0) return { label: t ? t("seller.products.inventoryDetail.inventoryStatus.outOfStock") : "Out of Stock", variant: "terracotta" };
+  if (count <= threshold) return { label: t ? t("seller.products.inventoryDetail.inventoryStatus.lowStock", count) : `Low Stock (${count})`, variant: "cream" };
+  return { label: t ? t("seller.products.inventoryDetail.inventoryStatus.inStock", count) : `In Stock (${count})`, variant: "forest" };
 }
 
 export function formatPrice(price: string | number | null | undefined): string {
@@ -95,7 +95,7 @@ export function getOrderStatusLabel(status: string): string {
   return labels[status] || status;
 }
 
-export function getStockMovementTypeLabel(type: string): string {
+export function getStockMovementTypeLabel(type: string, t?: (key: string, ...args: any[]) => string): string {
   const labels: Record<string, string> = {
     INITIAL_STOCK: "Initial Stock",
     RESTOCK: "Restock",
@@ -109,6 +109,10 @@ export function getStockMovementTypeLabel(type: string): string {
     TRANSFER_OUT: "Transfer Out",
     TRANSFER_IN: "Transfer In",
   };
+  if (t) {
+    const translated = t(`seller.products.inventoryDetail.movementType.${type}` as any);
+    return translated !== `seller.products.inventoryDetail.movementType.${type}` ? translated : (labels[type] || type);
+  }
   return labels[type] || type;
 }
 

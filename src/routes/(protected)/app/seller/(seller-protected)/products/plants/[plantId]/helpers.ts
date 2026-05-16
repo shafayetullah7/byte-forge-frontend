@@ -45,10 +45,10 @@ export function getStatusLabel(status: ProductStatus): string {
   return labels[status];
 }
 
-export function getInventoryStatus(count: number): { label: string; variant: "forest" | "cream" | "terracotta" } {
-  if (count === 0) return { label: "Out of Stock", variant: "terracotta" };
-  if (count <= 5) return { label: "Low Stock", variant: "cream" };
-  return { label: `${count} in stock`, variant: "forest" };
+export function getInventoryStatus(count: number, t?: (key: string, ...args: any[]) => string): { label: string; variant: "forest" | "cream" | "terracotta" } {
+  if (count === 0) return { label: t ? t("seller.products.inventory.outOfStock") : "Out of Stock", variant: "terracotta" };
+  if (count <= 5) return { label: t ? t("seller.products.inventoryDetail.inventoryStatus.lowStock", count) : "Low Stock", variant: "cream" };
+  return { label: t ? t("seller.products.inventory.inStock", count) : `${count} in stock`, variant: "forest" };
 }
 
 export function formatPrice(price: string | number | null | undefined): string {

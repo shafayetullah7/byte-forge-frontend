@@ -6,6 +6,7 @@ import Button from "~/components/ui/Button";
 import type { VariantInventoryDetail } from "~/lib/api/types/seller.types";
 
 interface AdjustStockModalProps {
+  t: (key: string, ...args: any[]) => string;
   isOpen: boolean;
   onClose: () => void;
   variant: VariantInventoryDetail | null;
@@ -56,38 +57,38 @@ export default function AdjustStockModal(props: AdjustStockModalProps) {
       });
 
       if (result && !result.success) {
-        setError(result.error?.message || "Failed to adjust stock. Please try again.");
+        setError(result.error?.message || props.t("seller.products.inventoryDetail.adjustModal.failedMessage"));
       }
     } catch (err: any) {
-      setError(err?.message || "Failed to adjust stock. Please try again.");
+      setError(err?.message || props.t("seller.products.inventoryDetail.adjustModal.failedMessage"));
     }
   };
 
   return (
-    <Modal isOpen={props.isOpen} onClose={handleClose} title="Adjust Stock" size="md">
+    <Modal isOpen={props.isOpen} onClose={handleClose} title={props.t("seller.products.inventoryDetail.adjustModal.title")} size="md">
       <div class="space-y-4">
         <div class="p-3 bg-gray-50 dark:bg-forest-900/30 rounded-lg border border-gray-200 dark:border-forest-700">
-          <p class="text-sm font-medium text-forest-800 dark:text-cream-50">{props.variant?.variantName || "Unnamed Variant"}</p>
+          <p class="text-sm font-medium text-forest-800 dark:text-cream-50">{props.variant?.variantName || props.t("seller.products.inventoryDetail.unnamedVariant")}</p>
           <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            SKU: {props.variant?.sku || "—"} · Current stock: {props.variant?.quantity ?? 0}
+            SKU: {props.variant?.sku || "\u2014"} \u00b7 Current stock: {props.variant?.quantity ?? 0}
           </p>
         </div>
 
         <div class="p-3 bg-cream-50 dark:bg-cream-900/20 rounded-lg border border-cream-200 dark:border-cream-800">
           <p class="text-xs text-cream-700 dark:text-cream-400">
-            Use <strong>positive numbers</strong> to add stock, <strong>negative numbers</strong> to remove stock.
+            {props.t("seller.products.inventoryDetail.adjustModal.hint")}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} class="space-y-4">
           <Input
-            label="Quantity Change"
+            label={props.t("seller.products.inventoryDetail.adjustModal.quantityChange")}
             type="number"
-            placeholder="e.g., 10 or -5"
+            placeholder={props.t("seller.products.inventoryDetail.adjustModal.quantityChangePlaceholder")}
             value={quantityChange()}
             onInput={(e) => setQuantityChange(e.currentTarget.value)}
             required
-            error={isZero() && quantityChange() ? "Enter a non-zero value" : undefined}
+            error={isZero() && quantityChange() ? props.t("seller.products.inventoryDetail.adjustModal.nonZeroValue") : undefined}
           />
 
           <Show when={quantityChange()}>
@@ -98,21 +99,21 @@ export default function AdjustStockModal(props: AdjustStockModalProps) {
                   ? "bg-terracotta-50 dark:bg-terracotta-900/20 text-terracotta-700 dark:text-terracotta-400"
                   : "bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
             }`}>
-              {isPositive() ? "+" : ""}{parsedChange()} units → New total: {(props.variant?.quantity ?? 0) + parsedChange()}
+              {isPositive() ? "+" : ""}{parsedChange()} units \u2192 New total: {(props.variant?.quantity ?? 0) + parsedChange()}
             </div>
           </Show>
 
           <Input
-            label="Reference (optional)"
+            label={props.t("seller.products.inventoryDetail.adjustModal.referenceOptional")}
             type="text"
-            placeholder="e.g., Inventory audit, Stock count"
+            placeholder={props.t("seller.products.inventoryDetail.adjustModal.referencePlaceholder")}
             value={reference()}
             onInput={(e) => setReference(e.currentTarget.value)}
           />
 
           <Textarea
-            label="Reason"
-            placeholder="Explain why stock is being adjusted"
+            label={props.t("seller.products.inventoryDetail.adjustModal.reason")}
+            placeholder={props.t("seller.products.inventoryDetail.adjustModal.reasonPlaceholder")}
             value={note()}
             onInput={(e) => setNote(e.currentTarget.value)}
             rows={3}
@@ -129,7 +130,7 @@ export default function AdjustStockModal(props: AdjustStockModalProps) {
 
           <div class="flex items-center justify-end gap-3 pt-2">
             <Button type="button" variant="secondary" onClick={handleClose} disabled={props.isSubmitting}>
-              Cancel
+              {props.t("common.cancel")}
             </Button>
             <Button
               type="submit"
@@ -137,7 +138,7 @@ export default function AdjustStockModal(props: AdjustStockModalProps) {
               loading={props.isSubmitting}
               disabled={!isFormValid() || props.isSubmitting}
             >
-              {isNegative() ? "Remove" : "Add"} Stock
+              {isNegative() ? props.t("seller.products.inventoryDetail.adjustModal.removeButton") : props.t("seller.products.inventoryDetail.adjustModal.addButton")}
             </Button>
           </div>
         </form>

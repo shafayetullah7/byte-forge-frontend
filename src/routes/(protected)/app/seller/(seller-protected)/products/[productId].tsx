@@ -1,26 +1,22 @@
-import { ErrorBoundary, Suspense, For, Show } from "solid-js";
+import { ErrorBoundary, Suspense, For, Show, createMemo } from "solid-js";
 import { A, useParams, useLocation, createAsync, type RouteSectionProps } from "@solidjs/router";
 import Badge from "~/components/ui/Badge";
 import { PageErrorFallback } from "~/components/seller/PageErrorFallback";
 import { getProductSummary } from "~/lib/api/endpoints/seller/products.api";
 import { getProductTypeColor, getProductTypeLabel, getStatusVariant, getStatusLabel } from "./[productId]/helpers";
+import { PRODUCT_TYPE } from "~/lib/api/types/seller.types";
+import { useI18n } from "~/i18n";
 import {
   ChevronLeftIcon,
   PencilIcon,
   ShareIcon,
   DotsVerticalIcon,
   ChevronRightIcon,
+  SproutIcon,
 } from "~/components/icons";
 
-const tabs = [
-  { id: "overview", label: "Overview", path: "" },
-  { id: "orders", label: "Orders", path: "orders" },
-  { id: "reviews", label: "Reviews", path: "reviews" },
-  { id: "inventory", label: "Inventory", path: "inventory" },
-  { id: "activity", label: "Activity", path: "activity" },
-];
-
 export default function ProductDetailLayout(props: RouteSectionProps) {
+  const { t } = useI18n();
   const params = useParams();
   const location = useLocation();
 
@@ -28,6 +24,14 @@ export default function ProductDetailLayout(props: RouteSectionProps) {
     () => getProductSummary(params.productId as string),
     { deferStream: true },
   );
+
+  const tabs = createMemo(() => [
+    { id: "overview", label: t("seller.products.productDetail.tabs.overview"), path: "" },
+    { id: "orders", label: t("seller.products.productDetail.tabs.orders"), path: "orders" },
+    { id: "reviews", label: t("seller.products.productDetail.tabs.reviews"), path: "reviews" },
+    { id: "inventory", label: t("seller.products.productDetail.tabs.inventory"), path: "inventory" },
+    { id: "activity", label: t("seller.products.productDetail.tabs.activity"), path: "activity" },
+  ]);
 
   const isActiveTab = (path: string) => {
     if (path === "") {
@@ -43,23 +47,23 @@ export default function ProductDetailLayout(props: RouteSectionProps) {
         fallback={(error) => (
           <PageErrorFallback
             error={error}
-            title="Failed to Load Product Details"
+            title={t("seller.products.productDetail.loadFailed")}
             backHref="/app/seller/products"
-            backLabel="Back to Products"
+            backLabel={t("seller.products.productDetail.backToProducts")}
           />
         )}
       >
-        <Suspense fallback={<div class="p-6">Loading product details...</div>}>
+        <Suspense fallback={<div class="p-6">{t("seller.products.productDetail.loading")}</div>}>
           <Show when={product()}>
             {/* Breadcrumb & Header */}
               <div class="mb-6">
                 <nav class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
                   <A href="/app/seller" class="hover:text-forest-600 dark:hover:text-forest-400 transition-colors">
-                    Dashboard
+                    {t("seller.products.productDetail.breadcrumb.dashboard")}
                   </A>
                   <ChevronRightIcon class="w-4 h-4" />
                   <A href="/app/seller/products" class="hover:text-forest-600 dark:hover:text-forest-400 transition-colors">
-                    Products
+                    {t("seller.products.productDetail.breadcrumb.products")}
                   </A>
                   <ChevronRightIcon class="w-4 h-4" />
                   <span class="text-forest-800 dark:text-cream-50 font-medium truncate">{product()!.name}</span>
@@ -90,29 +94,39 @@ export default function ProductDetailLayout(props: RouteSectionProps) {
                         {product()!.shortDescription}
                       </p>
                       <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                        Slug: <span class="font-mono text-xs">{product()!.slug}</span>
+                        {t("seller.products.productDetail.slug")}: <span class="font-mono text-xs">{product()!.slug}</span>
                       </p>
                     </div>
                   </div>
 
                   {/* Right: Actions */}
                   <div class="flex items-center gap-2 flex-shrink-0">
-                    <A
-                      href={`/app/seller/products/${product()!.id}/edit`}
-                      class="inline-flex items-center gap-2 px-4 py-2.5 bg-forest-600 hover:bg-forest-700 text-white rounded-lg font-semibold shadow-sm hover:shadow-md transition-colors"
-                    >
-                      <PencilIcon class="w-4 h-4" />
-                      Edit Product
-                    </A>
+                    {product()!.productType === PRODUCT_TYPE.PLANT ? (
+                      <A
+                        href={`/app/seller/products/plants/${product()!.id}`}
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold border-2 border-forest-600 dark:border-forest-400 text-forest-700 dark:text-forest-300 hover:bg-forest-50 dark:hover:bg-forest-900/30 transition-colors"
+                      >
+                        <SproutIcon class="w-4 h-4" />
+                        {t("seller.products.productDetail.plantDetails")}
+                      </A>
+                    ) : (
+                      <A
+                        href={`/app/seller/products/${product()!.id}/edit`}
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-forest-600 hover:bg-forest-700 text-white rounded-lg font-semibold shadow-sm hover:shadow-md transition-colors"
+                      >
+                        <PencilIcon class="w-4 h-4" />
+                        {t("seller.products.productDetail.editProduct")}
+                      </A>
+                    )}
                     <button
                       class="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg border border-cream-200 dark:border-forest-700 text-gray-700 dark:text-gray-300 hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors"
-                      title="Share"
+                      title={t("seller.products.productDetail.share")}
                     >
                       <ShareIcon class="w-4 h-4" />
                     </button>
                     <button
                       class="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg border border-cream-200 dark:border-forest-700 text-gray-700 dark:text-gray-300 hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors"
-                      title="More actions"
+                      title={t("seller.products.productDetail.moreActions")}
                     >
                       <DotsVerticalIcon class="w-4 h-4" />
                     </button>
@@ -124,7 +138,7 @@ export default function ProductDetailLayout(props: RouteSectionProps) {
               <div class="mb-6">
                 <div class="border-b border-cream-200 dark:border-forest-700">
                   <nav class="flex gap-0 -mb-px overflow-x-auto">
-                    <For each={tabs}>
+                    <For each={tabs()}>
                       {(tab) => (
                         <A
                           href={`/app/seller/products/${product()!.id}/${tab.path}`}

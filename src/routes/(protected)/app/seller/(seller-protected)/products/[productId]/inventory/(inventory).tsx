@@ -29,6 +29,7 @@ import StockMovementsTimeline, { type MovementFilters } from "./components/Stock
 import RestockModal from "./components/RestockModal";
 import AdjustStockModal from "./components/AdjustStockModal";
 import MarkDamagedModal from "./components/MarkDamagedModal";
+import { useI18n } from "~/i18n";
 
 /**
  * Restock Variant Action
@@ -112,6 +113,7 @@ export const route = {
 } satisfies RouteDefinition;
 
 export default function ProductInventoryRoute() {
+  const { t } = useI18n();
   const params = useParams();
   const productId = params.productId as string;
 
@@ -166,14 +168,14 @@ export default function ProductInventoryRoute() {
   createEffect(() => {
     if (restockSubmission.result?.success === false && restockSubmission.result?.error) {
       const msg = restockSubmission.result.error.message;
-      toaster.error(msg.includes(".") ? msg : msg || "Failed to restock stock");
+      toaster.error(msg.includes(".") ? msg : msg || t("seller.products.inventoryDetail.restockFailed"));
     }
   });
 
   // Handle restock success
   createEffect(() => {
     if (restockSubmission.result?.success === true && !restockSubmission.pending) {
-      toaster.success("Stock restocked successfully");
+      toaster.success(t("seller.products.inventoryDetail.restockSuccess"));
       setShouldCloseModal(true);
     }
   });
@@ -182,14 +184,14 @@ export default function ProductInventoryRoute() {
   createEffect(() => {
     if (adjustSubmission.result?.success === false && adjustSubmission.result?.error) {
       const msg = adjustSubmission.result.error.message;
-      toaster.error(msg.includes(".") ? msg : msg || "Failed to adjust stock");
+      toaster.error(msg.includes(".") ? msg : msg || t("seller.products.inventoryDetail.adjustFailed"));
     }
   });
 
   // Handle adjust success
   createEffect(() => {
     if (adjustSubmission.result?.success === true && !adjustSubmission.pending) {
-      toaster.success("Stock adjusted successfully");
+      toaster.success(t("seller.products.inventoryDetail.adjustSuccess"));
       setShouldCloseModal(true);
     }
   });
@@ -198,14 +200,14 @@ export default function ProductInventoryRoute() {
   createEffect(() => {
     if (damagedSubmission.result?.success === false && damagedSubmission.result?.error) {
       const msg = damagedSubmission.result.error.message;
-      toaster.error(msg.includes(".") ? msg : msg || "Failed to mark stock as damaged");
+      toaster.error(msg.includes(".") ? msg : msg || t("seller.products.inventoryDetail.damagedFailed"));
     }
   });
 
   // Handle damaged success
   createEffect(() => {
     if (damagedSubmission.result?.success === true && !damagedSubmission.pending) {
-      toaster.success("Stock marked as damaged successfully");
+      toaster.success(t("seller.products.inventoryDetail.damagedSuccess"));
       setShouldCloseModal(true);
     }
   });
@@ -228,7 +230,7 @@ export default function ProductInventoryRoute() {
 
   // Handlers to submit via actions
   const handleRestock = async (data: { quantity: number; reference: string; note: string }) => {
-    if (!selectedVariant()) return { success: false, error: { message: "No variant selected" } };
+    if (!selectedVariant()) return { success: false, error: { message: t("seller.products.inventoryDetail.noVariantSelected") } };
 
     const result = await restockTrigger({
       productId,
@@ -247,7 +249,7 @@ export default function ProductInventoryRoute() {
   };
 
   const handleAdjust = async (data: { quantityChange: number; reference: string; note: string }) => {
-    if (!selectedVariant()) return { success: false, error: { message: "No variant selected" } };
+    if (!selectedVariant()) return { success: false, error: { message: t("seller.products.inventoryDetail.noVariantSelected") } };
 
     const result = await adjustTrigger({
       productId,
@@ -266,7 +268,7 @@ export default function ProductInventoryRoute() {
   };
 
   const handleDamaged = async (data: { quantity: number; note: string }) => {
-    if (!selectedVariant()) return { success: false, error: { message: "No variant selected" } };
+    if (!selectedVariant()) return { success: false, error: { message: t("seller.products.inventoryDetail.noVariantSelected") } };
 
     const result = await damagedTrigger({
       productId,
@@ -307,7 +309,7 @@ export default function ProductInventoryRoute() {
       <Suspense fallback={
         <div class="flex items-center justify-center py-12">
           <SpinnerIcon class="h-8 w-8 text-gray-400 animate-spin" />
-          <span class="ml-3 text-sm text-gray-500 dark:text-gray-400">Loading inventory...</span>
+          <span class="ml-3 text-sm text-gray-500 dark:text-gray-400">{t("seller.products.inventoryDetail.loading")}</span>
         </div>
       }>
         <Show when={inventory()}>
@@ -316,48 +318,48 @@ export default function ProductInventoryRoute() {
               {/* Inventory Overview Cards */}
               <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
                 <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm p-5">
-                  <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total Stock</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{t("seller.products.inventoryDetail.totalStock")}</p>
                   <p class="text-2xl font-bold text-forest-800 dark:text-cream-50 mt-1">
                     {inv().totalStock}
                   </p>
                   <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                    {inv().variants.length} variants
+                    {inv().variants.length} {t("seller.products.inventoryDetail.variants")}
                   </p>
                 </div>
 
                 <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm p-5">
-                  <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Available</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{t("seller.products.inventoryDetail.available")}</p>
                   <p class="text-2xl font-bold text-forest-600 dark:text-forest-400 mt-1">
                     {inv().availableStock}
                   </p>
                   <div class="flex items-center gap-1 mt-1">
                     <TrendingUpIcon class="w-3 h-3 text-forest-500" />
-                    <p class="text-xs text-gray-400 dark:text-gray-500">ready to sell</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500">{t("seller.products.inventoryDetail.readyToSell")}</p>
                   </div>
                 </div>
 
                 <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm p-5">
-                  <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Reserved</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{t("seller.products.inventoryDetail.reserved")}</p>
                   <p class="text-2xl font-bold text-cream-600 dark:text-cream-400 mt-1">
                     {inv().reservedStock}
                   </p>
-                  <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">in active orders</p>
+                  <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{t("seller.products.inventoryDetail.inActiveOrders")}</p>
                 </div>
 
                 <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm p-5">
-                  <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Low Stock</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{t("seller.products.inventoryDetail.lowStock")}</p>
                   <p class="text-2xl font-bold text-cream-600 dark:text-cream-400 mt-1">
                     {inv().lowStockCount}
                   </p>
-                  <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">variants</p>
+                  <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{t("seller.products.inventoryDetail.variants")}</p>
                 </div>
 
                 <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm p-5">
-                  <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Out of Stock</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{t("seller.products.inventoryDetail.outOfStock")}</p>
                   <p class="text-2xl font-bold text-terracotta-600 dark:text-terracotta-400 mt-1">
                     {inv().outOfStockCount}
                   </p>
-                  <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">variants</p>
+                  <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{t("seller.products.inventoryDetail.variants")}</p>
                 </div>
               </div>
 
@@ -382,26 +384,26 @@ export default function ProductInventoryRoute() {
                             : "text-cream-800 dark:text-cream-300"
                         }`}>
                           {outOfStockVariants().length > 0
-                            ? `${outOfStockVariants().length} variant${outOfStockVariants().length > 1 ? "s" : ""} out of stock`
-                            : `${lowStockVariants().length} variant${lowStockVariants().length > 1 ? "s" : ""} low on stock`}
+                            ? t("seller.products.inventoryDetail.outOfStockVariants", outOfStockVariants().length)
+                            : t("seller.products.inventoryDetail.lowOnStockVariants", lowStockVariants().length)}
                         </p>
                         <div class="mt-2 flex flex-wrap gap-2">
                           <For each={[...outOfStockVariants(), ...lowStockVariants()]}>
                             {(v) => {
-                              const label = getInventoryLabel(v.availableQuantity, v.lowStockThreshold);
+                              const label = getInventoryLabel(v.availableQuantity, v.lowStockThreshold, t as unknown as (key: string, ...args: any[]) => string);
                               return (
                                 <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-forest-800 rounded-lg border border-cream-200 dark:border-forest-700">
                                   <span class="text-xs font-medium text-forest-800 dark:text-cream-50 truncate max-w-[150px]">
-                                    {v.variantName || "Unnamed"}
+                                    {v.variantName || t("seller.products.inventoryDetail.unnamedVariant")}
                                   </span>
                                   <Badge variant={label.variant} class="text-xs">
-                                    {v.availableQuantity} left
+                                    {v.availableQuantity} {t("seller.products.inventory.left", v.availableQuantity)}
                                   </Badge>
                                   <button
                                     onClick={() => handleOpenRestock(v)}
                                     class="text-xs text-forest-600 dark:text-forest-400 hover:underline font-medium"
                                   >
-                                    Restock
+                                    {t("seller.products.inventoryDetail.restock")}
                                   </button>
                                 </div>
                               );
@@ -424,7 +426,7 @@ export default function ProductInventoryRoute() {
                         <div class="flex items-center gap-2">
                           <CubeIcon class="w-4 h-4 text-gray-400" />
                           <h3 class="text-base font-semibold text-forest-800 dark:text-cream-50">
-                            Variant Stock Levels
+                            {t("seller.products.inventoryDetail.variantStockLevels")}
                           </h3>
                           <Badge variant="default" class="text-xs">
                             {inv().variants.length}
@@ -439,12 +441,13 @@ export default function ProductInventoryRoute() {
                             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-forest-600 hover:bg-forest-700 text-white text-xs font-medium transition-colors"
                           >
                             <PlusIcon class="w-3.5 h-3.5" />
-                            Quick Restock
+                            {t("seller.products.inventoryDetail.quickRestock")}
                           </button>
                         </div>
                       </div>
 
                       <VariantStockTable
+                        t={t as unknown as (key: string, ...args: any[]) => string}
                         variants={inv().variants}
                         onRestock={handleOpenRestock}
                         onAdjust={handleOpenAdjust}
@@ -462,12 +465,13 @@ export default function ProductInventoryRoute() {
                         <div class="flex items-center gap-2">
                           <ClockIcon class="w-4 h-4 text-gray-400" />
                           <h3 class="text-base font-semibold text-forest-800 dark:text-cream-50">
-                            Stock Movements
+                            {t("seller.products.inventoryDetail.stockMovements")}
                           </h3>
                         </div>
                       </div>
                       <div class="p-4 max-h-[600px] overflow-y-auto custom-scrollbar">
                         <StockMovementsTimeline
+                          t={t as unknown as (key: string, ...args: any[]) => string}
                           movements={movements()?.movements}
                           isLoading={!movements()}
                           error={null}
@@ -489,6 +493,7 @@ export default function ProductInventoryRoute() {
 
       {/* Modals */}
       <RestockModal
+        t={t as unknown as (key: string, ...args: any[]) => string}
         isOpen={activeModal() === "restock"}
         onClose={handleCloseModal}
         variant={selectedVariant()}
@@ -497,6 +502,7 @@ export default function ProductInventoryRoute() {
       />
 
       <AdjustStockModal
+        t={t as unknown as (key: string, ...args: any[]) => string}
         isOpen={activeModal() === "adjust"}
         onClose={handleCloseModal}
         variant={selectedVariant()}
@@ -505,6 +511,7 @@ export default function ProductInventoryRoute() {
       />
 
       <MarkDamagedModal
+        t={t as unknown as (key: string, ...args: any[]) => string}
         isOpen={activeModal() === "damaged"}
         onClose={handleCloseModal}
         variant={selectedVariant()}

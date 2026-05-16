@@ -6,6 +6,7 @@ import Button from "~/components/ui/Button";
 import type { VariantInventoryDetail } from "~/lib/api/types/seller.types";
 
 interface RestockModalProps {
+  t: (key: string, ...args: any[]) => string;
   isOpen: boolean;
   onClose: () => void;
   variant: VariantInventoryDetail | null;
@@ -51,51 +52,49 @@ export default function RestockModal(props: RestockModalProps) {
         note: note().trim(),
       });
 
-      // If the action failed synchronously (not via server action), show error
       if (result && !result.success) {
-        setError(result.error?.message || "Failed to restock. Please try again.");
+        setError(result.error?.message || props.t("seller.products.inventoryDetail.restockModal.failedMessage"));
       }
-      // On success, parent will close modal via shouldCloseModal
     } catch (err: any) {
-      setError(err?.message || "Failed to restock. Please try again.");
+      setError(err?.message || props.t("seller.products.inventoryDetail.restockModal.failedMessage"));
     }
   };
 
   return (
-    <Modal isOpen={props.isOpen} onClose={handleClose} title="Restock Variant" size="md">
+    <Modal isOpen={props.isOpen} onClose={handleClose} title={props.t("seller.products.inventoryDetail.restockModal.title")} size="md">
       <Show when={props.variant}>
         {(v) => (
           <div class="space-y-4">
             <div class="p-3 bg-forest-50 dark:bg-forest-900/30 rounded-lg border border-forest-200 dark:border-forest-700">
-              <p class="text-sm font-medium text-forest-800 dark:text-cream-50">{v().variantName || "Unnamed Variant"}</p>
+              <p class="text-sm font-medium text-forest-800 dark:text-cream-50">{v().variantName || props.t("seller.products.inventoryDetail.unnamedVariant")}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                SKU: {v().sku || "—"} · Current stock: {v().quantity}
+                SKU: {v().sku || "\u2014"} \u00b7 Current stock: {v().quantity}
               </p>
             </div>
 
             <form onSubmit={handleSubmit} class="space-y-4">
               <Input
-                label="Quantity to Add"
+                label={props.t("seller.products.inventoryDetail.restockModal.quantityToAdd")}
                 type="number"
                 min="1"
-                placeholder="Enter quantity"
+                placeholder={props.t("seller.products.inventoryDetail.restockModal.enterQuantity")}
                 value={quantity()}
                 onInput={(e) => setQuantity(e.currentTarget.value)}
                 required
-                error={parsedQuantity() < 0 ? "Quantity must be positive" : undefined}
+                error={parsedQuantity() < 0 ? props.t("seller.products.inventoryDetail.restockModal.quantityMustBePositive") : undefined}
               />
 
               <Input
-                label="Reference (optional)"
+                label={props.t("seller.products.inventoryDetail.restockModal.referenceOptional")}
                 type="text"
-                placeholder="e.g., PO-2026-001, Batch #123"
+                placeholder={props.t("seller.products.inventoryDetail.restockModal.referencePlaceholder")}
                 value={reference()}
                 onInput={(e) => setReference(e.currentTarget.value)}
               />
 
               <Textarea
-                label="Note (optional)"
-                placeholder="e.g., New batch received from supplier"
+                label={props.t("seller.products.inventoryDetail.restockModal.noteOptional")}
+                placeholder={props.t("seller.products.inventoryDetail.restockModal.notePlaceholder")}
                 value={note()}
                 onInput={(e) => setNote(e.currentTarget.value)}
                 rows={3}
@@ -116,7 +115,7 @@ export default function RestockModal(props: RestockModalProps) {
                   onClick={handleClose}
                   disabled={props.isSubmitting}
                 >
-                  Cancel
+                  {props.t("common.cancel")}
                 </Button>
                 <Button
                   type="submit"
@@ -124,7 +123,7 @@ export default function RestockModal(props: RestockModalProps) {
                   loading={props.isSubmitting}
                   disabled={!isFormValid() || props.isSubmitting}
                 >
-                  Restock (+{parsedQuantity()} units)
+                  {props.t("seller.products.inventoryDetail.restockModal.restockButton", parsedQuantity())}
                 </Button>
               </div>
             </form>

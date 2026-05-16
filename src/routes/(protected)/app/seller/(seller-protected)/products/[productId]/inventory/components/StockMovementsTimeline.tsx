@@ -9,6 +9,7 @@ import type { InventoryMovement } from "~/lib/api/types/seller.types";
 import { INVENTORY_MOVEMENT_TYPE } from "~/lib/api/types/seller.types";
 
 interface StockMovementsTimelineProps {
+  t: (key: string, ...args: any[]) => string;
   movements: InventoryMovement[] | undefined;
   isLoading: boolean;
   error?: Error | null;
@@ -24,27 +25,27 @@ export interface MovementFilters {
   movementType?: string;
 }
 
-const MOVEMENT_TYPE_OPTIONS = [
-  { value: "", label: "All Types" },
-  { value: INVENTORY_MOVEMENT_TYPE.INITIAL_STOCK, label: "Initial Stock" },
-  { value: INVENTORY_MOVEMENT_TYPE.RESTOCK, label: "Restock" },
-  { value: INVENTORY_MOVEMENT_TYPE.ORDER_RESERVED, label: "Order Reserved" },
-  { value: INVENTORY_MOVEMENT_TYPE.ORDER_FULFILLED, label: "Order Fulfilled" },
-  { value: INVENTORY_MOVEMENT_TYPE.ORDER_CANCELLED, label: "Order Cancelled" },
-  { value: INVENTORY_MOVEMENT_TYPE.CUSTOMER_RETURN, label: "Customer Return" },
-  { value: INVENTORY_MOVEMENT_TYPE.DAMAGED, label: "Damaged" },
-  { value: INVENTORY_MOVEMENT_TYPE.LOST, label: "Lost" },
-  { value: INVENTORY_MOVEMENT_TYPE.ADJUSTMENT, label: "Adjustment" },
-  { value: INVENTORY_MOVEMENT_TYPE.TRANSFER_OUT, label: "Transfer Out" },
-  { value: INVENTORY_MOVEMENT_TYPE.TRANSFER_IN, label: "Transfer In" },
-];
-
 export default function StockMovementsTimeline(props: StockMovementsTimelineProps) {
   const [showFilters, setShowFilters] = createSignal(false);
 
   const hasActiveFilters = createMemo(
     () => !!(props.activeFilters.variantId || props.activeFilters.movementType)
   );
+
+  const movementTypeOptions = createMemo(() => [
+    { value: "", label: props.t("seller.products.inventoryDetail.allMovementTypes") },
+    { value: INVENTORY_MOVEMENT_TYPE.INITIAL_STOCK, label: props.t("seller.products.inventoryDetail.movementType.INITIAL_STOCK") },
+    { value: INVENTORY_MOVEMENT_TYPE.RESTOCK, label: props.t("seller.products.inventoryDetail.movementType.RESTOCK") },
+    { value: INVENTORY_MOVEMENT_TYPE.ORDER_RESERVED, label: props.t("seller.products.inventoryDetail.movementType.ORDER_RESERVED") },
+    { value: INVENTORY_MOVEMENT_TYPE.ORDER_FULFILLED, label: props.t("seller.products.inventoryDetail.movementType.ORDER_FULFILLED") },
+    { value: INVENTORY_MOVEMENT_TYPE.ORDER_CANCELLED, label: props.t("seller.products.inventoryDetail.movementType.ORDER_CANCELLED") },
+    { value: INVENTORY_MOVEMENT_TYPE.CUSTOMER_RETURN, label: props.t("seller.products.inventoryDetail.movementType.CUSTOMER_RETURN") },
+    { value: INVENTORY_MOVEMENT_TYPE.DAMAGED, label: props.t("seller.products.inventoryDetail.movementType.DAMAGED") },
+    { value: INVENTORY_MOVEMENT_TYPE.LOST, label: props.t("seller.products.inventoryDetail.movementType.LOST") },
+    { value: INVENTORY_MOVEMENT_TYPE.ADJUSTMENT, label: props.t("seller.products.inventoryDetail.movementType.ADJUSTMENT") },
+    { value: INVENTORY_MOVEMENT_TYPE.TRANSFER_OUT, label: props.t("seller.products.inventoryDetail.movementType.TRANSFER_OUT") },
+    { value: INVENTORY_MOVEMENT_TYPE.TRANSFER_IN, label: props.t("seller.products.inventoryDetail.movementType.TRANSFER_IN") },
+  ]);
 
   const timeAgo = (dateStr: string): string => {
     const now = new Date();
@@ -54,12 +55,12 @@ export default function StockMovementsTimeline(props: StockMovementsTimelineProp
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffMinutes < 1) return "Just now";
-    if (diffMinutes < 60) return `${diffMinutes}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
-    return `${Math.floor(diffDays / 30)}mo ago`;
+    if (diffMinutes < 1) return props.t("seller.products.inventoryDetail.justNow");
+    if (diffMinutes < 60) return props.t("seller.products.inventoryDetail.minutesAgo", diffMinutes);
+    if (diffHours < 24) return props.t("seller.products.inventoryDetail.hoursAgo", diffHours);
+    if (diffDays < 7) return props.t("seller.products.inventoryDetail.daysAgo", diffDays);
+    if (diffDays < 30) return props.t("seller.products.inventoryDetail.weeksAgo", Math.floor(diffDays / 7));
+    return props.t("seller.products.inventoryDetail.monthsAgo", Math.floor(diffDays / 30));
   };
 
   const handleTypeFilter = (value: string) => {
@@ -78,7 +79,7 @@ export default function StockMovementsTimeline(props: StockMovementsTimelineProp
           class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-cream-200 dark:border-forest-700 text-sm text-gray-600 dark:text-gray-400 hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors"
         >
           <FilterIcon class="w-4 h-4" />
-          Filters
+          {props.t("seller.products.inventoryDetail.filters")}
           <Show when={hasActiveFilters()}>
             <span class="w-2 h-2 rounded-full bg-forest-500" />
           </Show>
@@ -93,7 +94,7 @@ export default function StockMovementsTimeline(props: StockMovementsTimelineProp
             class="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs text-gray-500 dark:text-gray-400 hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors"
           >
             <XIcon class="w-3 h-3" />
-            Clear all
+            {props.t("seller.products.inventoryDetail.clearAll")}
           </button>
         </Show>
       </div>
@@ -104,14 +105,14 @@ export default function StockMovementsTimeline(props: StockMovementsTimelineProp
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-                Movement Type
+                {props.t("seller.products.inventoryDetail.movementTypeLabel")}
               </label>
               <select
                 value={props.activeFilters.movementType || ""}
                 onChange={(e) => handleTypeFilter(e.currentTarget.value)}
                 class="w-full px-3 py-2 rounded-lg border border-cream-200 dark:border-forest-700 text-sm bg-white dark:bg-forest-900/50 text-gray-700 dark:text-gray-300 focus:border-forest-500 dark:focus:border-forest-400 focus:outline-none"
               >
-                <For each={MOVEMENT_TYPE_OPTIONS}>
+                <For each={movementTypeOptions()}>
                   {(opt) => <option value={opt.value}>{opt.label}</option>}
                 </For>
               </select>
@@ -124,7 +125,7 @@ export default function StockMovementsTimeline(props: StockMovementsTimelineProp
       <Show when={props.isLoading}>
         <div class="flex items-center justify-center py-12">
           <SpinnerIcon class="w-6 h-6 text-gray-400 animate-spin" />
-          <span class="ml-3 text-sm text-gray-500 dark:text-gray-400">Loading movements...</span>
+          <span class="ml-3 text-sm text-gray-500 dark:text-gray-400">{props.t("seller.products.inventoryDetail.loadingMovements")}</span>
         </div>
       </Show>
 
@@ -132,7 +133,7 @@ export default function StockMovementsTimeline(props: StockMovementsTimelineProp
       <Show when={props.error}>
         <div class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
           <p class="text-sm text-red-700 dark:text-red-400">
-            Failed to load stock movements: {props.error?.message}
+            {props.t("seller.products.inventoryDetail.loadMovementsFailed")}: {props.error?.message}
           </p>
         </div>
       </Show>
@@ -143,11 +144,11 @@ export default function StockMovementsTimeline(props: StockMovementsTimelineProp
           <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 dark:bg-forest-700 flex items-center justify-center">
             <ClockIcon class="w-6 h-6 text-gray-400 dark:text-gray-500" />
           </div>
-          <p class="text-sm font-medium text-gray-600 dark:text-gray-400">No stock movements found</p>
+          <p class="text-sm font-medium text-gray-600 dark:text-gray-400">{props.t("seller.products.inventoryDetail.noMovementsFound")}</p>
           <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
             {hasActiveFilters()
-              ? "Try adjusting your filters"
-              : "Stock movements will appear here when inventory changes"}
+              ? props.t("seller.products.inventoryDetail.tryAdjustingFilters")
+              : props.t("seller.products.inventoryDetail.movementsWillAppear")}
           </p>
         </div>
       </Show>
@@ -180,7 +181,7 @@ export default function StockMovementsTimeline(props: StockMovementsTimelineProp
                       <div class="flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2 min-w-0">
                           <span class={`text-xs font-medium px-2 py-0.5 rounded-full ${typeVariant.bg} ${typeVariant.text} whitespace-nowrap`}>
-                            {getStockMovementTypeLabel(movement.movementType)}
+                            {getStockMovementTypeLabel(movement.movementType, props.t)}
                           </span>
                           <Show when={movement.variantSku}>
                             <span class="text-xs text-gray-400 dark:text-gray-500 truncate font-mono">
@@ -231,7 +232,7 @@ export default function StockMovementsTimeline(props: StockMovementsTimelineProp
         <Show when={props.totalPages > 1}>
           <div class="flex items-center justify-between pt-4 border-t border-cream-200 dark:border-forest-700">
             <p class="text-xs text-gray-500 dark:text-gray-400">
-              Page {props.currentPage} of {props.totalPages}
+              {props.t("seller.products.inventoryDetail.pageOf", { page: props.currentPage, total: props.totalPages })}
             </p>
             <div class="flex items-center gap-1">
               <button
@@ -239,14 +240,14 @@ export default function StockMovementsTimeline(props: StockMovementsTimelineProp
                 disabled={props.currentPage <= 1}
                 class="px-3 py-1.5 rounded-lg text-xs font-medium border border-cream-200 dark:border-forest-700 text-gray-600 dark:text-gray-400 hover:bg-cream-50 dark:hover:bg-forest-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
-                Previous
+                {props.t("seller.products.inventoryDetail.previous")}
               </button>
               <button
                 onClick={() => props.onPageChange(props.currentPage + 1)}
                 disabled={props.currentPage >= props.totalPages}
                 class="px-3 py-1.5 rounded-lg text-xs font-medium border border-cream-200 dark:border-forest-700 text-gray-600 dark:text-gray-400 hover:bg-cream-50 dark:hover:bg-forest-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
-                Next
+                {props.t("seller.products.inventoryDetail.next")}
               </button>
             </div>
           </div>

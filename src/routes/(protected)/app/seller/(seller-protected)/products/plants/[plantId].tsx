@@ -1,19 +1,15 @@
-import { ErrorBoundary, Suspense, Show, For } from "solid-js";
+import { ErrorBoundary, Suspense, Show, For, createMemo } from "solid-js";
 import { A, useParams, useLocation, createAsync, type RouteSectionProps, type RouteDefinition } from "@solidjs/router";
 import { ChevronLeftIcon, ChevronRightIcon, ExclamationCircleIcon } from "~/components/icons";
 import { getPlantById } from "~/lib/api/endpoints/seller/plants.api";
-
-const tabs = [
-  { id: "overview", label: "Overview", path: "" },
-  { id: "variants", label: "Variants", path: "variants" },
-  { id: "care", label: "Care Guide", path: "care" },
-];
+import { useI18n } from "~/i18n";
 
 export const route = {
   preload: ({ params }) => getPlantById(params.plantId as string),
 } satisfies RouteDefinition;
 
 export default function PlantDetailLayout(props: RouteSectionProps) {
+  const { t } = useI18n();
   const params = useParams();
   const location = useLocation();
 
@@ -21,6 +17,12 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
     () => getPlantById(params.plantId as string),
     { deferStream: true }
   );
+
+  const tabs = createMemo(() => [
+    { id: "overview", label: t("seller.products.plantDetail.tabs.overview"), path: "" },
+    { id: "variants", label: t("seller.products.plantDetail.tabs.variants"), path: "variants" },
+    { id: "care", label: t("seller.products.plantDetail.tabs.care"), path: "care" },
+  ]);
 
   const isActiveTab = (path: string) => {
     if (path === "") {
@@ -38,7 +40,7 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
             <div class="bg-red-50 border border-red-200 rounded-xl p-8 max-w-md w-full">
               <div class="flex items-center gap-3 mb-4">
                 <ExclamationCircleIcon class="w-6 h-6 text-red-600" />
-                <h2 class="text-lg font-semibold text-red-900">Failed to Load Plant Details</h2>
+                <h2 class="text-lg font-semibold text-red-900">{t("seller.products.plantDetail.loadFailed")}</h2>
               </div>
               <p class="text-sm text-red-700 mb-4">{error.toString()}</p>
               <div class="flex gap-2">
@@ -46,31 +48,31 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
                   onClick={() => window.location.reload()}
                   class="flex-1 px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors"
                 >
-                  Retry
+                  {t("seller.products.plantDetail.retry")}
                 </button>
                 <A
                   href="/app/seller/products/plants"
                   class="flex-1 px-4 py-2 bg-white border border-red-200 text-red-700 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors text-center"
                 >
-                  Back to Plants
+                  {t("seller.products.plantDetail.backToPlants")}
                 </A>
               </div>
             </div>
           </div>
         )}
       >
-        <Suspense fallback={<div class="p-6">Loading plant details...</div>}>
+        <Suspense fallback={<div class="p-6">{t("seller.products.plantDetail.loading")}</div>}>
           <Show when={plant()}>
             {(plantData) => (
               <>
                 <div class="mb-6">
                   <nav class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
                     <A href="/app/seller" class="hover:text-forest-600 dark:hover:text-forest-400 transition-colors">
-                      Dashboard
+                      {t("seller.products.plantDetail.breadcrumb.dashboard")}
                     </A>
                     <ChevronRightIcon class="w-4 h-4" />
                     <A href="/app/seller/products/plants" class="hover:text-forest-600 dark:hover:text-forest-400 transition-colors">
-                      Plants
+                      {t("seller.products.plantDetail.breadcrumb.plants")}
                     </A>
                     <ChevronRightIcon class="w-4 h-4" />
                     <span class="text-forest-800 dark:text-cream-50 font-medium truncate">
@@ -96,8 +98,14 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
                           {plantData().plantDetails?.scientificName ?? ""}
                         </p>
                         <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                          Slug: <span class="font-mono text-xs">{plantData().slug}</span>
+                          {t("seller.products.plantDetail.slug")}: <span class="font-mono text-xs">{plantData().slug}</span>
                         </p>
+                        <A
+                          href={`/app/seller/products/${plantData().id}`}
+                          class="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-lg border border-forest-200 dark:border-forest-700 text-forest-700 dark:text-forest-300 hover:bg-forest-50 dark:hover:bg-forest-900/30 text-xs font-medium transition-colors"
+                        >
+                          {t("seller.products.plantDetail.viewProductDetails")}
+                        </A>
                       </div>
                     </div>
                   </div>
@@ -106,7 +114,7 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
                 <div class="mb-6">
                   <div class="border-b border-cream-200 dark:border-forest-700">
                     <nav class="flex gap-0 -mb-px overflow-x-auto">
-                      <For each={tabs}>
+                      <For each={tabs()}>
                         {(tab) => (
                           <A
                             href={`/app/seller/products/plants/${plantData().id}/${tab.path}`}

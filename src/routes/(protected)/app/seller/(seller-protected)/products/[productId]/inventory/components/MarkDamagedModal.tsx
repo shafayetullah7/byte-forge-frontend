@@ -6,6 +6,7 @@ import Button from "~/components/ui/Button";
 import type { VariantInventoryDetail } from "~/lib/api/types/seller.types";
 
 interface MarkDamagedModalProps {
+  t: (key: string, ...args: any[]) => string;
   isOpen: boolean;
   onClose: () => void;
   variant: VariantInventoryDetail | null;
@@ -54,60 +55,59 @@ export default function MarkDamagedModal(props: MarkDamagedModalProps) {
       });
 
       if (result && !result.success) {
-        setError(result.error?.message || "Failed to mark as damaged. Please try again.");
+        setError(result.error?.message || props.t("seller.products.inventoryDetail.damagedModal.failedMessage"));
       }
     } catch (err: any) {
-      setError(err?.message || "Failed to mark as damaged. Please try again.");
+      setError(err?.message || props.t("seller.products.inventoryDetail.damagedModal.failedMessage"));
     }
   };
 
   return (
-    <Modal isOpen={props.isOpen} onClose={handleClose} title="Mark as Damaged" size="md">
+    <Modal isOpen={props.isOpen} onClose={handleClose} title={props.t("seller.products.inventoryDetail.damagedModal.title")} size="md">
       <div class="space-y-4">
         <div class="p-3 bg-terracotta-50 dark:bg-terracotta-900/20 rounded-lg border border-terracotta-200 dark:border-terracotta-800">
           <p class="text-sm font-medium text-terracotta-800 dark:text-terracotta-300">
-            {props.variant?.variantName || "Unnamed Variant"}
+            {props.variant?.variantName || props.t("seller.products.inventoryDetail.unnamedVariant")}
           </p>
           <p class="text-xs text-terracotta-600 dark:text-terracotta-400 mt-0.5">
-            SKU: {props.variant?.sku || "—"} · Available: {availableQuantity()} · Reserved: {props.variant?.reservedQuantity ?? 0}
+            SKU: {props.variant?.sku || "\u2014"} \u00b7 Available: {availableQuantity()} \u00b7 Reserved: {props.variant?.reservedQuantity ?? 0}
           </p>
         </div>
 
         <div class="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
           <p class="text-xs text-amber-700 dark:text-amber-400">
-            This will <strong>permanently remove</strong> the specified quantity from stock.
-            This action cannot be undone.
+            {props.t("seller.products.inventoryDetail.damagedModal.warning")}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} class="space-y-4">
           <Input
-            label="Damaged Quantity"
+            label={props.t("seller.products.inventoryDetail.damagedModal.damagedQuantity")}
             type="number"
             min="1"
             max={availableQuantity()}
-            placeholder={`Max ${availableQuantity()}`}
+            placeholder={props.t("seller.products.inventoryDetail.damagedModal.maxQuantity", availableQuantity())}
             value={quantity()}
             onInput={(e) => setQuantity(e.currentTarget.value)}
             required
             error={
               parsedQuantity() > availableQuantity()
-                ? `Cannot exceed available stock (${availableQuantity()})`
+                ? props.t("seller.products.inventoryDetail.damagedModal.exceedsAvailableStock", availableQuantity())
                 : parsedQuantity() < 0
-                  ? "Quantity must be positive"
+                  ? props.t("seller.products.inventoryDetail.damagedModal.quantityMustBePositive")
                   : undefined
             }
           />
 
           <Show when={quantity() && isFormValid()}>
             <div class="p-2 rounded-lg bg-terracotta-50 dark:bg-terracotta-900/20 text-sm text-terracotta-700 dark:text-terracotta-400 font-medium">
-              {parsedQuantity()} units marked damaged → Remaining: {currentStock() - parsedQuantity()}
+              {parsedQuantity()} units marked damaged \u2192 Remaining: {currentStock() - parsedQuantity()}
             </div>
           </Show>
 
           <Textarea
-            label="Reason"
-            placeholder="e.g., Broken during handling, Quality check failure"
+            label={props.t("seller.products.inventoryDetail.damagedModal.reason")}
+            placeholder={props.t("seller.products.inventoryDetail.damagedModal.reasonPlaceholder")}
             value={note()}
             onInput={(e) => setNote(e.currentTarget.value)}
             rows={3}
@@ -124,7 +124,7 @@ export default function MarkDamagedModal(props: MarkDamagedModalProps) {
 
           <div class="flex items-center justify-end gap-3 pt-2">
             <Button type="button" variant="secondary" onClick={handleClose} disabled={props.isSubmitting}>
-              Cancel
+              {props.t("common.cancel")}
             </Button>
             <Button
               type="submit"
@@ -132,7 +132,7 @@ export default function MarkDamagedModal(props: MarkDamagedModalProps) {
               loading={props.isSubmitting}
               disabled={!isFormValid() || props.isSubmitting}
             >
-              Mark Damaged
+              {props.t("seller.products.inventoryDetail.damagedModal.markDamagedButton")}
             </Button>
           </div>
         </form>

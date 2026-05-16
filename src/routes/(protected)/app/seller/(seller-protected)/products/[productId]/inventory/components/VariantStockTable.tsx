@@ -10,6 +10,7 @@ import type { VariantInventoryDetail } from "~/lib/api/types/seller.types";
 import { formatPrice, getInventoryLabel } from "../../helpers";
 
 interface VariantStockTableProps {
+  t: (key: string, ...args: any[]) => string;
   variants: VariantInventoryDetail[];
   onRestock: (variant: VariantInventoryDetail) => void;
   onAdjust: (variant: VariantInventoryDetail) => void;
@@ -32,15 +33,15 @@ export default function VariantStockTable(props: VariantStockTableProps) {
       <table class="w-full text-sm">
         <thead>
           <tr class="border-b border-cream-200 dark:border-forest-700">
-            <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Variant</th>
-            <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">SKU</th>
-            <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Price</th>
-            <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total</th>
-            <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Reserved</th>
-            <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Available</th>
-            <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Stock Level</th>
-            <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-            <th class="text-right px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+            <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{props.t("seller.products.inventoryDetail.tableHeaders.variant")}</th>
+            <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{props.t("seller.products.inventoryDetail.tableHeaders.sku")}</th>
+            <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{props.t("seller.products.inventoryDetail.tableHeaders.price")}</th>
+            <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{props.t("seller.products.inventoryDetail.tableHeaders.total")}</th>
+            <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{props.t("seller.products.inventoryDetail.tableHeaders.reserved")}</th>
+            <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{props.t("seller.products.inventoryDetail.tableHeaders.available")}</th>
+            <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{props.t("seller.products.inventoryDetail.tableHeaders.stockLevel")}</th>
+            <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{props.t("seller.products.inventoryDetail.tableHeaders.status")}</th>
+            <th class="text-right px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{props.t("seller.products.inventoryDetail.tableHeaders.actions")}</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-cream-100 dark:divide-forest-700/50">
@@ -49,14 +50,14 @@ export default function VariantStockTable(props: VariantStockTableProps) {
               const stockPct = variant.quantity > 0
                 ? Math.round((variant.availableQuantity / variant.quantity) * 100)
                 : 0;
-              const label = getInventoryLabel(variant.availableQuantity, variant.lowStockThreshold);
+              const label = getInventoryLabel(variant.availableQuantity, variant.lowStockThreshold, props.t);
 
               return (
                 <tr class="hover:bg-cream-50 dark:hover:bg-forest-700/30 transition-colors group">
                   {/* Variant Name */}
                   <td class="px-4 py-3">
                     <p class="font-medium text-forest-800 dark:text-cream-50 truncate max-w-[200px]">
-                      {variant.variantName || "Unnamed Variant"}
+                      {variant.variantName || props.t("seller.products.inventoryDetail.unnamedVariant")}
                     </p>
                   </td>
 
@@ -128,21 +129,21 @@ export default function VariantStockTable(props: VariantStockTableProps) {
                       <button
                         onClick={() => props.onRestock(variant)}
                         class="p-1.5 rounded-lg text-gray-400 hover:text-forest-600 dark:hover:text-forest-400 hover:bg-forest-50 dark:hover:bg-forest-700 transition-colors"
-                        title="Restock"
+                        title={props.t("seller.products.inventoryDetail.restock")}
                       >
                         <PlusIcon class="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => props.onAdjust(variant)}
                         class="p-1.5 rounded-lg text-gray-400 hover:text-cream-600 dark:hover:text-cream-400 hover:bg-cream-50 dark:hover:bg-cream-900/30 transition-colors"
-                        title="Adjust Stock"
+                        title={props.t("seller.products.inventoryDetail.adjustStock")}
                       >
                         <ArrowPathIcon class="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => props.onDamaged(variant)}
                         class="p-1.5 rounded-lg text-gray-400 hover:text-terracotta-600 dark:hover:text-terracotta-400 hover:bg-terracotta-50 dark:hover:bg-terracotta-900/20 transition-colors"
-                        title="Mark Damaged"
+                        title={props.t("seller.products.inventoryDetail.markDamaged")}
                       >
                         <AlertTriangleIcon class="w-4 h-4" />
                       </button>
@@ -158,7 +159,7 @@ export default function VariantStockTable(props: VariantStockTableProps) {
       {/* Empty state */}
       <Show when={props.variants.length === 0}>
         <div class="text-center py-12">
-          <p class="text-sm text-gray-500 dark:text-gray-400">No variants found</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">{props.t("seller.products.inventoryDetail.noVariantsFound")}</p>
         </div>
       </Show>
     </div>
