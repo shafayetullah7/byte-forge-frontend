@@ -1,12 +1,35 @@
-import { Hero } from "~/components/home/Hero";
+import {
+  Hero,
+  TrustBar,
+  LiveCampaigns,
+  FeaturedPlants,
+  TrendingPlants,
+  FeaturedShops,
+  HowItWorks,
+  SeasonalPicks,
+  WhyChooseByteForge,
+  SellerCTA,
+  Testimonials,
+  Newsletter,
+  Footer,
+} from "~/components/home";
 
 export default function Home() {
   return (
     <main class="min-h-screen bg-cream-50 dark:bg-forest-900">
       <Hero />
-
-      <section class="py-20 px-4 max-w-7xl mx-auto">
-      </section>
+      <TrustBar />
+      <LiveCampaigns />
+      <FeaturedPlants />
+      <TrendingPlants />
+      <FeaturedShops />
+      <HowItWorks />
+      <SeasonalPicks />
+      <WhyChooseByteForge />
+      <SellerCTA />
+      <Testimonials />
+      <Newsletter />
+      <Footer />
     </main>
   );
 }
