@@ -1,5 +1,5 @@
 import { For, Show, createMemo, createSignal } from "solid-js";
-import { ChevronDownIcon, FilterIcon, XIcon, SpinnerIcon } from "~/components/icons";
+import { ChevronDownIcon, FilterIcon, XIcon, SpinnerIcon, ClockIcon, ArrowUpIcon, ArrowDownIcon, ArrowsRightLeftIcon } from "~/components/icons";
 import {
   getStockMovementTypeLabel,
   getStockMovementTypeVariant,
@@ -141,9 +141,7 @@ export default function StockMovementsTimeline(props: StockMovementsTimelineProp
       <Show when={!props.isLoading && (!props.movements || props.movements.length === 0)}>
         <div class="text-center py-12">
           <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 dark:bg-forest-700 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-gray-400 dark:text-gray-500">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <ClockIcon class="w-6 h-6 text-gray-400 dark:text-gray-500" />
           </div>
           <p class="text-sm font-medium text-gray-600 dark:text-gray-400">No stock movements found</p>
           <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
@@ -169,17 +167,11 @@ export default function StockMovementsTimeline(props: StockMovementsTimelineProp
                     {/* Icon */}
                     <div class={`mt-0.5 w-7 h-7 rounded-lg ${typeVariant.bg} flex items-center justify-center flex-shrink-0`}>
                       {isPositive ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class={typeVariant.text}>
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" />
-                        </svg>
+                        <ArrowDownIcon class={`w-3.5 h-3.5 ${typeVariant.text}`} />
                       ) : isNeutral ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class={typeVariant.text}>
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
-                        </svg>
+                        <ArrowsRightLeftIcon class={`w-3.5 h-3.5 ${typeVariant.text}`} />
                       ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class={typeVariant.text}>
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
-                        </svg>
+                        <ArrowUpIcon class={`w-3.5 h-3.5 ${typeVariant.text}`} />
                       )}
                     </div>
 
