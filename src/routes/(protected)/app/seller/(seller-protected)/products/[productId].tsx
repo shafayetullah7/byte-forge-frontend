@@ -8,11 +8,10 @@ import { PRODUCT_TYPE } from "~/lib/api/types/seller.types";
 import { useI18n } from "~/i18n";
 import {
   ChevronLeftIcon,
-  PencilIcon,
   ShareIcon,
   DotsVerticalIcon,
   ChevronRightIcon,
-  SproutIcon,
+  ArrowTopRightOnSquareIcon,
 } from "~/components/icons";
 
 export default function ProductDetailLayout(props: RouteSectionProps) {
@@ -89,6 +88,15 @@ export default function ProductDetailLayout(props: RouteSectionProps) {
                         <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getProductTypeColor(product()!.productType).bg} ${getProductTypeColor(product()!.productType).text} ${getProductTypeColor(product()!.productType).border}`}>
                           {getProductTypeLabel(product()!.productType)}
                         </span>
+                        {product()!.productType === PRODUCT_TYPE.PLANT && (
+                          <A
+                            href={`/app/seller/products/plants/${product()!.id}`}
+                            class="inline-flex items-center gap-1 text-xs text-forest-600 dark:text-forest-400 hover:text-forest-700 dark:hover:text-forest-300 hover:underline transition-colors"
+                          >
+                            <ArrowTopRightOnSquareIcon class="w-3.5 h-3.5" />
+                            {t("seller.products.productDetail.plantDetails")}
+                          </A>
+                        )}
                       </div>
                       <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                         {product()!.shortDescription}
@@ -101,23 +109,6 @@ export default function ProductDetailLayout(props: RouteSectionProps) {
 
                   {/* Right: Actions */}
                   <div class="flex items-center gap-2 flex-shrink-0">
-                    {product()!.productType === PRODUCT_TYPE.PLANT ? (
-                      <A
-                        href={`/app/seller/products/plants/${product()!.id}`}
-                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold border-2 border-forest-600 dark:border-forest-400 text-forest-700 dark:text-forest-300 hover:bg-forest-50 dark:hover:bg-forest-900/30 transition-colors"
-                      >
-                        <SproutIcon class="w-4 h-4" />
-                        {t("seller.products.productDetail.plantDetails")}
-                      </A>
-                    ) : (
-                      <A
-                        href={`/app/seller/products/${product()!.id}/edit`}
-                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-forest-600 hover:bg-forest-700 text-white rounded-lg font-semibold shadow-sm hover:shadow-md transition-colors"
-                      >
-                        <PencilIcon class="w-4 h-4" />
-                        {t("seller.products.productDetail.editProduct")}
-                      </A>
-                    )}
                     <button
                       class="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg border border-cream-200 dark:border-forest-700 text-gray-700 dark:text-gray-300 hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors"
                       title={t("seller.products.productDetail.share")}
