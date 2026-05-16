@@ -18,6 +18,8 @@ export const buttonVariants = {
     "bg-transparent border-2 border-cream-200 text-forest-700 hover:border-forest-300 hover:bg-cream-50 dark:border-forest-700 dark:text-gray-300 dark:hover:border-forest-500 dark:hover:bg-forest-800",
   ghost:
     "bg-transparent hover:bg-forest-50 text-forest-700 dark:text-gray-300 dark:hover:bg-forest-800",
+  destructive:
+    "bg-terracotta-600 hover:bg-terracotta-700 text-white border-2 border-transparent dark:bg-terracotta-500 dark:hover:bg-terracotta-400",
 };
 
 export type ButtonVariant = keyof typeof buttonVariants;

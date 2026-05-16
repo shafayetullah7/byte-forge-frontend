@@ -97,24 +97,34 @@ export function getOrderStatusLabel(status: string): string {
 
 export function getStockMovementTypeLabel(type: string): string {
   const labels: Record<string, string> = {
+    INITIAL_STOCK: "Initial Stock",
+    RESTOCK: "Restock",
     ORDER_RESERVED: "Order Reserved",
     ORDER_FULFILLED: "Order Fulfilled",
-    RESTOCK: "Restock",
-    STOCK_ADJUSTMENT: "Stock Adjustment",
-    RETURN: "Return",
+    ORDER_CANCELLED: "Order Cancelled",
+    CUSTOMER_RETURN: "Customer Return",
     DAMAGED: "Damaged",
+    LOST: "Lost",
+    ADJUSTMENT: "Stock Adjustment",
+    TRANSFER_OUT: "Transfer Out",
+    TRANSFER_IN: "Transfer In",
   };
   return labels[type] || type;
 }
 
 export function getStockMovementTypeVariant(type: string): { bg: string; text: string } {
   const variants: Record<string, { bg: string; text: string }> = {
+    INITIAL_STOCK: { bg: "bg-sage-100 dark:bg-sage-900/40", text: "text-sage-700 dark:text-sage-300" },
+    RESTOCK: { bg: "bg-forest-100 dark:bg-forest-900/40", text: "text-forest-700 dark:text-forest-300" },
     ORDER_RESERVED: { bg: "bg-cream-100 dark:bg-cream-900/40", text: "text-cream-700 dark:text-cream-300" },
     ORDER_FULFILLED: { bg: "bg-forest-100 dark:bg-forest-900/40", text: "text-forest-700 dark:text-forest-300" },
-    RESTOCK: { bg: "bg-forest-100 dark:bg-forest-900/40", text: "text-forest-700 dark:text-forest-300" },
-    STOCK_ADJUSTMENT: { bg: "bg-gray-100 dark:bg-gray-800", text: "text-gray-700 dark:text-gray-300" },
-    RETURN: { bg: "bg-sage-100 dark:bg-sage-900/40", text: "text-sage-700 dark:text-sage-300" },
+    ORDER_CANCELLED: { bg: "bg-sage-100 dark:bg-sage-900/40", text: "text-sage-700 dark:text-sage-300" },
+    CUSTOMER_RETURN: { bg: "bg-sage-100 dark:bg-sage-900/40", text: "text-sage-700 dark:text-sage-300" },
     DAMAGED: { bg: "bg-terracotta-100 dark:bg-terracotta-900/40", text: "text-terracotta-700 dark:text-terracotta-300" },
+    LOST: { bg: "bg-terracotta-100 dark:bg-terracotta-900/40", text: "text-terracotta-700 dark:text-terracotta-300" },
+    ADJUSTMENT: { bg: "bg-gray-100 dark:bg-gray-800", text: "text-gray-700 dark:text-gray-300" },
+    TRANSFER_OUT: { bg: "bg-cream-100 dark:bg-cream-900/40", text: "text-cream-700 dark:text-cream-300" },
+    TRANSFER_IN: { bg: "bg-forest-100 dark:bg-forest-900/40", text: "text-forest-700 dark:text-forest-300" },
   };
   return variants[type] || { bg: "bg-gray-100 dark:bg-gray-800", text: "text-gray-700 dark:text-gray-300" };
 }

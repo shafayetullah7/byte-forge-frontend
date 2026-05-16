@@ -70,14 +70,151 @@ export interface Shop {
   status: ShopStatusType;
   createdAt: string;
   updatedAt: string;
-  name: string;
-  description: string | null;
-  businessHours: string | null;
-  logo: MediaAttachment | null;
-  banner: MediaAttachment | null;
-  translations: ShopTranslation[];
-  contact: ShopContact | null;
-  address: ShopAddress | null;
+}
+
+/**
+ * Inventory movement type constants (matches backend InventoryMovementTypeEnum)
+ */
+export const INVENTORY_MOVEMENT_TYPE = {
+  INITIAL_STOCK: "INITIAL_STOCK",
+  RESTOCK: "RESTOCK",
+  ORDER_RESERVED: "ORDER_RESERVED",
+  ORDER_FULFILLED: "ORDER_FULFILLED",
+  ORDER_CANCELLED: "ORDER_CANCELLED",
+  CUSTOMER_RETURN: "CUSTOMER_RETURN",
+  DAMAGED: "DAMAGED",
+  LOST: "LOST",
+  ADJUSTMENT: "ADJUSTMENT",
+  TRANSFER_OUT: "TRANSFER_OUT",
+  TRANSFER_IN: "TRANSFER_IN",
+} as const;
+
+export type InventoryMovementType = (typeof INVENTORY_MOVEMENT_TYPE)[keyof typeof INVENTORY_MOVEMENT_TYPE];
+
+/**
+ * Variant inventory detail (matches backend inventory + product_variants join)
+ */
+export interface VariantInventoryDetail {
+  inventoryId: string;
+  variantId: string;
+  sku: string | null;
+  variantName: string | null;
+  price: string;
+  quantity: number;
+  reservedQuantity: number;
+  availableQuantity: number;
+  lowStockThreshold: number;
+  trackInventory: boolean;
+  allowBackorder: boolean;
+  status: "in_stock" | "low_stock" | "out_of_stock";
+  lastStockUpdate: string;
+}
+
+/**
+ * Inventory detail for a product (matches backend GET /products/:id/inventory)
+ */
+export interface InventoryDetail {
+  productId: string;
+  productName: string;
+  productSlug: string;
+  totalStock: number;
+  reservedStock: number;
+  availableStock: number;
+  lowStockCount: number;
+  outOfStockCount: number;
+  variants: VariantInventoryDetail[];
+  stockMovements: InventoryMovement[];
+}
+
+/**
+ * Stock movement record (matches backend inventory_movements table)
+ */
+export interface InventoryMovement {
+  id: string;
+  inventoryId: string;
+  variantId: string;
+  variantSku: string | null;
+  variantName: string | null;
+  movementType: InventoryMovementType;
+  quantityChange: number;
+  previousQuantity: number;
+  newQuantity: number;
+  previousReserved: number;
+  newReserved: number;
+  referenceType: string | null;
+  referenceId: string | null;
+  reason: string | null;
+  createdBy: string | null;
+  createdAt: string;
+}
+
+/**
+ * Filter options for stock movements (matches backend ListMovementsQueryDto)
+ */
+export interface InventoryMovementFilter {
+  page?: number;
+  limit?: number;
+  variantId?: string;
+  movementType?: InventoryMovementType;
+  startDate?: string;
+  endDate?: string;
+}
+
+/**
+ * Paginated stock movements response
+ */
+export interface InventoryMovementsResponse {
+  movements: InventoryMovement[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+}
+
+/**
+ * Restock request (matches backend RestockVariantDto)
+ */
+export interface RestockVariantRequest {
+  variantId: string;
+  quantity: number;
+  referenceType?: string;
+  referenceId?: string;
+  reason?: string;
+}
+
+/**
+ * Stock adjustment request (matches backend AdjustStockDto)
+ */
+export interface AdjustStockRequest {
+  variantId: string;
+  quantityChange: number;
+  referenceType?: string;
+  referenceId?: string;
+  reason?: string;
+}
+
+/**
+ * Mark damaged request (matches backend MarkDamagedDto)
+ */
+export interface MarkDamagedRequest {
+  variantId: string;
+  quantity: number;
+  reason?: string;
+}
+
+/**
+ * Generic inventory operation response
+ */
+export interface InventoryOperationResponse {
+  success: boolean;
+  message: string;
+  data: {
+    movement: InventoryMovement;
+    newQuantity: number;
+    newReserved: number;
+  };
 }
 
 /**
