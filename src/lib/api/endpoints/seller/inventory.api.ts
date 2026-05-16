@@ -38,7 +38,7 @@ export const getStockMovements = query(
     }
     return fetcher<InventoryMovementsResponse>(
       `/api/v1/user/seller/products/${productId}/inventory/movements`,
-      { params, unwrapData: false }
+      { params }
     );
   },
   "seller-stock-movements"
