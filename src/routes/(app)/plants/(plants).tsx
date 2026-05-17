@@ -13,10 +13,8 @@ import {
   DropletIcon,
   CloudIcon,
   TrendingUpIcon,
-  BeakerIcon,
   CubeIcon,
   TagIcon,
-  FolderIcon,
 } from "~/components/icons";
 import { Button } from "~/components/ui";
 
@@ -737,26 +735,24 @@ function FilterSection(props: {
   const setStock = (v: boolean) => { props.setInStockOnly(v); props.setCurrentPage(1); };
 
   return (
-    <div class="space-y-6">
+    <div class="space-y-5">
       {/* Clear All */}
       <Show when={props.hasActiveFilters()}>
         <button
           onClick={props.clearFilters}
-          class="w-full py-2.5 px-4 rounded-xl bg-forest-600 hover:bg-forest-700 text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+          class="w-full text-sm text-terracotta-600 dark:text-terracotta-400 hover:underline font-medium py-1"
         >
-          <XIcon class="w-4 h-4" />
           Clear All Filters
         </button>
       </Show>
 
       {/* Category */}
       <div>
-        <h3 class="text-sm font-semibold text-forest-800 dark:text-cream-50 mb-3 flex items-center gap-2">
-          <FolderIcon class="w-4 h-4" />
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Category
-        </h3>
-        <div class="space-y-1">
-          <label class="flex items-center gap-2.5 cursor-pointer group">
+        </label>
+        <div class="space-y-0.5">
+          <label class="flex items-center gap-2 cursor-pointer group">
             <input
               type="radio"
               name="category"
@@ -772,7 +768,7 @@ function FilterSection(props: {
               const children = CATEGORY_MAP[node.id] || [];
               return (
                 <div>
-                  <label class="flex items-center gap-2.5 cursor-pointer group pl-2">
+                  <label class="flex items-center gap-2 cursor-pointer group">
                     <input
                       type="radio"
                       name="category"
@@ -785,7 +781,7 @@ function FilterSection(props: {
                   </label>
                   <For each={children}>
                     {(child) => (
-                      <label class="flex items-center gap-2.5 cursor-pointer group pl-8">
+                      <label class="flex items-center gap-2 cursor-pointer group pl-4">
                         <input
                           type="radio"
                           name="category"
@@ -807,12 +803,11 @@ function FilterSection(props: {
 
       {/* Care Level */}
       <div>
-        <h3 class="text-sm font-semibold text-forest-800 dark:text-cream-50 mb-3 flex items-center gap-2">
-          <BeakerIcon class="w-4 h-4" />
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Care Level
-        </h3>
-        <div class="space-y-2">
-          <label class="flex items-center gap-2.5 cursor-pointer group">
+        </label>
+        <div class="space-y-1.5">
+          <label class="flex items-center gap-2 cursor-pointer group">
             <input
               type="radio"
               name="careDifficulty"
@@ -825,7 +820,7 @@ function FilterSection(props: {
           </label>
           <For each={CARE_OPTIONS}>
             {(opt) => (
-              <label class="flex items-center gap-2.5 cursor-pointer group">
+              <label class="flex items-center gap-2 cursor-pointer group">
                 <input
                   type="radio"
                   name="careDifficulty"
@@ -843,12 +838,11 @@ function FilterSection(props: {
 
       {/* Light */}
       <div>
-        <h3 class="text-sm font-semibold text-forest-800 dark:text-cream-50 mb-3 flex items-center gap-2">
-          <SunIcon class="w-4 h-4" />
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Light
-        </h3>
-        <div class="space-y-2">
-          <label class="flex items-center gap-2.5 cursor-pointer group">
+        </label>
+        <div class="space-y-1.5">
+          <label class="flex items-center gap-2 cursor-pointer group">
             <input
               type="radio"
               name="lightRequirement"
@@ -861,7 +855,7 @@ function FilterSection(props: {
           </label>
           <For each={LIGHT_OPTIONS}>
             {(opt) => (
-              <label class="flex items-center gap-2.5 cursor-pointer group">
+              <label class="flex items-center gap-2 cursor-pointer group">
                 <input
                   type="radio"
                   name="lightRequirement"
@@ -879,12 +873,11 @@ function FilterSection(props: {
 
       {/* Watering */}
       <div>
-        <h3 class="text-sm font-semibold text-forest-800 dark:text-cream-50 mb-3 flex items-center gap-2">
-          <DropletIcon class="w-4 h-4" />
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Watering
-        </h3>
-        <div class="space-y-2">
-          <label class="flex items-center gap-2.5 cursor-pointer group">
+        </label>
+        <div class="space-y-1.5">
+          <label class="flex items-center gap-2 cursor-pointer group">
             <input
               type="radio"
               name="wateringFrequency"
@@ -897,7 +890,7 @@ function FilterSection(props: {
           </label>
           <For each={WATERING_OPTIONS}>
             {(opt) => (
-              <label class="flex items-center gap-2.5 cursor-pointer group">
+              <label class="flex items-center gap-2 cursor-pointer group">
                 <input
                   type="radio"
                   name="wateringFrequency"
@@ -915,12 +908,11 @@ function FilterSection(props: {
 
       {/* Humidity */}
       <div>
-        <h3 class="text-sm font-semibold text-forest-800 dark:text-cream-50 mb-3 flex items-center gap-2">
-          <CloudIcon class="w-4 h-4" />
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Humidity
-        </h3>
-        <div class="space-y-2">
-          <label class="flex items-center gap-2.5 cursor-pointer group">
+        </label>
+        <div class="space-y-1.5">
+          <label class="flex items-center gap-2 cursor-pointer group">
             <input
               type="radio"
               name="humidityLevel"
@@ -933,7 +925,7 @@ function FilterSection(props: {
           </label>
           <For each={HUMIDITY_OPTIONS}>
             {(opt) => (
-              <label class="flex items-center gap-2.5 cursor-pointer group">
+              <label class="flex items-center gap-2 cursor-pointer group">
                 <input
                   type="radio"
                   name="humidityLevel"
@@ -951,12 +943,11 @@ function FilterSection(props: {
 
       {/* Growth Rate */}
       <div>
-        <h3 class="text-sm font-semibold text-forest-800 dark:text-cream-50 mb-3 flex items-center gap-2">
-          <TrendingUpIcon class="w-4 h-4" />
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Growth Rate
-        </h3>
-        <div class="space-y-2">
-          <label class="flex items-center gap-2.5 cursor-pointer group">
+        </label>
+        <div class="space-y-1.5">
+          <label class="flex items-center gap-2 cursor-pointer group">
             <input
               type="radio"
               name="growthRate"
@@ -969,7 +960,7 @@ function FilterSection(props: {
           </label>
           <For each={GROWTH_OPTIONS}>
             {(opt) => (
-              <label class="flex items-center gap-2.5 cursor-pointer group">
+              <label class="flex items-center gap-2 cursor-pointer group">
                 <input
                   type="radio"
                   name="growthRate"
@@ -987,7 +978,9 @@ function FilterSection(props: {
 
       {/* Price Range */}
       <div>
-        <h3 class="text-sm font-semibold text-forest-800 dark:text-cream-50 mb-3">Price Range (৳)</h3>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Price Range (৳)
+        </label>
         <div class="flex items-center gap-2">
           <input
             type="number"
@@ -995,7 +988,7 @@ function FilterSection(props: {
             value={props.minPrice()}
             onInput={(e) => setMin(e.currentTarget.value)}
             min="0"
-            class="w-full px-3 py-2.5 rounded-lg border-2 border-cream-200 dark:border-forest-700 focus:border-forest-500 dark:focus:border-forest-400 bg-white dark:bg-forest-900/30 text-sm transition-standard focus-ring-flat"
+            class="w-full px-3 py-2 rounded-lg border-2 border-cream-200 dark:border-forest-700 focus:border-forest-500 dark:focus:border-forest-400 bg-white dark:bg-forest-900/30 text-sm transition-standard focus-ring-flat"
           />
           <span class="text-gray-400 flex-shrink-0">—</span>
           <input
@@ -1004,14 +997,13 @@ function FilterSection(props: {
             value={props.maxPrice()}
             onInput={(e) => setMax(e.currentTarget.value)}
             min="0"
-            class="w-full px-3 py-2.5 rounded-lg border-2 border-cream-200 dark:border-forest-700 focus:border-forest-500 dark:focus:border-forest-400 bg-white dark:bg-forest-900/30 text-sm transition-standard focus-ring-flat"
+            class="w-full px-3 py-2 rounded-lg border-2 border-cream-200 dark:border-forest-700 focus:border-forest-500 dark:focus:border-forest-400 bg-white dark:bg-forest-900/30 text-sm transition-standard focus-ring-flat"
           />
         </div>
       </div>
 
       {/* In Stock Only */}
       <div>
-        <h3 class="text-sm font-semibold text-forest-800 dark:text-cream-50 mb-3">Availability</h3>
         <label class="flex items-center gap-2.5 cursor-pointer group">
           <input
             type="checkbox"
@@ -1019,22 +1011,20 @@ function FilterSection(props: {
             onChange={(e) => setStock(e.currentTarget.checked)}
             class="w-4 h-4 rounded border-gray-300 text-forest-600 focus:ring-forest-500"
           />
-          <CubeIcon class="w-4 h-4 text-gray-500 dark:text-gray-400" />
           <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-forest-700 dark:group-hover:text-forest-300 transition-colors">In Stock Only</span>
         </label>
       </div>
 
       {/* Tags */}
       <div>
-        <h3 class="text-sm font-semibold text-forest-800 dark:text-cream-50 mb-3 flex items-center gap-2">
-          <TagIcon class="w-4 h-4" />
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Tags
-        </h3>
-        <div class="space-y-3">
+        </label>
+        <div class="space-y-2.5">
           <For each={TAG_GROUPS}>
             {(group) => (
               <div>
-                <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">
+                <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">
                   {group.name}
                 </p>
                 <div class="flex flex-wrap gap-1.5">
