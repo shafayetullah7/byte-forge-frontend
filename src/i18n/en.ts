@@ -1634,6 +1634,7 @@ export const dict = {
       grid: {
         loading: "Loading plants...",
         loadingDesc: "Fetching plants from the store.",
+        refreshing: "Updating results...",
         noPlants: "No plants found",
         noPlantsFilters: "Try adjusting your filters or search query to find what you're looking for.",
         noPlantsEmpty: "No plants are available right now. Check back later!",

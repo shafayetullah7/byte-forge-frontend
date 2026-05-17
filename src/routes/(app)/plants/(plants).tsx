@@ -84,15 +84,12 @@ export default function PlantsPage() {
   );
 
   const [stablePlants, setStablePlants] = createSignal<Awaited<ReturnType<typeof getPublicPlants>> | undefined>(undefined);
-  const [isRefetching, setIsRefetching] = createSignal(false);
+  const isRefreshing = createMemo(() => plantsData() === undefined && stablePlants() !== undefined);
 
   createEffect(() => {
     const d = plantsData();
     if (d !== undefined) {
       setStablePlants(d);
-      setIsRefetching(false);
-    } else if (stablePlants() !== undefined) {
-      setIsRefetching(true);
     }
   });
 
@@ -100,20 +97,6 @@ export default function PlantsPage() {
   const meta = createMemo(() => stablePlants()?.meta);
   const totalPages = createMemo(() => meta()?.pages ?? 1);
   const totalItems = createMemo(() => meta()?.total ?? 0);
-
-  const hasActiveFilters = createMemo(() =>
-    !!debouncedSearch() ||
-    !!categoryId() ||
-    selectedTagIds().size > 0 ||
-    !!careDifficulty() ||
-    !!lightRequirement() ||
-    !!wateringFrequency() ||
-    !!humidityLevel() ||
-    !!growthRate() ||
-    !!minPrice() ||
-    !!maxPrice() ||
-    inStockOnly()
-  );
 
   const activeFilterCount = createMemo(() => {
     let count = 0;
@@ -130,6 +113,8 @@ export default function PlantsPage() {
     if (inStockOnly()) count++;
     return count;
   });
+
+  const hasActiveFilters = createMemo(() => activeFilterCount() > 0);
 
   const clearFilters = () => {
     setSearchQuery("");
@@ -276,6 +261,7 @@ export default function PlantsPage() {
               </div>
 
               <ActiveFilters
+                hasActiveFilters={hasActiveFilters}
                 debouncedSearch={debouncedSearch}
                 setSearchQuery={setSearchQuery}
                 setDebouncedSearch={setDebouncedSearch}
@@ -303,6 +289,7 @@ export default function PlantsPage() {
                 plants={plants}
                 hasData={() => stablePlants() !== undefined}
                 hasActiveFilters={hasActiveFilters}
+                isRefreshing={isRefreshing}
                 clearFilters={clearFilters}
               />
 

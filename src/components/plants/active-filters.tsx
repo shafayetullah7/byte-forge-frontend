@@ -16,6 +16,7 @@ function findCategoryName(tree: CategoryTree[], id: string): string | undefined 
 }
 
 export function ActiveFilters(props: {
+  hasActiveFilters: () => boolean;
   debouncedSearch: () => string;
   setSearchQuery: (v: string) => void;
   setDebouncedSearch: (v: string) => void;
@@ -52,7 +53,7 @@ export function ActiveFilters(props: {
   };
 
   return (
-    <Show when={hasAnyActiveFilters()}>
+    <Show when={props.hasActiveFilters()}>
       <div class="flex flex-wrap gap-2 mb-4">
         <FilterChip
           visible={!!props.debouncedSearch()}
@@ -106,20 +107,6 @@ export function ActiveFilters(props: {
       </div>
     </Show>
   );
-
-  function hasAnyActiveFilters() {
-    return (
-      props.debouncedSearch() ||
-      props.selectedCategoryId() ||
-      props.selectedTagIds().size > 0 ||
-      props.careDifficulty() ||
-      props.lightRequirement() ||
-      props.wateringFrequency() ||
-      props.humidityLevel() ||
-      props.growthRate() ||
-      props.inStockOnly()
-    );
-  }
 }
 
 function FilterChip(props: { visible: boolean; label: string; onRemove: () => void }) {

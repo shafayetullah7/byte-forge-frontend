@@ -11,12 +11,23 @@ export function PlantGrid(props: {
   plants: () => PublicPlantListItem[];
   hasData: () => boolean;
   hasActiveFilters: () => boolean;
+  isRefreshing: () => boolean;
   clearFilters: () => void;
 }) {
   const { t } = useI18n();
 
   return (
-    <Suspense fallback={
+    <div class="relative">
+      <Show when={props.isRefreshing()}>
+        <div class="absolute top-0 left-0 right-0 z-10 flex items-center justify-center py-2 bg-forest-50/90 dark:bg-forest-900/90 backdrop-blur-sm rounded-xl border border-forest-200 dark:border-forest-700 shadow-sm mb-4">
+          <svg class="animate-spin w-4 h-4 mr-2 text-forest-600 dark:text-forest-400" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          <span class="text-sm font-medium text-forest-700 dark:text-forest-300">{t("public.plants.grid.refreshing")}</span>
+        </div>
+      </Show>
+      <Suspense fallback={
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <For each={Array.from({ length: ITEMS_PER_PAGE })}>
           {() => (
@@ -49,6 +60,7 @@ export function PlantGrid(props: {
         </Show>
       </Show>
     </Suspense>
+    </div>
   );
 }
 
