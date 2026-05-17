@@ -1,7 +1,5 @@
 import { createSignal, createMemo, createEffect, For, Show, Suspense, onMount } from "solid-js";
 import { A } from "@solidjs/router";
-import Badge from "~/components/ui/Badge";
-import Button from "~/components/ui/Button";
 import {
   LeafIcon,
   SproutIcon,
@@ -20,6 +18,7 @@ import {
   TagIcon,
   FolderIcon,
 } from "~/components/icons";
+import { Button } from "~/components/ui";
 
 // ========================
 // Static Data
@@ -46,6 +45,9 @@ interface StaticPlant {
   origin: string;
   toxicityInfo: string;
   imageUrl: string;
+  shopName: string;
+  shopLogoUrl: string;
+  shopSlug: string;
 }
 
 const STATIC_PLANTS: StaticPlant[] = [
@@ -70,6 +72,9 @@ const STATIC_PLANTS: StaticPlant[] = [
     origin: "Central America",
     toxicityInfo: "Toxic to cats and dogs if ingested",
     imageUrl: "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=400&h=400&fit=crop",
+    shopName: "Green Paradise",
+    shopLogoUrl: "https://ui-avatars.com/api/?name=GP&background=16a34a&color=fff&size=80",
+    shopSlug: "green-paradise",
   },
   {
     id: "2",
@@ -92,6 +97,9 @@ const STATIC_PLANTS: StaticPlant[] = [
     origin: "Western Africa",
     toxicityInfo: "Mildly toxic to pets",
     imageUrl: "https://images.unsplash.com/photo-1617173944883-66a1d2437dd0?w=400&h=400&fit=crop",
+    shopName: "Urban Jungle BD",
+    shopLogoUrl: "https://ui-avatars.com/api/?name=UJ&background=0d9488&color=fff&size=80",
+    shopSlug: "urban-jungle-bd",
   },
   {
     id: "3",
@@ -114,6 +122,9 @@ const STATIC_PLANTS: StaticPlant[] = [
     origin: "West Africa",
     toxicityInfo: "Toxic to pets if chewed",
     imageUrl: "https://images.unsplash.com/photo-1599598424687-22d4339f1ca3?w=400&h=400&fit=crop",
+    shopName: "The Plant Corner",
+    shopLogoUrl: "https://ui-avatars.com/api/?name=PC&background=7c3aed&color=fff&size=80",
+    shopSlug: "the-plant-corner",
   },
   {
     id: "4",
@@ -136,6 +147,9 @@ const STATIC_PLANTS: StaticPlant[] = [
     origin: "Southeast Asia",
     toxicityInfo: "Toxic to pets and humans if ingested",
     imageUrl: "https://images.unsplash.com/photo-1459411552884-843db83f1e3d?w=400&h=400&fit=crop",
+    shopName: "Leaf & Bloom",
+    shopLogoUrl: "https://ui-avatars.com/api/?name=LB&background=ea580c&color=fff&size=80",
+    shopSlug: "leaf-bloom",
   },
   {
     id: "5",
@@ -158,6 +172,9 @@ const STATIC_PLANTS: StaticPlant[] = [
     origin: "Tropical Americas",
     toxicityInfo: "Toxic to cats and dogs",
     imageUrl: "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=400&h=400&fit=crop",
+    shopName: "Flora & Fauna",
+    shopLogoUrl: "https://ui-avatars.com/api/?name=FF&background=dc2626&color=fff&size=80",
+    shopSlug: "flora-fauna",
   },
   {
     id: "6",
@@ -180,6 +197,9 @@ const STATIC_PLANTS: StaticPlant[] = [
     origin: "Southeast Asia",
     toxicityInfo: "Latex sap may irritate skin",
     imageUrl: "https://images.unsplash.com/photo-1617173944883-66a1d2437dd0?w=400&h=400&fit=crop",
+    shopName: "Green Paradise",
+    shopLogoUrl: "https://ui-avatars.com/api/?name=GP&background=16a34a&color=fff&size=80",
+    shopSlug: "green-paradise",
   },
   {
     id: "7",
@@ -202,6 +222,9 @@ const STATIC_PLANTS: StaticPlant[] = [
     origin: "South America",
     toxicityInfo: "Non-toxic to pets",
     imageUrl: "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=400&h=400&fit=crop",
+    shopName: "The Plant Corner",
+    shopLogoUrl: "https://ui-avatars.com/api/?name=PC&background=7c3aed&color=fff&size=80",
+    shopSlug: "the-plant-corner",
   },
   {
     id: "8",
@@ -224,6 +247,9 @@ const STATIC_PLANTS: StaticPlant[] = [
     origin: "Arabian Peninsula",
     toxicityInfo: "Toxic to pets if ingested",
     imageUrl: "https://images.unsplash.com/photo-1599598424687-22d4339f1ca3?w=400&h=400&fit=crop",
+    shopName: "Urban Jungle BD",
+    shopLogoUrl: "https://ui-avatars.com/api/?name=UJ&background=0d9488&color=fff&size=80",
+    shopSlug: "urban-jungle-bd",
   },
   {
     id: "9",
@@ -246,6 +272,9 @@ const STATIC_PLANTS: StaticPlant[] = [
     origin: "South Africa",
     toxicityInfo: "Mildly toxic to pets",
     imageUrl: "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=400&h=400&fit=crop",
+    shopName: "Leaf & Bloom",
+    shopLogoUrl: "https://ui-avatars.com/api/?name=LB&background=ea580c&color=fff&size=80",
+    shopSlug: "leaf-bloom",
   },
   {
     id: "10",
@@ -268,6 +297,9 @@ const STATIC_PLANTS: StaticPlant[] = [
     origin: "Southwest Africa",
     toxicityInfo: "Toxic to cats, dogs, and humans",
     imageUrl: "https://images.unsplash.com/photo-1459411552884-843db83f1e3d?w=400&h=400&fit=crop",
+    shopName: "Flora & Fauna",
+    shopLogoUrl: "https://ui-avatars.com/api/?name=FF&background=dc2626&color=fff&size=80",
+    shopSlug: "flora-fauna",
   },
   {
     id: "11",
@@ -290,6 +322,9 @@ const STATIC_PLANTS: StaticPlant[] = [
     origin: "Eastern Africa",
     toxicityInfo: "Toxic if ingested",
     imageUrl: "https://images.unsplash.com/photo-1599598424687-22d4339f1ca3?w=400&h=400&fit=crop",
+    shopName: "Green Paradise",
+    shopLogoUrl: "https://ui-avatars.com/api/?name=GP&background=16a34a&color=fff&size=80",
+    shopSlug: "green-paradise",
   },
   {
     id: "12",
@@ -312,6 +347,9 @@ const STATIC_PLANTS: StaticPlant[] = [
     origin: "Central America & Caribbean",
     toxicityInfo: "Toxic to pets if ingested",
     imageUrl: "https://images.unsplash.com/photo-1459411552884-843db83f1e3d?w=400&h=400&fit=crop",
+    shopName: "The Plant Corner",
+    shopLogoUrl: "https://ui-avatars.com/api/?name=PC&background=7c3aed&color=fff&size=80",
+    shopSlug: "the-plant-corner",
   },
   {
     id: "13",
@@ -334,6 +372,9 @@ const STATIC_PLANTS: StaticPlant[] = [
     origin: "Southern China",
     toxicityInfo: "Non-toxic to pets",
     imageUrl: "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=400&h=400&fit=crop",
+    shopName: "Urban Jungle BD",
+    shopLogoUrl: "https://ui-avatars.com/api/?name=UJ&background=0d9488&color=fff&size=80",
+    shopSlug: "urban-jungle-bd",
   },
   {
     id: "14",
@@ -356,6 +397,9 @@ const STATIC_PLANTS: StaticPlant[] = [
     origin: "Europe & Western Asia",
     toxicityInfo: "Toxic to pets and humans if ingested",
     imageUrl: "https://images.unsplash.com/photo-1459411552884-843db83f1e3d?w=400&h=400&fit=crop",
+    shopName: "Leaf & Bloom",
+    shopLogoUrl: "https://ui-avatars.com/api/?name=LB&background=ea580c&color=fff&size=80",
+    shopSlug: "leaf-bloom",
   },
   {
     id: "15",
@@ -378,6 +422,9 @@ const STATIC_PLANTS: StaticPlant[] = [
     origin: "South Africa & Mozambique",
     toxicityInfo: "Toxic to cats, dogs, and horses",
     imageUrl: "https://images.unsplash.com/photo-1599598424687-22d4339f1ca3?w=400&h=400&fit=crop",
+    shopName: "Flora & Fauna",
+    shopLogoUrl: "https://ui-avatars.com/api/?name=FF&background=dc2626&color=fff&size=80",
+    shopSlug: "flora-fauna",
   },
   {
     id: "16",
@@ -400,6 +447,9 @@ const STATIC_PLANTS: StaticPlant[] = [
     origin: "South Africa",
     toxicityInfo: "Non-toxic to pets",
     imageUrl: "https://images.unsplash.com/photo-1459411552884-843db83f1e3d?w=400&h=400&fit=crop",
+    shopName: "Green Paradise",
+    shopLogoUrl: "https://ui-avatars.com/api/?name=GP&background=16a34a&color=fff&size=80",
+    shopSlug: "green-paradise",
   },
   {
     id: "17",
@@ -422,6 +472,9 @@ const STATIC_PLANTS: StaticPlant[] = [
     origin: "Madagascar",
     toxicityInfo: "Non-toxic to pets",
     imageUrl: "https://images.unsplash.com/photo-1617173944883-66a1d2437dd0?w=400&h=400&fit=crop",
+    shopName: "The Plant Corner",
+    shopLogoUrl: "https://ui-avatars.com/api/?name=PC&background=7c3aed&color=fff&size=80",
+    shopSlug: "the-plant-corner",
   },
   {
     id: "18",
@@ -444,6 +497,9 @@ const STATIC_PLANTS: StaticPlant[] = [
     origin: "Southern Africa",
     toxicityInfo: "Non-toxic to pets",
     imageUrl: "https://images.unsplash.com/photo-1459411552884-843db83f1e3d?w=400&h=400&fit=crop",
+    shopName: "Urban Jungle BD",
+    shopLogoUrl: "https://ui-avatars.com/api/?name=UJ&background=0d9488&color=fff&size=80",
+    shopSlug: "urban-jungle-bd",
   },
   {
     id: "19",
@@ -466,6 +522,9 @@ const STATIC_PLANTS: StaticPlant[] = [
     origin: "Madagascar",
     toxicityInfo: "Toxic to dogs and cats",
     imageUrl: "https://images.unsplash.com/photo-1617173944883-66a1d2437dd0?w=400&h=400&fit=crop",
+    shopName: "Leaf & Bloom",
+    shopLogoUrl: "https://ui-avatars.com/api/?name=LB&background=ea580c&color=fff&size=80",
+    shopSlug: "leaf-bloom",
   },
   {
     id: "20",
@@ -488,6 +547,9 @@ const STATIC_PLANTS: StaticPlant[] = [
     origin: "South America",
     toxicityInfo: "Toxic to pets and humans if ingested",
     imageUrl: "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=400&h=400&fit=crop",
+    shopName: "Flora & Fauna",
+    shopLogoUrl: "https://ui-avatars.com/api/?name=FF&background=dc2626&color=fff&size=80",
+    shopSlug: "flora-fauna",
   },
 ];
 
@@ -579,21 +641,6 @@ function getInventoryLabel(count: number): string {
   if (count <= 5) return `Only ${count} left`;
   if (count <= 20) return `${count} in stock`;
   return "In Stock";
-}
-
-function getInventoryVariant(count: number): "forest" | "cream" | "terracotta" {
-  if (count === 0) return "terracotta";
-  if (count <= 5) return "cream";
-  return "forest";
-}
-
-function getDifficultyVariant(difficulty: string): "forest" | "sage" | "terracotta" | "default" {
-  switch (difficulty) {
-    case "BEGINNER": return "forest";
-    case "INTERMEDIATE": return "sage";
-    case "EXPERT": return "terracotta";
-    default: return "default";
-  }
 }
 
 function getDifficultyLabel(difficulty: string): string {
@@ -1026,13 +1073,33 @@ function PlantCard(props: { plant: StaticPlant }) {
   const plant = props.plant;
   const inStock = plant.inventoryCount > 0;
 
+  const lightLabel = (light: string) => {
+    switch (light) {
+      case "LOW": return "Low";
+      case "MEDIUM": return "Medium";
+      case "BRIGHT_INDIRECT": return "Bright";
+      case "DIRECT": return "Direct";
+      default: return light;
+    }
+  };
+
+  const wateringLabel = (freq: string) => {
+    switch (freq) {
+      case "DAILY": return "Daily";
+      case "WEEKLY": return "Weekly";
+      case "BI_WEEKLY": return "Bi-weekly";
+      case "MONTHLY": return "Monthly";
+      default: return freq;
+    }
+  };
+
   return (
     <A
       href={`/plants/${plant.id}`}
       class="group block bg-white dark:bg-forest-800 rounded-2xl border border-cream-200 dark:border-forest-700 overflow-hidden hover:shadow-lg hover:border-forest-300 dark:hover:border-forest-600 transition-all duration-300"
     >
-      {/* Image */}
-      <div class="relative aspect-square bg-cream-100 dark:bg-forest-900/50 overflow-hidden">
+      {/* Image - 4:3 portrait */}
+      <div class="relative aspect-[4/3] bg-cream-100 dark:bg-forest-900/50 overflow-hidden">
         <img
           src={plant.imageUrl}
           alt={plant.name}
@@ -1043,77 +1110,97 @@ function PlantCard(props: { plant: StaticPlant }) {
           }}
         />
 
+        {/* Price Badge */}
+        <div class="absolute bottom-3 left-3">
+          <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-white/95 dark:bg-forest-900/95 backdrop-blur-sm shadow-sm text-sm font-bold text-forest-800 dark:text-cream-50">
+            {formatPrice(plant.price)}
+          </span>
+        </div>
+
         {/* Badges */}
         <div class="absolute top-3 left-3 flex flex-col gap-1.5">
           <Show when={!inStock}>
-            <Badge variant="terracotta" class="text-xs">Out of Stock</Badge>
+            <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-terracotta-500/90 backdrop-blur-sm text-xs font-semibold text-white">
+              Out of Stock
+            </span>
           </Show>
           <Show when={plant.inventoryCount > 0 && plant.inventoryCount <= 5}>
-            <Badge variant="cream" class="text-xs">Low Stock</Badge>
+            <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-cream-500/90 backdrop-blur-sm text-xs font-semibold text-cream-900">
+              Only {plant.inventoryCount} left
+            </span>
           </Show>
         </div>
 
         {/* Care Difficulty */}
         <div class="absolute top-3 right-3">
-          <Badge variant={getDifficultyVariant(plant.careDifficulty)} class="text-xs">
+          <span class={`inline-flex items-center px-2.5 py-1 rounded-lg backdrop-blur-sm text-xs font-semibold ${
+            plant.careDifficulty === "BEGINNER"
+              ? "bg-forest-500/90 text-white"
+              : plant.careDifficulty === "INTERMEDIATE"
+                ? "bg-sage-500/90 text-white"
+                : "bg-terracotta-500/90 text-white"
+          }`}>
             {getDifficultyLabel(plant.careDifficulty)}
-          </Badge>
+          </span>
         </div>
       </div>
 
       {/* Content */}
       <div class="p-4">
-        {/* Name & Category */}
+        {/* Name & Scientific Name */}
         <div class="mb-2">
-          <h3 class="font-semibold text-forest-800 dark:text-cream-50 group-hover:text-forest-600 dark:group-hover:text-forest-300 transition-colors truncate">
+          <h3 class="font-semibold text-forest-800 dark:text-cream-50 group-hover:text-forest-600 dark:group-hover:text-forest-300 transition-colors">
             {plant.name}
           </h3>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            {plant.category}
+          <p class="text-xs italic text-gray-400 dark:text-gray-500 mt-0.5 truncate">
+            {plant.scientificName}
           </p>
         </div>
 
-        {/* Short Description */}
-        <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
-          {plant.shortDescription}
-        </p>
-
-        {/* Care Info */}
-        <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mb-3">
-          <span class="flex items-center gap-1" title={`Light: ${plant.lightRequirement}`}>
-            <SunIcon class="w-3.5 h-3.5" />
-            {plant.lightRequirement.replace("_", " ")}
+        {/* Shop Info */}
+        <A
+          href={`/shops/${plant.shopSlug}`}
+          class="inline-flex items-center gap-2 mb-3 px-2 py-1 rounded-lg hover:bg-cream-50 dark:hover:bg-forest-700/50 transition-colors group/shop"
+        >
+          <img
+            src={plant.shopLogoUrl}
+            alt={plant.shopName}
+            class="w-5 h-5 rounded-full object-cover ring-1 ring-gray-200 dark:ring-forest-600"
+          />
+          <span class="text-xs text-gray-500 dark:text-gray-400 group-hover/shop:text-forest-600 dark:group-hover/shop:text-forest-300 transition-colors">
+            {plant.shopName}
           </span>
-          <span class="flex items-center gap-1" title={`Watering: ${plant.wateringFrequency}`}>
-            <DropletIcon class="w-3.5 h-3.5" />
-            {plant.wateringFrequency.replace("_", " ").toLowerCase()}
-          </span>
-        </div>
+        </A>
 
-        {/* Tags */}
-        <div class="flex flex-wrap gap-1 mb-3">
-          <For each={plant.tags.slice(0, 3)}>
-            {(tag) => (
-              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-cream-100 text-cream-700 dark:bg-forest-700 dark:text-gray-300">
-                {tag}
-              </span>
-            )}
-          </For>
-          <Show when={plant.tags.length > 3}>
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-cream-50 text-gray-500 dark:bg-forest-800 dark:text-gray-500">
-              +{plant.tags.length - 3}
-            </span>
-          </Show>
-        </div>
+        {/* Tags - compact, max 3 */}
+        <Show when={plant.tags.length > 0}>
+          <div class="flex flex-wrap gap-1.5 mb-3">
+            <For each={plant.tags.slice(0, 3)}>
+              {(tag) => (
+                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-cream-100/80 text-cream-700 dark:bg-forest-700/60 dark:text-gray-300">
+                  {tag}
+                </span>
+              )}
+            </For>
+          </div>
+        </Show>
 
-        {/* Price & Stock */}
-        <div class="flex items-center justify-between pt-3 border-t border-cream-100 dark:border-forest-700">
-          <span class="text-lg font-bold text-forest-700 dark:text-forest-300">
-            {formatPrice(plant.price)}
+        {/* Care Info - Clean labels */}
+        <div class="flex items-center gap-3 text-xs">
+          <span class="inline-flex items-center gap-1 text-gray-500 dark:text-gray-400" title={`Light: ${plant.lightRequirement}`}>
+            <SunIcon class="w-3.5 h-3.5 text-amber-500" />
+            {lightLabel(plant.lightRequirement)}
           </span>
-          <Badge variant={getInventoryVariant(plant.inventoryCount)} class="text-xs">
-            {getInventoryLabel(plant.inventoryCount)}
-          </Badge>
+          <span class="inline-flex items-center gap-1 text-gray-500 dark:text-gray-400" title={`Watering: ${plant.wateringFrequency}`}>
+            <DropletIcon class="w-3.5 h-3.5 text-blue-500" />
+            {wateringLabel(plant.wateringFrequency)}
+          </span>
+          <span class={`inline-flex items-center gap-1 ${
+            inStock ? "text-forest-600 dark:text-forest-400" : "text-terracotta-600 dark:text-terracotta-400"
+          }`}>
+            <CubeIcon class="w-3.5 h-3.5" />
+            {inStock ? getInventoryLabel(plant.inventoryCount) : "Out of Stock"}
+          </span>
         </div>
       </div>
     </A>
