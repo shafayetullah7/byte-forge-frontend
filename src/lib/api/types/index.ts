@@ -66,3 +66,6 @@ export class ApiError extends Error {
     this.name = "ApiError";
   }
 }
+
+// Public plants types
+export * from "./public/plants.types";
