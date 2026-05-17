@@ -1,4 +1,4 @@
-import { createSignal, createMemo, createEffect, For, Show, Suspense, ErrorBoundary } from "solid-js";
+import { createSignal, createMemo, createEffect, For, Show, Suspense, ErrorBoundary, onCleanup } from "solid-js";
 import { A, createAsync } from "@solidjs/router";
 import { getPublicPlants } from "~/lib/api/endpoints/public/plants.api";
 import type {
@@ -397,7 +397,7 @@ function PlantCard(props: { plant: PublicPlantListItem }) {
   return (
     <A
       href={`/plants/${plant.slug}`}
-      class="group block bg-white dark:bg-forest-800 rounded-2xl border border-cream-200 dark:border-forest-700 overflow-hidden hover:shadow-lg hover:border-forest-300 dark:hover:border-forest-600 transition-all duration-300"
+      class="group flex flex-col bg-white dark:bg-forest-800 rounded-2xl border border-cream-200 dark:border-forest-700 overflow-hidden hover:shadow-lg hover:border-forest-300 dark:hover:border-forest-600 transition-all duration-300"
     >
       {/* Image - 4:3 portrait */}
       <div class="relative aspect-[4/3] bg-cream-100 dark:bg-forest-900/50 overflow-hidden">
@@ -416,7 +416,7 @@ function PlantCard(props: { plant: PublicPlantListItem }) {
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               loading="lazy"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = "";
+                (e.currentTarget as HTMLImageElement).style.display = 'none';
               }}
             />
           )}
@@ -577,6 +577,8 @@ export default function PlantsPage() {
       setDebouncedSearch(query);
       setCurrentPage(1);
     }, 300);
+    
+    onCleanup(() => clearTimeout(debounceTimer));
   });
 
   // Filter params memo
@@ -596,32 +598,15 @@ export default function PlantsPage() {
     sortOrder: sortOrder(),
   }));
 
-  // API call with stable signal pattern (matches project standard)
+  // API call
   const plantsData = createAsync(
     () => getPublicPlants(filterParams()),
     { deferStream: true }
   );
 
-  const [stablePlants, setStablePlants] = createSignal<{
-    data: PublicPlantListItem[];
-    meta: { total: number; pages: number };
-  } | undefined>(undefined);
-
-  const [isRefetching, setIsRefetching] = createSignal(false);
-
-  createEffect(() => {
-    const d = plantsData();
-    if (d !== undefined) {
-      setStablePlants(d);
-      setIsRefetching(false);
-    } else if (stablePlants() !== undefined) {
-      setIsRefetching(true);
-    }
-  });
-
   // Extract data
-  const plants = createMemo(() => stablePlants()?.data ?? []);
-  const meta = createMemo(() => stablePlants()?.meta);
+  const plants = createMemo(() => plantsData()?.data ?? []);
+  const meta = createMemo(() => plantsData()?.meta);
   const totalPages = createMemo(() => meta()?.pages ?? 1);
   const totalItems = createMemo(() => meta()?.total ?? 0);
 
@@ -930,7 +915,7 @@ export default function PlantsPage() {
                 </div>
               }>
                 <Show
-                  when={stablePlants()}
+                  when={plantsData()}
                   fallback={
                     <div class="bg-white dark:bg-forest-800 rounded-2xl border border-cream-200 dark:border-forest-700 py-16 px-4 text-center">
                       <div class="w-16 h-16 rounded-full bg-cream-100 dark:bg-forest-700 flex items-center justify-center mx-auto mb-4">
@@ -1028,19 +1013,7 @@ export default function PlantsPage() {
                   </Show>
                 </Show>
 
-                {/* Loading overlay during refetch */}
-                <Show when={isRefetching()}>
-                  <div class="fixed inset-0 bg-white/40 dark:bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 pointer-events-none">
-                    <div class="flex items-center gap-2 text-forest-700 dark:text-cream-200 bg-white dark:bg-forest-800 px-4 py-2 rounded-lg shadow-lg">
-                      <svg class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                      </svg>
-                      <span class="text-sm font-medium">Updating...</span>
-                    </div>
-                  </div>
-                </Show>
-              </Suspense>
+                </Suspense>
             </div>
           </main>
         </div>
