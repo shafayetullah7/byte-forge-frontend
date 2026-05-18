@@ -63,7 +63,7 @@ export function PlantCard(props: { plant: PublicPlantListItem }) {
 
       <div class="p-4">
         <div class="mb-2">
-          <h3 class="font-semibold text-forest-800 dark:text-cream-50 group-hover:text-forest-600 dark:group-hover:text-forest-300 transition-colors">
+          <h3 class="font-semibold text-forest-800 dark:text-cream-50 group-hover:text-forest-600 dark:group-hover:text-forest-300 transition-colors truncate">
             {plant.name}
           </h3>
           <Show when={plant.scientificName}>
@@ -77,7 +77,7 @@ export function PlantCard(props: { plant: PublicPlantListItem }) {
           {(shop) => (
             <A
               href={`/shops/${shop().slug}`}
-              class="inline-flex items-center gap-2 mb-3 px-2 py-1 rounded-lg hover:bg-cream-50 dark:hover:bg-forest-700/50 transition-colors group/shop"
+              class="flex items-center gap-2 mb-3 px-2 py-1 rounded-lg hover:bg-cream-50 dark:hover:bg-forest-700/50 transition-colors group/shop"
             >
               <Show when={shop().logo}>
                 {(logo) => (
@@ -87,7 +87,7 @@ export function PlantCard(props: { plant: PublicPlantListItem }) {
                   />
                 )}
               </Show>
-              <span class="text-xs text-gray-500 dark:text-gray-400 group-hover/shop:text-forest-600 dark:group-hover/shop:text-forest-300 transition-colors">
+              <span class="text-xs text-gray-500 dark:text-gray-400 truncate group-hover/shop:text-forest-600 dark:group-hover/shop:text-forest-300 transition-colors">
                 {shop().name}
               </span>
             </A>
@@ -106,7 +106,7 @@ export function PlantCard(props: { plant: PublicPlantListItem }) {
           </div>
         </Show>
 
-        <div class="flex items-center gap-3 text-xs">
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
           <Show when={plant.lightRequirement}>
             {(light) => (
               <span class="inline-flex items-center gap-1 text-gray-500 dark:text-gray-400" title={`${t("public.plants.plantCard.lightTitle")}: ${light()}`}>
