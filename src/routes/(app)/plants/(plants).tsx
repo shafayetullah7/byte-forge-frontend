@@ -1,5 +1,5 @@
 import { createSignal, createMemo, createEffect, Show, ErrorBoundary, onCleanup } from "solid-js";
-import { A, createAsync } from "@solidjs/router";
+import { createAsync } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import type { PublicPlantFilter } from "~/lib/api/types/public/plants.types";
 import { getPublicPlants } from "~/lib/api/endpoints/public/plants.api";
@@ -45,21 +45,6 @@ export default function PlantsPage() {
     onCleanup(() => clearTimeout(debounceTimer));
   });
 
-  const categoryTree = createAsync(() => getCategoryTree(), { deferStream: true });
-  const tagGroups = createAsync(() => getTags(), { deferStream: true });
-
-  const allTags = createMemo(() => {
-    const groups = tagGroups();
-    if (!groups || groups.length === 0) return [];
-    const result: { id: string; name: string; groupId: string; groupName: string }[] = [];
-    for (const group of groups) {
-      for (const tag of group.tags) {
-        result.push({ id: tag.id, name: tag.name, groupId: group.id, groupName: group.name });
-      }
-    }
-    return result;
-  });
-
   const filterParams = createMemo<PublicPlantFilter>(() => ({
     page: currentPage(),
     limit: ITEMS_PER_PAGE,
@@ -78,18 +63,36 @@ export default function PlantsPage() {
     sortOrder: sortOrder(),
   }));
 
+  const categoryTree = createAsync(() => getCategoryTree(), { deferStream: true });
+  const tagGroups = createAsync(() => getTags(), { deferStream: true });
+
+  const allTags = createMemo(() => {
+    const groups = tagGroups();
+    if (!groups || groups.length === 0) return [];
+    const result: { id: string; name: string; groupId: string; groupName: string }[] = [];
+    for (const group of groups) {
+      for (const tag of group.tags) {
+        result.push({ id: tag.id, name: tag.name, groupId: group.id, groupName: group.name });
+      }
+    }
+    return result;
+  });
+
   const plantsData = createAsync(
     () => getPublicPlants(filterParams()),
     { deferStream: true }
   );
 
   const [stablePlants, setStablePlants] = createSignal<Awaited<ReturnType<typeof getPublicPlants>> | undefined>(undefined);
-  const isRefreshing = createMemo(() => plantsData() === undefined && stablePlants() !== undefined);
+  const [isRefreshing, setIsRefreshing] = createSignal(false);
 
   createEffect(() => {
     const d = plantsData();
     if (d !== undefined) {
       setStablePlants(d);
+      setIsRefreshing(false);
+    } else if (stablePlants() !== undefined) {
+      setIsRefreshing(true);
     }
   });
 

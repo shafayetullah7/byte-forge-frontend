@@ -1,4 +1,5 @@
 import { RouteSectionProps, useLocation } from "@solidjs/router";
+import { Suspense } from "solid-js";
 import { Navbar } from "~/components/layout/Navbar";
 
 export default function AppLayout(props: RouteSectionProps) {
@@ -14,7 +15,7 @@ export default function AppLayout(props: RouteSectionProps) {
 
       {/* Content Layer (z-0) */}
       <main classList={{ "pt-16": !isHome() }}>
-        {props.children}
+        <Suspense>{props.children}</Suspense>
       </main>
     </div>
   );

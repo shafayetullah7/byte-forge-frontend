@@ -1,11 +1,9 @@
-import { For, Show, Suspense } from "solid-js";
+import { For, Show } from "solid-js";
 import { useI18n } from "~/i18n";
 import type { PublicPlantListItem } from "~/lib/api/types/public/plants.types";
 import { LeafIcon } from "~/components/icons";
 import { Button } from "~/components/ui";
 import { PlantCard } from "../../routes/(app)/plants/plant-card";
-
-const ITEMS_PER_PAGE = 12;
 
 export function PlantGrid(props: {
   plants: () => PublicPlantListItem[];
@@ -27,22 +25,6 @@ export function PlantGrid(props: {
           <span class="text-sm font-medium text-forest-700 dark:text-forest-300">{t("public.plants.grid.refreshing")}</span>
         </div>
       </Show>
-      <Suspense fallback={
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <For each={Array.from({ length: ITEMS_PER_PAGE })}>
-          {() => (
-            <div class="bg-white dark:bg-forest-800 rounded-2xl border border-cream-200 dark:border-forest-700 overflow-hidden animate-pulse">
-              <div class="aspect-[4/3] bg-cream-100 dark:bg-forest-900/50" />
-              <div class="p-4 space-y-3">
-                <div class="h-4 bg-cream-200 dark:bg-forest-700 rounded w-3/4" />
-                <div class="h-3 bg-cream-100 dark:bg-forest-800 rounded w-1/2" />
-                <div class="h-3 bg-cream-100 dark:bg-forest-800 rounded w-full" />
-              </div>
-            </div>
-          )}
-        </For>
-      </div>
-    }>
       <Show when={props.hasData()} fallback={
         <EmptyState loading />
       }>
@@ -59,7 +41,6 @@ export function PlantGrid(props: {
           </div>
         </Show>
       </Show>
-    </Suspense>
     </div>
   );
 }
