@@ -1,7 +1,7 @@
 import { For, Show, createSignal, Suspense, ErrorBoundary, type Component, createMemo, createEffect, on } from "solid-js";
 import { A, createAsync, useParams } from "@solidjs/router";
 import { useI18n } from "~/i18n";
-import type { PublicPlantDetail, PublicPlantVariant, PublicPlantMedia } from "~/lib/api/types/public/plants.types";
+import type { PublicPlantVariant, PublicPlantMedia } from "~/lib/api/types/public/plants.types";
 import {
   LeafIcon,
   SunIcon,
@@ -44,11 +44,7 @@ function ImageGallery(props: { media: PublicPlantMedia[]; plantName: string; med
   );
 
   const images = createMemo<PublicPlantMedia[]>(() =>
-    props.media.length > 0 ? props.media : [
-      { id: "placeholder-1", url: "", type: "image", displayOrder: 1 },
-      { id: "placeholder-2", url: "", type: "image", displayOrder: 2 },
-      { id: "placeholder-3", url: "", type: "image", displayOrder: 3 },
-    ]
+    props.media.length > 0 ? props.media : []
   );
 
   const currentImage = () => images()[currentIndex()];
@@ -268,7 +264,7 @@ function DetailRow(props: {
         </div>
         <div class="flex-1 min-w-0">
           <p class="text-xs text-gray-500 dark:text-gray-400">{props.label}</p>
-          <p class={`text-sm font-medium mt-0.5 ${props.valueClass || "text-forest-800 dark:text-cream-50"} ${props.label === "Scientific Name" ? "italic" : ""}`}>
+          <p class={`text-sm font-medium mt-0.5 ${props.valueClass || "text-forest-800 dark:text-cream-50"}`}>
             {props.value}
           </p>
         </div>
@@ -308,10 +304,8 @@ export default function PlantDetailPage() {
   const [selectedVariant, setSelectedVariant] = createSignal<string | undefined>(undefined);
   const [quantity, setQuantity] = createSignal(1);
 
-  const plantData = () => plant();
-
   const selectedVariantData = () => {
-    const p = plantData();
+    const p = plant();
     if (!p) return null;
     const fallbackId = p.variants.find((v) => v.isBase)?.id ?? p.variants[0]?.id;
     const baseId = selectedVariant() || fallbackId;
@@ -321,8 +315,7 @@ export default function PlantDetailPage() {
   const displayMedia = () => {
     const variant = selectedVariantData();
     if (variant && variant.media.length > 0) return variant.media;
-    const p = plantData();
-    return p?.media ?? [];
+    return plant()?.media ?? [];
   };
 
   const mediaKey = createMemo(() => {
@@ -334,7 +327,7 @@ export default function PlantDetailPage() {
   });
 
   const careBadges = () => {
-    const p = plantData();
+    const p = plant();
     if (!p) return [];
     return [
       {
@@ -400,17 +393,7 @@ export default function PlantDetailPage() {
           </div>
         </div>
       }>
-        <Show when={plantData()} fallback={
-          <div class="min-h-screen bg-cream-50 dark:bg-forest-900 flex items-center justify-center">
-            <div class="flex items-center gap-3">
-              <svg class="animate-spin w-6 h-6 text-forest-600 dark:text-forest-400" viewBox="0 0 24 24" fill="none">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
-              <span class="text-lg font-medium text-forest-700 dark:text-forest-300">{t("public.plants.grid.loading")}</span>
-            </div>
-          </div>
-        }>
+        <Show when={plant()}>
           {(plant) => (
             <div class="min-h-screen bg-cream-50 dark:bg-forest-900">
               <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -683,22 +666,6 @@ export default function PlantDetailPage() {
                       </div>
                     </Show>
 
-                    {/* Common Problems Alert */}
-                    <Show when={plant().careInstructions?.commonProblems}>
-                      <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-6">
-                        <div class="flex items-start gap-3">
-                          <ExclamationCircleIcon class="w-6 h-6 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-                          <div>
-                            <h3 class="text-lg font-semibold text-amber-900 dark:text-amber-300 mb-2">
-                              {t("public.plants.detail.troubleshooting")}
-                            </h3>
-                            <p class="text-sm text-amber-700 dark:text-amber-400 leading-relaxed">
-                              {plant().careInstructions!.commonProblems}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </Show>
                   </div>
 
                   {/* Right Column (1/3) */}
