@@ -66,7 +66,7 @@ const VariantCard: Component<{
       <div class="p-4">
         <div class="flex items-start justify-between mb-2">
           <div>
-            <p class="font-semibold text-forest-800 dark:text-cream-50">{props.variant.title}</p>
+            <p class="text-base font-semibold text-forest-800 dark:text-cream-50">{props.variant.title}</p>
             {props.variant.sku && (
               <p class="text-xs text-gray-400 dark:text-gray-500 font-mono mt-0.5">{props.variant.sku}</p>
             )}
@@ -78,7 +78,7 @@ const VariantCard: Component<{
           <div class="flex flex-wrap gap-1.5 pt-2 border-t border-cream-100 dark:border-forest-700/50">
             <For each={primaryPills()}>
               {(pill) => (
-                <span class={`text-[10px] font-medium px-2 py-0.5 rounded-full ${pill.color}`}>
+                <span class={`text-xs font-medium px-2 py-0.5 rounded-full ${pill.color}`}>
                   {pill.value}
                 </span>
               )}

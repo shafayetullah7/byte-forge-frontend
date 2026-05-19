@@ -225,7 +225,7 @@ export default function PlantDetailPage() {
                     </div>
 
                     <Show when={plant().shortDescription}>
-                      <p class="text-gray-600 dark:text-gray-300 leading-relaxed">
+                      <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                         {plant().shortDescription}
                       </p>
                     </Show>
@@ -273,7 +273,7 @@ export default function PlantDetailPage() {
                       <div class="flex items-center border border-cream-200 dark:border-forest-700 rounded-xl overflow-hidden">
                         <button
                           onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                          class="px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-cream-50 dark:hover:bg-forest-800 transition-colors"
+                          class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 hover:bg-cream-50 dark:hover:bg-forest-800 transition-colors"
                           aria-label="Decrease quantity"
                         >
                           −
@@ -283,7 +283,7 @@ export default function PlantDetailPage() {
                         </span>
                         <button
                           onClick={() => setQuantity((q) => Math.min(selectedVariantData()?.inventoryCount ?? 1, q + 1))}
-                          class="px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-cream-50 dark:hover:bg-forest-800 transition-colors"
+                          class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 hover:bg-cream-50 dark:hover:bg-forest-800 transition-colors"
                           aria-label="Increase quantity"
                         >
                           +
@@ -409,7 +409,7 @@ export default function PlantDetailPage() {
 
                   <div class="space-y-6">
                     <div class="bg-white dark:bg-forest-800 rounded-2xl border border-cream-200 dark:border-forest-700 p-6">
-                      <h2 class="text-lg font-bold text-forest-800 dark:text-cream-50 mb-4">
+                      <h2 class="text-xl font-bold text-forest-800 dark:text-cream-50 mb-4">
                         {t("public.plants.detail.plantDetails")}
                       </h2>
                       <div class="space-y-0">
@@ -442,7 +442,7 @@ export default function PlantDetailPage() {
                     <Show when={plant().shop}>
                       {(shop) => (
                         <div class="bg-white dark:bg-forest-800 rounded-2xl border border-cream-200 dark:border-forest-700 p-6">
-                          <h3 class="text-lg font-bold text-forest-800 dark:text-cream-50 mb-4">
+                          <h3 class="text-xl font-bold text-forest-800 dark:text-cream-50 mb-4">
                             {t("public.plants.detail.soldBy")}
                           </h3>
                           <A href={`/shops/${shop().slug}`} class="block group">

@@ -45,7 +45,7 @@ const VariantDetail: Component<{
           <For each={allAttrs()}>
             {(row) => (
               <div>
-                <p class="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                   {row.label}
                 </p>
                 <p class="text-sm font-medium text-forest-800 dark:text-cream-50 mt-0.5">
