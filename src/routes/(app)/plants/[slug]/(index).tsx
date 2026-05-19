@@ -29,6 +29,7 @@ import {
   ImageGallery,
   CareBadge,
   VariantCard,
+  VariantDetail,
   CareInstructionCard,
   DetailRow,
   Breadcrumb,
@@ -41,19 +42,19 @@ export default function PlantDetailPage() {
   const [selectedVariant, setSelectedVariant] = createSignal<string | undefined>(undefined);
   const [quantity, setQuantity] = createSignal(1);
 
-  const selectedVariantData = (): PublicPlantVariant | null => {
+  const selectedVariantData = createMemo<PublicPlantVariant | null>(() => {
     const p = plant();
     if (!p) return null;
     const fallbackId = p.variants.find((v) => v.isBase)?.id ?? p.variants[0]?.id;
     const baseId = selectedVariant() || fallbackId;
     return p.variants.find((v) => v.id === baseId) || null;
-  };
+  });
 
-  const displayMedia = () => {
+  const displayMedia = createMemo(() => {
     const variant = selectedVariantData();
     if (variant && variant.media.length > 0) return variant.media;
     return plant()?.media ?? [];
-  };
+  });
 
   const mediaKey = createMemo(() => {
     const variant = selectedVariantData();
@@ -63,7 +64,7 @@ export default function PlantDetailPage() {
     return "plant-base";
   });
 
-  const careBadges = () => {
+  const careBadges = createMemo(() => {
     const p = plant();
     if (!p) return [];
     return [
@@ -96,7 +97,17 @@ export default function PlantDetailPage() {
         bgColor: "bg-sky-100 dark:bg-sky-900/30",
       },
     ];
-  };
+  });
+
+  const formattedDate = createMemo(() => {
+    const p = plant();
+    if (!p) return "";
+    return new Date(p.updatedAt).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  });
 
   return (
     <ErrorBoundary
@@ -248,6 +259,13 @@ export default function PlantDetailPage() {
                             )}
                           </For>
                         </div>
+                        <Show when={selectedVariantData()}>
+                          {(variant) => (
+                            <div class="mt-3">
+                              <VariantDetail variant={variant()} />
+                            </div>
+                          )}
+                        </Show>
                       </div>
                     </Show>
 
@@ -457,11 +475,7 @@ export default function PlantDetailPage() {
                         <ClockIcon class="w-3.5 h-3.5" />
                         <span>
                           {t("public.plants.detail.lastUpdated")}:{" "}
-                          {new Date(plant().updatedAt).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
+                          {formattedDate()}
                         </span>
                       </div>
                     </div>

@@ -18,11 +18,9 @@ const ImageGallery: Component<{
     )
   );
 
-  const images = createMemo<PublicPlantMedia[]>(() =>
-    props.media.length > 0 ? props.media : []
-  );
+  const images = createMemo(() => props.media, { equals: false });
 
-  const currentImage = () => images()[currentIndex()];
+  const currentImage = createMemo(() => images()[currentIndex()]);
 
   const goToPrev = () => {
     setCurrentIndex((prev) => (prev === 0 ? images().length - 1 : prev - 1));
@@ -36,7 +34,7 @@ const ImageGallery: Component<{
     <div class="space-y-4">
       <div class="relative w-full aspect-square bg-cream-100 dark:bg-forest-900/50 rounded-2xl overflow-hidden">
         <Show
-          when={currentImage().url}
+          when={currentImage()?.url}
           fallback={
             <div class="absolute inset-0 flex items-center justify-center">
               <ImageIcon class="w-24 h-24 text-gray-300 dark:text-gray-600" />
@@ -44,7 +42,7 @@ const ImageGallery: Component<{
           }
         >
           <img
-            src={currentImage().url}
+            src={currentImage()!.url}
             alt={props.plantName}
             class="w-full h-full object-cover"
           />
