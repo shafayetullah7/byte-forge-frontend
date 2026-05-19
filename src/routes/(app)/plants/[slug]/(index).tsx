@@ -21,6 +21,8 @@ import {
   ExclamationCircleIcon,
   ClockIcon,
   GlobeAltIcon,
+  ShoppingBagIcon,
+  EyeIcon,
 } from "~/components/icons";
 import { Button } from "~/components/ui";
 import { formatPrice, getDifficultyLabel, getDifficultyColor, lightLabel, wateringLabel } from "../constants";
@@ -33,7 +35,18 @@ import {
   CareInstructionCard,
   DetailRow,
   Breadcrumb,
+  PlantGridSection,
+  ReviewsSection,
+  FrequentlyBoughtTogether,
 } from "./components";
+import {
+  MOCK_SIMILAR_PLANTS,
+  MOCK_YOU_MIGHT_LIKE,
+  MOCK_REVIEWS,
+  MOCK_MORE_FROM_SHOP,
+  MOCK_BUNDLE_ITEMS,
+  MOCK_RECENTLY_VIEWED,
+} from "./mock-data";
 
 export default function PlantDetailPage() {
   const { t } = useI18n();
@@ -109,6 +122,8 @@ export default function PlantDetailPage() {
     });
   });
 
+  const plantPrice = createMemo(() => selectedVariantData()?.price ?? plant()?.price ?? "0");
+
   return (
     <ErrorBoundary
       fallback={(error) => (
@@ -150,6 +165,19 @@ export default function PlantDetailPage() {
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
                   <div>
                     <ImageGallery media={displayMedia()} plantName={plant().name} mediaKey={mediaKey()} />
+
+                    <div class="mt-6">
+                      <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
+                        {t("public.plants.detail.careAtAGlance")}
+                      </h3>
+                      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <For each={careBadges()}>
+                          {(badge) => (
+                            <CareBadge {...badge} />
+                          )}
+                        </For>
+                      </div>
+                    </div>
                   </div>
 
                   <div class="space-y-6">
@@ -207,7 +235,7 @@ export default function PlantDetailPage() {
                       <div>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{t("public.plants.detail.price")}</p>
                         <p class="text-3xl font-bold text-forest-800 dark:text-cream-50">
-                          {formatPrice(selectedVariantData()?.price ?? plant().price)}
+                          {formatPrice(plantPrice())}
                         </p>
                       </div>
                       <div class="pb-1">
@@ -229,19 +257,6 @@ export default function PlantDetailPage() {
                         {plant().shortDescription}
                       </p>
                     </Show>
-
-                    <div>
-                      <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
-                        {t("public.plants.detail.careAtAGlance")}
-                      </h3>
-                      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <For each={careBadges()}>
-                          {(badge) => (
-                            <CareBadge {...badge} />
-                          )}
-                        </For>
-                      </div>
-                    </div>
 
                     <Show when={plant().variants.length > 0}>
                       <div>
@@ -439,37 +454,6 @@ export default function PlantDetailPage() {
                       </div>
                     </Show>
 
-                    <Show when={plant().shop}>
-                      {(shop) => (
-                        <div class="bg-white dark:bg-forest-800 rounded-2xl border border-cream-200 dark:border-forest-700 p-6">
-                          <h3 class="text-xl font-bold text-forest-800 dark:text-cream-50 mb-4">
-                            {t("public.plants.detail.soldBy")}
-                          </h3>
-                          <A href={`/shops/${shop().slug}`} class="block group">
-                            <div class="flex items-center gap-3 mb-3">
-                              <div class="w-12 h-12 rounded-xl bg-cream-100 dark:bg-forest-900/50 flex items-center justify-center">
-                                <LeafIcon class="w-6 h-6 text-gray-400 dark:text-gray-500" />
-                              </div>
-                              <div>
-                                <p class="font-semibold text-forest-800 dark:text-cream-50 group-hover:text-forest-600 dark:group-hover:text-forest-400 transition-colors">
-                                  {shop().name}
-                                </p>
-                                {shop().isVerified && (
-                                  <span class="text-xs text-forest-600 dark:text-forest-400 flex items-center gap-1">
-                                    <CheckBadgeIcon class="w-3.5 h-3.5" />
-                                    {t("public.plants.detail.verifiedShop")}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <Button variant="outline" size="sm" class="w-full">
-                              {t("public.plants.detail.visitShop")}
-                            </Button>
-                          </A>
-                        </div>
-                      )}
-                    </Show>
-
                     <div class="bg-white dark:bg-forest-800 rounded-2xl border border-cream-200 dark:border-forest-700 p-6">
                       <div class="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
                         <ClockIcon class="w-3.5 h-3.5" />
@@ -481,6 +465,50 @@ export default function PlantDetailPage() {
                     </div>
                   </div>
                 </div>
+
+                <FrequentlyBoughtTogether
+                  plantPrice={plantPrice()}
+                  bundleItems={MOCK_BUNDLE_ITEMS}
+                />
+
+                <ReviewsSection reviews={MOCK_REVIEWS} />
+
+                <PlantGridSection
+                  icon={LeafIcon}
+                  title="Similar Plants"
+                  subtitle="Plants with similar care requirements"
+                  action={{ label: "Browse All", href: "/plants" }}
+                  plants={MOCK_SIMILAR_PLANTS}
+                />
+
+                <PlantGridSection
+                  icon={SparklesIcon}
+                  title="You Might Also Like"
+                  subtitle="Handpicked recommendations for you"
+                  action={{ label: "Explore More", href: "/plants" }}
+                  plants={MOCK_YOU_MIGHT_LIKE}
+                />
+
+                <PlantGridSection
+                  icon={ShoppingBagIcon}
+                  title={`More from ${plant().shop?.name || "this Shop"}`}
+                  subtitle="Explore more plants from the same seller"
+                  action={
+                    (() => {
+                      const shop = plant().shop;
+                      return shop ? { label: "Visit Shop", href: `/shops/${shop.slug}` } : undefined;
+                    })()
+                  }
+                  plants={MOCK_MORE_FROM_SHOP}
+                />
+
+                <PlantGridSection
+                  icon={EyeIcon}
+                  title="Recently Viewed"
+                  subtitle="Plants you've been looking at"
+                  plants={MOCK_RECENTLY_VIEWED}
+                />
+
               </div>
             </div>
           )}

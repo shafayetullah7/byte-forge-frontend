@@ -66,6 +66,7 @@ export { LeafIcon } from "./LeafIcon";
 export { RulerIcon } from "./RulerIcon";
 export { SparklesIcon } from "./SparklesIcon";
 export { SproutIcon } from "./SproutIcon";
+export { StarRatingIcon } from "./StarRatingIcon";
 
 export * from './TagIcon';
 export * from './ArrowsRightLeftIcon';

@@ -1,4 +1,4 @@
-import { A } from "@solidjs/router";
+import { A, useNavigate } from "@solidjs/router";
 import { Show, For } from "solid-js";
 import { useI18n } from "~/i18n";
 import type { PublicPlantListItem } from "~/lib/api/types/public/plants.types";
@@ -7,13 +7,14 @@ import { formatPrice, getInventoryLabel, getDifficultyLabel, getDifficultyColor,
 
 export function PlantCard(props: { plant: PublicPlantListItem }) {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const plant = props.plant;
   const inStock = plant.inStock;
 
   return (
     <A
       href={`/plants/${plant.slug}`}
-      class="group flex flex-col bg-white dark:bg-forest-800 rounded-2xl border border-cream-200 dark:border-forest-700 overflow-hidden hover:shadow-lg hover:border-forest-300 dark:hover:border-forest-600 transition-all duration-300"
+      class="group flex flex-col w-full min-w-0 bg-white dark:bg-forest-800 rounded-2xl border border-cream-200 dark:border-forest-700 overflow-hidden hover:shadow-lg hover:border-forest-300 dark:hover:border-forest-600 transition-all duration-300"
     >
       <div class="relative aspect-[4/3] bg-cream-100 dark:bg-forest-900/50 overflow-hidden">
         <Show when={plant.thumbnail} fallback={
@@ -75,9 +76,12 @@ export function PlantCard(props: { plant: PublicPlantListItem }) {
 
         <Show when={plant.shop}>
           {(shop) => (
-            <A
-              href={`/shops/${shop().slug}`}
-              class="flex items-center gap-2 mb-3 px-2 py-1 rounded-lg hover:bg-cream-50 dark:hover:bg-forest-700/50 transition-colors group/shop"
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/shops/${shop().slug}`);
+              }}
+              class="flex items-center gap-2 mb-3 px-2 py-1 rounded-lg hover:bg-cream-50 dark:hover:bg-forest-700/50 transition-colors cursor-pointer group/shop"
             >
               <Show when={shop().logo}>
                 {(logo) => (
@@ -90,7 +94,7 @@ export function PlantCard(props: { plant: PublicPlantListItem }) {
               <span class="text-xs text-gray-500 dark:text-gray-400 truncate group-hover/shop:text-forest-600 dark:group-hover/shop:text-forest-300 transition-colors">
                 {shop().name}
               </span>
-            </A>
+            </div>
           )}
         </Show>
 

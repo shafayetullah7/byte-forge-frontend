@@ -5,3 +5,7 @@ export { default as VariantDetail } from "./VariantDetail";
 export { default as CareInstructionCard } from "./CareInstructionCard";
 export { default as DetailRow } from "./DetailRow";
 export { default as Breadcrumb } from "./Breadcrumb";
+export { default as SectionHeader } from "./SectionHeader";
+export { default as PlantGridSection } from "./PlantGridSection";
+export { default as ReviewsSection } from "./ReviewsSection";
+export { default as FrequentlyBoughtTogether } from "./FrequentlyBoughtTogether";
