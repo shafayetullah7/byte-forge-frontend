@@ -1,5 +1,5 @@
-import { For, Show, createSignal, Suspense, ErrorBoundary, createMemo } from "solid-js";
-import { A, createAsync, useParams } from "@solidjs/router";
+import { For, Show, createSignal, Suspense, ErrorBoundary, createMemo, createEffect } from "solid-js";
+import { A, createAsync, useParams, action, useAction, useSubmission } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import type { PublicPlantVariant } from "~/lib/api/types/public/plants.types";
 import {
@@ -25,8 +25,10 @@ import {
   EyeIcon,
 } from "~/components/icons";
 import { Button } from "~/components/ui";
+import { toaster } from "~/components/ui/Toast";
 import { formatPrice, getDifficultyLabel, getDifficultyColor, lightLabel, wateringLabel } from "../constants";
 import { getPublicPlantBySlug } from "~/lib/api/endpoints/public/plants.api";
+import { cartApi, invalidateCart } from "~/lib/api/endpoints/buyer/cart.api";
 import {
   ImageGallery,
   CareBadge,
@@ -48,12 +50,38 @@ import {
   MOCK_RECENTLY_VIEWED,
 } from "./mock-data";
 
+const addToCartAction = action(async (data: { variantId: string; quantity: number }) => {
+  "use server";
+  try {
+    await cartApi.add(data);
+    return { success: true };
+  } catch (error) {
+    const apiError = error as any;
+    return {
+      success: false,
+      error: { message: apiError.message || "Failed to add to cart" },
+    };
+  }
+}, "add-to-cart-action");
+
 export default function PlantDetailPage() {
   const { t } = useI18n();
   const params = useParams<{ slug: string }>();
   const plant = createAsync(() => getPublicPlantBySlug(params.slug));
   const [selectedVariant, setSelectedVariant] = createSignal<string | undefined>(undefined);
   const [quantity, setQuantity] = createSignal(1);
+
+  const addToCartTrigger = useAction(addToCartAction);
+  const addToCartSubmission = useSubmission(addToCartAction);
+
+  createEffect(() => {
+    if (addToCartSubmission.result?.success === true) {
+      toaster.success(t("public.plants.detail.addedToCart"));
+      invalidateCart();
+    } else if (addToCartSubmission.result?.success === false) {
+      toaster.error(addToCartSubmission.result.error.message);
+    }
+  });
 
   const selectedVariantData = createMemo<PublicPlantVariant | null>(() => {
     const p = plant();
@@ -308,11 +336,18 @@ export default function PlantDetailPage() {
                         variant="primary"
                         size="lg"
                         class="flex-1"
-                        disabled={!plant().inStock}
+                        disabled={!plant().inStock || addToCartSubmission.pending}
+                        onClick={() => {
+                          const variantId = selectedVariantData()?.id;
+                          if (!variantId) return;
+                          addToCartTrigger({ variantId, quantity: quantity() });
+                        }}
                       >
-                        {plant().inStock
-                          ? t("public.plants.detail.addToCart")
-                          : t("public.plants.inventory.outOfStock")}
+                        {addToCartSubmission.pending
+                          ? t("public.plants.detail.adding")
+                          : plant().inStock
+                            ? t("public.plants.detail.addToCart")
+                            : t("public.plants.inventory.outOfStock")}
                       </Button>
                     </div>
 

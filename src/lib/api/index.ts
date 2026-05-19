@@ -7,6 +7,7 @@ export * from "./types/auth.types";
 export * from "./types/media.types";
 export * from "./types/library.types";
 export * from "./types/seller.types";
+export * from "./types/cart.types";
 export type {
   VerificationStatus,
   UpdateVerificationRequest,
@@ -16,8 +17,9 @@ export type {
 export * from "./utils/server-auth";
 export * from "./utils/client-auth";
 
-// Re-export API endpoints
+// Re-export API endpoint groups
 export * from "./endpoints/public";
 export * from "./endpoints/user";
 export * from "./endpoints/seller";
 export * from "./endpoints/admin";
+export * from "./endpoints/buyer";

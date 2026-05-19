@@ -97,13 +97,14 @@ export function Navbar() {
                 <MagnifyingGlassIcon class="w-5 h-5" />
               </button>
 
-              <button
+              <A
+                href="/cart"
                 class="p-2.5 text-gray-500 dark:text-gray-400 hover:text-terracotta-500 dark:hover:text-terracotta-400 transition-colors duration-200 relative"
                 aria-label="Cart"
               >
                 <ShoppingBagIcon class="w-5 h-5" />
                 {/* Optional cart badge could go here */}
-              </button>
+              </A>
 
               {/* Theme & Language - Hidden on mobile, accessible in menu */}
               <div class="hidden md:flex items-center gap-2">
