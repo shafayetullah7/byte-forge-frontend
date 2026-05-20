@@ -35,6 +35,16 @@ export const getCartCount = query(
 );
 
 /**
+ * Get cart summary (itemsCount + totalQuantity, without full item details)
+ */
+export const getCartSummary = query(
+  async (): Promise<{ itemsCount: number; totalQuantity: number }> => {
+    return fetcher<{ itemsCount: number; totalQuantity: number }>("/api/v1/user/buyer/cart/summary");
+  },
+  "buyer-cart-summary"
+);
+
+/**
  * Invalidate cart cache
  */
 export const invalidateCart = () => revalidate(getCart.keyFor());
@@ -45,11 +55,17 @@ export const invalidateCart = () => revalidate(getCart.keyFor());
 export const invalidateCartCount = () => revalidate(getCartCount.keyFor());
 
 /**
+ * Invalidate cart summary cache
+ */
+export const invalidateCartSummary = () => revalidate(getCartSummary.keyFor());
+
+/**
  * Invalidate all cart-related caches
  */
 export const invalidateAllCart = () => {
   revalidate(getCart.keyFor());
   revalidate(getCartCount.keyFor());
+  revalidate(getCartSummary.keyFor());
 };
 
 /**
@@ -154,6 +170,7 @@ export const mergeCart = async (
  */
 export const cartApi = {
   get: getCart,
+  getSummary: getCartSummary,
   add: addToCart,
   updateItem: updateCartItem,
   removeItem: removeCartItem,
