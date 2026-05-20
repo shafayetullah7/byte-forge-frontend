@@ -1,4 +1,4 @@
-import { A, useLocation } from "@solidjs/router";
+import { A, useLocation, createAsync } from "@solidjs/router";
 import { createSignal, onMount, onCleanup, Show } from "solid-js";
 import { isServer } from "solid-js/web";
 import { MagnifyingGlassIcon, ShoppingBagIcon, Bars3Icon } from "../icons";
@@ -9,12 +9,14 @@ import { useSession } from "~/lib/auth";
 import { getInitials } from "~/lib/utils/string.utils";
 import { useI18n } from "~/i18n";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { getCartCount } from "~/lib/api/endpoints/buyer/cart.api";
 
 export function Navbar() {
   const user = useSession();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = createSignal(false);
   const { t, locale, toggleLocale } = useI18n();
+  const cartCount = createAsync(() => getCartCount(), { initialValue: { itemsCount: 0, totalQuantity: 0 } });
 
   // Close mobile menu when clicking outside
   const handleClickOutside = (e: MouseEvent) => {
@@ -103,7 +105,11 @@ export function Navbar() {
                 aria-label="Cart"
               >
                 <ShoppingBagIcon class="w-5 h-5" />
-                {/* Optional cart badge could go here */}
+                <Show when={cartCount()?.totalQuantity > 0}>
+                  <span class="absolute -top-0.5 -right-0.5 min-w-[1.125rem] h-5 px-1.5 flex items-center justify-center bg-terracotta-500 text-white text-[10px] font-bold rounded-full leading-none">
+                    {cartCount()?.totalQuantity}
+                  </span>
+                </Show>
               </A>
 
               {/* Theme & Language - Hidden on mobile, accessible in menu */}

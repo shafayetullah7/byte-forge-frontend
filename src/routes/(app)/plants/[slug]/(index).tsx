@@ -28,7 +28,7 @@ import { Button } from "~/components/ui";
 import { toaster } from "~/components/ui/Toast";
 import { formatPrice, getDifficultyLabel, getDifficultyColor, lightLabel, wateringLabel } from "../constants";
 import { getPublicPlantBySlug } from "~/lib/api/endpoints/public/plants.api";
-import { cartApi, invalidateCart } from "~/lib/api/endpoints/buyer/cart.api";
+import { cartApi, invalidateAllCart } from "~/lib/api/endpoints/buyer/cart.api";
 import {
   ImageGallery,
   CareBadge,
@@ -77,7 +77,7 @@ export default function PlantDetailPage() {
   createEffect(() => {
     if (addToCartSubmission.result?.success === true) {
       toaster.success(t("public.plants.detail.addedToCart"));
-      invalidateCart();
+      invalidateAllCart();
     } else if (addToCartSubmission.result?.success === false) {
       toaster.error(addToCartSubmission.result.error.message);
     }

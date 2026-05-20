@@ -25,9 +25,32 @@ export const getCart = query(
 );
 
 /**
+ * Get lightweight cart count (for navbar badge)
+ */
+export const getCartCount = query(
+  async (): Promise<{ itemsCount: number; totalQuantity: number }> => {
+    return fetcher<{ itemsCount: number; totalQuantity: number }>("/api/v1/user/buyer/cart/count");
+  },
+  "buyer-cart-count"
+);
+
+/**
  * Invalidate cart cache
  */
 export const invalidateCart = () => revalidate(getCart.keyFor());
+
+/**
+ * Invalidate cart count cache
+ */
+export const invalidateCartCount = () => revalidate(getCartCount.keyFor());
+
+/**
+ * Invalidate all cart-related caches
+ */
+export const invalidateAllCart = () => {
+  revalidate(getCart.keyFor());
+  revalidate(getCartCount.keyFor());
+};
 
 /**
  * Add item to cart

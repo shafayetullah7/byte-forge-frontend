@@ -1759,7 +1759,6 @@ export const dict = {
     inStock: "In stock",
     lowStock: (p: { count: number | string }) => `Only ${p.count} left`,
     outOfStock: "Out of stock",
-    untracked: "Stock untracked",
     orderSummary: "Order Summary",
     promoPlaceholder: "Enter promo code",
     apply: "Apply",

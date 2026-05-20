@@ -1762,7 +1762,6 @@ export const dict = {
     inStock: "স্টকে আছে",
     lowStock: (p: { count: number | string }) => `মাত্র ${p.count}টি বাকি`,
     outOfStock: "স্টক নেই",
-    untracked: "স্টক ট্র্যাক নেই",
     orderSummary: "অর্ডার সারাংশ",
     promoPlaceholder: "প্রমো কোড লিখুন",
     apply: "প্রয়োগ করুন",

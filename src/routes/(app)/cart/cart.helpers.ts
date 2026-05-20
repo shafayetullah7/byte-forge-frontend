@@ -15,7 +15,5 @@ export function getStockStatusLabel(
       };
     case "out_of_stock":
       return { label: t("cart.outOfStock"), color: "text-terracotta-600 dark:text-terracotta-400" };
-    default:
-      return { label: t("cart.untracked"), color: "text-gray-500 dark:text-gray-400" };
   }
 }
