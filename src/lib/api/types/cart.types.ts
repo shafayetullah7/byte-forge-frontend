@@ -71,12 +71,6 @@ export interface BulkRemoveResult {
   notFound: string[];
 }
 
-export interface MergeCartResult {
-  mergedCount: number;
-  failedItems: { variantId: string; reason: string }[];
-  cart: Cart;
-}
-
 export interface AddToCartRequest {
   variantId: string;
   quantity: number;
@@ -97,13 +91,4 @@ export interface BulkUpdateCartRequest {
 
 export interface BulkRemoveCartRequest {
   itemIds: string[];
-}
-
-export interface MergeCartItem {
-  variantId: string;
-  quantity: number;
-}
-
-export interface MergeCartRequest {
-  guestItems: MergeCartItem[];
 }

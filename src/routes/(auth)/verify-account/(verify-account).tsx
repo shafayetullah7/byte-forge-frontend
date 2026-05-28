@@ -4,7 +4,7 @@ import { createForm } from "@modular-forms/solid";
 import { Button, Input } from "~/components/ui";
 import { verifySchema, type VerifyFormData } from "~/schemas/verify.schema";
 import { authApi, ApiError } from "~/lib/api";
-import { useSession } from "~/lib/auth";
+import { useSession, logoutAction } from "~/lib/auth";
 import { toaster } from "~/components/ui/Toast";
 import { useI18n } from "~/i18n";
 
@@ -262,10 +262,8 @@ export default function VerifyAccount() {
         <div class="text-center pt-4 border-t border-gray-100 dark:border-gray-800">
           <button
             type="button"
-            onClick={async () => {
-              const { performLogout } = await import("~/lib/auth");
-              await performLogout();
-              navigate("/login");
+            onClick={() => {
+              logoutAction().then(() => navigate("/login", { replace: true }));
             }}
             class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
           >

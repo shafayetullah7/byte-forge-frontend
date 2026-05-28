@@ -1,15 +1,15 @@
-import { A, useNavigate } from "@solidjs/router";
-import { Show, createSignal } from "solid-js";
+import { A, useNavigate, useAction, useSubmission } from "@solidjs/router";
+import { Show, type Accessor } from "solid-js";
 import {
     UserIcon,
     Cog6ToothIcon,
     ArrowRightOnRectangleIcon,
     Squares2x2Icon,
 } from "../icons";
-
-import { type Accessor } from "solid-js";
+import { logoutAction } from "~/lib/auth";
 import { type AuthUser } from "~/lib/api/types/auth.types";
 import { useI18n } from "~/i18n";
+import { Bars3Icon, XMarkIcon } from "../icons";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import LinkButton from "../ui/LinkButton";
@@ -21,24 +21,17 @@ interface MobileMenuProps {
 }
 
 export function MobileMenu(props: MobileMenuProps) {
-    // const user = useSession(); // Removed local call
     const navigate = useNavigate();
     const { t, locale, toggleLocale } = useI18n();
 
-    const [isLoggingOut, setIsLoggingOut] = createSignal(false);
+    const logout = useAction(logoutAction);
+    const submission = useSubmission(logoutAction);
 
-    const handleLogout = async () => {
-        const { performLogout } = await import("~/lib/auth");
-        setIsLoggingOut(true);
-        try {
-            await performLogout();
-            navigate("/");
-        } catch (error) {
-            console.error("Logout failed:", error);
-        } finally {
-            setIsLoggingOut(false);
-            props.onClose();
-        }
+    const handleLogout = () => {
+        logout().then(() => {
+            navigate("/", { replace: true });
+        });
+        props.onClose();
     };
 
     return (
@@ -163,11 +156,11 @@ export function MobileMenu(props: MobileMenuProps) {
                                 <div class="border-t border-cream-200 dark:border-forest-700 mt-2 pt-2">
                                     <button
                                         onClick={handleLogout}
-                                        class="flex items-center gap-3 w-full px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200"
-                                        disabled={isLoggingOut()}
+                                        class="flex items-center gap-3 w-full px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        disabled={submission.pending}
                                     >
                                         <ArrowRightOnRectangleIcon class="w-4 h-4" />
-                                        {isLoggingOut() ? t("common.loading") : t("common.signOut")}
+                                        {submission.pending ? t("common.loading") : t("common.signOut")}
                                     </button>
                                 </div>
                             </>

@@ -1,4 +1,4 @@
-import { query, createAsync } from "@solidjs/router";
+import { query, createAsync, action } from "@solidjs/router";
 import { authApi } from "~/lib/api/endpoints/user/auth.api";
 
 /**
@@ -59,27 +59,40 @@ export const getSession = query(async () => {
 }, "user-session");
 
 /**
- * Perform a logout operation
+ * Logout Action
  *
- * Calls the backend logout endpoint to invalidate the session
- * and clears tokens from cookies.
+ * Server-side logout that invalidates the session on the backend
+ * and clears the session cache. Handles edge cases:
+ * - Already logged out (401) — silently succeeds
+ * - Network/server errors — still clears local session state
  */
-export const performLogout = async () => {
-  const { revalidate } = await import("@solidjs/router");
-
+export const logoutAction = action(async (): Promise<{ success: boolean }> => {
+  "use server";
   try {
-    // Use the authApi for logout
     await authApi.logout();
   } catch (error: any) {
-    // Silent failure if already logged out (401)
-    if (error?.statusCode !== 401) {
-      console.error("[Auth] Logout error:", error);
+    // Already logged out (401) or session expired — treat as success
+    if (error?.statusCode === 401) {
+      return { success: true };
     }
+    // Network/server error — still proceed with local cleanup
+    console.error("[Auth] Logout API error, proceeding with local cleanup:", error);
   } finally {
+    const { revalidate } = await import("@solidjs/router");
     await revalidate("user-session");
   }
+  return { success: true };
+}, "logout-action");
 
-  return true;
+/**
+ * Perform a logout operation
+ *
+ * Convenience wrapper around logoutAction for use outside
+ * component contexts (e.g., hooks, effects).
+ */
+export const performLogout = async (): Promise<boolean> => {
+  const result = await logoutAction();
+  return result.success;
 };
 
 /**

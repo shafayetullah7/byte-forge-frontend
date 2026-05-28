@@ -1,16 +1,18 @@
 import { Component } from "solid-js";
-import { useSession, performLogout } from "~/lib/auth";
+import { useSession, logoutAction } from "~/lib/auth";
 import { useI18n } from "~/i18n";
-import { useNavigate } from "@solidjs/router";
+import { useNavigate, useAction } from "@solidjs/router";
 
 const Profile: Component = () => {
     const user = useSession();
     const { t } = useI18n();
     const navigate = useNavigate();
+    const logout = useAction(logoutAction);
 
-    const handleLogout = async () => {
-        await performLogout();
-        navigate("/login");
+    const handleLogout = () => {
+        logout().then(() => {
+            navigate("/login", { replace: true });
+        });
     };
 
     // Format date

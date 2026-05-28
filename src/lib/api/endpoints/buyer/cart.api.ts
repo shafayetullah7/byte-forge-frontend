@@ -6,12 +6,10 @@ import type {
   CartValidationResult,
   BulkUpdateResult,
   BulkRemoveResult,
-  MergeCartResult,
   AddToCartRequest,
   UpdateCartItemRequest,
   BulkUpdateCartRequest,
   BulkRemoveCartRequest,
-  MergeCartRequest,
 } from "../../types/cart.types";
 
 /**
@@ -35,16 +33,6 @@ export const getCartCount = query(
 );
 
 /**
- * Get cart summary (itemsCount + totalQuantity, without full item details)
- */
-export const getCartSummary = query(
-  async (): Promise<{ itemsCount: number; totalQuantity: number }> => {
-    return fetcher<{ itemsCount: number; totalQuantity: number }>("/api/v1/user/buyer/cart/summary");
-  },
-  "buyer-cart-summary"
-);
-
-/**
  * Invalidate cart cache
  */
 export const invalidateCart = () => revalidate(getCart.keyFor());
@@ -55,17 +43,11 @@ export const invalidateCart = () => revalidate(getCart.keyFor());
 export const invalidateCartCount = () => revalidate(getCartCount.keyFor());
 
 /**
- * Invalidate cart summary cache
- */
-export const invalidateCartSummary = () => revalidate(getCartSummary.keyFor());
-
-/**
  * Invalidate all cart-related caches
  */
 export const invalidateAllCart = () => {
   revalidate(getCart.keyFor());
   revalidate(getCartCount.keyFor());
-  revalidate(getCartSummary.keyFor());
 };
 
 /**
@@ -154,23 +136,10 @@ export const bulkRemoveCartItems = async (
 };
 
 /**
- * Merge guest cart items
- */
-export const mergeCart = async (
-  data: MergeCartRequest
-): Promise<MergeCartResult> => {
-  return fetcher<MergeCartResult>("/api/v1/user/buyer/cart/merge", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
-};
-
-/**
  * Cart API endpoints
  */
 export const cartApi = {
   get: getCart,
-  getSummary: getCartSummary,
   add: addToCart,
   updateItem: updateCartItem,
   removeItem: removeCartItem,
@@ -178,5 +147,4 @@ export const cartApi = {
   validate: validateCart,
   bulkUpdate: bulkUpdateCartItems,
   bulkRemove: bulkRemoveCartItems,
-  merge: mergeCart,
 };
