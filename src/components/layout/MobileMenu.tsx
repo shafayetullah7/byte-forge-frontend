@@ -9,7 +9,6 @@ import {
 import { logoutAction } from "~/lib/auth";
 import { type AuthUser } from "~/lib/api/types/auth.types";
 import { useI18n } from "~/i18n";
-import { Bars3Icon, XMarkIcon } from "../icons";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import LinkButton from "../ui/LinkButton";
@@ -88,6 +87,7 @@ export function MobileMenu(props: MobileMenuProps) {
 
                     <Show
                         when={props.user()}
+                        keyed
                         fallback={
                             <div class="px-4 flex flex-col gap-2">
                                 <LinkButton
@@ -113,14 +113,14 @@ export function MobileMenu(props: MobileMenuProps) {
                             <>
                                 <div class="px-4 py-2">
                                     <p class="text-sm font-semibold text-forest-800 dark:text-cream-50">
-                                        {userData().userName}
+                                        {userData.userName}
                                     </p>
                                     <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
-                                        {userData().email}
+                                        {userData.email}
                                     </p>
                                 </div>
 
-                                <Show when={userData().emailVerified}>
+                                <Show when={userData.emailVerified}>
                                     <A
                                         href="/app"
                                         class="flex items-center gap-3 px-4 py-3 text-sm text-forest-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-700 transition-colors duration-200"
