@@ -1,10 +1,11 @@
 import type { Component } from "solid-js";
-import { createSignal, createMemo, Show } from "solid-js";
+import { createSignal, createMemo, Show, createEffect } from "solid-js";
 import { useI18n } from "~/i18n";
 import type { CartItem } from "~/lib/api/types/cart.types";
 import { formatPrice } from "../../plants/constants";
 import { Button } from "~/components/ui";
 import { toaster } from "~/components/ui/Toast";
+import { publicShopsApi } from "~/lib/api/endpoints/public/shops.api";
 import {
   TagIcon,
   ShieldCheckIcon,
@@ -15,10 +16,22 @@ import {
 
 const OrderSummary: Component<{
   items: CartItem[];
+  deliveryDistrictId?: string | null;
 }> = (props) => {
   const { t } = useI18n();
   const [promoCode, setPromoCode] = createSignal("");
   const [promoApplied, setPromoApplied] = createSignal(false);
+
+  // Group items by shopId
+  const shopGroups = createMemo(() => {
+    const groups = new Map<string, CartItem[]>();
+    props.items.forEach((item) => {
+      const existing = groups.get(item.shopId) || [];
+      existing.push(item);
+      groups.set(item.shopId, existing);
+    });
+    return groups;
+  });
 
   const subtotal = createMemo(() =>
     props.items.reduce((sum, item) => sum + parseFloat(item.lineTotal), 0)
@@ -28,9 +41,51 @@ const OrderSummary: Component<{
     promoApplied() ? Math.round(subtotal() * 0.1) : 0
   );
 
-  const shipping = createMemo(() => (subtotal() > 2000 ? 0 : 120));
+  // Shipping rates cache: shopId -> cost
+  const [shippingRates, setShippingRates] = createSignal<
+    Map<string, number>
+  >(new Map());
+  const [shippingLoading, setShippingLoading] = createSignal(false);
 
-  const total = createMemo(() => subtotal() - discount() + shipping());
+  // Fetch shipping rates when district changes
+  createEffect(async () => {
+    const districtId = props.deliveryDistrictId;
+    if (!districtId || shopGroups().size === 0) {
+      setShippingRates(new Map());
+      return;
+    }
+
+    setShippingLoading(true);
+    const rates = new Map<string, number>();
+
+    for (const [shopId] of shopGroups()) {
+      try {
+        const rate = await publicShopsApi.getShippingRate(shopId, districtId);
+        if (rate) {
+          rates.set(shopId, parseFloat(rate.cost));
+        }
+      } catch {
+        // Rate not configured for this shop/district
+      }
+    }
+
+    setShippingRates(rates);
+    setShippingLoading(false);
+  });
+
+  const totalShipping = createMemo(() => {
+    let sum = 0;
+    for (const [shopId, cost] of shippingRates()) {
+      sum += cost;
+    }
+    return sum;
+  });
+
+  const hasShippingConfigured = createMemo(() => {
+    return shippingRates().size > 0;
+  });
+
+  const total = createMemo(() => subtotal() - discount() + totalShipping());
 
   return (
     <div class="bg-white dark:bg-forest-800 rounded-2xl border border-cream-200 dark:border-forest-700 p-6 shadow-sm sticky top-24">
@@ -107,14 +162,34 @@ const OrderSummary: Component<{
         <div class="flex justify-between text-gray-600 dark:text-gray-400">
           <span>{t("cart.shipping")}</span>
           <Show
-            when={shipping() > 0}
-            fallback={<span class="font-medium text-forest-600 dark:text-forest-400">{t("cart.free")}</span>}
+            when={props.deliveryDistrictId}
+            fallback={
+              <span class="text-xs text-amber-600 dark:text-amber-400">
+                {t("cart.selectDistrict")}
+              </span>
+            }
           >
-            <span class="font-medium">{formatPrice(shipping())}</span>
+            <Show
+              when={shippingLoading()}
+              fallback={
+                <Show
+                  when={totalShipping() > 0}
+                  fallback={
+                    <span class="font-medium text-forest-600 dark:text-forest-400">
+                      {hasShippingConfigured() ? t("cart.free") : t("cart.selectDistrict")}
+                    </span>
+                  }
+                >
+                  <span class="font-medium">{formatPrice(totalShipping())}</span>
+                </Show>
+              }
+            >
+              <span class="text-xs text-gray-400">...</span>
+            </Show>
           </Show>
         </div>
 
-        <Show when={shipping() === 0}>
+        <Show when={totalShipping() === 0 && props.deliveryDistrictId && hasShippingConfigured()}>
           <div class="flex items-center gap-1.5 text-xs text-forest-600 dark:text-forest-400">
             <PackageIcon class="w-3.5 h-3.5" />
             <span>{t("cart.freeShipping")}</span>

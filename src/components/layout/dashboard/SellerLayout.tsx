@@ -14,6 +14,7 @@ import {
     BankIcon,
     CogIcon,
     BoltIcon,
+    MapPinIcon,
 } from "~/components/icons";
 import { useI18n } from "~/i18n";
 
@@ -43,6 +44,11 @@ export const SellerLayout: ParentComponent = (props) => {
                 href: "/app/seller/my-shop/history",
                 icon: ClockIcon,
                 label: t("seller.history"),
+            },
+            {
+                href: "/app/seller/shipping-rates",
+                icon: MapPinIcon,
+                label: t("seller.shippingRates.title"),
             },
             {
                 href: "/app/seller/products",

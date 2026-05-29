@@ -2,6 +2,7 @@ import { sellerShopsApi } from "./shops.api";
 import { sellerVerificationApi } from "./verification.api";
 import { plantsApi, getPlants, getPlantById, createPlant, updatePlant, deletePlant } from "./plants.api";
 import { productsApi, getProducts } from "./products.api";
+import { sellerShippingRatesApi } from "./shipping-rates.api";
 
 export { sellerShopApi } from "./shop-detail.api";
 export { getPlants, getPlantById, createPlant, updatePlant, deletePlant };
@@ -21,6 +22,8 @@ export type {
   ProductListItem,
   ProductListResponse,
   ProductFilter,
+  ShippingRate,
+  BulkUpdateShippingRatesRequest,
 } from "../../types/seller.types";
 
 /**
@@ -38,6 +41,11 @@ export const sellerApi = {
    * Shop verification
    */
   verification: sellerVerificationApi,
+
+  /**
+   * Shipping rates per district
+   */
+  shippingRates: sellerShippingRatesApi,
 
   /**
    * Plant/Product management

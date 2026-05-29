@@ -789,6 +789,33 @@ export interface VerificationStatus {
 }
 
 /**
+ * Shipping rate per district (matches backend ShippingRate)
+ */
+export interface ShippingRate {
+  id: string;
+  shopId: string;
+  districtId: string;
+  cost: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Bulk shipping rate item for update request
+ */
+export interface BulkShippingRateItem {
+  districtId: string;
+  cost: string | number;
+}
+
+/**
+ * Bulk update shipping rates request
+ */
+export interface BulkUpdateShippingRatesRequest {
+  rates: BulkShippingRateItem[];
+}
+
+/**
  * Update Verification Request (matches backend UpdateVerificationDto)
  */
 export interface UpdateVerificationRequest {

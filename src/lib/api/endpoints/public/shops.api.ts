@@ -20,6 +20,12 @@ export interface PublicShop {
   } | null;
 }
 
+export interface PublicShippingRate {
+  shopId: string;
+  districtId: string;
+  cost: string;
+}
+
 export interface PublicProduct {
   id: string;
   name: string;
@@ -90,4 +96,21 @@ export const publicShopsApi = {
   getAll: getShops,
   getById: getShopById,
   getProducts: getShopProducts,
+
+  /**
+   * Get shipping rate for a shop and district (public)
+   * Returns null if no rate is configured
+   */
+  getShippingRate: async (
+    shopId: string,
+    districtId: string
+  ): Promise<PublicShippingRate | null> => {
+    try {
+      return await fetcher<PublicShippingRate>(
+        `/api/v1/public/shops/${shopId}/shipping-rate/${districtId}`
+      );
+    } catch (error: any) {
+      return null;
+    }
+  },
 };
