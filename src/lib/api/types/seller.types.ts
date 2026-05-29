@@ -789,15 +789,23 @@ export interface VerificationStatus {
 }
 
 /**
- * Shipping rate per district (matches backend ShippingRate)
+ * Shipping rate per district (matches backend ShippingRate for PUT response)
  */
 export interface ShippingRate {
   id: string;
   shopId: string;
   districtId: string;
   cost: string;
-  createdAt: string;
-  updatedAt: string;
+}
+
+/**
+ * Shipping rate with district name (matches backend ShippingRateResponse for GET response)
+ */
+export interface ShippingRateWithDistrict {
+  districtId: string;
+  districtName: string;
+  divisionName: string;
+  cost: string;
 }
 
 /**
