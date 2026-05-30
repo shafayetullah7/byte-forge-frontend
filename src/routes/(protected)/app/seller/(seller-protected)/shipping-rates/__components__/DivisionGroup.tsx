@@ -1,6 +1,7 @@
 import type { Component, Accessor } from "solid-js";
 import { For, Show } from "solid-js";
-import { GlobeAltIcon, CheckCircleIcon } from "~/components/icons";
+import { GlobeAltIcon, CheckCircleIcon, SpinnerIcon } from "~/components/icons";
+import { CurrencyInput } from "./CurrencyInput";
 
 interface DistrictItem {
   districtId: string;
@@ -12,8 +13,8 @@ interface DistrictItem {
 interface DivisionGroupProps {
   divisionName: string;
   districts: DistrictItem[];
-  pendingCosts: Accessor<Record<string, string>>;
-  selectedIds: Set<string>;
+  pendingCosts: Record<string, string>;
+  selectedIds: Accessor<Set<string>>;
   isSaving: boolean;
   onToggleSelect: (id: string) => void;
   onCostChange: (id: string, val: string) => void;
@@ -39,11 +40,11 @@ export const DivisionGroup: Component<DivisionGroupProps> = (props) => {
       <div class="divide-y divide-cream-100 dark:divide-forest-700/50">
         <For each={props.districts}>
           {(item) => {
-            const pending = () => props.pendingCosts()[item.districtId];
+            const pending = () => props.pendingCosts[item.districtId];
             const displayCost = () => pending() ?? item.cost;
             const hasChanges = () => pending() !== undefined && pending() !== item.cost;
             const isConfigured = () => item.cost !== "0";
-            const isSelected = () => props.selectedIds.has(item.districtId);
+            const isSelected = () => props.selectedIds().has(item.districtId);
             const isSavingThis = () => props.isSaving && hasChanges();
 
             return (
@@ -75,10 +76,7 @@ export const DivisionGroup: Component<DivisionGroupProps> = (props) => {
                       class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer flex-shrink-0 text-xs font-semibold"
                     >
                       {isSavingThis() ? (
-                        <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                        </svg>
+                        <SpinnerIcon class="animate-spin h-4 w-4" />
                       ) : (
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
                           <path d="M3 3.5A1.5 1.5 0 0 1 4.5 2h11A1.5 1.5 0 0 1 17 3.5v9l-5 5H4.5A1.5 1.5 0 0 1 3 16v-12.5zM14 2.5a.5.5 0 0 0-.5.5V7h4.5V2.5H14ZM5 12.75a.75.75 0 0 1 .75-.75h8.5a.75.75 0 0 1 0 1.5H5.75a.75.75 0 0 1-.75-.75Z" />
@@ -86,20 +84,18 @@ export const DivisionGroup: Component<DivisionGroupProps> = (props) => {
                       )}
                     </button>
                   </Show>
-                  <div class="relative flex-1">
-                    <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-xs">৳</span>
-                    <input
-                      type="number" step="1" min="0" placeholder="—"
-                      value={displayCost()}
-                      onInput={(e) => props.onCostChange(item.districtId, e.currentTarget.value)}
-                      onBlur={() => props.onBlur(item.districtId)}
-                      class={`w-full pl-6 pr-2 py-1.5 rounded-lg border text-sm transition-colors ${
-                        isConfigured()
-                          ? "border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-800 text-forest-800 dark:text-cream-50"
-                          : "border-dashed border-cream-300 dark:border-forest-500 bg-cream-50 dark:bg-forest-900/50 text-gray-500 dark:text-gray-400"
-                      } focus:border-terracotta-500 dark:focus:border-terracotta-400 focus:ring-2 focus:ring-terracotta-500/20 outline-none`}
-                    />
-                  </div>
+                  <CurrencyInput
+                    size="sm"
+                    placeholder="—"
+                    value={displayCost()}
+                    onInput={(e) => props.onCostChange(item.districtId, e.currentTarget.value)}
+                    onBlur={() => props.onBlur(item.districtId)}
+                    class={`${
+                      isConfigured()
+                        ? "border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-800"
+                        : "border-dashed border-cream-300 dark:border-forest-500 bg-cream-50 dark:bg-forest-900/50 text-gray-500 dark:text-gray-400"
+                    }`}
+                  />
                 </div>
               </div>
             );

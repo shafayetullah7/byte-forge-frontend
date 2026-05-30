@@ -7,6 +7,7 @@ import {
   Suspense,
   For,
 } from "solid-js";
+import { createStore, produce } from "solid-js/store";
 import { useI18n } from "~/i18n";
 import { getShippingRates, bulkUpdateShippingRates } from "~/lib/api/endpoints/seller/shipping-rates.api";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
@@ -18,9 +19,11 @@ import {
   CheckCircleIcon,
   DollarSignIcon,
   SparklesIcon,
+  SpinnerIcon,
 } from "~/components/icons";
 import { StatCard } from "./__components__/StatCard";
 import { DivisionGroup } from "./__components__/DivisionGroup";
+import { CurrencyInput } from "./__components__/CurrencyInput";
 
 const updateShippingRatesAction = action(
   async (input: { rates: Array<{ districtId: string; cost: string }>; successMessage?: string }) => {
@@ -50,7 +53,7 @@ export default function ShippingRatesPage() {
   const [setAllCost, setSetAllCost] = createSignal("");
   const [bulkCost, setBulkCost] = createSignal("");
   const [selectedIds, setSelectedIds] = createSignal<Set<string>>(new Set());
-  const [pendingCosts, setPendingCosts] = createSignal<Record<string, string>>({});
+  const [pendingCosts, setPendingCosts] = createStore<Record<string, string>>({});
 
   const updateRatesAction = useAction(updateShippingRatesAction);
   const submission = useSubmission(updateShippingRatesAction);
@@ -116,6 +119,7 @@ export default function ShippingRatesPage() {
     const rates = allDistricts().map((item) => ({ districtId: item.districtId, cost }));
     await updateRatesAction({ rates, successMessage: t("seller.shippingRates.allUpdated") });
     setSetAllCost("");
+    setPendingCosts(produce((prev) => { for (const key of Object.keys(prev)) delete prev[key]; }));
   };
 
   const handleBulkUpdate = async () => {
@@ -127,36 +131,29 @@ export default function ShippingRatesPage() {
     await updateRatesAction({ rates, successMessage: t("seller.shippingRates.bulkUpdated", { count: rates.length }) });
     setSelectedIds(new Set<string>());
     setBulkCost("");
+    setPendingCosts(produce((prev) => { for (const key of Object.keys(prev)) delete prev[key]; }));
   };
 
   const handleSave = async (districtId: string) => {
-    const cost = pendingCosts()[districtId];
+    const cost = pendingCosts[districtId];
     if (cost === undefined) return;
     await updateRatesAction({ rates: [{ districtId, cost: cost || "0" }], successMessage: t("seller.shippingRates.rateUpdated") });
-    setPendingCosts((prev) => {
-      const next = { ...prev };
-      delete next[districtId];
-      return next;
-    });
+    setPendingCosts(produce((prev) => { delete prev[districtId]; }));
   };
 
   const handleBlur = (districtId: string) => {
-    const pending = pendingCosts()[districtId];
+    const pending = pendingCosts[districtId];
     if (pending === undefined) return;
     const original = allDistricts().find((d) => d.districtId === districtId)?.cost;
     if (pending === original) {
-      setPendingCosts((prev) => {
-        const next = { ...prev };
-        delete next[districtId];
-        return next;
-      });
+      setPendingCosts(produce((prev) => { delete prev[districtId]; }));
       return;
     }
     handleSave(districtId);
   };
 
   const handleCostChange = (districtId: string, val: string) => {
-    setPendingCosts((prev) => ({ ...prev, [districtId]: val }));
+    setPendingCosts(districtId, val);
   };
 
   return (
@@ -165,7 +162,7 @@ export default function ShippingRatesPage() {
         <InlineErrorFallback error={err} reset={reset} label={t("seller.shippingRates.title")} />
       )}
     >
-      <div class="min-h-screen bg-cream-50 dark:bg-forest-900 py-8">
+      <div class="min-h-screen bg-cream-50 dark:bg-forest-900 py-8 pb-24">
         <div class="max-w-6xl mx-auto px-4">
           <div class="mb-8">
             <div class="flex items-center gap-3 mb-2">
@@ -219,14 +216,11 @@ export default function ShippingRatesPage() {
                           {t("seller.shippingRates.setAllLabel")}
                         </label>
                         <div class="flex gap-2">
-                          <div class="relative flex-1">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm">৳</span>
-                            <input
-                              type="number" step="1" min="0"
+                          <div class="flex-1">
+                            <CurrencyInput
                               placeholder={t("seller.shippingRates.placeholder")}
                               value={setAllCost()}
                               onInput={(e) => setSetAllCost(e.currentTarget.value)}
-                              class="w-full pl-7 pr-3 py-2.5 rounded-xl border border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-900 text-forest-800 dark:text-cream-50 text-sm placeholder-gray-400 dark:placeholder-gray-500 focus:border-terracotta-500 dark:focus:border-terracotta-400 focus:ring-2 focus:ring-terracotta-500/20 transition-colors"
                             />
                           </div>
                           <button
@@ -235,10 +229,7 @@ export default function ShippingRatesPage() {
                             class="px-5 py-2.5 rounded-xl bg-terracotta-600 hover:bg-terracotta-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors flex items-center gap-2 whitespace-nowrap"
                           >
                             {submission.pending && setAllCost() ? (
-                              <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                              </svg>
+                              <SpinnerIcon class="animate-spin h-4 w-4" />
                             ) : null}
                             {t("seller.shippingRates.applyAll")}
                           </button>
@@ -248,38 +239,15 @@ export default function ShippingRatesPage() {
                   </div>
 
                   <div class="bg-white dark:bg-forest-800 rounded-2xl border border-cream-200 dark:border-forest-700 p-4 mb-4 shadow-sm">
-                    <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
-                      <div class="flex-1 min-w-0">
-                        <div class="relative">
-                          <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
-                          <input
-                            type="text"
-                            placeholder={t("seller.shippingRates.searchPlaceholder")}
-                            value={searchQuery()}
-                            onInput={(e) => setSearchQuery(e.currentTarget.value)}
-                            class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-900 text-forest-800 dark:text-cream-50 text-sm placeholder-gray-400 dark:placeholder-gray-500 focus:border-terracotta-500 dark:focus:border-terracotta-400 focus:ring-2 focus:ring-terracotta-500/20 transition-colors"
-                          />
-                        </div>
-                      </div>
-                      <div class="flex items-center gap-2">
-                        <div class="relative">
-                          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm">৳</span>
-                          <input
-                            type="number" step="1" min="0"
-                            placeholder={t("seller.shippingRates.bulkPlaceholder")}
-                            value={bulkCost()}
-                            onInput={(e) => setBulkCost(e.currentTarget.value)}
-                            class="w-32 pl-7 pr-3 py-2.5 rounded-xl border border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-900 text-forest-800 dark:text-cream-50 text-sm placeholder-gray-400 dark:placeholder-gray-500 focus:border-terracotta-500 dark:focus:border-terracotta-400 focus:ring-2 focus:ring-terracotta-500/20 transition-colors"
-                          />
-                        </div>
-                        <button
-                          onClick={handleBulkUpdate}
-                          disabled={selectedIds().size === 0 || !bulkCost() || submission.pending}
-                          class="px-4 py-2.5 rounded-xl bg-forest-600 hover:bg-forest-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors whitespace-nowrap"
-                        >
-                          {t("seller.shippingRates.applySelected", { count: selectedIds().size })}
-                        </button>
-                      </div>
+                    <div class="relative">
+                      <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+                      <input
+                        type="text"
+                        placeholder={t("seller.shippingRates.searchPlaceholder")}
+                        value={searchQuery()}
+                        onInput={(e) => setSearchQuery(e.currentTarget.value)}
+                        class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-900 text-forest-800 dark:text-cream-50 text-sm placeholder-gray-400 dark:placeholder-gray-500 focus:border-terracotta-500 dark:focus:border-terracotta-400 focus:ring-2 focus:ring-terracotta-500/20 transition-colors"
+                      />
                     </div>
                   </div>
 
@@ -299,7 +267,7 @@ export default function ShippingRatesPage() {
                             divisionName={group.divisionName}
                             districts={group.districts}
                             pendingCosts={pendingCosts}
-                            selectedIds={selectedIds()}
+                            selectedIds={selectedIds}
                             isSaving={submission.pending || false}
                             onToggleSelect={(id) =>
                               setSelectedIds((prev) => {
@@ -314,6 +282,41 @@ export default function ShippingRatesPage() {
                           />
                         )}
                       </For>
+                    </div>
+                  </Show>
+
+                  <Show when={selectedIds().size > 0}>
+                    <div class="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-forest-800/95 backdrop-blur-lg border-t border-cream-200 dark:border-forest-700 shadow-lg">
+                      <div class="max-w-6xl mx-auto px-4 py-3">
+                        <div class="flex items-center gap-3">
+                          <span class="text-sm font-semibold text-forest-800 dark:text-cream-50 whitespace-nowrap">
+                            {selectedIds().size} selected
+                          </span>
+                          <div class="w-32">
+                            <CurrencyInput
+                              placeholder={t("seller.shippingRates.bulkPlaceholder")}
+                              value={bulkCost()}
+                              onInput={(e) => setBulkCost(e.currentTarget.value)}
+                            />
+                          </div>
+                          <button
+                            onClick={handleBulkUpdate}
+                            disabled={!bulkCost() || submission.pending}
+                            class="px-5 py-2 rounded-lg bg-forest-600 hover:bg-forest-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors whitespace-nowrap flex items-center gap-2"
+                          >
+                            {submission.pending ? (
+                              <SpinnerIcon class="animate-spin h-4 w-4" />
+                            ) : null}
+                            Apply to {selectedIds().size}
+                          </button>
+                          <button
+                            onClick={() => { setSelectedIds(new Set<string>()); setBulkCost(""); }}
+                            class="px-4 py-2 rounded-lg border border-gray-300 dark:border-forest-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-forest-700 text-sm font-medium transition-colors whitespace-nowrap"
+                          >
+                            Clear
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </Show>
                 </>

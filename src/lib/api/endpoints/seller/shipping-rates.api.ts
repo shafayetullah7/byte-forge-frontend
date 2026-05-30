@@ -1,4 +1,4 @@
-import { query, revalidate } from "@solidjs/router";
+import { query } from "@solidjs/router";
 import { fetcher } from "../../api-client";
 import type {
   ShippingRate,
@@ -20,33 +20,17 @@ export const getShippingRates = query(
 );
 
 /**
- * Invalidate shipping rates cache
- */
-export const invalidateShippingRates = () =>
-  revalidate(getShippingRates.keyFor());
-
-/**
  * Bulk update shipping rates for the current shop
  * Only updates the districts provided in the request
  */
 export const bulkUpdateShippingRates = async (
   data: BulkUpdateShippingRatesRequest
 ): Promise<ShippingRate[]> => {
-  const result = await fetcher<ShippingRate[]>(
+  return fetcher<ShippingRate[]>(
     "/api/v1/user/seller/shipping-rates/my-shop",
     {
       method: "PUT",
       body: JSON.stringify(data),
     }
   );
-  invalidateShippingRates();
-  return result;
-};
-
-/**
- * Seller Shipping Rates API endpoints
- */
-export const sellerShippingRatesApi = {
-  get: getShippingRates,
-  bulkUpdate: bulkUpdateShippingRates,
 };
