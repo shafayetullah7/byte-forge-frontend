@@ -1368,6 +1368,7 @@ export const dict = {
       allUpdated: "সব শিপিং রেট সফলভাবে আপডেট করা হয়েছে",
       bulkUpdated: (p: { count: number }) => `${p.count}টি রেট সফলভাবে আপডেট করা হয়েছে`,
       rateUpdated: "শিপিং রেট আপডেট করা হয়েছে",
+      ratesUpdated: "শিপিং রেট সফলভাবে আপডেট করা হয়েছে",
       updateFailed: "শিপিং রেট আপডেট করতে ব্যর্থ",
     },
     setupShop: {

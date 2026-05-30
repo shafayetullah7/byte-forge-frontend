@@ -1365,6 +1365,7 @@ export const dict = {
       allUpdated: "All shipping rates updated successfully",
       bulkUpdated: (p: { count: number }) => `${p.count} rates updated successfully`,
       rateUpdated: "Shipping rate updated",
+      ratesUpdated: "Shipping rates updated successfully",
       updateFailed: "Failed to update shipping rates",
     },
     setupShop: {
