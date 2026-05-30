@@ -67,6 +67,7 @@ export { RulerIcon } from "./RulerIcon";
 export { SparklesIcon } from "./SparklesIcon";
 export { SproutIcon } from "./SproutIcon";
 export { StarRatingIcon } from "./StarRatingIcon";
+export { TruckIcon } from "./TruckIcon";
 
 export * from './TagIcon';
 export * from './ArrowsRightLeftIcon';
