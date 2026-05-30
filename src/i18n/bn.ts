@@ -273,6 +273,31 @@ export const dict = {
     favorites: {
       title: "পছন্দের তালিকা",
     },
+    addresses: {
+      title: "আমার ঠিকানা",
+      subtitle: "আপনার শিপিং এবং বিলিং ঠিকানা পরিচালনা করুন",
+      addNew: "নতুন ঠিকানা যোগ করুন",
+      defaultLabel: "ডিফল্ট",
+      setDefault: "ডিফল্ট হিসেবে সেট করুন",
+      types: {
+        shipping: "শিপিং",
+        billing: "বিলিং",
+      },
+      stats: {
+        total: "মোট ঠিকানা",
+        shipping: "শিপিং",
+        billing: "বিলিং",
+      },
+      tabs: {
+        all: "সকল",
+        shipping: "শিপিং",
+        billing: "বিলিং",
+      },
+      empty: {
+        title: "কোন ঠিকানা পাওয়া যায়নি",
+        description: "আপনি এখনও কোনো ঠিকানা যোগ করেননি। চেকআউট দ্রুত করতে আপনার প্রথম ঠিকানা যোগ করুন।",
+      },
+    },
   },
   seller: {
     businessAccount: {

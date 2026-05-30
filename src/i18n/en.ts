@@ -271,6 +271,31 @@ export const dict = {
     favorites: {
       title: "Favorites",
     },
+    addresses: {
+      title: "My Addresses",
+      subtitle: "Manage your shipping and billing addresses",
+      addNew: "Add New Address",
+      defaultLabel: "Default",
+      setDefault: "Set as Default",
+      types: {
+        shipping: "Shipping",
+        billing: "Billing",
+      },
+      stats: {
+        total: "Total Addresses",
+        shipping: "Shipping",
+        billing: "Billing",
+      },
+      tabs: {
+        all: "All",
+        shipping: "Shipping",
+        billing: "Billing",
+      },
+      empty: {
+        title: "No addresses found",
+        description: "You haven't added any addresses yet. Add your first address to speed up checkout.",
+      },
+    },
   },
   seller: {
     businessAccount: {

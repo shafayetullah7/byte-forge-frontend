@@ -1,7 +1,7 @@
 import { ParentComponent, createMemo } from "solid-js";
 import { DashboardLayout } from "~/components/layout/dashboard/DashboardLayout";
 import { SidebarConfig } from "~/components/layout/dashboard/Sidebar";
-import { Squares2x2Icon, ShoppingBagIcon, HeartIcon } from "~/components/icons";
+import { Squares2x2Icon, MapPinIcon, ShoppingBagIcon, HeartIcon } from "~/components/icons";
 import { useI18n } from "~/i18n";
 
 export const BuyerLayout: ParentComponent = (props) => {
@@ -25,6 +25,11 @@ export const BuyerLayout: ParentComponent = (props) => {
                 href: "/app/favorites",
                 icon: HeartIcon,
                 label: t("buyer.favorites.title"),
+            },
+            {
+                href: "/app/addresses",
+                icon: MapPinIcon,
+                label: t("buyer.addresses.title"),
             },
         ],
     }));
