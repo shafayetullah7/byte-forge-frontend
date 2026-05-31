@@ -357,10 +357,6 @@ export const dict = {
           label: "Company Name",
           placeholder: "For billing addresses (optional)",
         },
-        gstin: {
-          label: "GSTIN",
-          placeholder: "GST identification number (optional)",
-        },
         deliveryInstructions: {
           label: "Delivery Instructions",
           placeholder: "e.g., Leave at the gate, Call before delivery (optional)",

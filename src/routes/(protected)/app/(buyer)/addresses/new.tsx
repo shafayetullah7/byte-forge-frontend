@@ -24,7 +24,6 @@ const NewAddressPage: Component = () => {
     const [districtId, setDistrictId] = createSignal("");
     const [postalCode, setPostalCode] = createSignal("");
     const [companyName, setCompanyName] = createSignal("");
-    const [gstin, setGstin] = createSignal("");
     const [deliveryInstructions, setDeliveryInstructions] = createSignal("");
     const [billingNotes, setBillingNotes] = createSignal("");
     const [isDefault, setIsDefault] = createSignal(false);
@@ -103,10 +102,6 @@ const NewAddressPage: Component = () => {
             newErrors.companyName = "Company name cannot exceed 255 characters";
         }
 
-        if (gstin().trim().length > 20) {
-            newErrors.gstin = "GSTIN cannot exceed 20 characters";
-        }
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -130,7 +125,6 @@ const NewAddressPage: Component = () => {
             postalCode: postalCode().trim() || undefined,
             country: "Bangladesh",
             companyName: companyName().trim() || undefined,
-            gstin: gstin().trim() || undefined,
             deliveryInstructions: deliveryInstructions().trim() || undefined,
             billingNotes: billingNotes().trim() || undefined,
             isDefault: isDefault(),
@@ -343,22 +337,15 @@ const NewAddressPage: Component = () => {
                                 />
                             </div>
 
-                            {/* Company Name & GSTIN (for billing) */}
+                            {/* Company Name (for billing) */}
                             {addressType() === "billing" && (
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2 border-t border-gray-100 dark:border-gray-700">
+                                <div class="pt-2 border-t border-gray-100 dark:border-gray-700">
                                     <Input
                                         label={`${t("buyer.addresses.form.companyName.label")} (${t("buyer.addresses.form.addressLine2.optional")})`}
                                         placeholder={t("buyer.addresses.form.companyName.placeholder")}
                                         value={companyName()}
                                         onInput={(e) => setCompanyName(e.currentTarget.value)}
                                         error={errors().companyName}
-                                    />
-                                    <Input
-                                        label={`${t("buyer.addresses.form.gstin.label")} (${t("buyer.addresses.form.addressLine2.optional")})`}
-                                        placeholder={t("buyer.addresses.form.gstin.placeholder")}
-                                        value={gstin()}
-                                        onInput={(e) => setGstin(e.currentTarget.value)}
-                                        error={errors().gstin}
                                     />
                                 </div>
                             )}
