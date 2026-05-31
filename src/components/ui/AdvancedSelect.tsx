@@ -26,6 +26,7 @@ export function AdvancedSelect(props: AdvancedSelectProps) {
   const [search, setSearch] = createSignal("");
   let containerRef: HTMLDivElement | undefined;
   let inputRef: HTMLInputElement | undefined;
+  let dropdownRef: HTMLDivElement | undefined;
 
   const selectedOption = createMemo(() =>
     props.options.find(opt => opt.value === props.value)
@@ -41,6 +42,10 @@ export function AdvancedSelect(props: AdvancedSelectProps) {
 
   const handleClickOutside = (e: MouseEvent) => {
     if (containerRef && !containerRef.contains(e.target as Node)) {
+      // Also check if the click is inside the portal dropdown
+      if (dropdownRef && dropdownRef.contains(e.target as Node)) {
+        return;
+      }
       setIsOpen(false);
     }
   };
@@ -138,6 +143,7 @@ export function AdvancedSelect(props: AdvancedSelectProps) {
       <Show when={isOpen()}>
         <Portal>
           <div
+            ref={dropdownRef}
             class="fixed z-[9999] bg-white dark:bg-forest-800 border-2 border-cream-200 dark:border-forest-600 rounded-xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
             style={{
               width: `${containerRef?.offsetWidth}px`,

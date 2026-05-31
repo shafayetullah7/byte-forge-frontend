@@ -4,7 +4,7 @@ import { useI18n } from "~/i18n";
 import { MapPinIcon, ChevronLeftIcon } from "~/components/icons";
 import Input from "~/components/ui/Input";
 import Textarea from "~/components/ui/Textarea";
-import { Select } from "~/components/ui/Select";
+import { AdvancedSelect } from "~/components/ui/AdvancedSelect";
 import { createAddress } from "~/lib/api/endpoints/buyer/address.api";
 import { getDivisions } from "~/lib/api/endpoints/public/locations.api";
 import type { AddressType, CreateAddressRequest } from "~/lib/api/types/address.types";
@@ -299,28 +299,28 @@ const NewAddressPage: Component = () => {
 
                             {/* Division & District */}
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <Select
+                                <AdvancedSelect
                                     label={t("buyer.addresses.form.division.label")}
                                     placeholder={divisions() ? t("buyer.addresses.form.division.placeholder") : "Loading..."}
-                                    value={divisionId()}
-                                    onChange={(e) => handleDivisionChange(e.currentTarget.value)}
+                                    value={divisionId() || null}
+                                    onChange={(val) => handleDivisionChange(val || "")}
                                     error={errors().division}
-                                    required
                                     disabled={!divisions()}
+                                    allowClear
                                     options={divisions()?.map((d) => ({
                                         value: d.id,
                                         label: d.name,
                                     })) ?? []}
                                 />
-                                <Select
+                                <AdvancedSelect
                                     label={t("buyer.addresses.form.district.label")}
                                     placeholder={t("buyer.addresses.form.district.placeholder")}
-                                    value={districtId()}
-                                    onChange={(e) => setDistrictId(e.currentTarget.value)}
+                                    value={districtId() || null}
+                                    onChange={(val) => setDistrictId(val || "")}
                                     error={errors().district}
-                                    required
-                                    options={districtOptions()}
                                     disabled={!divisionId()}
+                                    allowClear
+                                    options={districtOptions()}
                                 />
                             </div>
 
