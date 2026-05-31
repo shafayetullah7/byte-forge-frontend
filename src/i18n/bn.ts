@@ -359,10 +359,6 @@ export const dict = {
           label: "কোম্পানির নাম",
           placeholder: "বিলিং ঠিকানার জন্য (ঐচ্ছিক)",
         },
-        gstin: {
-          label: "জিএসটিআইএন",
-          placeholder: "জিএসটি শনাক্তকারী নম্বর (ঐচ্ছিক)",
-        },
         deliveryInstructions: {
           label: "ডেলিভারি নির্দেশনা",
           placeholder: "যেমন, গেটের কাছে রেখে যান, ডেলিভারির আগে কল করুন (ঐচ্ছিক)",

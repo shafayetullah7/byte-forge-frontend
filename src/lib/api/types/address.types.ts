@@ -22,7 +22,6 @@ export interface Address {
   postalCode: string | null;
   country: string;
   companyName: string | null;
-  gstin: string | null;
   deliveryInstructions: string | null;
   billingNotes: string | null;
   isDefault: boolean;
@@ -46,7 +45,6 @@ export interface CreateAddressRequest {
   postalCode?: string;
   country?: string;
   companyName?: string;
-  gstin?: string;
   deliveryInstructions?: string;
   billingNotes?: string;
   isDefault?: boolean;
@@ -68,7 +66,6 @@ export interface UpdateAddressRequest {
   postalCode?: string | null;
   country?: string;
   companyName?: string | null;
-  gstin?: string | null;
   deliveryInstructions?: string | null;
   billingNotes?: string | null;
   isDefault?: boolean;
