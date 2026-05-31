@@ -186,8 +186,16 @@ export async function fetcher<T>(
           // 4. Default Action (Redirect)
           if (strict && !preventDefault) {
             if (import.meta.env.SSR) {
-              const { redirect } = await import("@solidjs/router");
-              throw redirect(defaultAuthErrorConfig.loginUrl || "/login");
+              try {
+                const { redirect } = await import("@solidjs/router");
+                throw redirect(defaultAuthErrorConfig.loginUrl || "/login");
+              } catch (e) {
+                // During SSR streaming (e.g., inside createAsync),
+                // response headers may already be sent. redirect() will
+                // fail with ERR_HTTP_HEADERS_SENT. Fall through to
+                // throw the ApiError, which ErrorBoundary handles.
+                throw apiError;
+              }
             } else {
               window.location.href =
                 defaultAuthErrorConfig.loginUrl || "/login";

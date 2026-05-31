@@ -69,3 +69,6 @@ export class ApiError extends Error {
 
 // Public plants types
 export * from "./public/plants.types";
+
+// Address types
+export * from "./address.types";

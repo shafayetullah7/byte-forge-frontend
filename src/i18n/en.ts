@@ -295,6 +295,88 @@ export const dict = {
         title: "No addresses found",
         description: "You haven't added any addresses yet. Add your first address to speed up checkout.",
       },
+      form: {
+        pageTitle: "Add New Address",
+        pageSubtitle: "Fill in the details below to add a new address",
+        backToList: "Back to Addresses",
+        addressType: {
+          label: "Address Type",
+          shipping: "Shipping Address",
+          billing: "Billing Address",
+        },
+        label: {
+          label: "Label",
+          placeholder: "e.g., Home, Office, Parent's House",
+          hint: "A short name to identify this address",
+        },
+        recipientName: {
+          label: "Recipient Name",
+          placeholder: "Full name of the person receiving the package",
+        },
+        phone: {
+          label: "Phone Number",
+          placeholder: "+8801XXXXXXXXX",
+        },
+        addressLine1: {
+          label: "Address Line 1",
+          placeholder: "House/Building number, Road/Street",
+          required: "Address line 1 is required",
+        },
+        addressLine2: {
+          label: "Address Line 2",
+          placeholder: "Apt/Flat number, Floor, Area name (optional)",
+          optional: "Optional",
+        },
+        city: {
+          label: "City",
+          placeholder: "e.g., Dhaka",
+          required: "City is required",
+        },
+        division: {
+          label: "Division",
+          placeholder: "Select division",
+          required: "Division is required",
+        },
+        district: {
+          label: "District",
+          placeholder: "Select district",
+          required: "District is required",
+        },
+        state: {
+          label: "State/Division",
+          placeholder: "e.g., Dhaka Division (optional)",
+        },
+        postalCode: {
+          label: "Postal Code",
+          placeholder: "e.g., 1213 (optional)",
+        },
+        country: {
+          label: "Country",
+        },
+        companyName: {
+          label: "Company Name",
+          placeholder: "For billing addresses (optional)",
+        },
+        gstin: {
+          label: "GSTIN",
+          placeholder: "GST identification number (optional)",
+        },
+        deliveryInstructions: {
+          label: "Delivery Instructions",
+          placeholder: "e.g., Leave at the gate, Call before delivery (optional)",
+        },
+        billingNotes: {
+          label: "Billing Notes",
+          placeholder: "Special billing instructions (optional)",
+        },
+        isDefault: {
+          label: "Set as default address",
+        },
+        submit: "Save Address",
+        submitting: "Saving...",
+        success: "Address added successfully",
+        error: "Failed to add address",
+      },
     },
   },
   seller: {

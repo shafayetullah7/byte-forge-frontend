@@ -297,6 +297,88 @@ export const dict = {
         title: "কোন ঠিকানা পাওয়া যায়নি",
         description: "আপনি এখনও কোনো ঠিকানা যোগ করেননি। চেকআউট দ্রুত করতে আপনার প্রথম ঠিকানা যোগ করুন।",
       },
+      form: {
+        pageTitle: "নতুন ঠিকানা যোগ করুন",
+        pageSubtitle: "নতুন ঠিকানা যোগ করতে নিচের বিবরণ পূরণ করুন",
+        backToList: "ঠিকানায় ফিরে যান",
+        addressType: {
+          label: "ঠিকানার ধরন",
+          shipping: "শিপিং ঠিকানা",
+          billing: "বিলিং ঠিকানা",
+        },
+        label: {
+          label: "লেবেল",
+          placeholder: "যেমন, বাড়ি, অফিস, বাবার বাড়ি",
+          hint: "এই ঠিকানাটি শনাক্ত করার জন্য একটি সংক্ষিপ্ত নাম",
+        },
+        recipientName: {
+          label: "প্রাপকের নাম",
+          placeholder: "প্যাকেট গ্রহণকারী ব্যক্তির পূর্ণ নাম",
+        },
+        phone: {
+          label: "ফোন নম্বর",
+          placeholder: "+8801XXXXXXXXX",
+        },
+        addressLine1: {
+          label: "ঠিকানার প্রথম লাইন",
+          placeholder: "বাড়ি/ভবন নম্বর, সড়ক/গলি",
+          required: "ঠিকানার প্রথম লাইন প্রয়োজন",
+        },
+        addressLine2: {
+          label: "ঠিকানার দ্বিতীয় লাইন",
+          placeholder: "অ্যাপার্টমেন্ট/ফ্ল্যাট নম্বর, তলা, এলাকার নাম (ঐচ্ছিক)",
+          optional: "ঐচ্ছিক",
+        },
+        city: {
+          label: "শহর",
+          placeholder: "যেমন, ঢাকা",
+          required: "শহর প্রয়োজন",
+        },
+        division: {
+          label: "বিভাগ",
+          placeholder: "বিভাগ নির্বাচন করুন",
+          required: "বিভাগ প্রয়োজন",
+        },
+        district: {
+          label: "জেলা",
+          placeholder: "জেলা নির্বাচন করুন",
+          required: "জেলা প্রয়োজন",
+        },
+        state: {
+          label: "রাজ্য/বিভাগ",
+          placeholder: "যেমন, ঢাকা বিভাগ (ঐচ্ছিক)",
+        },
+        postalCode: {
+          label: "পোস্টাল কোড",
+          placeholder: "যেমন, 1213 (ঐচ্ছিক)",
+        },
+        country: {
+          label: "দেশ",
+        },
+        companyName: {
+          label: "কোম্পানির নাম",
+          placeholder: "বিলিং ঠিকানার জন্য (ঐচ্ছিক)",
+        },
+        gstin: {
+          label: "জিএসটিআইএন",
+          placeholder: "জিএসটি শনাক্তকারী নম্বর (ঐচ্ছিক)",
+        },
+        deliveryInstructions: {
+          label: "ডেলিভারি নির্দেশনা",
+          placeholder: "যেমন, গেটের কাছে রেখে যান, ডেলিভারির আগে কল করুন (ঐচ্ছিক)",
+        },
+        billingNotes: {
+          label: "বিলিং নোট",
+          placeholder: "বিশেষ বিলিং নির্দেশনা (ঐচ্ছিক)",
+        },
+        isDefault: {
+          label: "ডিফল্ট ঠিকানা হিসেবে সেট করুন",
+        },
+        submit: "ঠিকানা সংরক্ষণ করুন",
+        submitting: "সংরক্ষণ হচ্ছে...",
+        success: "ঠিকানা সফলভাবে যোগ করা হয়েছে",
+        error: "ঠিকানা যোগ করতে ব্যর্থ",
+      },
     },
   },
   seller: {
