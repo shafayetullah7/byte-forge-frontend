@@ -7,14 +7,13 @@ import Textarea from "~/components/ui/Textarea";
 import { AdvancedSelect } from "~/components/ui/AdvancedSelect";
 import { createAddress } from "~/lib/api/endpoints/buyer/address.api";
 import { getDivisions } from "~/lib/api/endpoints/public/locations.api";
-import type { AddressType, CreateAddressRequest } from "~/lib/api/types/address.types";
+import type { CreateAddressRequest } from "~/lib/api/types/address.types";
 import { toaster } from "~/components/ui/Toast";
 
 const NewAddressPage: Component = () => {
     const { t } = useI18n();
     const navigate = useNavigate();
 
-    const [addressType, setAddressType] = createSignal<AddressType>("shipping");
     const [label, setLabel] = createSignal("");
     const [recipientName, setRecipientName] = createSignal("");
     const [phone, setPhone] = createSignal("");
@@ -102,6 +101,14 @@ const NewAddressPage: Component = () => {
             newErrors.companyName = "Company name cannot exceed 255 characters";
         }
 
+        if (deliveryInstructions().trim().length > 1000) {
+            newErrors.deliveryInstructions = "Delivery instructions cannot exceed 1000 characters";
+        }
+
+        if (billingNotes().trim().length > 1000) {
+            newErrors.billingNotes = "Billing notes cannot exceed 1000 characters";
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -114,7 +121,7 @@ const NewAddressPage: Component = () => {
         setIsSubmitting(true);
 
         const data: CreateAddressRequest = {
-            type: addressType(),
+            type: "shipping",
             label: label().trim(),
             recipientName: recipientName().trim(),
             phone: phone().trim(),
@@ -170,73 +177,6 @@ const NewAddressPage: Component = () => {
                 {/* Form Card */}
                 <form onSubmit={handleSubmit}>
                     <div class="bg-white dark:bg-forest-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-                        {/* Address Type Selection */}
-                        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                                {t("buyer.addresses.form.addressType.label")} <span class="text-red-500">*</span>
-                            </label>
-                            <div class="grid grid-cols-2 gap-3">
-                                <button
-                                    type="button"
-                                    onClick={() => setAddressType("shipping")}
-                                    class={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${
-                                        addressType() === "shipping"
-                                            ? "border-forest-500 dark:border-forest-400 bg-forest-50 dark:bg-forest-900/30"
-                                            : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
-                                    }`}
-                                >
-                                    <div class={`p-2 rounded-lg ${
-                                        addressType() === "shipping"
-                                            ? "bg-forest-100 dark:bg-forest-900/40"
-                                            : "bg-gray-100 dark:bg-gray-700"
-                                    }`}>
-                                        <MapPinIcon class={`w-5 h-5 ${
-                                            addressType() === "shipping"
-                                                ? "text-forest-600 dark:text-sage-400"
-                                                : "text-gray-500 dark:text-gray-400"
-                                        }`} />
-                                    </div>
-                                    <span class={`text-sm font-semibold ${
-                                        addressType() === "shipping"
-                                            ? "text-forest-800 dark:text-cream-50"
-                                            : "text-gray-700 dark:text-gray-300"
-                                    }`}>
-                                        {t("buyer.addresses.form.addressType.shipping")}
-                                    </span>
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setAddressType("billing")}
-                                    class={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${
-                                        addressType() === "billing"
-                                            ? "border-sage-500 dark:border-sage-400 bg-sage-50 dark:bg-sage-900/30"
-                                            : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
-                                    }`}
-                                >
-                                    <div class={`p-2 rounded-lg ${
-                                        addressType() === "billing"
-                                            ? "bg-sage-100 dark:bg-sage-900/40"
-                                            : "bg-gray-100 dark:bg-gray-700"
-                                    }`}>
-                                        <svg class={`w-5 h-5 ${
-                                            addressType() === "billing"
-                                                ? "text-sage-600 dark:text-sage-400"
-                                                : "text-gray-500 dark:text-gray-400"
-                                        }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                                        </svg>
-                                    </div>
-                                    <span class={`text-sm font-semibold ${
-                                        addressType() === "billing"
-                                            ? "text-sage-800 dark:text-cream-50"
-                                            : "text-gray-700 dark:text-gray-300"
-                                    }`}>
-                                        {t("buyer.addresses.form.addressType.billing")}
-                                    </span>
-                                </button>
-                            </div>
-                        </div>
-
                         {/* Form Fields */}
                         <div class="p-6 space-y-5">
                             {/* Label */}
@@ -246,6 +186,7 @@ const NewAddressPage: Component = () => {
                                 value={label()}
                                 onInput={(e) => setLabel(e.currentTarget.value)}
                                 error={errors().label}
+                                maxLength={50}
                                 required
                             />
                             <p class="text-xs text-gray-500 dark:text-gray-400 -mt-3">
@@ -260,6 +201,7 @@ const NewAddressPage: Component = () => {
                                     value={recipientName()}
                                     onInput={(e) => setRecipientName(e.currentTarget.value)}
                                     error={errors().recipientName}
+                                    maxLength={100}
                                     required
                                 />
                                 <Input
@@ -268,6 +210,7 @@ const NewAddressPage: Component = () => {
                                     value={phone()}
                                     onInput={(e) => setPhone(e.currentTarget.value)}
                                     error={errors().phone}
+                                    maxLength={20}
                                     required
                                 />
                             </div>
@@ -279,6 +222,7 @@ const NewAddressPage: Component = () => {
                                 value={addressLine1()}
                                 onInput={(e) => setAddressLine1(e.currentTarget.value)}
                                 error={errors().addressLine1}
+                                maxLength={255}
                                 required
                             />
 
@@ -289,6 +233,7 @@ const NewAddressPage: Component = () => {
                                 value={addressLine2()}
                                 onInput={(e) => setAddressLine2(e.currentTarget.value)}
                                 error={errors().addressLine2}
+                                maxLength={255}
                             />
 
                             {/* Division & District */}
@@ -328,6 +273,7 @@ const NewAddressPage: Component = () => {
                                     value={postalCode()}
                                     onInput={(e) => setPostalCode(e.currentTarget.value)}
                                     error={errors().postalCode}
+                                    maxLength={20}
                                 />
                                 <Input
                                     label={t("buyer.addresses.form.country.label")}
@@ -337,18 +283,17 @@ const NewAddressPage: Component = () => {
                                 />
                             </div>
 
-                            {/* Company Name (for billing) */}
-                            {addressType() === "billing" && (
-                                <div class="pt-2 border-t border-gray-100 dark:border-gray-700">
+                            {/* Company Name */}
+                            <div class="pt-2 border-t border-gray-100 dark:border-gray-700">
                                     <Input
                                         label={`${t("buyer.addresses.form.companyName.label")} (${t("buyer.addresses.form.addressLine2.optional")})`}
                                         placeholder={t("buyer.addresses.form.companyName.placeholder")}
                                         value={companyName()}
                                         onInput={(e) => setCompanyName(e.currentTarget.value)}
                                         error={errors().companyName}
+                                        maxLength={255}
                                     />
-                                </div>
-                            )}
+                            </div>
 
                             {/* Delivery Instructions */}
                             <div class="pt-2 border-t border-gray-100 dark:border-gray-700">
@@ -358,21 +303,21 @@ const NewAddressPage: Component = () => {
                                     value={deliveryInstructions()}
                                     onInput={(e) => setDeliveryInstructions(e.currentTarget.value)}
                                     rows={4}
+                                    maxLength={1000}
                                 />
                             </div>
 
-                            {/* Billing Notes (billing only) */}
-                            {addressType() === "billing" && (
-                                <div class="pt-2">
-                                    <Textarea
-                                        label={`${t("buyer.addresses.form.billingNotes.label")} (${t("buyer.addresses.form.addressLine2.optional")})`}
-                                        placeholder={t("buyer.addresses.form.billingNotes.placeholder")}
-                                        value={billingNotes()}
-                                        onInput={(e) => setBillingNotes(e.currentTarget.value)}
-                                        rows={4}
-                                    />
-                                </div>
-                            )}
+                            {/* Billing Notes */}
+                            <div class="pt-2">
+                                <Textarea
+                                    label={`${t("buyer.addresses.form.billingNotes.label")} (${t("buyer.addresses.form.addressLine2.optional")})`}
+                                    placeholder={t("buyer.addresses.form.billingNotes.placeholder")}
+                                    value={billingNotes()}
+                                    onInput={(e) => setBillingNotes(e.currentTarget.value)}
+                                    rows={4}
+                                    maxLength={1000}
+                                />
+                            </div>
 
                             {/* Set as Default */}
                             <div class="pt-2 border-t border-gray-100 dark:border-gray-700">
