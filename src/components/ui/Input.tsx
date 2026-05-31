@@ -53,6 +53,8 @@ export default function Input(props: InputProps) {
     }
   };
 
+  const errorId = `${inputId}-error`;
+
   return (
     <div class="w-full">
       <Show when={local.label}>
@@ -64,7 +66,14 @@ export default function Input(props: InputProps) {
         </label>
       </Show>
       <div class="relative">
-        <input id={inputId} class={inputClass} {...others} onInput={onInputHandler} />
+        <input
+          id={inputId}
+          class={inputClass}
+          {...others}
+          onInput={onInputHandler}
+          aria-invalid={!!local.error}
+          aria-describedby={local.error ? errorId : undefined}
+        />
         <Show when={hasCounter()}>
           <span class={`${counterStyles} ${isNearLimit() ? "text-amber-600 dark:text-amber-400" : "text-gray-400 dark:text-gray-500"}`}>
             {charCount()}
@@ -72,7 +81,9 @@ export default function Input(props: InputProps) {
         </Show>
       </div>
       <Show when={local.error}>
-        <p class="mt-1 text-xs text-red-600 dark:text-red-400 font-medium">{local.error}</p>
+        <p id={errorId} class="mt-1 text-xs text-red-600 dark:text-red-400 font-medium" role="alert">
+          {local.error}
+        </p>
       </Show>
     </div>
   );

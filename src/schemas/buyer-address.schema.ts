@@ -80,8 +80,3 @@ export const buyerAddressSchema = z.object({
  * Type inferred from the zod schema
  */
 export type BuyerAddressFormData = z.infer<typeof buyerAddressSchema>;
-
-/**
- * Form field names for error mapping
- */
-export type BuyerAddressField = keyof z.infer<typeof buyerAddressSchema>;

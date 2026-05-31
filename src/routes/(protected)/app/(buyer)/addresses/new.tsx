@@ -8,10 +8,9 @@ import Textarea from "~/components/ui/Textarea";
 import { AdvancedSelect } from "~/components/ui/AdvancedSelect";
 import { createAddress } from "~/lib/api/endpoints/buyer/address.api";
 import { getDivisions } from "~/lib/api/endpoints/public/locations.api";
-import type { CreateAddressRequest } from "~/lib/api/types/address.types";
 import { ApiError } from "~/lib/api/types";
 import { toaster } from "~/components/ui/Toast";
-import { buyerAddressSchema } from "~/schemas/buyer-address.schema";
+import { buyerAddressSchema, type BuyerAddressFormData } from "~/schemas/buyer-address.schema";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 
 interface FormState {
@@ -51,11 +50,10 @@ const NewAddressPage: Component = () => {
     const [errors, setErrors] = createStore<Record<string, string>>({});
     const [isSubmitting, setIsSubmitting] = createSignal(false);
 
-    const handleInput = (field: keyof FormState, max: number) =>
-        (e: Event) => {
-            const target = e.target as HTMLInputElement | HTMLTextAreaElement;
-            const value = target.value.slice(0, max);
-            setForm(field, value);
+    const handleInput = (field: keyof FormState) =>
+        (e: InputEvent) => {
+            const target = e.target as HTMLInputElement;
+            setForm(field, target.value);
             if (errors[field]) {
                 setErrors(field, "");
             }
@@ -85,7 +83,7 @@ const NewAddressPage: Component = () => {
         setForm("districtId", "");
     };
 
-    const validate = (): boolean => {
+    const validate = (): BuyerAddressFormData | null => {
         const fieldErrors: Record<string, string> = {};
 
         if (!form.divisionId.trim()) {
@@ -120,31 +118,29 @@ const NewAddressPage: Component = () => {
         }
 
         setErrors(() => fieldErrors);
-        return Object.keys(fieldErrors).length === 0;
+
+        if (Object.keys(fieldErrors).length > 0) {
+            return null;
+        }
+
+        return result.success ? result.data : null;
     };
 
     const handleSubmit = async (e: Event) => {
         e.preventDefault();
 
-        if (!validate()) return;
+        const parsed = validate();
+        if (!parsed) return;
 
         setIsSubmitting(true);
 
-        const data: CreateAddressRequest = {
-            type: "shipping",
-            label: form.label.trim(),
-            recipientName: form.recipientName.trim(),
-            phone: form.phone.trim(),
-            addressLine1: form.addressLine1.trim(),
-            addressLine2: form.addressLine2.trim() || undefined,
-            city: districtOptions().find((d) => d.value === form.districtId)?.label ?? "",
-            state: selectedDivision()?.name,
-            postalCode: form.postalCode.trim() || undefined,
-            country: "Bangladesh",
-            companyName: form.companyName.trim() || undefined,
-            deliveryInstructions: form.deliveryInstructions.trim() || undefined,
-            billingNotes: form.billingNotes.trim() || undefined,
-            isDefault: form.isDefault,
+        const data = {
+            ...parsed,
+            addressLine2: parsed.addressLine2 || undefined,
+            postalCode: parsed.postalCode || undefined,
+            companyName: parsed.companyName || undefined,
+            deliveryInstructions: parsed.deliveryInstructions || undefined,
+            billingNotes: parsed.billingNotes || undefined,
         };
 
         try {
@@ -216,7 +212,7 @@ const NewAddressPage: Component = () => {
                                 label={t("buyer.addresses.form.label.label")}
                                 placeholder={t("buyer.addresses.form.label.placeholder")}
                                 value={form.label}
-                                onInput={handleInput("label", 50)}
+                                onInput={handleInput("label")}
                                 error={errors.label}
                                 maxLength={50}
                                 required
@@ -231,7 +227,7 @@ const NewAddressPage: Component = () => {
                                     label={t("buyer.addresses.form.recipientName.label")}
                                     placeholder={t("buyer.addresses.form.recipientName.placeholder")}
                                     value={form.recipientName}
-                                    onInput={handleInput("recipientName", 100)}
+                                    onInput={handleInput("recipientName")}
                                     error={errors.recipientName}
                                     maxLength={100}
                                     required
@@ -240,7 +236,7 @@ const NewAddressPage: Component = () => {
                                     label={t("buyer.addresses.form.phone.label")}
                                     placeholder={t("buyer.addresses.form.phone.placeholder")}
                                     value={form.phone}
-                                    onInput={handleInput("phone", 20)}
+                                    onInput={handleInput("phone")}
                                     error={errors.phone}
                                     maxLength={20}
                                     required
@@ -252,7 +248,7 @@ const NewAddressPage: Component = () => {
                                 label={t("buyer.addresses.form.addressLine1.label")}
                                 placeholder={t("buyer.addresses.form.addressLine1.placeholder")}
                                 value={form.addressLine1}
-                                onInput={handleInput("addressLine1", 255)}
+                                onInput={handleInput("addressLine1")}
                                 error={errors.addressLine1}
                                 maxLength={255}
                                 required
@@ -263,7 +259,7 @@ const NewAddressPage: Component = () => {
                                 label={`${t("buyer.addresses.form.addressLine2.label")} (${t("buyer.addresses.form.addressLine2.optional")})`}
                                 placeholder={t("buyer.addresses.form.addressLine2.placeholder")}
                                 value={form.addressLine2}
-                                onInput={handleInput("addressLine2", 255)}
+                                onInput={handleInput("addressLine2")}
                                 error={errors.addressLine2}
                                 maxLength={255}
                             />
@@ -303,7 +299,7 @@ const NewAddressPage: Component = () => {
                                     label={`${t("buyer.addresses.form.postalCode.label")} (${t("buyer.addresses.form.addressLine2.optional")})`}
                                     placeholder={t("buyer.addresses.form.postalCode.placeholder")}
                                     value={form.postalCode}
-                                    onInput={handleInput("postalCode", 20)}
+                                    onInput={handleInput("postalCode")}
                                     error={errors.postalCode}
                                     maxLength={20}
                                 />
@@ -321,7 +317,7 @@ const NewAddressPage: Component = () => {
                                     label={`${t("buyer.addresses.form.companyName.label")} (${t("buyer.addresses.form.addressLine2.optional")})`}
                                     placeholder={t("buyer.addresses.form.companyName.placeholder")}
                                     value={form.companyName}
-                                    onInput={handleInput("companyName", 255)}
+                                        onInput={handleInput("companyName")}
                                     error={errors.companyName}
                                     maxLength={255}
                                 />
@@ -333,7 +329,7 @@ const NewAddressPage: Component = () => {
                                     label={`${t("buyer.addresses.form.deliveryInstructions.label")} (${t("buyer.addresses.form.addressLine2.optional")})`}
                                     placeholder={t("buyer.addresses.form.deliveryInstructions.placeholder")}
                                     value={form.deliveryInstructions}
-                                    onInput={handleInput("deliveryInstructions", 1000)}
+                                    onInput={handleInput("deliveryInstructions")}
                                     rows={4}
                                     maxLength={1000}
                                 />
@@ -345,7 +341,7 @@ const NewAddressPage: Component = () => {
                                     label={`${t("buyer.addresses.form.billingNotes.label")} (${t("buyer.addresses.form.addressLine2.optional")})`}
                                     placeholder={t("buyer.addresses.form.billingNotes.placeholder")}
                                     value={form.billingNotes}
-                                    onInput={handleInput("billingNotes", 1000)}
+                                    onInput={handleInput("billingNotes")}
                                     rows={4}
                                     maxLength={1000}
                                 />
