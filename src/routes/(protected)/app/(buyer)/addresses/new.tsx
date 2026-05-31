@@ -9,8 +9,10 @@ import { AdvancedSelect } from "~/components/ui/AdvancedSelect";
 import { createAddress } from "~/lib/api/endpoints/buyer/address.api";
 import { getDivisions } from "~/lib/api/endpoints/public/locations.api";
 import type { CreateAddressRequest } from "~/lib/api/types/address.types";
+import { ApiError } from "~/lib/api/types";
 import { toaster } from "~/components/ui/Toast";
 import { buyerAddressSchema } from "~/schemas/buyer-address.schema";
+import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 
 interface FormState {
     label: string;
@@ -51,8 +53,12 @@ const NewAddressPage: Component = () => {
 
     const handleInput = (field: keyof FormState, max: number) =>
         (e: Event) => {
-            const value = (e.target as HTMLInputElement).value;
-            setForm(field, value.slice(0, max));
+            const target = e.target as HTMLInputElement | HTMLTextAreaElement;
+            const value = target.value.slice(0, max);
+            setForm(field, value);
+            if (errors[field]) {
+                setErrors(field, "");
+            }
         };
 
     // Fetch divisions from public API
@@ -113,7 +119,7 @@ const NewAddressPage: Component = () => {
             }
         }
 
-        setErrors(fieldErrors);
+        setErrors(() => fieldErrors);
         return Object.keys(fieldErrors).length === 0;
     };
 
@@ -146,13 +152,35 @@ const NewAddressPage: Component = () => {
             toaster.success(t("buyer.addresses.form.success"));
             navigate("/app/addresses");
         } catch (error) {
-            toaster.error(t("buyer.addresses.form.error"));
+            if (error instanceof ApiError) {
+                if (error.statusCode === 400 && error.response?.validationErrors) {
+                    const fieldErrors: Record<string, string> = {};
+                    for (const ve of error.response.validationErrors) {
+                        fieldErrors[ve.field] = ve.message;
+                    }
+                    setErrors(() => fieldErrors);
+                    toaster.error(t("buyer.addresses.form.validationError"));
+                } else if (error.statusCode === 401) {
+                    toaster.error(t("buyer.addresses.form.unauthorized"));
+                } else if (error.statusCode === 409) {
+                    toaster.error(t("buyer.addresses.form.conflict"));
+                } else {
+                    toaster.error(error.response?.message ?? t("buyer.addresses.form.error"));
+                }
+            } else {
+                toaster.error(t("buyer.addresses.form.error"));
+            }
         } finally {
             setIsSubmitting(false);
         }
     };
 
     return (
+        <SafeErrorBoundary
+            fallback={(err, reset) => (
+                <InlineErrorFallback error={err} reset={reset} label={t("buyer.addresses.title")} />
+            )}
+        >
         <div class="min-h-screen py-8">
             <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Page Header */}
@@ -365,6 +393,7 @@ const NewAddressPage: Component = () => {
                 </form>
             </div>
         </div>
+        </SafeErrorBoundary>
     );
 };
 
