@@ -306,6 +306,7 @@ const NewAddressPage: Component = () => {
                                     onChange={(val) => handleDivisionChange(val || "")}
                                     error={errors().division}
                                     disabled={!divisions()}
+                                    required
                                     allowClear
                                     options={divisions()?.map((d) => ({
                                         value: d.id,
@@ -319,6 +320,7 @@ const NewAddressPage: Component = () => {
                                     onChange={(val) => setDistrictId(val || "")}
                                     error={errors().district}
                                     disabled={!divisionId()}
+                                    required
                                     allowClear
                                     options={districtOptions()}
                                 />

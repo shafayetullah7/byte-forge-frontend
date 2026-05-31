@@ -6,7 +6,7 @@ export interface InputProps extends JSX.InputHTMLAttributes<HTMLInputElement> {
 }
 
 export default function Input(props: InputProps) {
-  const [local, others] = splitProps(props, ["label", "error", "class"]);
+  const [local, others] = splitProps(props, ["label", "error", "class", "required"]);
   
   const inputId = createUniqueId();
 
@@ -26,6 +26,9 @@ export default function Input(props: InputProps) {
       <Show when={local.label}>
         <label for={inputId} class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
           {local.label}
+          <Show when={local.required}>
+            <span class="text-red-500 ml-1">*</span>
+          </Show>
         </label>
       </Show>
       <input id={inputId} class={classes} {...others} />

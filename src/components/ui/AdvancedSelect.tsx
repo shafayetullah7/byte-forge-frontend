@@ -19,6 +19,7 @@ export interface AdvancedSelectProps {
   disabled?: boolean;
   class?: string;
   allowClear?: boolean;
+  required?: boolean;
 }
 
 export function AdvancedSelect(props: AdvancedSelectProps) {
@@ -86,6 +87,9 @@ export function AdvancedSelect(props: AdvancedSelectProps) {
       <Show when={props.label}>
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
           {props.label}
+          <Show when={props.required}>
+            <span class="text-red-500 ml-1">*</span>
+          </Show>
         </label>
       </Show>
 

@@ -6,7 +6,7 @@ export interface TextareaProps extends JSX.TextareaHTMLAttributes<HTMLTextAreaEl
 }
 
 export default function Textarea(props: TextareaProps) {
-  const [local, others] = splitProps(props, ["label", "error", "class"]);
+  const [local, others] = splitProps(props, ["label", "error", "class", "required"]);
 
   const textareaId = createUniqueId();
 
@@ -24,6 +24,9 @@ export default function Textarea(props: TextareaProps) {
       <Show when={local.label}>
         <label for={textareaId} class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
           {local.label}
+          <Show when={local.required}>
+            <span class="text-red-500 ml-1">*</span>
+          </Show>
         </label>
       </Show>
       <textarea id={textareaId} class={classes} {...others} />
