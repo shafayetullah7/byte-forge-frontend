@@ -35,6 +35,24 @@ export default function Textarea(props: TextareaProps) {
     ? `${baseStyles} ${stateStyles} pr-20 ${local.class || ""}`
     : `${baseStyles} ${stateStyles} ${local.class || ""}`;
 
+  const handleInput = (e: InputEvent) => {
+    const target = e.target as HTMLTextAreaElement;
+    if (local.maxLength) {
+      const max = Number(local.maxLength);
+      if (target.value.length > max) {
+        target.value = target.value.slice(0, max);
+      }
+    }
+  };
+
+  const onInputHandler = (e: Event) => {
+    handleInput(e as InputEvent);
+    const handler = props.onInput;
+    if (typeof handler === "function") {
+      handler(e as InputEvent & { currentTarget: HTMLTextAreaElement; target: HTMLTextAreaElement; });
+    }
+  };
+
   return (
     <div class="w-full">
       <Show when={local.label}>
@@ -46,7 +64,7 @@ export default function Textarea(props: TextareaProps) {
         </label>
       </Show>
       <div class="relative">
-        <textarea id={textareaId} class={textareaClass} {...others} />
+        <textarea id={textareaId} class={textareaClass} {...others} onInput={onInputHandler} />
         <Show when={hasCounter()}>
           <span class={`${counterStyles} ${isNearLimit() ? "text-amber-600 dark:text-amber-400" : "text-gray-400 dark:text-gray-500"}`}>
             {charCount()}

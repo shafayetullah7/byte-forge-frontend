@@ -1,4 +1,5 @@
-import { Component, createSignal, createMemo } from "solid-js";
+import { Component, createMemo, createSignal } from "solid-js";
+import { createStore } from "solid-js/store";
 import { useNavigate, A, createAsync } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import { MapPinIcon, ChevronLeftIcon } from "~/components/icons";
@@ -9,26 +10,50 @@ import { createAddress } from "~/lib/api/endpoints/buyer/address.api";
 import { getDivisions } from "~/lib/api/endpoints/public/locations.api";
 import type { CreateAddressRequest } from "~/lib/api/types/address.types";
 import { toaster } from "~/components/ui/Toast";
+import { buyerAddressSchema } from "~/schemas/buyer-address.schema";
+
+interface FormState {
+    label: string;
+    recipientName: string;
+    phone: string;
+    addressLine1: string;
+    addressLine2: string;
+    divisionId: string;
+    districtId: string;
+    postalCode: string;
+    companyName: string;
+    deliveryInstructions: string;
+    billingNotes: string;
+    isDefault: boolean;
+}
 
 const NewAddressPage: Component = () => {
     const { t } = useI18n();
     const navigate = useNavigate();
 
-    const [label, setLabel] = createSignal("");
-    const [recipientName, setRecipientName] = createSignal("");
-    const [phone, setPhone] = createSignal("");
-    const [addressLine1, setAddressLine1] = createSignal("");
-    const [addressLine2, setAddressLine2] = createSignal("");
-    const [divisionId, setDivisionId] = createSignal("");
-    const [districtId, setDistrictId] = createSignal("");
-    const [postalCode, setPostalCode] = createSignal("");
-    const [companyName, setCompanyName] = createSignal("");
-    const [deliveryInstructions, setDeliveryInstructions] = createSignal("");
-    const [billingNotes, setBillingNotes] = createSignal("");
-    const [isDefault, setIsDefault] = createSignal(false);
+    const [form, setForm] = createStore<FormState>({
+        label: "",
+        recipientName: "",
+        phone: "",
+        addressLine1: "",
+        addressLine2: "",
+        divisionId: "",
+        districtId: "",
+        postalCode: "",
+        companyName: "",
+        deliveryInstructions: "",
+        billingNotes: "",
+        isDefault: false,
+    });
 
-    const [errors, setErrors] = createSignal<Record<string, string>>({});
+    const [errors, setErrors] = createStore<Record<string, string>>({});
     const [isSubmitting, setIsSubmitting] = createSignal(false);
+
+    const handleInput = (field: keyof FormState, max: number) =>
+        (e: Event) => {
+            const value = (e.target as HTMLInputElement).value;
+            setForm(field, value.slice(0, max));
+        };
 
     // Fetch divisions from public API
     const divisions = createAsync(() => getDivisions(), {
@@ -37,7 +62,7 @@ const NewAddressPage: Component = () => {
 
     // Selected division (to get its districts)
     const selectedDivision = createMemo(() =>
-        divisions()?.find((d) => d.id === divisionId())
+        divisions()?.find((d) => d.id === form.divisionId)
     );
 
     // District options for the selected division
@@ -50,67 +75,46 @@ const NewAddressPage: Component = () => {
 
     // Reset district when division changes
     const handleDivisionChange = (id: string) => {
-        setDivisionId(id);
-        setDistrictId("");
+        setForm("divisionId", id);
+        setForm("districtId", "");
     };
 
     const validate = (): boolean => {
-        const newErrors: Record<string, string> = {};
+        const fieldErrors: Record<string, string> = {};
 
-        if (!label().trim()) {
-            newErrors.label = t("common.required");
-        } else if (label().trim().length > 50) {
-            newErrors.label = "Label cannot exceed 50 characters";
+        if (!form.divisionId.trim()) {
+            fieldErrors.division = t("buyer.addresses.form.division.required");
         }
 
-        if (!recipientName().trim()) {
-            newErrors.recipientName = t("common.required");
-        } else if (recipientName().trim().length > 100) {
-            newErrors.recipientName = "Recipient name cannot exceed 100 characters";
+        if (!form.districtId.trim()) {
+            fieldErrors.district = t("buyer.addresses.form.district.required");
         }
 
-        if (!phone().trim()) {
-            newErrors.phone = t("common.required");
-        } else if (phone().trim().length > 20) {
-            newErrors.phone = "Phone number cannot exceed 20 characters";
+        const result = buyerAddressSchema.safeParse({
+            label: form.label,
+            recipientName: form.recipientName,
+            phone: form.phone,
+            addressLine1: form.addressLine1,
+            addressLine2: form.addressLine2,
+            city: districtOptions().find((d) => d.value === form.districtId)?.label ?? "",
+            state: selectedDivision()?.name,
+            postalCode: form.postalCode,
+            country: "Bangladesh",
+            companyName: form.companyName,
+            deliveryInstructions: form.deliveryInstructions,
+            billingNotes: form.billingNotes,
+            isDefault: form.isDefault,
+        });
+
+        if (!result.success) {
+            for (const issue of result.error.issues) {
+                const field = issue.path[0] as string;
+                fieldErrors[field] = issue.message;
+            }
         }
 
-        if (!addressLine1().trim()) {
-            newErrors.addressLine1 = t("buyer.addresses.form.addressLine1.required");
-        } else if (addressLine1().trim().length > 255) {
-            newErrors.addressLine1 = "Address line 1 cannot exceed 255 characters";
-        }
-
-        if (!divisionId().trim()) {
-            newErrors.division = t("buyer.addresses.form.division.required");
-        }
-
-        if (!districtId().trim()) {
-            newErrors.district = t("buyer.addresses.form.district.required");
-        }
-
-        if (addressLine2().trim().length > 255) {
-            newErrors.addressLine2 = "Address line 2 cannot exceed 255 characters";
-        }
-
-        if (postalCode().trim().length > 20) {
-            newErrors.postalCode = "Postal code cannot exceed 20 characters";
-        }
-
-        if (companyName().trim().length > 255) {
-            newErrors.companyName = "Company name cannot exceed 255 characters";
-        }
-
-        if (deliveryInstructions().trim().length > 1000) {
-            newErrors.deliveryInstructions = "Delivery instructions cannot exceed 1000 characters";
-        }
-
-        if (billingNotes().trim().length > 1000) {
-            newErrors.billingNotes = "Billing notes cannot exceed 1000 characters";
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+        setErrors(fieldErrors);
+        return Object.keys(fieldErrors).length === 0;
     };
 
     const handleSubmit = async (e: Event) => {
@@ -122,19 +126,19 @@ const NewAddressPage: Component = () => {
 
         const data: CreateAddressRequest = {
             type: "shipping",
-            label: label().trim(),
-            recipientName: recipientName().trim(),
-            phone: phone().trim(),
-            addressLine1: addressLine1().trim(),
-            addressLine2: addressLine2().trim() || undefined,
-            city: districtOptions().find((d) => d.value === districtId())?.label ?? "",
+            label: form.label.trim(),
+            recipientName: form.recipientName.trim(),
+            phone: form.phone.trim(),
+            addressLine1: form.addressLine1.trim(),
+            addressLine2: form.addressLine2.trim() || undefined,
+            city: districtOptions().find((d) => d.value === form.districtId)?.label ?? "",
             state: selectedDivision()?.name,
-            postalCode: postalCode().trim() || undefined,
+            postalCode: form.postalCode.trim() || undefined,
             country: "Bangladesh",
-            companyName: companyName().trim() || undefined,
-            deliveryInstructions: deliveryInstructions().trim() || undefined,
-            billingNotes: billingNotes().trim() || undefined,
-            isDefault: isDefault(),
+            companyName: form.companyName.trim() || undefined,
+            deliveryInstructions: form.deliveryInstructions.trim() || undefined,
+            billingNotes: form.billingNotes.trim() || undefined,
+            isDefault: form.isDefault,
         };
 
         try {
@@ -183,9 +187,9 @@ const NewAddressPage: Component = () => {
                             <Input
                                 label={t("buyer.addresses.form.label.label")}
                                 placeholder={t("buyer.addresses.form.label.placeholder")}
-                                value={label()}
-                                onInput={(e) => setLabel(e.currentTarget.value)}
-                                error={errors().label}
+                                value={form.label}
+                                onInput={handleInput("label", 50)}
+                                error={errors.label}
                                 maxLength={50}
                                 required
                             />
@@ -198,18 +202,18 @@ const NewAddressPage: Component = () => {
                                 <Input
                                     label={t("buyer.addresses.form.recipientName.label")}
                                     placeholder={t("buyer.addresses.form.recipientName.placeholder")}
-                                    value={recipientName()}
-                                    onInput={(e) => setRecipientName(e.currentTarget.value)}
-                                    error={errors().recipientName}
+                                    value={form.recipientName}
+                                    onInput={handleInput("recipientName", 100)}
+                                    error={errors.recipientName}
                                     maxLength={100}
                                     required
                                 />
                                 <Input
                                     label={t("buyer.addresses.form.phone.label")}
                                     placeholder={t("buyer.addresses.form.phone.placeholder")}
-                                    value={phone()}
-                                    onInput={(e) => setPhone(e.currentTarget.value)}
-                                    error={errors().phone}
+                                    value={form.phone}
+                                    onInput={handleInput("phone", 20)}
+                                    error={errors.phone}
                                     maxLength={20}
                                     required
                                 />
@@ -219,9 +223,9 @@ const NewAddressPage: Component = () => {
                             <Input
                                 label={t("buyer.addresses.form.addressLine1.label")}
                                 placeholder={t("buyer.addresses.form.addressLine1.placeholder")}
-                                value={addressLine1()}
-                                onInput={(e) => setAddressLine1(e.currentTarget.value)}
-                                error={errors().addressLine1}
+                                value={form.addressLine1}
+                                onInput={handleInput("addressLine1", 255)}
+                                error={errors.addressLine1}
                                 maxLength={255}
                                 required
                             />
@@ -230,9 +234,9 @@ const NewAddressPage: Component = () => {
                             <Input
                                 label={`${t("buyer.addresses.form.addressLine2.label")} (${t("buyer.addresses.form.addressLine2.optional")})`}
                                 placeholder={t("buyer.addresses.form.addressLine2.placeholder")}
-                                value={addressLine2()}
-                                onInput={(e) => setAddressLine2(e.currentTarget.value)}
-                                error={errors().addressLine2}
+                                value={form.addressLine2}
+                                onInput={handleInput("addressLine2", 255)}
+                                error={errors.addressLine2}
                                 maxLength={255}
                             />
 
@@ -241,9 +245,9 @@ const NewAddressPage: Component = () => {
                                 <AdvancedSelect
                                     label={t("buyer.addresses.form.division.label")}
                                     placeholder={divisions() ? t("buyer.addresses.form.division.placeholder") : "Loading..."}
-                                    value={divisionId() || null}
+                                    value={form.divisionId || null}
                                     onChange={(val) => handleDivisionChange(val || "")}
-                                    error={errors().division}
+                                    error={errors.division}
                                     disabled={!divisions()}
                                     required
                                     allowClear
@@ -255,10 +259,10 @@ const NewAddressPage: Component = () => {
                                 <AdvancedSelect
                                     label={t("buyer.addresses.form.district.label")}
                                     placeholder={t("buyer.addresses.form.district.placeholder")}
-                                    value={districtId() || null}
-                                    onChange={(val) => setDistrictId(val || "")}
-                                    error={errors().district}
-                                    disabled={!divisionId()}
+                                    value={form.districtId || null}
+                                    onChange={(val) => setForm("districtId", val || "")}
+                                    error={errors.district}
+                                    disabled={!form.divisionId}
                                     required
                                     allowClear
                                     options={districtOptions()}
@@ -270,9 +274,9 @@ const NewAddressPage: Component = () => {
                                 <Input
                                     label={`${t("buyer.addresses.form.postalCode.label")} (${t("buyer.addresses.form.addressLine2.optional")})`}
                                     placeholder={t("buyer.addresses.form.postalCode.placeholder")}
-                                    value={postalCode()}
-                                    onInput={(e) => setPostalCode(e.currentTarget.value)}
-                                    error={errors().postalCode}
+                                    value={form.postalCode}
+                                    onInput={handleInput("postalCode", 20)}
+                                    error={errors.postalCode}
                                     maxLength={20}
                                 />
                                 <Input
@@ -285,14 +289,14 @@ const NewAddressPage: Component = () => {
 
                             {/* Company Name */}
                             <div class="pt-2 border-t border-gray-100 dark:border-gray-700">
-                                    <Input
-                                        label={`${t("buyer.addresses.form.companyName.label")} (${t("buyer.addresses.form.addressLine2.optional")})`}
-                                        placeholder={t("buyer.addresses.form.companyName.placeholder")}
-                                        value={companyName()}
-                                        onInput={(e) => setCompanyName(e.currentTarget.value)}
-                                        error={errors().companyName}
-                                        maxLength={255}
-                                    />
+                                <Input
+                                    label={`${t("buyer.addresses.form.companyName.label")} (${t("buyer.addresses.form.addressLine2.optional")})`}
+                                    placeholder={t("buyer.addresses.form.companyName.placeholder")}
+                                    value={form.companyName}
+                                    onInput={handleInput("companyName", 255)}
+                                    error={errors.companyName}
+                                    maxLength={255}
+                                />
                             </div>
 
                             {/* Delivery Instructions */}
@@ -300,8 +304,8 @@ const NewAddressPage: Component = () => {
                                 <Textarea
                                     label={`${t("buyer.addresses.form.deliveryInstructions.label")} (${t("buyer.addresses.form.addressLine2.optional")})`}
                                     placeholder={t("buyer.addresses.form.deliveryInstructions.placeholder")}
-                                    value={deliveryInstructions()}
-                                    onInput={(e) => setDeliveryInstructions(e.currentTarget.value)}
+                                    value={form.deliveryInstructions}
+                                    onInput={handleInput("deliveryInstructions", 1000)}
                                     rows={4}
                                     maxLength={1000}
                                 />
@@ -312,8 +316,8 @@ const NewAddressPage: Component = () => {
                                 <Textarea
                                     label={`${t("buyer.addresses.form.billingNotes.label")} (${t("buyer.addresses.form.addressLine2.optional")})`}
                                     placeholder={t("buyer.addresses.form.billingNotes.placeholder")}
-                                    value={billingNotes()}
-                                    onInput={(e) => setBillingNotes(e.currentTarget.value)}
+                                    value={form.billingNotes}
+                                    onInput={handleInput("billingNotes", 1000)}
                                     rows={4}
                                     maxLength={1000}
                                 />
@@ -324,8 +328,8 @@ const NewAddressPage: Component = () => {
                                 <label class="flex items-center gap-3 cursor-pointer">
                                     <input
                                         type="checkbox"
-                                        checked={isDefault()}
-                                        onChange={(e) => setIsDefault(e.currentTarget.checked)}
+                                        checked={form.isDefault}
+                                        onChange={(e) => setForm("isDefault", e.currentTarget.checked)}
                                         class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-forest-600 dark:text-sage-600 focus:ring-forest-500 dark:focus:ring-sage-500 cursor-pointer"
                                     />
                                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
