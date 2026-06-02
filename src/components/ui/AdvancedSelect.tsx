@@ -141,7 +141,7 @@ export function AdvancedSelect(props: AdvancedSelectProps) {
       </div>
 
       <Show when={props.error}>
-        <p class="mt-1 body-small text-red-600 dark:text-red-400 font-semibold">{props.error}</p>
+        <p class="mt-1 text-xs text-red-600 dark:text-red-400 font-medium" role="alert">{props.error}</p>
       </Show>
 
       <Show when={isOpen()}>

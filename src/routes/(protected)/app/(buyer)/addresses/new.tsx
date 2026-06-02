@@ -10,7 +10,7 @@ import { createAddress } from "~/lib/api/endpoints/buyer/address.api";
 import { getDivisions } from "~/lib/api/endpoints/public/locations.api";
 import { ApiError } from "~/lib/api/types";
 import { toaster } from "~/components/ui/Toast";
-import { buyerAddressSchema, type BuyerAddressFormData } from "~/schemas/buyer-address.schema";
+import { buyerAddressSchema, type BuyerAddressFormData, type BuyerAddressValidationKey } from "~/schemas/buyer-address.schema";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 
 interface FormState {
@@ -47,15 +47,27 @@ const NewAddressPage: Component = () => {
         isDefault: false,
     });
 
-    const [errors, setErrors] = createStore<Record<string, string>>({});
+    const [errors, setErrors] = createStore<Record<string, string | undefined>>({});
     const [isSubmitting, setIsSubmitting] = createSignal(false);
+
+    // Helper function to get translated error message
+    // Only translate if it looks like a translation key (contains dots)
+    const getErrorMessage = (error: string | undefined): string | undefined => {
+        if (!error) return undefined;
+        // Check if it looks like a translation key (e.g., "buyer.addresses.validation.labelRequired")
+        if (error.includes(".") && error.startsWith("buyer.")) {
+            return t(error as any);
+        }
+        // Otherwise, it's already a translated message (from API)
+        return error;
+    };
 
     const handleInput = (field: keyof FormState) =>
         (e: InputEvent) => {
             const target = e.target as HTMLInputElement;
             setForm(field, target.value);
             if (errors[field]) {
-                setErrors(field, "");
+                setErrors(field, undefined);
             }
         };
 
@@ -87,11 +99,11 @@ const NewAddressPage: Component = () => {
         const fieldErrors: Record<string, string> = {};
 
         if (!form.divisionId.trim()) {
-            fieldErrors.division = t("buyer.addresses.validation.divisionRequired");
+            fieldErrors.division = "buyer.addresses.validation.divisionRequired";
         }
 
         if (!form.districtId.trim()) {
-            fieldErrors.district = t("buyer.addresses.validation.districtRequired");
+            fieldErrors.district = "buyer.addresses.validation.districtRequired";
         }
 
         const result = buyerAddressSchema.safeParse({
@@ -113,7 +125,7 @@ const NewAddressPage: Component = () => {
         if (!result.success) {
             for (const issue of result.error.issues) {
                 const field = issue.path[0] as string;
-                fieldErrors[field] = t(issue.message as any);
+                fieldErrors[field] = issue.message; // Store raw key
             }
         }
 
@@ -213,7 +225,7 @@ const NewAddressPage: Component = () => {
                                 placeholder={t("buyer.addresses.form.label.placeholder")}
                                 value={form.label}
                                 onInput={handleInput("label")}
-                                error={errors.label}
+                                error={getErrorMessage(errors.label)}
                                 maxLength={50}
                                 required
                             />
@@ -228,7 +240,7 @@ const NewAddressPage: Component = () => {
                                     placeholder={t("buyer.addresses.form.recipientName.placeholder")}
                                     value={form.recipientName}
                                     onInput={handleInput("recipientName")}
-                                    error={errors.recipientName}
+                                    error={getErrorMessage(errors.recipientName)}
                                     maxLength={100}
                                     required
                                 />
@@ -237,7 +249,7 @@ const NewAddressPage: Component = () => {
                                     placeholder={t("buyer.addresses.form.phone.placeholder")}
                                     value={form.phone}
                                     onInput={handleInput("phone")}
-                                    error={errors.phone}
+                                    error={getErrorMessage(errors.phone)}
                                     maxLength={20}
                                     required
                                 />
@@ -249,7 +261,7 @@ const NewAddressPage: Component = () => {
                                 placeholder={t("buyer.addresses.form.addressLine1.placeholder")}
                                 value={form.addressLine1}
                                 onInput={handleInput("addressLine1")}
-                                error={errors.addressLine1}
+                                error={getErrorMessage(errors.addressLine1)}
                                 maxLength={255}
                                 required
                             />
@@ -260,18 +272,18 @@ const NewAddressPage: Component = () => {
                                 placeholder={t("buyer.addresses.form.addressLine2.placeholder")}
                                 value={form.addressLine2}
                                 onInput={handleInput("addressLine2")}
-                                error={errors.addressLine2}
+                                error={getErrorMessage(errors.addressLine2)}
                                 maxLength={255}
                             />
 
                             {/* Division & District */}
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <AdvancedSelect
+                                 <AdvancedSelect
                                     label={t("buyer.addresses.form.division.label")}
                                     placeholder={divisions() ? t("buyer.addresses.form.division.placeholder") : "Loading..."}
                                     value={form.divisionId || null}
                                     onChange={(val) => handleDivisionChange(val || "")}
-                                    error={errors.division}
+                                    error={getErrorMessage(errors.division)}
                                     disabled={!divisions()}
                                     required
                                     allowClear
@@ -285,7 +297,7 @@ const NewAddressPage: Component = () => {
                                     placeholder={t("buyer.addresses.form.district.placeholder")}
                                     value={form.districtId || null}
                                     onChange={(val) => setForm("districtId", val || "")}
-                                    error={errors.district}
+                                    error={getErrorMessage(errors.district)}
                                     disabled={!form.divisionId}
                                     required
                                     allowClear
@@ -295,12 +307,12 @@ const NewAddressPage: Component = () => {
 
                             {/* Postal Code & Country */}
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <Input
+                                 <Input
                                     label={`${t("buyer.addresses.form.postalCode.label")} (${t("buyer.addresses.form.addressLine2.optional")})`}
                                     placeholder={t("buyer.addresses.form.postalCode.placeholder")}
                                     value={form.postalCode}
                                     onInput={handleInput("postalCode")}
-                                    error={errors.postalCode}
+                                    error={getErrorMessage(errors.postalCode)}
                                     maxLength={20}
                                 />
                                 <Input
@@ -313,23 +325,24 @@ const NewAddressPage: Component = () => {
 
                             {/* Company Name */}
                             <div class="pt-2 border-t border-gray-100 dark:border-gray-700">
-                                <Input
+                                 <Input
                                     label={`${t("buyer.addresses.form.companyName.label")} (${t("buyer.addresses.form.addressLine2.optional")})`}
                                     placeholder={t("buyer.addresses.form.companyName.placeholder")}
                                     value={form.companyName}
                                         onInput={handleInput("companyName")}
-                                    error={errors.companyName}
+                                    error={getErrorMessage(errors.companyName)}
                                     maxLength={255}
                                 />
                             </div>
 
                             {/* Delivery Instructions */}
                             <div class="pt-2 border-t border-gray-100 dark:border-gray-700">
-                                <Textarea
+                                 <Textarea
                                     label={`${t("buyer.addresses.form.deliveryInstructions.label")} (${t("buyer.addresses.form.addressLine2.optional")})`}
                                     placeholder={t("buyer.addresses.form.deliveryInstructions.placeholder")}
                                     value={form.deliveryInstructions}
                                     onInput={handleInput("deliveryInstructions")}
+                                    error={getErrorMessage(errors.deliveryInstructions)}
                                     rows={4}
                                     maxLength={1000}
                                 />
@@ -337,11 +350,12 @@ const NewAddressPage: Component = () => {
 
                             {/* Billing Notes */}
                             <div class="pt-2">
-                                <Textarea
+                                 <Textarea
                                     label={`${t("buyer.addresses.form.billingNotes.label")} (${t("buyer.addresses.form.addressLine2.optional")})`}
                                     placeholder={t("buyer.addresses.form.billingNotes.placeholder")}
                                     value={form.billingNotes}
                                     onInput={handleInput("billingNotes")}
+                                    error={getErrorMessage(errors.billingNotes)}
                                     rows={4}
                                     maxLength={1000}
                                 />
