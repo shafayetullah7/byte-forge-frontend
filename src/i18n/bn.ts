@@ -390,6 +390,8 @@ export const dict = {
         addressLine2TooLong: "ঠিকানার দ্বিতীয় লাইন ২৫৫ অক্ষরের বেশি হতে পারে না",
         cityRequired: "শহর প্রয়োজন",
         cityTooLong: "শহর ১০০ অক্ষরের বেশি হতে পারে না",
+        divisionRequired: "বিভাগ প্রয়োজন",
+        districtRequired: "জেলা প্রয়োজন",
         stateTooLong: "রাজ্য/বিভাগ ১০০ অক্ষরের বেশি হতে পারে না",
         postalCodeTooLong: "পোস্টাল কোড ২০ অক্ষরের বেশি হতে পারে না",
         countryRequired: "দেশ প্রয়োজন",

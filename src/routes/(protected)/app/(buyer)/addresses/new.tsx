@@ -87,11 +87,11 @@ const NewAddressPage: Component = () => {
         const fieldErrors: Record<string, string> = {};
 
         if (!form.divisionId.trim()) {
-            fieldErrors.division = t("buyer.addresses.form.division.required");
+            fieldErrors.division = t("buyer.addresses.validation.divisionRequired");
         }
 
         if (!form.districtId.trim()) {
-            fieldErrors.district = t("buyer.addresses.form.district.required");
+            fieldErrors.district = t("buyer.addresses.validation.districtRequired");
         }
 
         const result = buyerAddressSchema.safeParse({
@@ -113,7 +113,7 @@ const NewAddressPage: Component = () => {
         if (!result.success) {
             for (const issue of result.error.issues) {
                 const field = issue.path[0] as string;
-                fieldErrors[field] = issue.message;
+                fieldErrors[field] = t(issue.message as any);
             }
         }
 

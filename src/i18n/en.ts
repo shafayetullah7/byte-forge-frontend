@@ -388,6 +388,8 @@ export const dict = {
         addressLine2TooLong: "Address line 2 cannot exceed 255 characters",
         cityRequired: "City is required",
         cityTooLong: "City cannot exceed 100 characters",
+        divisionRequired: "Division is required",
+        districtRequired: "District is required",
         stateTooLong: "State cannot exceed 100 characters",
         postalCodeTooLong: "Postal code cannot exceed 20 characters",
         countryRequired: "Country is required",
