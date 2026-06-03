@@ -1,16 +1,16 @@
-import { Component, createMemo, createSignal } from "solid-js";
+import { Component, createMemo, createEffect } from "solid-js";
 import { createStore } from "solid-js/store";
-import { useNavigate, A, createAsync } from "@solidjs/router";
+import { useNavigate, A, createAsync, action, useAction, useSubmission } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import { MapPinIcon, ChevronLeftIcon } from "~/components/icons";
 import Input from "~/components/ui/Input";
 import Textarea from "~/components/ui/Textarea";
 import { AdvancedSelect } from "~/components/ui/AdvancedSelect";
-import { createAddress } from "~/lib/api/endpoints/buyer/address.api";
+import { createAddress, invalidateAddresses } from "~/lib/api/endpoints/buyer/address.api";
 import { getDivisions } from "~/lib/api/endpoints/public/locations.api";
 import { ApiError } from "~/lib/api/types";
 import { toaster } from "~/components/ui/Toast";
-import { buyerAddressSchema, type BuyerAddressFormData, type BuyerAddressValidationKey } from "~/schemas/buyer-address.schema";
+import { buyerAddressSchema } from "~/schemas/buyer-address.schema";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 
 interface FormState {
@@ -27,6 +27,47 @@ interface FormState {
     billingNotes: string;
     isDefault: boolean;
 }
+
+interface CreateAddressActionData {
+    data: ReturnType<typeof buildDto>;
+}
+
+const createAddressAction = action(async (input: CreateAddressActionData) => {
+    "use server";
+    try {
+        await createAddress(input.data);
+        invalidateAddresses();
+        return { success: true };
+    } catch (error) {
+        const apiError = error as ApiError;
+        return {
+            success: false,
+            error: {
+                statusCode: apiError.statusCode,
+                message: apiError.response?.message ?? apiError.message,
+                validationErrors: apiError.response?.validationErrors,
+            },
+        };
+    }
+}, "create-address-action");
+
+const buildDto = (form: FormState, districtOptions: Array<{ value: string; label: string }>, selectedDivisionName: string | undefined) => {
+    return {
+        label: form.label,
+        recipientName: form.recipientName,
+        phone: form.phone,
+        addressLine1: form.addressLine1,
+        addressLine2: form.addressLine2 || undefined,
+        city: districtOptions.find((d) => d.value === form.districtId)?.label ?? "",
+        state: selectedDivisionName,
+        postalCode: form.postalCode || undefined,
+        country: "Bangladesh",
+        companyName: form.companyName || undefined,
+        deliveryInstructions: form.deliveryInstructions || undefined,
+        billingNotes: form.billingNotes || undefined,
+        isDefault: form.isDefault,
+    };
+};
 
 const NewAddressPage: Component = () => {
     const { t } = useI18n();
@@ -48,17 +89,16 @@ const NewAddressPage: Component = () => {
     });
 
     const [errors, setErrors] = createStore<Record<string, string | undefined>>({});
-    const [isSubmitting, setIsSubmitting] = createSignal(false);
 
-    // Helper function to get translated error message
-    // Only translate if it looks like a translation key (contains dots)
+    const createAddressTrigger = useAction(createAddressAction);
+    const addressSubmission = useSubmission(createAddressAction);
+    const isSubmitting = () => addressSubmission.pending;
+
     const getErrorMessage = (error: string | undefined): string | undefined => {
         if (!error) return undefined;
-        // Check if it looks like a translation key (e.g., "buyer.addresses.validation.labelRequired")
         if (error.includes(".") && error.startsWith("buyer.")) {
             return t(error as any);
         }
-        // Otherwise, it's already a translated message (from API)
         return error;
     };
 
@@ -71,17 +111,14 @@ const NewAddressPage: Component = () => {
             }
         };
 
-    // Fetch divisions from public API
     const divisions = createAsync(() => getDivisions(), {
         deferStream: true,
     });
 
-    // Selected division (to get its districts)
     const selectedDivision = createMemo(() =>
         divisions()?.find((d) => d.id === form.divisionId)
     );
 
-    // District options for the selected division
     const districtOptions = createMemo(() =>
         selectedDivision()?.districts.map((d) => ({
             value: d.id,
@@ -89,13 +126,12 @@ const NewAddressPage: Component = () => {
         })) ?? []
     );
 
-    // Reset district when division changes
     const handleDivisionChange = (id: string) => {
         setForm("divisionId", id);
         setForm("districtId", "");
     };
 
-    const validate = (): BuyerAddressFormData | null => {
+    const validate = (): ReturnType<typeof buildDto> | null => {
         const fieldErrors: Record<string, string> = {};
 
         if (!form.divisionId.trim()) {
@@ -106,26 +142,14 @@ const NewAddressPage: Component = () => {
             fieldErrors.district = "buyer.addresses.validation.districtRequired";
         }
 
-        const result = buyerAddressSchema.safeParse({
-            label: form.label,
-            recipientName: form.recipientName,
-            phone: form.phone,
-            addressLine1: form.addressLine1,
-            addressLine2: form.addressLine2,
-            city: districtOptions().find((d) => d.value === form.districtId)?.label ?? "",
-            state: selectedDivision()?.name,
-            postalCode: form.postalCode,
-            country: "Bangladesh",
-            companyName: form.companyName,
-            deliveryInstructions: form.deliveryInstructions,
-            billingNotes: form.billingNotes,
-            isDefault: form.isDefault,
-        });
+        const dto = buildDto(form, districtOptions(), selectedDivision()?.name);
+
+        const result = buyerAddressSchema.safeParse(dto);
 
         if (!result.success) {
             for (const issue of result.error.issues) {
                 const field = issue.path[0] as string;
-                fieldErrors[field] = issue.message; // Store raw key
+                fieldErrors[field] = issue.message;
             }
         }
 
@@ -135,52 +159,42 @@ const NewAddressPage: Component = () => {
             return null;
         }
 
-        return result.success ? result.data : null;
+        return dto;
     };
 
-    const handleSubmit = async (e: Event) => {
+    createEffect(() => {
+        const result = addressSubmission.result;
+        if (!result) return;
+
+        if (result.success === true) {
+            toaster.success(t("buyer.addresses.form.success"));
+            navigate("/app/addresses");
+        } else if (result.success === false && result.error) {
+            const err = result.error;
+            if (err.statusCode === 400 && err.validationErrors) {
+                const fieldErrors: Record<string, string> = {};
+                for (const ve of err.validationErrors) {
+                    fieldErrors[ve.field] = ve.message;
+                }
+                setErrors(() => fieldErrors);
+                toaster.error(t("buyer.addresses.form.validationError"));
+            } else if (err.statusCode === 401) {
+                toaster.error(t("buyer.addresses.form.unauthorized"));
+            } else if (err.statusCode === 409) {
+                toaster.error(t("buyer.addresses.form.conflict"));
+            } else {
+                toaster.error(err.message || t("buyer.addresses.form.error"));
+            }
+        }
+    });
+
+    const handleSubmit = (e: Event) => {
         e.preventDefault();
 
         const parsed = validate();
         if (!parsed) return;
 
-        setIsSubmitting(true);
-
-        const data = {
-            ...parsed,
-            addressLine2: parsed.addressLine2 || undefined,
-            postalCode: parsed.postalCode || undefined,
-            companyName: parsed.companyName || undefined,
-            deliveryInstructions: parsed.deliveryInstructions || undefined,
-            billingNotes: parsed.billingNotes || undefined,
-        };
-
-        try {
-            await createAddress(data);
-            toaster.success(t("buyer.addresses.form.success"));
-            navigate("/app/addresses");
-        } catch (error) {
-            if (error instanceof ApiError) {
-                if (error.statusCode === 400 && error.response?.validationErrors) {
-                    const fieldErrors: Record<string, string> = {};
-                    for (const ve of error.response.validationErrors) {
-                        fieldErrors[ve.field] = ve.message;
-                    }
-                    setErrors(() => fieldErrors);
-                    toaster.error(t("buyer.addresses.form.validationError"));
-                } else if (error.statusCode === 401) {
-                    toaster.error(t("buyer.addresses.form.unauthorized"));
-                } else if (error.statusCode === 409) {
-                    toaster.error(t("buyer.addresses.form.conflict"));
-                } else {
-                    toaster.error(error.response?.message ?? t("buyer.addresses.form.error"));
-                }
-            } else {
-                toaster.error(t("buyer.addresses.form.error"));
-            }
-        } finally {
-            setIsSubmitting(false);
-        }
+        createAddressTrigger({ data: parsed });
     };
 
     return (
