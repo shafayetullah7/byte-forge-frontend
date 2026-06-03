@@ -1,19 +1,20 @@
-import { Component, createMemo, Suspense } from "solid-js";
+import { Component, createMemo, createEffect, Suspense } from "solid-js";
 import { createStore } from "solid-js/store";
 import { useI18n } from "~/i18n";
-import { A, createAsync } from "@solidjs/router";
+import { A, createAsync, action, useAction, useSubmission } from "@solidjs/router";
 import { MapPinIcon, PlusIcon } from "~/components/icons";
 import {
     getAddresses,
     deleteAddress,
+    invalidateAddresses,
     setDefaultAddress,
 } from "~/lib/api/endpoints/buyer/address.api";
 import type { AddressType } from "~/lib/api/types/address.types";
+import { ApiError } from "~/lib/api/types";
 import { toaster } from "~/components/ui/Toast";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 import {
     AddressCard,
-    AddressStats,
     AddressTabs,
     AddressEmptyState,
     AddressSkeleton,
@@ -23,6 +24,28 @@ import {
 interface FilterState {
     tab: AddressTab;
 }
+
+interface DeleteAddressActionData {
+    id: string;
+}
+
+const deleteAddressAction = action(async (input: DeleteAddressActionData) => {
+    "use server";
+    try {
+        await deleteAddress(input.id);
+        invalidateAddresses();
+        return { success: true };
+    } catch (error) {
+        const apiError = error as ApiError;
+        return {
+            success: false,
+            error: {
+                statusCode: apiError.statusCode,
+                message: apiError.response?.message ?? apiError.message,
+            },
+        };
+    }
+}, "delete-address-action");
 
 const AddressesPage: Component = () => {
     const { t } = useI18n();
@@ -39,14 +62,19 @@ const AddressesPage: Component = () => {
         { deferStream: true }
     );
 
-    const handleDelete = async (id: string) => {
-        try {
-            await deleteAddress(id);
+    const deleteAddressTrigger = useAction(deleteAddressAction);
+    const deleteSubmission = useSubmission(deleteAddressAction);
+
+    createEffect(() => {
+        const result = deleteSubmission.result;
+        if (!result) return;
+
+        if (result.success === true) {
             toaster.success("Address deleted successfully");
-        } catch (error) {
-            toaster.error("Failed to delete address");
+        } else if (result.success === false && result.error) {
+            toaster.error(result.error.message || "Failed to delete address");
         }
-    };
+    });
 
     const handleSetDefault = async (id: string) => {
         try {
@@ -101,13 +129,6 @@ const AddressesPage: Component = () => {
 
                         return (
                             <>
-                                {/* Stats */}
-                                <AddressStats
-                                    total={list.length}
-                                    shipping={shipping.length}
-                                    billing={billing.length}
-                                />
-
                                 {/* Tabs */}
                                 <AddressTabs
                                     activeTab={filters.tab}
@@ -127,7 +148,7 @@ const AddressesPage: Component = () => {
                                         {list.map((address) => (
                                             <AddressCard
                                                 address={address}
-                                                onDelete={handleDelete}
+                                                onDelete={(id) => deleteAddressTrigger({ id })}
                                                 onSetDefault={handleSetDefault}
                                             />
                                         ))}
