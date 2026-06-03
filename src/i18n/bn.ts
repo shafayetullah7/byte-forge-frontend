@@ -300,6 +300,8 @@ export const dict = {
       form: {
         pageTitle: "নতুন ঠিকানা যোগ করুন",
         pageSubtitle: "নতুন ঠিকানা যোগ করতে নিচের বিবরণ পূরণ করুন",
+        editTitle: "ঠিকানা সম্পাদনা করুন",
+        editSubtitle: "আপনার ঠিকানা সম্পাদনা করতে নিচের বিবরণ আপডেট করুন",
         backToList: "ঠিকানায় ফিরে যান",
         addressType: {
           label: "ঠিকানার ধরন",
@@ -373,9 +375,11 @@ export const dict = {
         submit: "ঠিকানা সংরক্ষণ করুন",
         submitting: "সংরক্ষণ হচ্ছে...",
         success: "ঠিকানা সফলভাবে যোগ করা হয়েছে",
+        updateSuccess: "ঠিকানা সফলভাবে আপডেট হয়েছে",
         error: "ঠিকানা যোগ করতে ব্যর্থ",
         validationError: "নিচের ত্রুটিগুলো ঠিক করুন",
         unauthorized: "এই কাজটি করতে আপনার অনুমতি নেই",
+        notFound: "ঠিকানা পাওয়া যায়নি",
         conflict: "এই ঠিকানাটি ইতিমধ্যে বিদ্যমান",
       },
       validation: {

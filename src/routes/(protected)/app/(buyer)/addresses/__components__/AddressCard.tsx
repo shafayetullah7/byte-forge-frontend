@@ -1,11 +1,11 @@
 import { Component } from "solid-js";
+import { A } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import { MapPinIcon, BankIcon, PencilIcon, TrashIcon, CheckIcon } from "~/components/icons";
 import type { Address } from "~/lib/api/types/address.types";
 
 export interface AddressCardProps {
     address: Address;
-    onEdit: (address: Address) => void;
     onDelete: (id: string) => void;
     onSetDefault: (id: string) => void;
 }
@@ -82,13 +82,13 @@ const AddressCard: Component<AddressCardProps> = (props) => {
 
             {/* Actions */}
             <div class="flex items-center gap-2 pt-4 border-t border-gray-100 dark:border-gray-700">
-                <button
-                    onClick={() => props.onEdit(props.address)}
+                <A
+                    href={`/app/addresses/${props.address.id}/edit`}
                     class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 >
                     <PencilIcon class="w-4 h-4" />
                     {t("common.edit")}
-                </button>
+                </A>
 
                 {!props.address.isDefault && (
                     <button

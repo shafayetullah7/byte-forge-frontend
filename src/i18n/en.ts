@@ -298,6 +298,8 @@ export const dict = {
       form: {
         pageTitle: "Add New Address",
         pageSubtitle: "Fill in the details below to add a new address",
+        editTitle: "Edit Address",
+        editSubtitle: "Update the details below to edit your address",
         backToList: "Back to Addresses",
         addressType: {
           label: "Address Type",
@@ -371,9 +373,11 @@ export const dict = {
         submit: "Save Address",
         submitting: "Saving...",
         success: "Address added successfully",
+        updateSuccess: "Address updated successfully",
         error: "Failed to add address",
         validationError: "Please fix the errors below",
         unauthorized: "You are not authorized to perform this action",
+        notFound: "Address not found",
         conflict: "This address already exists",
       },
       validation: {

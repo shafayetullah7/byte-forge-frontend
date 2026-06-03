@@ -19,11 +19,8 @@ export type BuyerAddressValidationKey =
   | "buyer.addresses.validation.addressLine1Invalid"
   | "buyer.addresses.validation.addressLine2TooLong"
   | "buyer.addresses.validation.addressLine2Invalid"
-  | "buyer.addresses.validation.cityRequired"
-  | "buyer.addresses.validation.cityTooLong"
-  | "buyer.addresses.validation.cityInvalid"
-  | "buyer.addresses.validation.stateTooLong"
-  | "buyer.addresses.validation.stateInvalid"
+  | "buyer.addresses.validation.districtRequired"
+  | "buyer.addresses.validation.divisionRequired"
   | "buyer.addresses.validation.postalCodeTooLong"
   | "buyer.addresses.validation.postalCodeInvalid"
   | "buyer.addresses.validation.countryRequired"
@@ -76,19 +73,12 @@ export const buyerAddressSchema = z.object({
     .regex(/^[a-zA-Z0-9\s\u0980-\u09FF\.\-\#\,\/\\]*$/, "buyer.addresses.validation.addressLine2Invalid")
     .optional()
     .or(z.literal("")),
-  city: z
+  districtId: z
     .string()
-    .trim()
-    .min(1, "buyer.addresses.validation.cityRequired")
-    .max(100, "buyer.addresses.validation.cityTooLong")
-    .regex(NAME_PATTERN, "buyer.addresses.validation.cityInvalid"),
-  state: z
+    .uuid("buyer.addresses.validation.districtRequired"),
+  divisionId: z
     .string()
-    .trim()
-    .max(100, "buyer.addresses.validation.stateTooLong")
-    .regex(/^[a-zA-Z\s\u0980-\u09FF]*$/, "buyer.addresses.validation.stateInvalid")
-    .optional()
-    .or(z.literal("")),
+    .uuid("buyer.addresses.validation.divisionRequired"),
   postalCode: z
     .string()
     .trim()

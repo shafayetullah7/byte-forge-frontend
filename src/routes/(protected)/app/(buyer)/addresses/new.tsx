@@ -51,15 +51,15 @@ const createAddressAction = action(async (input: CreateAddressActionData) => {
     }
 }, "create-address-action");
 
-const buildDto = (form: FormState, districtOptions: Array<{ value: string; label: string }>, selectedDivisionName: string | undefined) => {
+const buildDto = (form: FormState) => {
     return {
         label: form.label,
         recipientName: form.recipientName,
         phone: form.phone,
         addressLine1: form.addressLine1,
         addressLine2: form.addressLine2 || undefined,
-        city: districtOptions.find((d) => d.value === form.districtId)?.label ?? "",
-        state: selectedDivisionName,
+        districtId: form.districtId,
+        divisionId: form.divisionId,
         postalCode: form.postalCode || undefined,
         country: "Bangladesh",
         companyName: form.companyName || undefined,
@@ -142,7 +142,7 @@ const NewAddressPage: Component = () => {
             fieldErrors.district = "buyer.addresses.validation.districtRequired";
         }
 
-        const dto = buildDto(form, districtOptions(), selectedDivision()?.name);
+        const dto = buildDto(form);
 
         const result = buyerAddressSchema.safeParse(dto);
 

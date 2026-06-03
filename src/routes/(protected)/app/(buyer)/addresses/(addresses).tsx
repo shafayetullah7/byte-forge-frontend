@@ -8,7 +8,7 @@ import {
     deleteAddress,
     setDefaultAddress,
 } from "~/lib/api/endpoints/buyer/address.api";
-import type { Address, AddressType } from "~/lib/api/types/address.types";
+import type { AddressType } from "~/lib/api/types/address.types";
 import { toaster } from "~/components/ui/Toast";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 import {
@@ -55,11 +55,6 @@ const AddressesPage: Component = () => {
         } catch (error) {
             toaster.error("Failed to set default address");
         }
-    };
-
-    const handleEdit = (address: Address) => {
-        // Placeholder for future edit modal
-        console.log("Edit address:", address);
     };
 
     return (
@@ -132,7 +127,6 @@ const AddressesPage: Component = () => {
                                         {list.map((address) => (
                                             <AddressCard
                                                 address={address}
-                                                onEdit={handleEdit}
                                                 onDelete={handleDelete}
                                                 onSetDefault={handleSetDefault}
                                             />
