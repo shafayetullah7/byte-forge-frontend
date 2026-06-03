@@ -1,4 +1,4 @@
-import { Component, createMemo } from "solid-js";
+import { Component, createMemo, Suspense } from "solid-js";
 import { createStore } from "solid-js/store";
 import { useI18n } from "~/i18n";
 import { A, createAsync } from "@solidjs/router";
@@ -35,14 +35,9 @@ const AddressesPage: Component = () => {
     );
 
     const addresses = createAsync(
-        () => getAddresses({ type: apiType() }).catch(() => [] as Address[]),
+        () => getAddresses({ type: apiType() }),
         { deferStream: true }
     );
-
-    const shippingAddresses = () =>
-        addresses()?.filter((a) => a.type === "shipping") ?? [];
-    const billingAddresses = () =>
-        addresses()?.filter((a) => a.type === "billing") ?? [];
 
     const handleDelete = async (id: string) => {
         try {
@@ -101,41 +96,53 @@ const AddressesPage: Component = () => {
                     </div>
                 </div>
 
-                {/* Stats */}
-                <AddressStats
-                    total={addresses()?.length ?? 0}
-                    shipping={shippingAddresses().length}
-                    billing={billingAddresses().length}
-                />
+                <Suspense fallback={<AddressSkeleton />}>
+                    {(() => {
+                        const list = addresses();
+                        if (!list) return null;
 
-                {/* Tabs */}
-                <AddressTabs
-                    activeTab={filters.tab}
-                    onTabChange={(tab) => setFilters("tab", tab)}
-                    counts={{
-                        all: addresses()?.length ?? 0,
-                        shipping: shippingAddresses().length,
-                        billing: billingAddresses().length,
-                    }}
-                />
+                        const shipping = list.filter((a) => a.type === "shipping");
+                        const billing = list.filter((a) => a.type === "billing");
 
-                {/* Address Cards */}
-                {addresses() === undefined ? (
-                    <AddressSkeleton />
-                ) : addresses()!.length === 0 ? (
-                    <AddressEmptyState />
-                ) : (
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {addresses()!.map((address) => (
-                            <AddressCard
-                                address={address}
-                                onEdit={handleEdit}
-                                onDelete={handleDelete}
-                                onSetDefault={handleSetDefault}
-                            />
-                        ))}
-                    </div>
-                )}
+                        return (
+                            <>
+                                {/* Stats */}
+                                <AddressStats
+                                    total={list.length}
+                                    shipping={shipping.length}
+                                    billing={billing.length}
+                                />
+
+                                {/* Tabs */}
+                                <AddressTabs
+                                    activeTab={filters.tab}
+                                    onTabChange={(tab) => setFilters("tab", tab)}
+                                    counts={{
+                                        all: list.length,
+                                        shipping: shipping.length,
+                                        billing: billing.length,
+                                    }}
+                                />
+
+                                {/* Address Cards */}
+                                {list.length === 0 ? (
+                                    <AddressEmptyState />
+                                ) : (
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {list.map((address) => (
+                                            <AddressCard
+                                                address={address}
+                                                onEdit={handleEdit}
+                                                onDelete={handleDelete}
+                                                onSetDefault={handleSetDefault}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </>
+                        );
+                    })()}
+                </Suspense>
             </div>
             </div>
         </SafeErrorBoundary>

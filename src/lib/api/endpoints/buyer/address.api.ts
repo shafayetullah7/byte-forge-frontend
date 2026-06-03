@@ -1,6 +1,5 @@
 import { query, revalidate } from "@solidjs/router";
 import { fetcher } from "../../api-client";
-import { ApiError } from "../../types";
 import type {
   Address,
   CreateAddressRequest,
@@ -17,30 +16,20 @@ const BASE_PATH = "/api/v1/user/buyer/addresses";
 /**
  * Get all addresses for the authenticated user
  * Supports filtering by type (shipping/billing/both)
- * Returns empty array on error (401/404) to prevent redirect
  */
 export const getAddresses = query(
   async (params?: ListAddressesParams): Promise<Address[]> => {
-    try {
-      const queryParams: Record<string, string | number | boolean | undefined> = {};
-      if (params) {
-        if (params.page !== undefined) queryParams.page = params.page;
-        if (params.limit !== undefined) queryParams.limit = params.limit;
-        if (params.type !== undefined) queryParams.type = params.type;
-        if (params.sortBy !== undefined) queryParams.sortBy = params.sortBy;
-        if (params.sortOrder !== undefined) queryParams.sortOrder = params.sortOrder;
-      }
-      return await fetcher<Address[]>(BASE_PATH, {
-        params: queryParams,
-        strict: false, // Don't redirect on 401 - handle gracefully
-      });
-    } catch (error) {
-      // Handle 401 and 404 gracefully - return empty array instead of throwing
-      if (error instanceof ApiError && (error.statusCode === 401 || error.statusCode === 404)) {
-        return [];
-      }
-      throw error;
+    const queryParams: Record<string, string | number | boolean | undefined> = {};
+    if (params) {
+      if (params.page !== undefined) queryParams.page = params.page;
+      if (params.limit !== undefined) queryParams.limit = params.limit;
+      if (params.type !== undefined) queryParams.type = params.type;
+      if (params.sortBy !== undefined) queryParams.sortBy = params.sortBy;
+      if (params.sortOrder !== undefined) queryParams.sortOrder = params.sortOrder;
     }
+    const result = await fetcher<Address[]>(BASE_PATH, { params: queryParams });
+    console.log('[Frontend getAddresses] Response:', JSON.stringify(result, null, 2));
+    return result;
   },
   "buyer-addresses"
 );
