@@ -30,14 +30,14 @@ export interface CreateAddressRequest {
   recipientName: string;
   phone: string;
   addressLine1: string;
-  addressLine2?: string;
+  addressLine2?: string | null;
   districtId: string;
   divisionId: string;
-  postalCode?: string;
+  postalCode?: string | null;
   country?: string;
-  companyName?: string;
-  deliveryInstructions?: string;
-  billingNotes?: string;
+  companyName?: string | null;
+  deliveryInstructions?: string | null;
+  billingNotes?: string | null;
   isDefault?: boolean;
 }
 
