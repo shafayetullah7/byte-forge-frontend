@@ -5,10 +5,16 @@ import {
   Suspense,
   Show,
   For,
-  createUniqueId,
+  createEffect,
+  onCleanup,
 } from "solid-js";
-import { useNavigate, A } from "@solidjs/router";
+import { useNavigate, A, createAsync } from "@solidjs/router";
 import { useI18n } from "~/i18n";
+import { getCart } from "~/lib/api/endpoints/buyer/cart.api";
+import { getAddresses } from "~/lib/api/endpoints/buyer/address.api";
+import { calculatePriceBreakdown } from "~/lib/api/endpoints/buyer/checkout.api";
+import type { Address } from "~/lib/api/types/address.types";
+import type { PriceBreakdown, ShopPriceBreakdown } from "~/lib/api/types/checkout.types";
 import {
   ExclamationCircleIcon,
   SpinnerIcon,
@@ -22,14 +28,6 @@ import CheckoutStepIndicator from "./components/CheckoutStepIndicator";
 import AddressSelector from "./components/AddressSelector";
 import ShopOrderReview from "./components/ShopOrderReview";
 import PriceBreakdownSidebar from "./components/PriceBreakdownSidebar";
-import {
-  mockCartItems,
-  mockAddresses,
-  mockShippingRatesDhaka,
-  mockShippingRatesChittagong,
-  computePriceBreakdown,
-} from "./mock-data";
-import type { MockCartItem } from "./mock-data";
 
 type CheckoutStep = "address" | "review" | "confirmation";
 
@@ -47,7 +45,32 @@ function LoadingFallback() {
   );
 }
 
+function mapShopBreakdownToShopOrderReview(breakdown: ShopPriceBreakdown) {
+  return {
+    shopId: breakdown.shopId,
+    shopName: breakdown.shopName,
+    items: breakdown.items.map((item) => ({
+      id: item.id,
+      shopId: item.shopId,
+      shopName: item.shopName,
+      productName: item.productName,
+      productSlug: item.productSlug,
+      variantTitle: item.variantTitle ?? "",
+      quantity: item.quantity,
+      price: parseFloat(item.price),
+      lineTotal: parseFloat(item.lineTotal),
+      thumbnailUrl: item.thumbnail?.url ?? null,
+      stockStatus: item.stockStatus as 'in_stock' | 'low_stock' | 'out_of_stock',
+    })),
+    itemsSubtotal: parseFloat(breakdown.itemsSubtotal),
+    shippingCost: parseFloat(breakdown.shippingCost),
+    districtId: "",
+    districtName: "",
+  };
+}
+
 function AddressStepContent(props: {
+  addresses: Address[];
   selectedAddressId: string | null;
   canPlaceOrder: boolean;
   onSelectAddress: (id: string) => void;
@@ -57,7 +80,7 @@ function AddressStepContent(props: {
   return (
     <div class="space-y-6">
       <AddressSelector
-        addresses={mockAddresses}
+        addresses={props.addresses}
         selectedAddressId={props.selectedAddressId}
         onSelect={props.onSelectAddress}
       />
@@ -85,15 +108,21 @@ function AddressStepContent(props: {
 
 function ReviewStepContent(props: {
   selectedAddressId: string | null;
+  addresses: Address[];
   canPlaceOrder: boolean;
-  priceBreakdown: ReturnType<typeof computePriceBreakdown>;
+  priceBreakdown: PriceBreakdown | undefined;
   onBack: () => void;
   onPlaceOrder: () => void;
 }) {
   const { t } = useI18n();
   const selectedAddress = createMemo(() =>
-    mockAddresses.find((a) => a.id === props.selectedAddressId)
+    props.addresses.find((a) => a.id === props.selectedAddressId)
   );
+
+  const shopBreakdowns = createMemo(() => {
+    if (!props.priceBreakdown) return [];
+    return props.priceBreakdown.shopBreakdowns.map(mapShopBreakdownToShopOrderReview);
+  });
 
   return (
     <div class="space-y-6">
@@ -133,11 +162,13 @@ function ReviewStepContent(props: {
       </div>
 
       {/* Shop order reviews */}
-      <div class="space-y-4">
-        <For each={props.priceBreakdown.shopBreakdowns}>
-          {(shop) => <ShopOrderReview shop={shop} />}
-        </For>
-      </div>
+      <Show when={shopBreakdowns().length > 0}>
+        <div class="space-y-4">
+          <For each={shopBreakdowns()}>
+            {(shop) => <ShopOrderReview shop={shop} />}
+          </For>
+        </div>
+      </Show>
 
       {/* Navigation */}
       <div class="flex justify-between items-center pt-4">
@@ -202,36 +233,77 @@ export default function CheckoutPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = createSignal<CheckoutStep>("address");
-  const [selectedAddressId, setSelectedAddressId] = createSignal<string | null>(
-    mockAddresses.find((a) => a.isDefault)?.id ?? null
-  );
+  const [selectedAddressId, setSelectedAddressId] = createSignal<string | null>(null);
   const [isPlacingOrder, setIsPlacingOrder] = createSignal(false);
 
-  const selectedItems = createMemo<MockCartItem[]>(() => mockCartItems);
+  // Fetch cart data
+  const cart = createAsync(() => getCart());
+  const cartItems = createMemo(() => cart()?.items ?? []);
 
-  const selectedDistrictId = createMemo(() => {
-    const address = mockAddresses.find((a) => a.id === selectedAddressId());
-    return address?.districtId ?? "district-dhaka";
-  });
+  // Fetch addresses
+  const addresses = createAsync(() => getAddresses({ type: "shipping" }));
 
-  const shippingRates = createMemo(() => {
-    const districtId = selectedDistrictId();
-    if (districtId === "district-chittagong") {
-      return mockShippingRatesChittagong;
+  // Set default address when addresses load
+  createMemo(() => {
+    const addrList = addresses();
+    if (addrList && addrList.length > 0 && !selectedAddressId()) {
+      const defaultAddr = addrList.find((address: Address) => address.isDefault) ?? addrList[0];
+      setSelectedAddressId(defaultAddr.id);
     }
-    return mockShippingRatesDhaka;
   });
 
-  const priceBreakdown = createMemo(() =>
-    computePriceBreakdown(selectedItems(), selectedDistrictId(), shippingRates())
-  );
+  // Get selected address for district calculation
+  const selectedDistrictId = createMemo(() => {
+    const addrList = addresses();
+    if (!addrList) return undefined;
+    const address = addrList.find((address: Address) => address.id === selectedAddressId());
+    return address?.districtId;
+  });
+
+  // Calculate price breakdown when district changes
+  const [priceBreakdownData, setPriceBreakdownData] = createSignal<PriceBreakdown | undefined>();
+  const [isCalculatingPrice, setIsCalculatingPrice] = createSignal(false);
+
+  createEffect(() => {
+    const districtId = selectedDistrictId();
+    const items = cartItems();
+    if (!districtId || items.length === 0) {
+      setPriceBreakdownData(undefined);
+      return;
+    }
+
+    setIsCalculatingPrice(true);
+    let cancelled = false;
+
+    calculatePriceBreakdown(districtId)
+      .then((result) => {
+        if (!cancelled) {
+          setPriceBreakdownData(result.breakdown);
+          setIsCalculatingPrice(false);
+        }
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          console.error("Failed to calculate price breakdown:", error);
+          setPriceBreakdownData(undefined);
+          setIsCalculatingPrice(false);
+        }
+      });
+
+    onCleanup(() => {
+      cancelled = true;
+    });
+  });
+
+  const breakdown = createMemo(() => priceBreakdownData());
 
   const canPlaceOrder = createMemo(
-    () => selectedAddressId() !== null && selectedItems().length > 0
+    () => selectedAddressId() !== null && cartItems().length > 0
   );
 
   const handlePlaceOrder = () => {
     setIsPlacingOrder(true);
+    // TODO: Replace with actual order placement API call
     setTimeout(() => {
       setIsPlacingOrder(false);
       setCurrentStep("confirmation");
@@ -242,9 +314,12 @@ export default function CheckoutPage() {
   // Use a single memoized step to avoid hydration mismatches from multiple Show components
   const stepContent = createMemo(() => {
     const step = currentStep();
+    const addrList = addresses() ?? [];
+
     if (step === "address") {
       return (
         <AddressStepContent
+          addresses={addrList}
           selectedAddressId={selectedAddressId()}
           canPlaceOrder={canPlaceOrder()}
           onSelectAddress={setSelectedAddressId}
@@ -256,10 +331,11 @@ export default function CheckoutPage() {
       return (
         <ReviewStepContent
           selectedAddressId={selectedAddressId()}
+          addresses={addrList}
           canPlaceOrder={canPlaceOrder()}
-          priceBreakdown={priceBreakdown()}
+          priceBreakdown={breakdown()}
           onBack={() => setCurrentStep("address")}
-          onPlaceOrder={() => setCurrentStep("confirmation")}
+          onPlaceOrder={handlePlaceOrder}
         />
       );
     }
@@ -347,7 +423,7 @@ export default function CheckoutPage() {
               <Show when={showPriceSidebar()}>
                 <div>
                   <PriceBreakdownSidebar
-                    breakdown={priceBreakdown()}
+                    breakdown={breakdown()}
                     onPlaceOrder={handlePlaceOrder}
                     isPlacingOrder={isPlacingOrder()}
                     canPlaceOrder={canPlaceOrder()}

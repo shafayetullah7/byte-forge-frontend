@@ -6,10 +6,29 @@ import {
   TruckIcon,
   ShopIcon,
 } from "~/components/icons";
-import type { MockShopShipping } from "../mock-data";
+
+interface ShopItem {
+  id: string;
+  shopId: string;
+  shopName: string;
+  productName: string;
+  productSlug: string;
+  variantTitle: string;
+  quantity: number;
+  price: number;
+  lineTotal: number;
+  thumbnailUrl: string | null;
+  stockStatus: 'in_stock' | 'low_stock' | 'out_of_stock';
+}
 
 interface ShopOrderReviewProps {
-  shop: MockShopShipping;
+  shop: {
+    shopId: string;
+    shopName: string;
+    items: ShopItem[];
+    itemsSubtotal: number;
+    shippingCost: number;
+  };
 }
 
 const ShopOrderReview: Component<ShopOrderReviewProps> = (props) => {

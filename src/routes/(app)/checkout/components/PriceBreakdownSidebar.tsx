@@ -8,10 +8,10 @@ import {
   SparklesIcon,
   TruckIcon,
 } from "~/components/icons";
-import type { MockPriceBreakdown } from "../mock-data";
+import type { PriceBreakdown } from "~/lib/api/types/checkout.types";
 
 interface PriceBreakdownSidebarProps {
-  breakdown: MockPriceBreakdown;
+  breakdown: PriceBreakdown | undefined;
   onPlaceOrder: () => void;
   isPlacingOrder?: boolean;
   canPlaceOrder: boolean;
@@ -19,6 +19,11 @@ interface PriceBreakdownSidebarProps {
 
 const PriceBreakdownSidebar: Component<PriceBreakdownSidebarProps> = (props) => {
   const { t } = useI18n();
+
+  const subtotal = () => props.breakdown ? parseFloat(props.breakdown.subtotal) : 0;
+  const shipping = () => props.breakdown ? parseFloat(props.breakdown.shipping) : 0;
+  const tax = () => props.breakdown ? parseFloat(props.breakdown.tax) : 0;
+  const total = () => props.breakdown ? parseFloat(props.breakdown.total) : 0;
 
   return (
     <div class="bg-white dark:bg-forest-800 rounded-2xl border border-cream-200 dark:border-forest-700 p-6 shadow-sm sticky top-24">
@@ -31,7 +36,7 @@ const PriceBreakdownSidebar: Component<PriceBreakdownSidebarProps> = (props) => 
         <div class="flex justify-between text-gray-600 dark:text-gray-400">
           <span>{t("cart.subtotal")}</span>
           <span class="font-medium text-forest-800 dark:text-cream-50">
-            {formatPrice(props.breakdown.subtotal)}
+            {formatPrice(subtotal())}
           </span>
         </div>
 
@@ -41,7 +46,7 @@ const PriceBreakdownSidebar: Component<PriceBreakdownSidebarProps> = (props) => 
             {t("checkout.shipping")}
           </span>
           <Show
-            when={props.breakdown.shipping > 0}
+            when={shipping() > 0}
             fallback={
               <span class="font-medium text-forest-600 dark:text-forest-400">
                 {t("checkout.freeShipping")}
@@ -49,7 +54,7 @@ const PriceBreakdownSidebar: Component<PriceBreakdownSidebarProps> = (props) => 
             }
           >
             <span class="font-medium text-forest-800 dark:text-cream-50">
-              {formatPrice(props.breakdown.shipping)}
+              {formatPrice(shipping())}
             </span>
           </Show>
         </div>
@@ -57,7 +62,7 @@ const PriceBreakdownSidebar: Component<PriceBreakdownSidebarProps> = (props) => 
         <div class="flex justify-between text-gray-600 dark:text-gray-400">
           <span>{t("checkout.tax")}</span>
           <span class="font-medium text-forest-800 dark:text-cream-50">
-            {formatPrice(props.breakdown.tax)}
+            {formatPrice(tax())}
           </span>
         </div>
 
@@ -67,7 +72,7 @@ const PriceBreakdownSidebar: Component<PriceBreakdownSidebarProps> = (props) => 
             {t("checkout.orderTotal")}
           </span>
           <span class="text-xl font-bold text-forest-800 dark:text-cream-50">
-            {formatPrice(props.breakdown.total)}
+            {formatPrice(total())}
           </span>
         </div>
       </div>
@@ -85,7 +90,7 @@ const PriceBreakdownSidebar: Component<PriceBreakdownSidebarProps> = (props) => 
           {props.isPlacingOrder
             ? t("checkout.placingOrder")
             : t("checkout.placeOrder", {
-                total: formatPrice(props.breakdown.total),
+                total: formatPrice(total()),
               })}
         </Button>
       </div>

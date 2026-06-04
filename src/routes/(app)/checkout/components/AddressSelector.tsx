@@ -6,11 +6,11 @@ import {
   PlusIcon,
   PhoneIcon,
 } from "~/components/icons";
-import type { MockAddress } from "../mock-data";
+import type { Address } from "~/lib/api/types/address.types";
 import { A } from "@solidjs/router";
 
 interface AddressSelectorProps {
-  addresses: MockAddress[];
+  addresses: Address[];
   selectedAddressId: string | null;
   onSelect: (id: string) => void;
 }
