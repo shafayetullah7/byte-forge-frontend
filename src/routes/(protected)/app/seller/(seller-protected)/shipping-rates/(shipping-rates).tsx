@@ -26,7 +26,7 @@ import { DivisionGroup } from "./__components__/DivisionGroup";
 import { CurrencyInput } from "./__components__/CurrencyInput";
 
 const updateShippingRatesAction = action(
-  async (input: { rates: Array<{ districtId: string; cost: string }>; successMessage?: string }) => {
+  async (input: { rates: Array<{ districtId: string; cost: string; costPerKg?: string }>; successMessage?: string }) => {
     "use server";
     const { rates, successMessage } = input;
     try {
@@ -46,14 +46,18 @@ const updateShippingRatesAction = action(
   "update-shipping-rates-action"
 );
 
+type PendingEntry = { cost?: string; costPerKg?: string };
+
 export default function ShippingRatesPage() {
   const { t } = useI18n();
   const ratesData = createAsync(() => getShippingRates(), { deferStream: true });
   const [searchQuery, setSearchQuery] = createSignal("");
   const [setAllCost, setSetAllCost] = createSignal("");
+  const [setAllCostPerKg, setSetAllCostPerKg] = createSignal("");
   const [bulkCost, setBulkCost] = createSignal("");
+  const [bulkCostPerKg, setBulkCostPerKg] = createSignal("");
   const [selectedIds, setSelectedIds] = createSignal<Set<string>>(new Set());
-  const [pendingCosts, setPendingCosts] = createStore<Record<string, string>>({});
+  const [pendingCosts, setPendingCosts] = createStore<Record<string, PendingEntry>>({});
 
   const updateRatesAction = useAction(updateShippingRatesAction);
   const submission = useSubmission(updateShippingRatesAction);
@@ -111,41 +115,61 @@ export default function ShippingRatesPage() {
     }
   });
 
+  const getPending = (districtId: string): PendingEntry => {
+    return pendingCosts[districtId] || {};
+  };
+
   const handleSetAll = async () => {
     const cost = setAllCost();
-    if (!cost) return;
-    const num = parseFloat(cost);
-    if (isNaN(num) || num < 0) return;
-    const rates = allDistricts().map((item) => ({ districtId: item.districtId, cost }));
+    const costPerKg = setAllCostPerKg();
+    if (!cost && !costPerKg) return;
+    const rates = allDistricts().map((item) => ({
+      districtId: item.districtId,
+      cost: cost || item.cost,
+      costPerKg: costPerKg || undefined,
+    }));
     await updateRatesAction({ rates, successMessage: t("seller.shippingRates.allUpdated") });
     setSetAllCost("");
+    setSetAllCostPerKg("");
     setPendingCosts(produce((prev) => { for (const key of Object.keys(prev)) delete prev[key]; }));
   };
 
   const handleBulkUpdate = async () => {
     const cost = bulkCost();
-    if (!cost || selectedIds().size === 0) return;
-    const num = parseFloat(cost);
-    if (isNaN(num) || num < 0) return;
-    const rates = Array.from(selectedIds()).map((id) => ({ districtId: id, cost }));
+    const costPerKg = bulkCostPerKg();
+    if ((!cost && !costPerKg) || selectedIds().size === 0) return;
+    const rates = Array.from(selectedIds()).map((id) => ({
+      districtId: id,
+      cost: cost || allDistricts().find((d) => d.districtId === id)?.cost || "0",
+      costPerKg: costPerKg || undefined,
+    }));
     await updateRatesAction({ rates, successMessage: t("seller.shippingRates.bulkUpdated", { count: rates.length }) });
     setSelectedIds(new Set<string>());
     setBulkCost("");
+    setBulkCostPerKg("");
     setPendingCosts(produce((prev) => { for (const key of Object.keys(prev)) delete prev[key]; }));
   };
 
   const handleSave = async (districtId: string) => {
-    const cost = pendingCosts[districtId];
-    if (cost === undefined) return;
-    await updateRatesAction({ rates: [{ districtId, cost: cost || "0" }], successMessage: t("seller.shippingRates.rateUpdated") });
+    const pending = getPending(districtId);
+    if (pending.cost === undefined && pending.costPerKg === undefined) return;
+    const district = allDistricts().find((d) => d.districtId === districtId);
+    const cost = pending.cost !== undefined ? pending.cost : district?.cost || "0";
+    const costPerKg = pending.costPerKg;
+    await updateRatesAction({
+      rates: [{ districtId, cost, costPerKg }],
+      successMessage: t("seller.shippingRates.rateUpdated"),
+    });
     setPendingCosts(produce((prev) => { delete prev[districtId]; }));
   };
 
   const handleBlur = (districtId: string) => {
-    const pending = pendingCosts[districtId];
-    if (pending === undefined) return;
-    const original = allDistricts().find((d) => d.districtId === districtId)?.cost;
-    if (pending === original) {
+    const pending = getPending(districtId);
+    if (pending.cost === undefined && pending.costPerKg === undefined) return;
+    const district = allDistricts().find((d) => d.districtId === districtId);
+    const costChanged = pending.cost !== undefined && pending.cost !== district?.cost;
+    const costPerKgChanged = pending.costPerKg !== undefined && pending.costPerKg !== district?.costPerKg;
+    if (!costChanged && !costPerKgChanged) {
       setPendingCosts(produce((prev) => { delete prev[districtId]; }));
       return;
     }
@@ -153,7 +177,11 @@ export default function ShippingRatesPage() {
   };
 
   const handleCostChange = (districtId: string, val: string) => {
-    setPendingCosts(districtId, val);
+    setPendingCosts(districtId, (prev) => ({ ...(prev || {}), cost: val }));
+  };
+
+  const handleCostPerKgChange = (districtId: string, val: string) => {
+    setPendingCosts(districtId, (prev) => ({ ...(prev || {}), costPerKg: val }));
   };
 
   return (
@@ -223,12 +251,19 @@ export default function ShippingRatesPage() {
                               onInput={(e) => setSetAllCost(e.currentTarget.value)}
                             />
                           </div>
+                          <div class="flex-1">
+                            <CurrencyInput
+                              placeholder={t("seller.shippingRates.costPerKg")}
+                              value={setAllCostPerKg()}
+                              onInput={(e) => setSetAllCostPerKg(e.currentTarget.value)}
+                            />
+                          </div>
                           <button
                             onClick={handleSetAll}
-                            disabled={!setAllCost() || submission.pending}
+                            disabled={!setAllCost() && !setAllCostPerKg() || submission.pending}
                             class="px-5 py-2.5 rounded-xl bg-terracotta-600 hover:bg-terracotta-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors flex items-center gap-2 whitespace-nowrap"
                           >
-                            {submission.pending && setAllCost() ? (
+                            {submission.pending && (setAllCost() || setAllCostPerKg()) ? (
                               <SpinnerIcon class="animate-spin h-4 w-4" />
                             ) : null}
                             {t("seller.shippingRates.applyAll")}
@@ -277,6 +312,7 @@ export default function ShippingRatesPage() {
                               })
                             }
                             onCostChange={handleCostChange}
+                            onCostPerKgChange={handleCostPerKgChange}
                             onSave={handleSave}
                             onBlur={handleBlur}
                           />
@@ -288,20 +324,27 @@ export default function ShippingRatesPage() {
                   <Show when={selectedIds().size > 0}>
                     <div class="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-forest-800/95 backdrop-blur-lg border-t border-cream-200 dark:border-forest-700 shadow-lg">
                       <div class="max-w-6xl mx-auto px-4 py-3">
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-3 flex-wrap">
                           <span class="text-sm font-semibold text-forest-800 dark:text-cream-50 whitespace-nowrap">
                             {selectedIds().size} selected
                           </span>
-                          <div class="w-32">
+                          <div class="w-28">
                             <CurrencyInput
                               placeholder={t("seller.shippingRates.bulkPlaceholder")}
                               value={bulkCost()}
                               onInput={(e) => setBulkCost(e.currentTarget.value)}
                             />
                           </div>
+                          <div class="w-28">
+                            <CurrencyInput
+                              placeholder={t("seller.shippingRates.costPerKg")}
+                              value={bulkCostPerKg()}
+                              onInput={(e) => setBulkCostPerKg(e.currentTarget.value)}
+                            />
+                          </div>
                           <button
                             onClick={handleBulkUpdate}
-                            disabled={!bulkCost() || submission.pending}
+                            disabled={!bulkCost() && !bulkCostPerKg() || submission.pending}
                             class="px-5 py-2 rounded-lg bg-forest-600 hover:bg-forest-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors whitespace-nowrap flex items-center gap-2"
                           >
                             {submission.pending ? (
@@ -310,7 +353,7 @@ export default function ShippingRatesPage() {
                             Apply to {selectedIds().size}
                           </button>
                           <button
-                            onClick={() => { setSelectedIds(new Set<string>()); setBulkCost(""); }}
+                            onClick={() => { setSelectedIds(new Set<string>()); setBulkCost(""); setBulkCostPerKg(""); }}
                             class="px-4 py-2 rounded-lg border border-gray-300 dark:border-forest-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-forest-700 text-sm font-medium transition-colors whitespace-nowrap"
                           >
                             Clear

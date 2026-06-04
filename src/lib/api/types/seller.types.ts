@@ -796,6 +796,7 @@ export interface ShippingRate {
   shopId: string;
   districtId: string;
   cost: string;
+  costPerKg: string;
 }
 
 /**
@@ -806,6 +807,7 @@ export interface ShippingRateWithDistrict {
   districtName: string;
   divisionName: string;
   cost: string;
+  costPerKg: string;
 }
 
 /**
@@ -814,6 +816,7 @@ export interface ShippingRateWithDistrict {
 export interface BulkShippingRateItem {
   districtId: string;
   cost: string | number;
+  costPerKg?: string | number;
 }
 
 /**

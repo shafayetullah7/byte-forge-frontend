@@ -6,6 +6,7 @@ import { formatPrice } from "../../plants/constants";
 import { Button } from "~/components/ui";
 import { toaster } from "~/components/ui/Toast";
 import { publicShopsApi } from "~/lib/api/endpoints/public/shops.api";
+import { A } from "@solidjs/router";
 import {
   TagIcon,
   ShieldCheckIcon,
@@ -208,16 +209,18 @@ const OrderSummary: Component<{
 
       {/* Checkout Button */}
       <div class="mt-5">
-        <Button
-          variant="primary"
-          size="lg"
-          class="w-full"
-          disabled={props.items.length === 0}
-        >
-          {props.items.length > 0
-            ? t("cart.checkout", { count: props.items.length })
-            : t("cart.selectItems")}
-        </Button>
+        <A href="/checkout">
+          <Button
+            variant="primary"
+            size="lg"
+            class="w-full"
+            disabled={props.items.length === 0}
+          >
+            {props.items.length > 0
+              ? t("cart.checkout", { count: props.items.length })
+              : t("cart.selectItems")}
+          </Button>
+        </A>
       </div>
 
       {/* Trust Badges */}

@@ -8,22 +8,50 @@ interface DistrictItem {
   districtName: string;
   divisionName: string;
   cost: string;
+  costPerKg: string;
 }
+
+type PendingEntry = { cost?: string; costPerKg?: string };
 
 interface DivisionGroupProps {
   divisionName: string;
   districts: DistrictItem[];
-  pendingCosts: Record<string, string>;
+  pendingCosts: Record<string, PendingEntry>;
   selectedIds: Accessor<Set<string>>;
   isSaving: boolean;
   onToggleSelect: (id: string) => void;
   onCostChange: (id: string, val: string) => void;
+  onCostPerKgChange: (id: string, val: string) => void;
   onSave: (id: string) => void;
   onBlur: (id: string) => void;
 }
 
 export const DivisionGroup: Component<DivisionGroupProps> = (props) => {
   const configuredCount = () => props.districts.filter((d) => d.cost !== "0").length;
+
+  const getPending = (districtId: string): PendingEntry => {
+    return props.pendingCosts[districtId] || {};
+  };
+
+  const getDisplayCost = (item: DistrictItem) => {
+    const pending = getPending(item.districtId);
+    return pending.cost ?? item.cost;
+  };
+
+  const getDisplayCostPerKg = (item: DistrictItem) => {
+    const pending = getPending(item.districtId);
+    return pending.costPerKg ?? item.costPerKg;
+  };
+
+  const hasChanges = (item: DistrictItem) => {
+    const pending = getPending(item.districtId);
+    const costChanged = pending.cost !== undefined && pending.cost !== item.cost;
+    const costPerKgChanged = pending.costPerKg !== undefined && pending.costPerKg !== item.costPerKg;
+    return costChanged || costPerKgChanged;
+  };
+
+  const isConfigured = (item: DistrictItem) => item.cost !== "0";
+  const isSavingThis = (item: DistrictItem) => props.isSaving && hasChanges(item);
 
   return (
     <div class="bg-white dark:bg-forest-800 rounded-2xl border border-cream-200 dark:border-forest-700 shadow-sm overflow-hidden">
@@ -37,15 +65,24 @@ export const DivisionGroup: Component<DivisionGroupProps> = (props) => {
         </span>
       </div>
 
+      {/* Column headers */}
+      <div class="hidden sm:grid grid-cols-12 gap-3 px-5 py-2 bg-cream-50/50 dark:bg-forest-900/30 border-b border-cream-100 dark:border-forest-700/50 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+        <div class="col-span-1"></div>
+        <div class="col-span-4">District</div>
+        <div class="col-span-2 text-right">Base Cost</div>
+        <div class="col-span-2 text-right">Cost/kg</div>
+        <div class="col-span-3"></div>
+      </div>
+
       <div class="divide-y divide-cream-100 dark:divide-forest-700/50">
         <For each={props.districts}>
           {(item) => {
-            const pending = () => props.pendingCosts[item.districtId];
-            const displayCost = () => pending() ?? item.cost;
-            const hasChanges = () => pending() !== undefined && pending() !== item.cost;
-            const isConfigured = () => item.cost !== "0";
+            const displayCost = () => getDisplayCost(item);
+            const displayCostPerKg = () => getDisplayCostPerKg(item);
+            const itemHasChanges = () => hasChanges(item);
+            const itemConfigured = () => isConfigured(item);
             const isSelected = () => props.selectedIds().has(item.districtId);
-            const isSavingThis = () => props.isSaving && hasChanges();
+            const savingThis = () => isSavingThis(item);
 
             return (
               <div
@@ -62,20 +99,20 @@ export const DivisionGroup: Component<DivisionGroupProps> = (props) => {
                 <div class="flex-1 min-w-0">
                   <p class="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{item.districtName}</p>
                 </div>
-                <Show when={isConfigured()}>
+                <Show when={itemConfigured()}>
                   <span class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-forest-100 dark:bg-forest-900/40 text-xs font-medium text-forest-700 dark:text-forest-400">
                     <CheckCircleIcon class="w-3 h-3" />
                     ৳{item.cost}
                   </span>
                 </Show>
-                <div class="flex items-center gap-2 w-36 sm:w-40">
-                  <Show when={hasChanges()}>
+                <div class="flex items-center gap-2">
+                  <Show when={itemHasChanges()}>
                     <button
                       onClick={() => props.onSave(item.districtId)}
                       disabled={props.isSaving}
                       class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer flex-shrink-0 text-xs font-semibold"
                     >
-                      {isSavingThis() ? (
+                      {savingThis() ? (
                         <SpinnerIcon class="animate-spin h-4 w-4" />
                       ) : (
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
@@ -84,18 +121,30 @@ export const DivisionGroup: Component<DivisionGroupProps> = (props) => {
                       )}
                     </button>
                   </Show>
-                  <CurrencyInput
-                    size="sm"
-                    placeholder="—"
-                    value={displayCost()}
-                    onInput={(e) => props.onCostChange(item.districtId, e.currentTarget.value)}
-                    onBlur={() => props.onBlur(item.districtId)}
-                    class={`${
-                      isConfigured()
-                        ? "border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-800"
-                        : "border-dashed border-cream-300 dark:border-forest-500 bg-cream-50 dark:bg-forest-900/50 text-gray-500 dark:text-gray-400"
-                    }`}
-                  />
+                  <div class="flex items-center gap-2 w-36 sm:w-40">
+                    <CurrencyInput
+                      size="sm"
+                      placeholder="—"
+                      value={displayCost()}
+                      onInput={(e) => props.onCostChange(item.districtId, e.currentTarget.value)}
+                      onBlur={() => props.onBlur(item.districtId)}
+                      class={`${
+                        itemConfigured()
+                          ? "border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-800"
+                          : "border-dashed border-cream-300 dark:border-forest-500 bg-cream-50 dark:bg-forest-900/50 text-gray-500 dark:text-gray-400"
+                      }`}
+                    />
+                  </div>
+                  <div class="flex items-center gap-2 w-32">
+                    <CurrencyInput
+                      size="sm"
+                      placeholder="0"
+                      value={displayCostPerKg()}
+                      onInput={(e) => props.onCostPerKgChange(item.districtId, e.currentTarget.value)}
+                      onBlur={() => props.onBlur(item.districtId)}
+                      class="border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-800"
+                    />
+                  </div>
                 </div>
               </div>
             );
