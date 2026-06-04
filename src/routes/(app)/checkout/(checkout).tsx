@@ -13,7 +13,7 @@ import { useNavigate, A, createAsync } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import { getCart } from "~/lib/api/endpoints/buyer/cart.api";
 import { getAddresses } from "~/lib/api/endpoints/buyer/address.api";
-import { calculatePriceBreakdown } from "~/lib/api/endpoints/buyer/checkout.api";
+import { calculatePriceBreakdown, placeOrder } from "~/lib/api/endpoints/buyer/checkout.api";
 import type { Address } from "~/lib/api/types/address.types";
 import type { PriceBreakdown, PriceBreakdownResponse } from "~/lib/api/types/checkout.types";
 import {
@@ -31,6 +31,11 @@ import ShopOrderReview from "./components/ShopOrderReview";
 import PriceBreakdownSidebar from "./components/PriceBreakdownSidebar";
 
 type CheckoutStep = "address" | "review" | "confirmation";
+
+interface ConfirmationStepContentProps {
+  navigate: (path: string) => void;
+  orderNumber: string;
+}
 
 function LoadingFallback() {
   const { t } = useI18n();
@@ -193,9 +198,7 @@ function ReviewStepContent(props: {
   );
 }
 
-function ConfirmationStepContent(props: {
-  navigate: (path: string) => void;
-}) {
+function ConfirmationStepContent(props: ConfirmationStepContentProps) {
   const { t } = useI18n();
   return (
     <div class="max-w-lg mx-auto text-center py-12">
@@ -206,7 +209,7 @@ function ConfirmationStepContent(props: {
         {t("checkout.orderPlaced")}
       </h2>
       <p class="text-gray-600 dark:text-gray-400 mb-2">
-        {t("checkout.orderNumber")}: #BF-2026-0042
+        {t("checkout.orderNumber")}: {props.orderNumber}
       </p>
       <p class="text-sm text-gray-500 dark:text-gray-400 mb-8">
         {t("checkout.orderConfirmationMessage")}
@@ -236,6 +239,7 @@ export default function CheckoutPage() {
   const [currentStep, setCurrentStep] = createSignal<CheckoutStep>("address");
   const [selectedAddressId, setSelectedAddressId] = createSignal<string | null>(null);
   const [isPlacingOrder, setIsPlacingOrder] = createSignal(false);
+  const [orderNumber, setOrderNumber] = createSignal("");
 
   // Fetch cart data
   const cart = createAsync(() => getCart());
@@ -292,14 +296,28 @@ export default function CheckoutPage() {
     () => selectedAddressId() !== null && selectedItems().length > 0
   );
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
+    const addressId = selectedAddressId();
+    const items = selectedItems();
+    if (!addressId || items.length === 0) return;
+
     setIsPlacingOrder(true);
-    // TODO: Replace with actual order placement API call
-    setTimeout(() => {
-      setIsPlacingOrder(false);
+    try {
+      const result = await placeOrder({
+        addressId,
+        itemIds: items.map((item) => item.id),
+        paymentMethod: "COD",
+      });
+
+      const firstOrderNumber = result.orderGroup.orderNumbers[0] ?? "";
+      setOrderNumber(firstOrderNumber);
       setCurrentStep("confirmation");
       toaster.success(t("checkout.orderPlaced"));
-    }, 2000);
+    } catch (error) {
+      toaster.error(error instanceof Error ? error.message : "Failed to place order");
+    } finally {
+      setIsPlacingOrder(false);
+    }
   };
 
   const showStepIndicator = createMemo(() => currentStep() !== "confirmation");
@@ -397,7 +415,7 @@ export default function CheckoutPage() {
                     />
                   </Match>
                   <Match when={currentStep() === "confirmation"}>
-                    <ConfirmationStepContent navigate={navigate} />
+                    <ConfirmationStepContent navigate={navigate} orderNumber={orderNumber()} />
                   </Match>
                 </Switch>
               </div>

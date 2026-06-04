@@ -1,10 +1,17 @@
 import { query } from "@solidjs/router";
 import { fetcher } from "../../api-client";
-import type { PriceBreakdownResponse } from "../../types/checkout.types";
+import type { PriceBreakdownResponse, PlaceOrderResponse } from "../../types/checkout.types";
 
 export interface CalculatePriceBreakdownRequest {
   addressId: string;
   itemIds: string[];
+}
+
+export interface PlaceOrderRequest {
+  addressId: string;
+  itemIds: string[];
+  paymentMethod: "COD";
+  notes?: string;
 }
 
 /**
@@ -23,3 +30,16 @@ export const calculatePriceBreakdown = query(
   },
   "buyer-checkout-price-breakdown"
 );
+
+/**
+ * Place order with Cash on Delivery
+ */
+export const placeOrder = async (request: PlaceOrderRequest): Promise<PlaceOrderResponse> => {
+  return fetcher<PlaceOrderResponse>(
+    "/api/v1/user/buyer/checkout/place-order",
+    {
+      method: "POST",
+      body: JSON.stringify(request),
+    }
+  );
+};
