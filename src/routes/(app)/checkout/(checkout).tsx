@@ -11,6 +11,8 @@ import {
 } from "solid-js";
 import { useNavigate, A, createAsync } from "@solidjs/router";
 import { useI18n } from "~/i18n";
+import { requireAuth } from "~/lib/auth/guards";
+import { useSession } from "~/lib/auth";
 import { getCart } from "~/lib/api/endpoints/buyer/cart.api";
 import { getAddresses } from "~/lib/api/endpoints/buyer/address.api";
 import { calculatePriceBreakdown, placeOrder } from "~/lib/api/endpoints/buyer/checkout.api";
@@ -25,10 +27,15 @@ import {
 } from "~/components/icons";
 import { Button } from "~/components/ui";
 import { toaster } from "~/components/ui/Toast";
+import { ApiError } from "~/lib/api";
 import CheckoutStepIndicator from "./components/CheckoutStepIndicator";
 import AddressSelector from "./components/AddressSelector";
 import ShopOrderReview from "./components/ShopOrderReview";
 import PriceBreakdownSidebar from "./components/PriceBreakdownSidebar";
+
+export const route = {
+  load: () => requireAuth(),
+};
 
 type CheckoutStep = "address" | "review" | "confirmation";
 
@@ -236,6 +243,17 @@ function ConfirmationStepContent(props: ConfirmationStepContentProps) {
 export default function CheckoutPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
+  const session = useSession();
+
+  // Client-side backup guard: redirect to login if session expires
+  createEffect(() => {
+    const user = session();
+    if (user === undefined) return;
+    if (user === null) {
+      navigate("/login", { replace: true });
+    }
+  });
+
   const [currentStep, setCurrentStep] = createSignal<CheckoutStep>("address");
   const [selectedAddressId, setSelectedAddressId] = createSignal<string | null>(null);
   const [isPlacingOrder, setIsPlacingOrder] = createSignal(false);
@@ -325,27 +343,34 @@ export default function CheckoutPage() {
 
   return (
     <ErrorBoundary
-      fallback={(error) => (
-        <div class="min-h-screen bg-cream-50 dark:bg-forest-900 flex items-center justify-center p-6">
-          <div class="bg-white dark:bg-forest-800 rounded-2xl border border-red-200 dark:border-red-800 p-8 max-w-md w-full">
-            <div class="flex items-center gap-3 mb-4">
-              <ExclamationCircleIcon class="w-8 h-8 text-red-600 dark:text-red-400" />
-              <h2 class="text-lg font-semibold text-red-900 dark:text-red-300">
-                {t("checkout.loadError")}
-              </h2>
+      fallback={(error) => {
+        if (error instanceof Response) throw error;
+        if (error instanceof ApiError && error.statusCode === 401) {
+          navigate("/login", { replace: true });
+          return null;
+        }
+        return (
+          <div class="min-h-screen bg-cream-50 dark:bg-forest-900 flex items-center justify-center p-6">
+            <div class="bg-white dark:bg-forest-800 rounded-2xl border border-red-200 dark:border-red-800 p-8 max-w-md w-full">
+              <div class="flex items-center gap-3 mb-4">
+                <ExclamationCircleIcon class="w-8 h-8 text-red-600 dark:text-red-400" />
+                <h2 class="text-lg font-semibold text-red-900 dark:text-red-300">
+                  {t("checkout.loadError")}
+                </h2>
+              </div>
+              <p class="text-sm text-red-700 dark:text-red-400 mb-4">
+                {error.message}
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
+              >
+                {t("common.retry")}
+              </button>
             </div>
-            <p class="text-sm text-red-700 dark:text-red-400 mb-4">
-              {error.message}
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
-            >
-              {t("common.retry")}
-            </button>
           </div>
-        </div>
-      )}
+        );
+      }}
     >
       <Suspense fallback={<LoadingFallback />}>
         <div class="min-h-screen bg-cream-50 dark:bg-forest-900">
