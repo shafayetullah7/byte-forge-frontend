@@ -5,8 +5,9 @@ import {
   Suspense,
   Show,
   For,
+  Switch,
+  Match,
   createEffect,
-  onCleanup,
 } from "solid-js";
 import { useNavigate, A, createAsync } from "@solidjs/router";
 import { useI18n } from "~/i18n";
@@ -14,7 +15,7 @@ import { getCart } from "~/lib/api/endpoints/buyer/cart.api";
 import { getAddresses } from "~/lib/api/endpoints/buyer/address.api";
 import { calculatePriceBreakdown } from "~/lib/api/endpoints/buyer/checkout.api";
 import type { Address } from "~/lib/api/types/address.types";
-import type { PriceBreakdown, ShopPriceBreakdown } from "~/lib/api/types/checkout.types";
+import type { PriceBreakdown, PriceBreakdownResponse } from "~/lib/api/types/checkout.types";
 import {
   ExclamationCircleIcon,
   SpinnerIcon,
@@ -45,7 +46,7 @@ function LoadingFallback() {
   );
 }
 
-function mapShopBreakdownToShopOrderReview(breakdown: ShopPriceBreakdown) {
+function mapShopBreakdownToShopOrderReview(breakdown: PriceBreakdown["shopBreakdowns"][number]) {
   return {
     shopId: breakdown.shopId,
     shopName: breakdown.shopName,
@@ -240,11 +241,27 @@ export default function CheckoutPage() {
   const cart = createAsync(() => getCart());
   const cartItems = createMemo(() => cart()?.items ?? []);
 
+  // Track selected item IDs (default to all items)
+  const [selectedItemIds, setSelectedItemIds] = createSignal<Set<string>>(new Set());
+
+  // Auto-select all items when cart loads
+  createEffect(() => {
+    const items = cartItems();
+    if (items.length > 0 && selectedItemIds().size === 0) {
+      setSelectedItemIds(new Set(items.map((item) => item.id)));
+    }
+  });
+
+  // Get selected items
+  const selectedItems = createMemo(() =>
+    cartItems().filter((item) => selectedItemIds().has(item.id))
+  );
+
   // Fetch addresses
   const addresses = createAsync(() => getAddresses({ type: "shipping" }));
 
-  // Set default address when addresses load
-  createMemo(() => {
+  // Set default address when addresses load (createEffect for side effects)
+  createEffect(() => {
     const addrList = addresses();
     if (addrList && addrList.length > 0 && !selectedAddressId()) {
       const defaultAddr = addrList.find((address: Address) => address.isDefault) ?? addrList[0];
@@ -252,53 +269,27 @@ export default function CheckoutPage() {
     }
   });
 
-  // Get selected address for district calculation
-  const selectedDistrictId = createMemo(() => {
-    const addrList = addresses();
-    if (!addrList) return undefined;
-    const address = addrList.find((address: Address) => address.id === selectedAddressId());
-    return address?.districtId;
-  });
-
-  // Calculate price breakdown when district changes
-  const [priceBreakdownData, setPriceBreakdownData] = createSignal<PriceBreakdown | undefined>();
-  const [isCalculatingPrice, setIsCalculatingPrice] = createSignal(false);
-
-  createEffect(() => {
-    const districtId = selectedDistrictId();
-    const items = cartItems();
-    if (!districtId || items.length === 0) {
-      setPriceBreakdownData(undefined);
-      return;
-    }
-
-    setIsCalculatingPrice(true);
-    let cancelled = false;
-
-    calculatePriceBreakdown(districtId)
-      .then((result) => {
-        if (!cancelled) {
-          setPriceBreakdownData(result.breakdown);
-          setIsCalculatingPrice(false);
-        }
-      })
-      .catch((error) => {
-        if (!cancelled) {
-          console.error("Failed to calculate price breakdown:", error);
-          setPriceBreakdownData(undefined);
-          setIsCalculatingPrice(false);
-        }
+  // Calculate price breakdown using createAsync + query() for SSR/caching
+  const priceBreakdown = createAsync<PriceBreakdownResponse | undefined>(
+    () => {
+      const addressId = selectedAddressId();
+      const items = selectedItems();
+      if (!addressId || items.length === 0) {
+        return Promise.resolve(undefined);
+      }
+      return calculatePriceBreakdown({
+        addressId,
+        itemIds: items.map((item) => item.id),
       });
+    },
+    { deferStream: true }
+  );
 
-    onCleanup(() => {
-      cancelled = true;
-    });
-  });
-
-  const breakdown = createMemo(() => priceBreakdownData());
+  // Flatten the breakdown from the response wrapper
+  const breakdown = createMemo(() => priceBreakdown()?.breakdown);
 
   const canPlaceOrder = createMemo(
-    () => selectedAddressId() !== null && cartItems().length > 0
+    () => selectedAddressId() !== null && selectedItems().length > 0
   );
 
   const handlePlaceOrder = () => {
@@ -310,37 +301,6 @@ export default function CheckoutPage() {
       toaster.success(t("checkout.orderPlaced"));
     }, 2000);
   };
-
-  // Use a single memoized step to avoid hydration mismatches from multiple Show components
-  const stepContent = createMemo(() => {
-    const step = currentStep();
-    const addrList = addresses() ?? [];
-
-    if (step === "address") {
-      return (
-        <AddressStepContent
-          addresses={addrList}
-          selectedAddressId={selectedAddressId()}
-          canPlaceOrder={canPlaceOrder()}
-          onSelectAddress={setSelectedAddressId}
-          onContinue={() => setCurrentStep("review")}
-        />
-      );
-    }
-    if (step === "review") {
-      return (
-        <ReviewStepContent
-          selectedAddressId={selectedAddressId()}
-          addresses={addrList}
-          canPlaceOrder={canPlaceOrder()}
-          priceBreakdown={breakdown()}
-          onBack={() => setCurrentStep("address")}
-          onPlaceOrder={handlePlaceOrder}
-        />
-      );
-    }
-    return <ConfirmationStepContent navigate={navigate} />;
-  });
 
   const showStepIndicator = createMemo(() => currentStep() !== "confirmation");
   const showPriceSidebar = createMemo(() => currentStep() !== "confirmation");
@@ -414,9 +374,32 @@ export default function CheckoutPage() {
 
             {/* Main content */}
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Left: Steps */}
+              {/* Left: Steps - rendered directly with Switch/Match instead of createMemo returning JSX */}
               <div class="lg:col-span-2">
-                {stepContent()}
+                <Switch>
+                  <Match when={currentStep() === "address"}>
+                    <AddressStepContent
+                      addresses={addresses() ?? []}
+                      selectedAddressId={selectedAddressId()}
+                      canPlaceOrder={canPlaceOrder()}
+                      onSelectAddress={setSelectedAddressId}
+                      onContinue={() => setCurrentStep("review")}
+                    />
+                  </Match>
+                  <Match when={currentStep() === "review"}>
+                    <ReviewStepContent
+                      selectedAddressId={selectedAddressId()}
+                      addresses={addresses() ?? []}
+                      canPlaceOrder={canPlaceOrder()}
+                      priceBreakdown={breakdown()}
+                      onBack={() => setCurrentStep("address")}
+                      onPlaceOrder={handlePlaceOrder}
+                    />
+                  </Match>
+                  <Match when={currentStep() === "confirmation"}>
+                    <ConfirmationStepContent navigate={navigate} />
+                  </Match>
+                </Switch>
               </div>
 
               {/* Right: Price breakdown */}
