@@ -48,6 +48,18 @@ const updateShippingRatesAction = action(
 
 type PendingEntry = { cost?: string; costPerKg?: string };
 
+const normalizeCost = (val: string | undefined): string => {
+  if (val === undefined || val === "" || val.trim() === "") return "0";
+  const num = parseFloat(val);
+  if (isNaN(num) || num < 0) return "0";
+  if (num > 999999.99) return "999999.99";
+  return String(num);
+};
+
+const isEmptyOrZero = (val: string | undefined): boolean => {
+  return val === undefined || val === "" || val.trim() === "" || parseFloat(val) === 0;
+};
+
 export default function ShippingRatesPage() {
   const { t } = useI18n();
   const ratesData = createAsync(() => getShippingRates(), { deferStream: true });
@@ -92,14 +104,17 @@ export default function ShippingRatesPage() {
     let freeCount = 0;
     let costSum = 0;
     for (const item of allDistricts()) {
-      const num = parseFloat(item.cost);
-      if (!isNaN(num)) {
+      const costNum = parseFloat(item.cost);
+      const costPerKgNum = parseFloat(item.costPerKg || "0");
+      const hasCost = !isNaN(costNum) && costNum > 0;
+      const hasCostPerKg = !isNaN(costPerKgNum) && costPerKgNum > 0;
+      if (hasCost || hasCostPerKg) {
         configured++;
-        if (num === 0) freeCount++;
-        costSum += num;
+        if (hasCost) costSum += costNum;
       }
+      if (!hasCost && !hasCostPerKg) freeCount++;
     }
-    return { total, configured, freeCount, avg: configured > 0 ? Math.round(costSum / configured) : 0 };
+    return { total, configured, freeCount, avg: configured > 0 ? Math.round(costSum / (configured > 0 ? allDistricts().filter((d) => parseFloat(d.cost) > 0).length : 1)) : 0 };
   });
 
   createEffect(() => {
@@ -122,11 +137,11 @@ export default function ShippingRatesPage() {
   const handleSetAll = async () => {
     const cost = setAllCost();
     const costPerKg = setAllCostPerKg();
-    if (!cost && !costPerKg) return;
+    if (isEmptyOrZero(cost) && isEmptyOrZero(costPerKg)) return;
     const rates = allDistricts().map((item) => ({
       districtId: item.districtId,
-      cost: cost || item.cost,
-      costPerKg: costPerKg || undefined,
+      cost: normalizeCost(cost || item.cost),
+      costPerKg: normalizeCost(costPerKg),
     }));
     await updateRatesAction({ rates, successMessage: t("seller.shippingRates.allUpdated") });
     setSetAllCost("");
@@ -137,12 +152,15 @@ export default function ShippingRatesPage() {
   const handleBulkUpdate = async () => {
     const cost = bulkCost();
     const costPerKg = bulkCostPerKg();
-    if ((!cost && !costPerKg) || selectedIds().size === 0) return;
-    const rates = Array.from(selectedIds()).map((id) => ({
-      districtId: id,
-      cost: cost || allDistricts().find((d) => d.districtId === id)?.cost || "0",
-      costPerKg: costPerKg || undefined,
-    }));
+    if ((isEmptyOrZero(cost) && isEmptyOrZero(costPerKg)) || selectedIds().size === 0) return;
+    const rates = Array.from(selectedIds()).map((id) => {
+      const district = allDistricts().find((d) => d.districtId === id);
+      return {
+        districtId: id,
+        cost: normalizeCost(isEmptyOrZero(cost) ? district?.cost || "0" : cost),
+        costPerKg: normalizeCost(costPerKg),
+      };
+    });
     await updateRatesAction({ rates, successMessage: t("seller.shippingRates.bulkUpdated", { count: rates.length }) });
     setSelectedIds(new Set<string>());
     setBulkCost("");
@@ -154,8 +172,8 @@ export default function ShippingRatesPage() {
     const pending = getPending(districtId);
     if (pending.cost === undefined && pending.costPerKg === undefined) return;
     const district = allDistricts().find((d) => d.districtId === districtId);
-    const cost = pending.cost !== undefined ? pending.cost : district?.cost || "0";
-    const costPerKg = pending.costPerKg;
+    const cost = pending.cost !== undefined ? normalizeCost(pending.cost) : normalizeCost(district?.cost);
+    const costPerKg = pending.costPerKg !== undefined ? normalizeCost(pending.costPerKg) : normalizeCost(district?.costPerKg);
     await updateRatesAction({
       rates: [{ districtId, cost, costPerKg }],
       successMessage: t("seller.shippingRates.rateUpdated"),
@@ -167,8 +185,12 @@ export default function ShippingRatesPage() {
     const pending = getPending(districtId);
     if (pending.cost === undefined && pending.costPerKg === undefined) return;
     const district = allDistricts().find((d) => d.districtId === districtId);
-    const costChanged = pending.cost !== undefined && pending.cost !== district?.cost;
-    const costPerKgChanged = pending.costPerKg !== undefined && pending.costPerKg !== district?.costPerKg;
+    const normalizedPendingCost = normalizeCost(pending.cost);
+    const normalizedPendingCostPerKg = normalizeCost(pending.costPerKg);
+    const normalizedDistrictCost = normalizeCost(district?.cost);
+    const normalizedDistrictCostPerKg = normalizeCost(district?.costPerKg);
+    const costChanged = pending.cost !== undefined && normalizedPendingCost !== normalizedDistrictCost;
+    const costPerKgChanged = pending.costPerKg !== undefined && normalizedPendingCostPerKg !== normalizedDistrictCostPerKg;
     if (!costChanged && !costPerKgChanged) {
       setPendingCosts(produce((prev) => { delete prev[districtId]; }));
       return;
@@ -260,10 +282,10 @@ export default function ShippingRatesPage() {
                           </div>
                           <button
                             onClick={handleSetAll}
-                            disabled={!setAllCost() && !setAllCostPerKg() || submission.pending}
+                            disabled={isEmptyOrZero(setAllCost()) && isEmptyOrZero(setAllCostPerKg()) || submission.pending}
                             class="px-5 py-2.5 rounded-xl bg-terracotta-600 hover:bg-terracotta-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors flex items-center gap-2 whitespace-nowrap"
                           >
-                            {submission.pending && (setAllCost() || setAllCostPerKg()) ? (
+                            {submission.pending && (!isEmptyOrZero(setAllCost()) || !isEmptyOrZero(setAllCostPerKg())) ? (
                               <SpinnerIcon class="animate-spin h-4 w-4" />
                             ) : null}
                             {t("seller.shippingRates.applyAll")}
@@ -281,7 +303,7 @@ export default function ShippingRatesPage() {
                         placeholder={t("seller.shippingRates.searchPlaceholder")}
                         value={searchQuery()}
                         onInput={(e) => setSearchQuery(e.currentTarget.value)}
-                        class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-900 text-forest-800 dark:text-cream-50 text-sm placeholder-gray-400 dark:placeholder-gray-500 focus:border-terracotta-500 dark:focus:border-terracotta-400 focus:ring-2 focus:ring-terracotta-500/20 transition-colors"
+                        class="w-full pl-9 pr-3 py-2.5 rounded-lg border-2 border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-900 text-forest-800 dark:text-cream-50 text-sm placeholder-gray-400 dark:placeholder-gray-500 focus:border-terracotta-500 dark:focus:border-terracotta-400 focus:ring-2 focus:ring-terracotta-500/20 transition-colors"
                       />
                     </div>
                   </div>
@@ -326,7 +348,7 @@ export default function ShippingRatesPage() {
                       <div class="max-w-6xl mx-auto px-4 py-3">
                         <div class="flex items-center gap-3 flex-wrap">
                           <span class="text-sm font-semibold text-forest-800 dark:text-cream-50 whitespace-nowrap">
-                            {selectedIds().size} selected
+                            {selectedIds().size} {t("seller.shippingRates.selected")}
                           </span>
                           <div class="w-28">
                             <CurrencyInput
@@ -344,19 +366,19 @@ export default function ShippingRatesPage() {
                           </div>
                           <button
                             onClick={handleBulkUpdate}
-                            disabled={!bulkCost() && !bulkCostPerKg() || submission.pending}
+                            disabled={isEmptyOrZero(bulkCost()) && isEmptyOrZero(bulkCostPerKg()) || submission.pending}
                             class="px-5 py-2 rounded-lg bg-forest-600 hover:bg-forest-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors whitespace-nowrap flex items-center gap-2"
                           >
                             {submission.pending ? (
                               <SpinnerIcon class="animate-spin h-4 w-4" />
                             ) : null}
-                            Apply to {selectedIds().size}
+                            {t("seller.shippingRates.applySelected", { count: selectedIds().size })}
                           </button>
                           <button
                             onClick={() => { setSelectedIds(new Set<string>()); setBulkCost(""); setBulkCostPerKg(""); }}
                             class="px-4 py-2 rounded-lg border border-gray-300 dark:border-forest-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-forest-700 text-sm font-medium transition-colors whitespace-nowrap"
                           >
-                            Clear
+                            {t("seller.shippingRates.clear")}
                           </button>
                         </div>
                       </div>

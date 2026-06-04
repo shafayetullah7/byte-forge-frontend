@@ -1,6 +1,7 @@
 import type { Component, Accessor } from "solid-js";
 import { For, Show } from "solid-js";
-import { GlobeAltIcon, CheckCircleIcon, SpinnerIcon } from "~/components/icons";
+import { useI18n } from "~/i18n";
+import { GlobeAltIcon, CheckCircleIcon, SpinnerIcon, CheckIcon } from "~/components/icons";
 import { CurrencyInput } from "./CurrencyInput";
 
 interface DistrictItem {
@@ -27,7 +28,8 @@ interface DivisionGroupProps {
 }
 
 export const DivisionGroup: Component<DivisionGroupProps> = (props) => {
-  const configuredCount = () => props.districts.filter((d) => d.cost !== "0").length;
+  const { t } = useI18n();
+  const configuredCount = () => props.districts.filter((d) => d.cost !== "0" || (d.costPerKg !== "0" && d.costPerKg !== undefined && d.costPerKg !== "")).length;
 
   const getPending = (districtId: string): PendingEntry => {
     return props.pendingCosts[districtId] || {};
@@ -51,6 +53,7 @@ export const DivisionGroup: Component<DivisionGroupProps> = (props) => {
   };
 
   const isConfigured = (item: DistrictItem) => item.cost !== "0";
+  const isCostPerKgConfigured = (item: DistrictItem) => item.costPerKg !== "0" && item.costPerKg !== undefined && item.costPerKg !== "";
   const isSavingThis = (item: DistrictItem) => props.isSaving && hasChanges(item);
 
   return (
@@ -61,16 +64,16 @@ export const DivisionGroup: Component<DivisionGroupProps> = (props) => {
           <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{props.divisionName}</h3>
         </div>
         <span class="text-xs text-gray-500 dark:text-gray-400">
-          {configuredCount()}/{props.districts.length} {props.districts.length === 1 ? "district" : "districts"}
+          {configuredCount()}/{props.districts.length} {props.districts.length === 1 ? t("seller.shippingRates.districtSingular") : t("seller.shippingRates.districtPlural")}
         </span>
       </div>
 
       {/* Column headers */}
-      <div class="hidden sm:grid grid-cols-12 gap-3 px-5 py-2 bg-cream-50/50 dark:bg-forest-900/30 border-b border-cream-100 dark:border-forest-700/50 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+      <div class="hidden sm:grid grid-cols-12 gap-3 px-5 py-2 bg-cream-50/50 dark:bg-forest-900/30 border-b border-cream-100 dark:border-forest-700/50 text-sm font-semibold text-gray-700 dark:text-gray-300">
         <div class="col-span-1"></div>
-        <div class="col-span-4">District</div>
-        <div class="col-span-2 text-right">Base Cost</div>
-        <div class="col-span-2 text-right">Cost/kg</div>
+        <div class="col-span-4">{t("seller.shippingRates.columnDistrict")}</div>
+        <div class="col-span-2 text-right">{t("seller.shippingRates.columnBaseCost")}</div>
+        <div class="col-span-2 text-right">{t("seller.shippingRates.columnCostPerKg")}</div>
         <div class="col-span-3"></div>
       </div>
 
@@ -100,9 +103,15 @@ export const DivisionGroup: Component<DivisionGroupProps> = (props) => {
                   <p class="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{item.districtName}</p>
                 </div>
                 <Show when={itemConfigured()}>
-                  <span class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-forest-100 dark:bg-forest-900/40 text-xs font-medium text-forest-700 dark:text-forest-400">
+                  <span class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-forest-100 dark:bg-forest-900/40 text-sm font-medium text-forest-700 dark:text-forest-400">
                     <CheckCircleIcon class="w-3 h-3" />
                     ৳{item.cost}
+                  </span>
+                </Show>
+                <Show when={isCostPerKgConfigured(item)}>
+                  <span class="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-cream-200 dark:bg-cream-800/40 text-sm font-medium text-cream-800 dark:text-cream-300">
+                    <CheckCircleIcon class="w-3 h-3" />
+                    ৳{item.costPerKg}/kg
                   </span>
                 </Show>
                 <div class="flex items-center gap-2">
@@ -115,9 +124,7 @@ export const DivisionGroup: Component<DivisionGroupProps> = (props) => {
                       {savingThis() ? (
                         <SpinnerIcon class="animate-spin h-4 w-4" />
                       ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
-                          <path d="M3 3.5A1.5 1.5 0 0 1 4.5 2h11A1.5 1.5 0 0 1 17 3.5v9l-5 5H4.5A1.5 1.5 0 0 1 3 16v-12.5zM14 2.5a.5.5 0 0 0-.5.5V7h4.5V2.5H14ZM5 12.75a.75.75 0 0 1 .75-.75h8.5a.75.75 0 0 1 0 1.5H5.75a.75.75 0 0 1-.75-.75Z" />
-                        </svg>
+                        <CheckIcon class="w-4 h-4" />
                       )}
                     </button>
                   </Show>
@@ -142,7 +149,11 @@ export const DivisionGroup: Component<DivisionGroupProps> = (props) => {
                       value={displayCostPerKg()}
                       onInput={(e) => props.onCostPerKgChange(item.districtId, e.currentTarget.value)}
                       onBlur={() => props.onBlur(item.districtId)}
-                      class="border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-800"
+                      class={`${
+                        isCostPerKgConfigured(item)
+                          ? "border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-800"
+                          : "border-dashed border-cream-300 dark:border-forest-500 bg-cream-50 dark:bg-forest-900/50 text-gray-500 dark:text-gray-400"
+                      }`}
                     />
                   </div>
                 </div>

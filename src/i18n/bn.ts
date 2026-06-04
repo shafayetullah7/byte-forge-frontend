@@ -1492,7 +1492,7 @@ export const dict = {
     settings: {
       shopSettings: "দোকান সেটিংস",
     },
-    shippingRates: {
+      shippingRates: {
       title: "শিপিং রেট",
       subtitle: "আপনার দোকানের জন্য প্রতি জেলায় ডেলিভারি খরচ নির্ধারণ করুন",
       totalDistricts: "মোট জেলা",
@@ -1512,6 +1512,13 @@ export const dict = {
       ratesUpdated: "শিপিং রেট সফলভাবে আপডেট করা হয়েছে",
       updateFailed: "শিপিং রেট আপডেট করতে ব্যর্থ",
       costPerKg: "প্রতি কেজি খরচ",
+      selected: "সিলেক্ট করা",
+      clear: "মুছুন",
+      districtSingular: "জেলা",
+      districtPlural: "জেলাসমূহ",
+      columnDistrict: "জেলা",
+      columnBaseCost: "বেস খরচ",
+      columnCostPerKg: "প্রতি কেজি খরচ",
     },
     setupShop: {
       title: "আপনার দোকান তৈরি করুন",

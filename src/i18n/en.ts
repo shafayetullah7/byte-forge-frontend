@@ -1489,7 +1489,7 @@ export const dict = {
     settings: {
       shopSettings: "Shop Settings",
     },
-    shippingRates: {
+      shippingRates: {
       title: "Shipping Rates",
       subtitle: "Set delivery cost per district for your shop",
       totalDistricts: "Total Districts",
@@ -1509,6 +1509,13 @@ export const dict = {
       ratesUpdated: "Shipping rates updated successfully",
       updateFailed: "Failed to update shipping rates",
       costPerKg: "Cost per kg",
+      selected: "selected",
+      clear: "Clear",
+      districtSingular: "district",
+      districtPlural: "districts",
+      columnDistrict: "District",
+      columnBaseCost: "Base Cost",
+      columnCostPerKg: "Cost/kg",
     },
     setupShop: {
       title: "Create Your Shop",
