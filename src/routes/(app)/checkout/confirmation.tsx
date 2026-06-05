@@ -1,5 +1,5 @@
-import { ErrorBoundary, Suspense, Show, createEffect } from "solid-js";
-import { useNavigate, A, useLocation } from "@solidjs/router";
+import { ErrorBoundary, Suspense, Show } from "solid-js";
+import { useNavigate, A, useSearchParams, Navigate } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import { requireAuth } from "~/lib/auth/guards";
 import { ApiError } from "~/lib/api";
@@ -10,11 +10,6 @@ import {
 import { Button } from "~/components/ui";
 import type { PaymentMethod } from "~/lib/api/types/checkout.types";
 
-interface OrderConfirmationState {
-  orderNumber: string;
-  paymentMethod: PaymentMethod;
-}
-
 const PaymentMethodIcon: Record<PaymentMethod, string> = {
   COD: "💵",
   CARD: "💳",
@@ -22,12 +17,6 @@ const PaymentMethodIcon: Record<PaymentMethod, string> = {
   NAGAD: "📱",
   SSLCOMMERCE: "🌐",
 };
-
-function AuthRedirect() {
-  const navigate = useNavigate();
-  navigate("/login", { replace: true });
-  return null;
-}
 
 export const route = {
   load: () => requireAuth(),
@@ -50,29 +39,18 @@ function LoadingFallback() {
 export default function ConfirmationPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
-  const location = useLocation();
+  const [searchParams] = useSearchParams();
 
-  const state = location.state as OrderConfirmationState | null;
-  const orderNumber = () => state?.orderNumber ?? "";
-  const paymentMethod = () => state?.paymentMethod ?? null;
+  const orderNumber = () => (searchParams.order as string) ?? "";
+  const paymentMethod = () => (searchParams.method as PaymentMethod) ?? null;
 
   const getPaymentLabel = (method: PaymentMethod): string => {
     const key = `checkout.payment.${method.toLowerCase()}` as const;
     return t(key) || method;
   };
 
-  // Redirect to cart if no order data (e.g., user navigated directly)
-  let hasRedirected = false;
-  createEffect(() => {
-    if (hasRedirected) return;
-    if (!orderNumber()) {
-      hasRedirected = true;
-      navigate("/cart", { replace: true });
-    }
-  });
-
   if (!orderNumber()) {
-    return null;
+    return <Navigate href="/cart" />;
   }
 
   return (
@@ -80,7 +58,7 @@ export default function ConfirmationPage() {
       fallback={(error) => {
         if (error instanceof Response) throw error;
         if (error instanceof ApiError && error.statusCode === 401) {
-          return <AuthRedirect />;
+          return <Navigate href="/login" />;
         }
         return (
           <div class="min-h-screen bg-cream-50 dark:bg-forest-900 flex items-center justify-center p-6">
@@ -98,7 +76,7 @@ export default function ConfirmationPage() {
                 onClick={() => navigate("/cart", { replace: true })}
                 class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
               >
-                {t("common.goHome")}
+                {t("common.retry")}
               </button>
             </div>
           </div>
@@ -137,7 +115,7 @@ export default function ConfirmationPage() {
                 </svg>
               </div>
 
-              <h1 class="text-3xl font-bold text-forest-800 dark:text-cream-50 mb-3">
+              <h1 class="text-2xl font-bold text-forest-800 dark:text-cream-50 mb-2">
                 {t("checkout.orderPlaced")}
               </h1>
               <p class="text-lg text-gray-600 dark:text-gray-400 mb-2">

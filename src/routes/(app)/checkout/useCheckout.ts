@@ -13,11 +13,6 @@ export type CheckoutStep = "address" | "review" | "payment";
 
 const PAYMENT_METHODS: PaymentMethod[] = ["COD", "CARD", "BKASH", "NAGAD", "SSLCOMMERCE"];
 
-interface OrderConfirmationState {
-  orderNumber: string;
-  paymentMethod: PaymentMethod;
-}
-
 export function useCheckout() {
   const { t } = useI18n();
   const navigate = useNavigate();
@@ -112,11 +107,7 @@ export function useCheckout() {
       });
 
       const firstOrderNumber = result.orderGroup.orderNumbers[0] ?? "";
-      const state: OrderConfirmationState = {
-        orderNumber: firstOrderNumber,
-        paymentMethod,
-      };
-      navigate("/checkout/confirmation", { state });
+      navigate(`/checkout/confirmation?order=${firstOrderNumber}&method=${paymentMethod}`);
       toaster.success(t("checkout.orderPlaced"));
     } catch (error) {
       toaster.error(error instanceof Error ? error.message : "Failed to place order");

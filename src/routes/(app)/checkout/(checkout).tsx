@@ -1,5 +1,5 @@
 import { ErrorBoundary, Suspense, Show, Switch, Match, createEffect } from "solid-js";
-import { useNavigate, A } from "@solidjs/router";
+import { useNavigate, A, Navigate } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import { requireAuth } from "~/lib/auth/guards";
 import { ApiError } from "~/lib/api";
@@ -13,14 +13,6 @@ import ReviewStepContent from "./components/ReviewStepContent";
 import PaymentStepContent from "./components/PaymentStepContent";
 import PriceBreakdownSidebar from "./components/PriceBreakdownSidebar";
 import { useCheckout } from "./useCheckout";
-
-function AuthRedirect() {
-  const navigate = useNavigate();
-  createEffect(() => {
-    navigate("/login", { replace: true });
-  });
-  return null;
-}
 
 export const route = {
   load: () => requireAuth(),
@@ -62,7 +54,7 @@ export default function CheckoutPage() {
       fallback={(error) => {
         if (error instanceof Response) throw error;
         if (error instanceof ApiError && error.statusCode === 401) {
-          return <AuthRedirect />;
+          return <Navigate href="/login" />;
         }
         return (
           <div class="min-h-screen bg-cream-50 dark:bg-forest-900 flex items-center justify-center p-6">
