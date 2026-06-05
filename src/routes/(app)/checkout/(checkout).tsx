@@ -46,10 +46,13 @@ export default function CheckoutPage() {
   const checkout = useCheckout();
 
   // Redirect to cart if cart is empty (e.g., after order placement + refresh)
+  let hasRedirected = false;
   createEffect(() => {
+    if (hasRedirected) return;
     const items = checkout.cartItems();
     const isLoaded = checkout.cartLoaded();
     if (isLoaded && items.length === 0) {
+      hasRedirected = true;
       navigate("/cart", { replace: true });
     }
   });

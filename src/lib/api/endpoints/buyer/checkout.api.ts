@@ -32,7 +32,7 @@ export const calculatePriceBreakdown = query(
 );
 
 /**
- * Place order with Cash on Delivery
+ * Place order with the specified payment method
  */
 export const placeOrder = async (request: PlaceOrderRequest): Promise<PlaceOrderResponse> => {
   return fetcher<PlaceOrderResponse>(

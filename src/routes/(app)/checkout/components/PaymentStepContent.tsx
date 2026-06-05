@@ -6,13 +6,6 @@ import { ChevronLeftIcon } from "~/components/icons";
 import { Button } from "~/components/ui";
 import { A } from "@solidjs/router";
 
-interface PaymentMethodOption {
-  id: PaymentMethod;
-  name: string;
-  description: string;
-  icon: string;
-}
-
 interface PaymentStepContentProps {
   selectedPaymentMethod: PaymentMethod;
   paymentMethods: PaymentMethod[];

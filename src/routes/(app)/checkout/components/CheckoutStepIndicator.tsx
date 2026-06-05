@@ -1,4 +1,4 @@
-import { Component, For, Show } from "solid-js";
+import { Component, For, Show, type JSXElement } from "solid-js";
 import { useI18n } from "~/i18n";
 import {
   CheckIcon,
@@ -13,7 +13,9 @@ interface StepIndicatorProps {
   currentStep: CheckoutStep;
 }
 
-const stepIcons: Record<CheckoutStep, any> = {
+type StepIconComponent = (props: { class?: string }) => JSXElement;
+
+const stepIcons: Record<CheckoutStep, StepIconComponent> = {
   address: MapPinIcon,
   review: DocumentTextIcon,
   payment: CreditCardIcon,

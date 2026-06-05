@@ -1,4 +1,4 @@
-import { ErrorBoundary, Suspense, Show, createMemo } from "solid-js";
+import { ErrorBoundary, Suspense, Show, createEffect } from "solid-js";
 import { useNavigate, A, useLocation } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import { requireAuth } from "~/lib/auth/guards";
@@ -52,12 +52,9 @@ export default function ConfirmationPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const state = createMemo<OrderConfirmationState | null>(() => {
-    return location.state as OrderConfirmationState | null;
-  });
-
-  const orderNumber = () => state()?.orderNumber ?? "";
-  const paymentMethod = () => state()?.paymentMethod ?? null;
+  const state = location.state as OrderConfirmationState | null;
+  const orderNumber = () => state?.orderNumber ?? "";
+  const paymentMethod = () => state?.paymentMethod ?? null;
 
   const getPaymentLabel = (method: PaymentMethod): string => {
     const key = `checkout.payment.${method.toLowerCase()}` as const;
@@ -65,8 +62,16 @@ export default function ConfirmationPage() {
   };
 
   // Redirect to cart if no order data (e.g., user navigated directly)
+  let hasRedirected = false;
+  createEffect(() => {
+    if (hasRedirected) return;
+    if (!orderNumber()) {
+      hasRedirected = true;
+      navigate("/cart", { replace: true });
+    }
+  });
+
   if (!orderNumber()) {
-    navigate("/cart", { replace: true });
     return null;
   }
 
