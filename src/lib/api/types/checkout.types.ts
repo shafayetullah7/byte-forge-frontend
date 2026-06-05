@@ -1,3 +1,5 @@
+export type PaymentMethod = 'COD' | 'CARD' | 'BKASH' | 'NAGAD' | 'SSLCOMMERCE';
+
 export interface PriceBreakdown {
   subtotal: string;
   shipping: string;

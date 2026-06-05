@@ -1,6 +1,6 @@
 import { query } from "@solidjs/router";
 import { fetcher } from "../../api-client";
-import type { PriceBreakdownResponse, PlaceOrderResponse } from "../../types/checkout.types";
+import type { PriceBreakdownResponse, PlaceOrderResponse, PaymentMethod } from "../../types/checkout.types";
 
 export interface CalculatePriceBreakdownRequest {
   addressId: string;
@@ -10,7 +10,7 @@ export interface CalculatePriceBreakdownRequest {
 export interface PlaceOrderRequest {
   addressId: string;
   itemIds: string[];
-  paymentMethod: "COD";
+  paymentMethod: PaymentMethod;
   notes?: string;
 }
 

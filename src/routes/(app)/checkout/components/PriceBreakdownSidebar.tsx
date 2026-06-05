@@ -1,21 +1,34 @@
 import { Component, Show } from "solid-js";
 import { useI18n } from "~/i18n";
 import { formatPrice } from "../../plants/constants";
-import { Button } from "~/components/ui";
 import {
   ShieldCheckIcon,
   PackageIcon,
   SparklesIcon,
   TruckIcon,
 } from "~/components/icons";
-import type { PriceBreakdown } from "~/lib/api/types/checkout.types";
+import type { PriceBreakdown, PaymentMethod } from "~/lib/api/types/checkout.types";
 
 interface PriceBreakdownSidebarProps {
   breakdown: PriceBreakdown | undefined;
-  onPlaceOrder: () => void;
-  isPlacingOrder?: boolean;
-  canPlaceOrder: boolean;
+  paymentMethod?: PaymentMethod;
 }
+
+const PaymentMethodLabel: Record<PaymentMethod, string> = {
+  COD: "Cash on Delivery",
+  CARD: "Credit/Debit Card",
+  BKASH: "bKash",
+  NAGAD: "Nagad",
+  SSLCOMMERCE: "SSLCommerz",
+};
+
+const PaymentMethodIcon: Record<PaymentMethod, string> = {
+  COD: "💵",
+  CARD: "💳",
+  BKASH: "📱",
+  NAGAD: "📱",
+  SSLCOMMERCE: "🌐",
+};
 
 const PriceBreakdownSidebar: Component<PriceBreakdownSidebarProps> = (props) => {
   const { t } = useI18n();
@@ -31,75 +44,78 @@ const PriceBreakdownSidebar: Component<PriceBreakdownSidebarProps> = (props) => 
         {t("checkout.priceBreakdown")}
       </h2>
 
-      {/* Price details */}
-      <div class="space-y-3 text-sm">
-        <div class="flex justify-between text-gray-600 dark:text-gray-400">
-          <span>{t("cart.subtotal")}</span>
-          <span class="font-medium text-forest-800 dark:text-cream-50">
-            {formatPrice(subtotal())}
-          </span>
-        </div>
-
-        <div class="flex justify-between text-gray-600 dark:text-gray-400">
-          <span class="flex items-center gap-1.5">
-            <TruckIcon class="w-3.5 h-3.5" />
-            {t("checkout.shipping")}
-          </span>
-          <Show
-            when={shipping() > 0}
-            fallback={
-              <span class="font-medium text-forest-600 dark:text-forest-400">
-                {t("checkout.freeShipping")}
-              </span>
-            }
-          >
+      {/* Loading state */}
+      <Show
+        when={props.breakdown}
+        fallback={
+          <div class="space-y-3">
+            <div class="h-4 bg-cream-200 dark:bg-forest-700 rounded animate-pulse" />
+            <div class="h-4 bg-cream-200 dark:bg-forest-700 rounded animate-pulse w-3/4" />
+            <div class="h-4 bg-cream-200 dark:bg-forest-700 rounded animate-pulse w-1/2" />
+            <div class="h-8 bg-cream-200 dark:bg-forest-700 rounded animate-pulse w-full mt-4" />
+          </div>
+        }
+      >
+        {/* Price details */}
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between text-gray-600 dark:text-gray-400">
+            <span>{t("cart.subtotal")}</span>
             <span class="font-medium text-forest-800 dark:text-cream-50">
-              {formatPrice(shipping())}
+              {formatPrice(subtotal())}
             </span>
-          </Show>
+          </div>
+
+          <div class="flex justify-between text-gray-600 dark:text-gray-400">
+            <span class="flex items-center gap-1.5">
+              <TruckIcon class="w-3.5 h-3.5" />
+              {t("checkout.shipping")}
+            </span>
+            <Show
+              when={shipping() > 0}
+              fallback={
+                <span class="font-medium text-forest-600 dark:text-forest-400">
+                  {t("checkout.freeShipping")}
+                </span>
+              }
+            >
+              <span class="font-medium text-forest-800 dark:text-cream-50">
+                {formatPrice(shipping())}
+              </span>
+            </Show>
+          </div>
+
+          <div class="flex justify-between text-gray-600 dark:text-gray-400">
+            <span>{t("checkout.tax")}</span>
+            <span class="font-medium text-forest-800 dark:text-cream-50">
+              {formatPrice(tax())}
+            </span>
+          </div>
+
+          {/* Total */}
+          <div class="border-t border-cream-200 dark:border-forest-700 pt-3 flex justify-between">
+            <span class="text-base font-bold text-forest-800 dark:text-cream-50">
+              {t("checkout.orderTotal")}
+            </span>
+            <span class="text-xl font-bold text-forest-800 dark:text-cream-50">
+              {formatPrice(total())}
+            </span>
+          </div>
         </div>
 
-        <div class="flex justify-between text-gray-600 dark:text-gray-400">
-          <span>{t("checkout.tax")}</span>
-          <span class="font-medium text-forest-800 dark:text-cream-50">
-            {formatPrice(tax())}
-          </span>
-        </div>
-
-        {/* Total */}
-        <div class="border-t border-cream-200 dark:border-forest-700 pt-3 flex justify-between">
-          <span class="text-base font-bold text-forest-800 dark:text-cream-50">
-            {t("checkout.orderTotal")}
-          </span>
-          <span class="text-xl font-bold text-forest-800 dark:text-cream-50">
-            {formatPrice(total())}
-          </span>
-        </div>
-      </div>
-
-      {/* Place order button */}
-      <div class="mt-5">
-        <Button
-          variant="primary"
-          size="lg"
-          class="w-full"
-          onClick={props.onPlaceOrder}
-          disabled={!props.canPlaceOrder || props.isPlacingOrder}
-          loading={props.isPlacingOrder}
-        >
-          {props.isPlacingOrder
-            ? t("checkout.placingOrder")
-            : t("checkout.placeOrder", {
-                total: formatPrice(total()),
-              })}
-        </Button>
-      </div>
-
-      {/* Security note */}
-      <Show when={props.canPlaceOrder}>
-        <p class="text-xs text-gray-400 dark:text-gray-500 text-center mt-3">
-          {t("checkout.secureCheckoutNote")}
-        </p>
+        {/* Selected payment method */}
+        <Show when={props.paymentMethod}>
+          <div class="mt-4 pt-4 border-t border-cream-200 dark:border-forest-700">
+            <span class="text-xs text-gray-500 dark:text-gray-400">
+              {t("checkout.paymentMethod")}
+            </span>
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-base">{PaymentMethodIcon[props.paymentMethod!]}</span>
+              <span class="text-sm font-medium text-forest-800 dark:text-cream-50">
+                {PaymentMethodLabel[props.paymentMethod!]}
+              </span>
+            </div>
+          </div>
+        </Show>
       </Show>
 
       {/* Trust badges */}

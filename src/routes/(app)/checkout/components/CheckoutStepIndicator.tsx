@@ -1,31 +1,38 @@
 import { Component, For, Show } from "solid-js";
+import { useI18n } from "~/i18n";
 import {
   CheckIcon,
   MapPinIcon,
   DocumentTextIcon,
+  CreditCardIcon,
 } from "~/components/icons";
 
-type CheckoutStep = "address" | "review" | "confirmation";
+type CheckoutStep = "address" | "review" | "payment" | "confirmation";
 
 interface StepIndicatorProps {
   currentStep: CheckoutStep;
 }
 
-const steps: { key: CheckoutStep; number: number; label: string; icon: any }[] = [
-  { key: "address", number: 1, label: "Shipping Address", icon: MapPinIcon },
-  { key: "review", number: 2, label: "Review Order", icon: DocumentTextIcon },
-  { key: "confirmation", number: 3, label: "Confirmation", icon: CheckIcon },
-];
+const stepIcons: Record<CheckoutStep, any> = {
+  address: MapPinIcon,
+  review: DocumentTextIcon,
+  payment: CreditCardIcon,
+  confirmation: CheckIcon,
+};
+
+const stepOrder: CheckoutStep[] = ["address", "review", "payment", "confirmation"];
 
 const CheckoutStepIndicator: Component<StepIndicatorProps> = (props) => {
-  const currentStepIndex = () => steps.findIndex((s) => s.key === props.currentStep);
+  const { t } = useI18n();
+
+  const currentStepIndex = () => stepOrder.findIndex((s) => s === props.currentStep);
 
   return (
     <nav aria-label="Progress">
       <ol class="flex items-center w-full">
-        <For each={steps}>
-          {(step, index) => {
-            const Icon = step.icon;
+        <For each={stepOrder}>
+          {(stepKey, index) => {
+            const Icon = stepIcons[stepKey];
             const isCompleted = index() < currentStepIndex();
             const isCurrent = index() === currentStepIndex();
 
@@ -64,12 +71,12 @@ const CheckoutStepIndicator: Component<StepIndicatorProps> = (props) => {
                         : "text-gray-400 dark:text-gray-500"
                     }`}
                   >
-                    {step.label}
+                    {t(`checkout.steps.${stepKey}`)}
                   </span>
                 </div>
 
                 {/* Connector line */}
-                <Show when={index() < steps.length - 1}>
+                <Show when={index() < stepOrder.length - 1}>
                   <div
                     class={`flex-1 h-0.5 mx-4 ${
                       isCompleted ? "bg-forest-600" : "bg-gray-200 dark:bg-gray-700"
