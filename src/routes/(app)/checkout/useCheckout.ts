@@ -9,9 +9,14 @@ import type { Address } from "~/lib/api/types/address.types";
 import type { PriceBreakdown, PriceBreakdownResponse, PaymentMethod } from "~/lib/api/types/checkout.types";
 import { toaster } from "~/components/ui/Toast";
 
-export type CheckoutStep = "address" | "review" | "payment" | "confirmation";
+export type CheckoutStep = "address" | "review" | "payment";
 
 const PAYMENT_METHODS: PaymentMethod[] = ["COD", "CARD", "BKASH", "NAGAD", "SSLCOMMERCE"];
+
+interface OrderConfirmationState {
+  orderNumber: string;
+  paymentMethod: PaymentMethod;
+}
 
 export function useCheckout() {
   const { t } = useI18n();
@@ -31,14 +36,13 @@ export function useCheckout() {
   const [selectedAddressId, setSelectedAddressId] = createSignal<string | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = createSignal<PaymentMethod>("COD");
   const [isPlacingOrder, setIsPlacingOrder] = createSignal(false);
-  const [orderNumber, setOrderNumber] = createSignal("");
-  const [placedPaymentMethod, setPlacedPaymentMethod] = createSignal<PaymentMethod | null>(null);
   const [itemsInitialized, setItemsInitialized] = createSignal(false);
   const [addressInitialized, setAddressInitialized] = createSignal(false);
 
   // Fetch cart data
-  const cart = createAsync(() => getCart());
+  const cart = createAsync(() => getCart(), { deferStream: true });
   const cartItems = createMemo(() => cart()?.items ?? []);
+  const cartLoaded = createMemo(() => cart() !== undefined);
 
   // Track selected item IDs (default to all items)
   const [selectedItemIds, setSelectedItemIds] = createSignal<Set<string>>(new Set());
@@ -108,9 +112,11 @@ export function useCheckout() {
       });
 
       const firstOrderNumber = result.orderGroup.orderNumbers[0] ?? "";
-      setOrderNumber(firstOrderNumber);
-      setPlacedPaymentMethod(paymentMethod);
-      setCurrentStep("confirmation");
+      const state: OrderConfirmationState = {
+        orderNumber: firstOrderNumber,
+        paymentMethod,
+      };
+      navigate("/checkout/confirmation", { state });
       toaster.success(t("checkout.orderPlaced"));
     } catch (error) {
       toaster.error(error instanceof Error ? error.message : "Failed to place order");
@@ -118,8 +124,6 @@ export function useCheckout() {
       setIsPlacingOrder(false);
     }
   };
-
-  const showStepIndicator = createMemo(() => currentStep() !== "confirmation");
 
   const paymentMethods = PAYMENT_METHODS;
 
@@ -131,13 +135,12 @@ export function useCheckout() {
     selectedPaymentMethod,
     setSelectedPaymentMethod,
     isPlacingOrder,
-    orderNumber,
-    placedPaymentMethod,
     addresses,
     breakdown,
     canPlaceOrder,
     handlePlaceOrder,
-    showStepIndicator,
+    cartItems,
+    cartLoaded,
     paymentMethods,
   };
 }

@@ -11,7 +11,6 @@ import CheckoutStepIndicator from "./components/CheckoutStepIndicator";
 import AddressStepContent from "./components/AddressStepContent";
 import ReviewStepContent from "./components/ReviewStepContent";
 import PaymentStepContent from "./components/PaymentStepContent";
-import ConfirmationStepContent from "./components/ConfirmationStepContent";
 import PriceBreakdownSidebar from "./components/PriceBreakdownSidebar";
 import { useCheckout } from "./useCheckout";
 
@@ -46,6 +45,15 @@ export default function CheckoutPage() {
   const navigate = useNavigate();
   const checkout = useCheckout();
 
+  // Redirect to cart if cart is empty (e.g., after order placement + refresh)
+  createEffect(() => {
+    const items = checkout.cartItems();
+    const isLoaded = checkout.cartLoaded();
+    if (isLoaded && items.length === 0) {
+      navigate("/cart", { replace: true });
+    }
+  });
+
   return (
     <ErrorBoundary
       fallback={(error) => {
@@ -77,38 +85,36 @@ export default function CheckoutPage() {
       }}
     >
       <Suspense fallback={<LoadingFallback />}>
-        <div class="min-h-screen bg-cream-50 dark:bg-forest-900">
-          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {/* Breadcrumb */}
-            <nav class="flex items-center gap-2 text-sm mb-6">
-              <A
-                href="/"
-                class="text-gray-500 dark:text-gray-400 hover:text-forest-600 dark:hover:text-forest-400 transition-colors"
-              >
-                {t("common.home")}
-              </A>
-              <span class="text-gray-300 dark:text-gray-600">/</span>
-              <A
-                href="/cart"
-                class="text-gray-500 dark:text-gray-400 hover:text-forest-600 dark:hover:text-forest-400 transition-colors"
-              >
-                {t("common.cart")}
-              </A>
-              <span class="text-gray-300 dark:text-gray-600">/</span>
-              <span class="text-forest-800 dark:text-cream-50 font-medium">
-                {t("checkout.title")}
-              </span>
-            </nav>
+        <Show when={checkout.cartLoaded() && checkout.cartItems().length > 0}>
+          <div class="min-h-screen bg-cream-50 dark:bg-forest-900">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              {/* Breadcrumb */}
+              <nav class="flex items-center gap-2 text-sm mb-6">
+                <A
+                  href="/"
+                  class="text-gray-500 dark:text-gray-400 hover:text-forest-600 dark:hover:text-forest-400 transition-colors"
+                >
+                  {t("common.home")}
+                </A>
+                <span class="text-gray-300 dark:text-gray-600">/</span>
+                <A
+                  href="/cart"
+                  class="text-gray-500 dark:text-gray-400 hover:text-forest-600 dark:hover:text-forest-400 transition-colors"
+                >
+                  {t("common.cart")}
+                </A>
+                <span class="text-gray-300 dark:text-gray-600">/</span>
+                <span class="text-forest-800 dark:text-cream-50 font-medium">
+                  {t("checkout.title")}
+                </span>
+              </nav>
 
-            {/* Step indicator */}
-            <Show when={checkout.showStepIndicator()}>
+              {/* Step indicator */}
               <div class="mb-8">
                 <CheckoutStepIndicator currentStep={checkout.currentStep()} />
               </div>
-            </Show>
 
-            {/* Page title */}
-            <Show when={checkout.showStepIndicator()}>
+              {/* Page title */}
               <div class="mb-8">
                 <h1 class="text-2xl md:text-3xl font-bold text-forest-800 dark:text-cream-50">
                   {t("checkout.title")}
@@ -117,65 +123,56 @@ export default function CheckoutPage() {
                   {t("checkout.subtitle")}
                 </p>
               </div>
-            </Show>
 
-            {/* Main content */}
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Left: Steps */}
-              <div class="lg:col-span-2">
-                <Switch>
-                  <Match when={checkout.currentStep() === "address"}>
-                    <AddressStepContent
-                      addresses={checkout.addresses() ?? []}
-                      selectedAddressId={checkout.selectedAddressId()}
-                      canPlaceOrder={checkout.canPlaceOrder()}
-                      onSelectAddress={checkout.setSelectedAddressId}
-                      onContinue={() => checkout.setCurrentStep("review")}
-                    />
-                  </Match>
-                  <Match when={checkout.currentStep() === "review"}>
-                    <ReviewStepContent
-                      selectedAddressId={checkout.selectedAddressId()}
-                      addresses={checkout.addresses() ?? []}
-                      canPlaceOrder={checkout.canPlaceOrder()}
-                      priceBreakdown={checkout.breakdown()}
-                      onBack={() => checkout.setCurrentStep("address")}
-                      onContinue={() => checkout.setCurrentStep("payment")}
-                    />
-                  </Match>
-                  <Match when={checkout.currentStep() === "payment"}>
-                    <PaymentStepContent
-                      selectedPaymentMethod={checkout.selectedPaymentMethod()}
-                      paymentMethods={checkout.paymentMethods}
-                      onSelectPaymentMethod={checkout.setSelectedPaymentMethod}
-                      onBack={() => checkout.setCurrentStep("review")}
-                      onPlaceOrder={checkout.handlePlaceOrder}
-                      canPlaceOrder={checkout.canPlaceOrder()}
-                      isPlacingOrder={checkout.isPlacingOrder()}
-                    />
-                  </Match>
-                  <Match when={checkout.currentStep() === "confirmation"}>
-                    <ConfirmationStepContent
-                      navigate={navigate}
-                      orderNumber={checkout.orderNumber()}
-                      paymentMethod={checkout.placedPaymentMethod()}
-                    />
-                  </Match>
-                </Switch>
-              </div>
+              {/* Main content */}
+              <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Left: Steps */}
+                <div class="lg:col-span-2">
+                  <Switch>
+                    <Match when={checkout.currentStep() === "address"}>
+                      <AddressStepContent
+                        addresses={checkout.addresses() ?? []}
+                        selectedAddressId={checkout.selectedAddressId()}
+                        canPlaceOrder={checkout.canPlaceOrder()}
+                        onSelectAddress={checkout.setSelectedAddressId}
+                        onContinue={() => checkout.setCurrentStep("review")}
+                      />
+                    </Match>
+                    <Match when={checkout.currentStep() === "review"}>
+                      <ReviewStepContent
+                        selectedAddressId={checkout.selectedAddressId()}
+                        addresses={checkout.addresses() ?? []}
+                        canPlaceOrder={checkout.canPlaceOrder()}
+                        priceBreakdown={checkout.breakdown()}
+                        onBack={() => checkout.setCurrentStep("address")}
+                        onContinue={() => checkout.setCurrentStep("payment")}
+                      />
+                    </Match>
+                    <Match when={checkout.currentStep() === "payment"}>
+                      <PaymentStepContent
+                        selectedPaymentMethod={checkout.selectedPaymentMethod()}
+                        paymentMethods={checkout.paymentMethods}
+                        onSelectPaymentMethod={checkout.setSelectedPaymentMethod}
+                        onBack={() => checkout.setCurrentStep("review")}
+                        onPlaceOrder={checkout.handlePlaceOrder}
+                        canPlaceOrder={checkout.canPlaceOrder()}
+                        isPlacingOrder={checkout.isPlacingOrder()}
+                      />
+                    </Match>
+                  </Switch>
+                </div>
 
-              {/* Right: Price breakdown */}
-              <Show when={checkout.showStepIndicator()}>
+                {/* Right: Price breakdown */}
                 <div>
                   <PriceBreakdownSidebar
                     breakdown={checkout.breakdown()}
                     paymentMethod={checkout.selectedPaymentMethod()}
                   />
                 </div>
-              </Show>
+              </div>
             </div>
           </div>
-        </div>
+        </Show>
       </Suspense>
     </ErrorBoundary>
   );

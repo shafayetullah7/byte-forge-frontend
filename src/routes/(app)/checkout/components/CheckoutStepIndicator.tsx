@@ -7,7 +7,7 @@ import {
   CreditCardIcon,
 } from "~/components/icons";
 
-type CheckoutStep = "address" | "review" | "payment" | "confirmation";
+type CheckoutStep = "address" | "review" | "payment";
 
 interface StepIndicatorProps {
   currentStep: CheckoutStep;
@@ -17,10 +17,9 @@ const stepIcons: Record<CheckoutStep, any> = {
   address: MapPinIcon,
   review: DocumentTextIcon,
   payment: CreditCardIcon,
-  confirmation: CheckIcon,
 };
 
-const stepOrder: CheckoutStep[] = ["address", "review", "payment", "confirmation"];
+const stepOrder: CheckoutStep[] = ["address", "review", "payment"];
 
 const CheckoutStepIndicator: Component<StepIndicatorProps> = (props) => {
   const { t } = useI18n();
