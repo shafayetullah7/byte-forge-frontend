@@ -31,7 +31,7 @@ export function StatsDisplay(props: {
   const { t } = useI18n();
 
   return (
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
       <div class="bg-white dark:bg-forest-800 rounded-xl border border-gray-200 dark:border-forest-700 p-4 shadow-sm">
         <div class="flex items-center justify-between">
           <div>
