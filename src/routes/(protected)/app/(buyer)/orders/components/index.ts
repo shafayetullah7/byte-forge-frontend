@@ -4,8 +4,8 @@ export { FilterBar } from "./FilterBar";
 export { OrdersTable } from "./OrdersTable";
 export { Pagination } from "./Pagination";
 export {
-  ORDER_STATUS_OPTIONS,
-  PAYMENT_STATUS_OPTIONS,
+  getOrderStatusOptions,
+  getPaymentStatusOptions,
   mapStatus,
   getStatusColor,
   formatTotal,

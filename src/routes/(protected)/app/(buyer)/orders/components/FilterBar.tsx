@@ -2,7 +2,7 @@ import { Show } from "solid-js";
 import { useI18n } from "~/i18n";
 import { MagnifyingGlassIcon, XCircleIcon } from "~/components/icons";
 import { FilterSelect } from "~/components/ui/FilterSelect";
-import { ORDER_STATUS_OPTIONS, PAYMENT_STATUS_OPTIONS } from "./utils";
+import { getOrderStatusOptions, getPaymentStatusOptions } from "./utils";
 
 function FilterChip(props: {
   label: string;
@@ -31,6 +31,9 @@ export function FilterBar(props: {
 }) {
   const { t } = useI18n();
 
+  const statusOptions = () => getOrderStatusOptions(t);
+  const paymentOptions = () => getPaymentStatusOptions(t);
+
   return (
     <div class="bg-white dark:bg-forest-800 rounded-xl border border-gray-200 dark:border-forest-700 shadow-sm">
       <div class="px-5 py-4">
@@ -46,14 +49,14 @@ export function FilterBar(props: {
             />
           </div>
           <FilterSelect
-            options={ORDER_STATUS_OPTIONS}
+            options={statusOptions()}
             value={props.statusFilter}
             onChange={props.onStatusChange}
             placeholder={t("buyer.orders.filters.allStatuses")}
             class="w-full lg:w-52"
           />
           <FilterSelect
-            options={PAYMENT_STATUS_OPTIONS}
+            options={paymentOptions()}
             value={props.paymentFilter}
             onChange={props.onPaymentChange}
             placeholder={t("buyer.orders.filters.allPayments")}
@@ -65,14 +68,14 @@ export function FilterBar(props: {
           <div class="flex items-center gap-2 flex-wrap mt-3 pt-3 border-t border-gray-100 dark:border-forest-700">
             <Show when={props.statusFilter}>
               <FilterChip
-                label={ORDER_STATUS_OPTIONS.find((o) => o.value === props.statusFilter)?.label || ""}
+                label={statusOptions().find((o) => o.value === props.statusFilter)?.label || ""}
                 onRemove={() => props.onStatusChange("")}
                 colorClass="bg-forest-100 text-forest-700 dark:bg-forest-900/40 dark:text-forest-300"
               />
             </Show>
             <Show when={props.paymentFilter}>
               <FilterChip
-                label={PAYMENT_STATUS_OPTIONS.find((o) => o.value === props.paymentFilter)?.label || ""}
+                label={paymentOptions().find((o) => o.value === props.paymentFilter)?.label || ""}
                 onRemove={() => props.onPaymentChange("")}
                 colorClass="bg-sage-100 text-sage-700 dark:bg-sage-900/40 dark:text-sage-300"
               />

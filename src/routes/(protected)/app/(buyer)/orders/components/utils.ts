@@ -1,26 +1,33 @@
 import type { OrderFilterParams } from "~/lib/api/types/order.types";
 import type { StatusType } from "~/components/ui/StatusBadge";
+import type { FilterOption } from "~/components/ui/FilterSelect";
 
-export const ORDER_STATUS_OPTIONS: { value: string; label: string; dotColor?: string }[] = [
-  { value: "", label: "All Statuses" },
-  { value: "PENDING_PAYMENT", label: "Pending Payment", dotColor: "bg-cream-400" },
-  { value: "CONFIRMED", label: "Confirmed", dotColor: "bg-sage-400" },
-  { value: "PROCESSING", label: "Processing", dotColor: "bg-cream-400" },
-  { value: "SHIPPED", label: "Shipped", dotColor: "bg-forest-400" },
-  { value: "DELIVERED", label: "Delivered", dotColor: "bg-forest-500" },
-  { value: "CANCELLED", label: "Cancelled", dotColor: "bg-terracotta-400" },
-  { value: "EXPIRED", label: "Expired", dotColor: "bg-terracotta-400" },
-];
+type TranslateFn = (key: string, params?: Record<string, string | number>) => string;
 
-export const PAYMENT_STATUS_OPTIONS: { value: string; label: string; dotColor?: string }[] = [
-  { value: "", label: "All Payments" },
-  { value: "PENDING", label: "Pending", dotColor: "bg-cream-400" },
-  { value: "PROCESSING", label: "Processing", dotColor: "bg-sage-400" },
-  { value: "COMPLETED", label: "Completed", dotColor: "bg-forest-500" },
-  { value: "FAILED", label: "Failed", dotColor: "bg-terracotta-400" },
-  { value: "REFUNDED", label: "Refunded", dotColor: "bg-sage-400" },
-  { value: "PARTIALLY_REFUNDED", label: "Partially Refunded", dotColor: "bg-sage-400" },
-];
+export function getOrderStatusOptions(t: TranslateFn): FilterOption[] {
+  return [
+    { value: "", label: t("buyer.orders.filters.allStatuses") },
+    { value: "PENDING_PAYMENT", label: t("buyer.orders.status.pendingPayment"), dotColor: "bg-cream-400" },
+    { value: "CONFIRMED", label: t("buyer.orders.status.confirmed"), dotColor: "bg-sage-400" },
+    { value: "PROCESSING", label: t("buyer.orders.status.processing"), dotColor: "bg-cream-400" },
+    { value: "SHIPPED", label: t("buyer.orders.status.shipped"), dotColor: "bg-forest-400" },
+    { value: "DELIVERED", label: t("buyer.orders.status.delivered"), dotColor: "bg-forest-500" },
+    { value: "CANCELLED", label: t("buyer.orders.status.cancelled"), dotColor: "bg-terracotta-400" },
+    { value: "EXPIRED", label: t("buyer.orders.status.expired"), dotColor: "bg-terracotta-400" },
+  ];
+}
+
+export function getPaymentStatusOptions(t: TranslateFn): FilterOption[] {
+  return [
+    { value: "", label: t("buyer.orders.filters.allPayments") },
+    { value: "PENDING", label: t("buyer.orders.payment.pending"), dotColor: "bg-cream-400" },
+    { value: "PROCESSING", label: t("buyer.orders.payment.processing"), dotColor: "bg-sage-400" },
+    { value: "COMPLETED", label: t("buyer.orders.payment.completed"), dotColor: "bg-forest-500" },
+    { value: "FAILED", label: t("buyer.orders.payment.failed"), dotColor: "bg-terracotta-400" },
+    { value: "REFUNDED", label: t("buyer.orders.payment.refunded"), dotColor: "bg-sage-400" },
+    { value: "PARTIALLY_REFUNDED", label: t("buyer.orders.payment.partiallyRefunded"), dotColor: "bg-sage-400" },
+  ];
+}
 
 export function mapStatus(status: string): StatusType {
   const s = status.toUpperCase();

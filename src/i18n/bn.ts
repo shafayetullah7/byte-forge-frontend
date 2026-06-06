@@ -228,6 +228,50 @@ export const dict = {
     orders: {
       title: "আমার অর্ডার",
       subtitle: "আপনার কেনাকাটা ট্র্যাক এবং পরিচালনা করুন",
+      loading: "অর্ডার লোড হচ্ছে",
+      loadingDescription: "আপনার অর্ডার ইতিহাস আনা হচ্ছে",
+      resultsCount: (p: { showing: number; total: number }) =>
+        `${p.total} এর মধ্যে ${p.showing} দেখানো হচ্ছে`,
+      clearAllFilters: "সব ফিল্টার মুছুন",
+      searchPlaceholder: "অর্ডার নম্বর, পণ্য বা দোকান দিয়ে খুঁজুন...",
+      stats: {
+        total: "মোট অর্ডার",
+        active: "সক্রিয়",
+        delivered: "বিতরিত",
+        cancelled: "বাতিল",
+        spent: "মোট খরচ",
+      },
+      status: {
+        pendingPayment: "পেমেন্ট মুলতুবি",
+        confirmed: "নিশ্চিত",
+        processing: "প্রক্রিয়াধীন",
+        shipped: "পাঠানো হয়েছে",
+        delivered: "বিতরণ করা হয়েছে",
+        cancelled: "বাতিল",
+        expired: "মেয়াদোত্তীর্ণ",
+      },
+      payment: {
+        pending: "মুলতুবি",
+        processing: "প্রক্রিয়াধীন",
+        completed: "সম্পন্ন",
+        failed: "ব্যর্থ",
+        refunded: "ফেরত দেওয়া হয়েছে",
+        partiallyRefunded: "আংশিক ফেরত",
+      },
+      filters: {
+        allStatuses: "সব অবস্থা",
+        allPayments: "সব পেমেন্ট",
+        clearAll: "সব মুছুন",
+      },
+      noOrdersFound: "আপনার ফিল্টার মিলেছে এমন কোনো অর্ডার নেই",
+      noOrdersAdjustFilters: "আপনার সার্চ বা ফিল্টার পরিবর্তন করে দেখুন",
+      clearFilters: "ফিল্টার মুছুন",
+      shops: "দোকান",
+      items: "আইটেম",
+      error: {
+        failedToLoad: "অর্ডার লোড করা যায়নি",
+        retry: "আবার চেষ্টা করুন",
+      },
       empty: {
         title: "কোন অর্ডার নেই",
         description:

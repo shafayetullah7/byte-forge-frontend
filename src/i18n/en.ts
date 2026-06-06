@@ -226,6 +226,50 @@ export const dict = {
     orders: {
       title: "My Orders",
       subtitle: "Track and manage your purchases",
+      loading: "Loading orders",
+      loadingDescription: "Fetching your order history",
+      resultsCount: (p: { showing: number; total: number }) =>
+        `Showing ${p.showing} of ${p.total} orders`,
+      clearAllFilters: "Clear all",
+      searchPlaceholder: "Search by order number, product, or shop...",
+      stats: {
+        total: "Total Orders",
+        active: "Active",
+        delivered: "Delivered",
+        cancelled: "Cancelled",
+        spent: "Total Spent",
+      },
+      status: {
+        pendingPayment: "Pending Payment",
+        confirmed: "Confirmed",
+        processing: "Processing",
+        shipped: "Shipped",
+        delivered: "Delivered",
+        cancelled: "Cancelled",
+        expired: "Expired",
+      },
+      payment: {
+        pending: "Pending",
+        processing: "Processing",
+        completed: "Completed",
+        failed: "Failed",
+        refunded: "Refunded",
+        partiallyRefunded: "Partially Refunded",
+      },
+      filters: {
+        allStatuses: "All Statuses",
+        allPayments: "All Payments",
+        clearAll: "Clear All",
+      },
+      noOrdersFound: "No orders match your filters",
+      noOrdersAdjustFilters: "Try adjusting your search or filters",
+      clearFilters: "Clear filters",
+      shops: "shops",
+      items: "items",
+      error: {
+        failedToLoad: "Failed to load orders",
+        retry: "Retry",
+      },
       empty: {
         title: "No orders yet",
         description:
