@@ -37,7 +37,6 @@ export interface OrderStats {
 
 export interface OrderListResponse {
   groups: OrderGroup[];
-  stats: OrderStats;
   meta: {
     page: number;
     limit: number;

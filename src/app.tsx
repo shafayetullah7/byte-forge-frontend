@@ -73,7 +73,13 @@ export default function App() {
       <ThemeProvider initialTheme={initialTheme}>
         <Router
           root={(props) => (
-            <Suspense>
+            <Suspense
+              fallback={
+                <div class="flex items-center justify-center min-h-screen">
+                  <div class="w-8 h-8 border-2 border-forest-600 border-t-transparent rounded-full animate-spin" />
+                </div>
+              }
+            >
               <AutoTokenRefreshProvider />
               {props.children}
               <Toaster />
