@@ -1,9 +1,8 @@
-import { Show, createMemo, createSignal, createEffect } from "solid-js";
+import { Show, createMemo, createSignal, createResource } from "solid-js";
 import { createAsync } from "@solidjs/router";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 import { useI18n } from "~/i18n";
 import { getOrders, getOrdersStats } from "~/lib/api/endpoints/buyer/orders.api";
-import type { OrderListResponse } from "~/lib/api/types/order.types";
 import { ShoppingBagIcon } from "~/components/icons";
 import {
   StatsLoading,
@@ -20,7 +19,6 @@ const ITEMS_PER_PAGE = 10;
 export default function OrdersPage() {
   const { t } = useI18n();
 
-  // Filter state - individual signals for flat state (Solid best practice)
   const [currentPage, setCurrentPage] = createSignal(1);
   const [statusFilter, setStatusFilter] = createSignal("");
   const [paymentFilter, setPaymentFilter] = createSignal("");
@@ -36,30 +34,13 @@ export default function OrdersPage() {
     })
   );
 
-  // Stats - fetch once, no filter dependency
   const statsData = createAsync(() => getOrdersStats());
-
-  // Orders - reactive to filter changes
-  const ordersData = createAsync(
-    () => getOrders(filterParams()),
-    { deferStream: true }
+  const [ordersData] = createResource(
+    () => filterParams(),
+    (params) => getOrders(params)
   );
 
-  // Stable data pattern - prevents flash during refetch
-  const [stableOrders, setStableOrders] = createSignal<OrderListResponse | undefined>(undefined);
-  const [isRefetching, setIsRefetching] = createSignal(false);
-
-  createEffect(() => {
-    const d = ordersData();
-    if (d !== undefined) {
-      setStableOrders(d);
-      setIsRefetching(false);
-    } else if (stableOrders() !== undefined) {
-      setIsRefetching(true);
-    }
-  });
-
-  const totalItems = createMemo(() => stableOrders()?.meta?.total ?? 0);
+  const totalItems = createMemo(() => ordersData.latest?.meta?.total ?? 0);
   const totalPages = createMemo(() => Math.ceil(totalItems() / ITEMS_PER_PAGE) || 1);
 
   const hasActiveFilters = createMemo(
@@ -121,7 +102,7 @@ export default function OrdersPage() {
 
       <div class="flex items-center justify-between mb-4">
         <p class="text-sm text-gray-500 dark:text-gray-400">
-          {t("buyer.orders.resultsCount", { showing: stableOrders()?.groups?.length ?? 0, total: totalItems() })}
+          {t("buyer.orders.resultsCount", { showing: ordersData.latest?.groups?.length ?? 0, total: totalItems() })}
         </p>
         <Show when={hasActiveFilters()}>
           <button
@@ -139,12 +120,12 @@ export default function OrdersPage() {
         )}
       >
         <Show
-          when={stableOrders()}
+          when={ordersData.latest}
           fallback={<OrdersLoading />}
         >
           {(data) => (
             <div class="relative">
-              {isRefetching() && (
+              {ordersData.loading && (
                 <div class="absolute top-0 left-0 right-0 h-0.5 bg-forest-600 animate-pulse rounded-full z-10" />
               )}
               <OrdersTable
