@@ -1,6 +1,5 @@
-export { StatsLoading } from "./StatsCard";
-export { FilterChip } from "./FilterChip";
-export { FilterBar } from "./FilterBar";
+export { StatsLoading, StatsDisplay } from "./StatsDisplay";
+export { FilterBar, FilterChip } from "./FilterBar";
 export { OrdersTable } from "./OrdersTable";
 export { Pagination } from "./Pagination";
 export {
