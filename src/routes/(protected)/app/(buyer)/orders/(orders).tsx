@@ -1,10 +1,9 @@
-import { Show, Suspense, createMemo } from "solid-js";
-import { createStore } from "solid-js/store";
+import { Show, createMemo, createSignal, createEffect } from "solid-js";
 import { createAsync } from "@solidjs/router";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 import { useI18n } from "~/i18n";
 import { getOrders, getOrdersStats } from "~/lib/api/endpoints/buyer/orders.api";
-import type { OrderFilterParams } from "~/lib/api/types/order.types";
+import type { OrderListResponse } from "~/lib/api/types/order.types";
 import { ShoppingBagIcon } from "~/components/icons";
 import {
   StatsLoading,
@@ -16,50 +15,67 @@ import {
   buildFilterParams,
 } from "./components";
 
-interface OrderFilters {
-  page: number;
-  statusFilter: string;
-  paymentFilter: string;
-  searchQuery: string;
-}
+const ITEMS_PER_PAGE = 10;
 
 export default function OrdersPage() {
   const { t } = useI18n();
 
-  const [filters, setFilters] = createStore<OrderFilters>({
-    page: 1,
-    statusFilter: "",
-    paymentFilter: "",
-    searchQuery: "",
-  });
-  const ITEMS_PER_PAGE = 10;
+  // Filter state - individual signals for flat state (Solid best practice)
+  const [currentPage, setCurrentPage] = createSignal(1);
+  const [statusFilter, setStatusFilter] = createSignal("");
+  const [paymentFilter, setPaymentFilter] = createSignal("");
+  const [searchQuery, setSearchQuery] = createSignal("");
 
-  const filterParams = createMemo<OrderFilterParams>(() =>
+  const filterParams = createMemo(() =>
     buildFilterParams({
-      page: filters.page,
+      page: currentPage(),
       limit: ITEMS_PER_PAGE,
-      statusFilter: filters.statusFilter,
-      paymentFilter: filters.paymentFilter,
-      searchQuery: filters.searchQuery,
+      statusFilter: statusFilter(),
+      paymentFilter: paymentFilter(),
+      searchQuery: searchQuery(),
     })
   );
 
+  // Stats - fetch once, no filter dependency
   const statsData = createAsync(() => getOrdersStats());
-  const ordersData = createAsync(() => getOrders(filterParams()));
 
-  const totalItems = createMemo(() => ordersData()?.meta?.total ?? 0);
+  // Orders - reactive to filter changes
+  const ordersData = createAsync(
+    () => getOrders(filterParams()),
+    { deferStream: true }
+  );
+
+  // Stable data pattern - prevents flash during refetch
+  const [stableOrders, setStableOrders] = createSignal<OrderListResponse | undefined>(undefined);
+  const [isRefetching, setIsRefetching] = createSignal(false);
+
+  createEffect(() => {
+    const d = ordersData();
+    if (d !== undefined) {
+      setStableOrders(d);
+      setIsRefetching(false);
+    } else if (stableOrders() !== undefined) {
+      setIsRefetching(true);
+    }
+  });
+
+  const totalItems = createMemo(() => stableOrders()?.meta?.total ?? 0);
   const totalPages = createMemo(() => Math.ceil(totalItems() / ITEMS_PER_PAGE) || 1);
 
   const hasActiveFilters = createMemo(
-    () => !!(filters.searchQuery || filters.statusFilter || filters.paymentFilter)
+    () => !!(searchQuery() || statusFilter() || paymentFilter())
   );
 
-  const handleFilterChange = (key: "statusFilter" | "paymentFilter" | "searchQuery", value: string) => {
-    setFilters({ [key]: value, page: 1 });
+  const handleFilterChange = (setter: (val: string) => void, value: string) => {
+    setter(value);
+    setCurrentPage(1);
   };
 
   const clearFilters = () => {
-    setFilters({ page: 1, statusFilter: "", paymentFilter: "", searchQuery: "" });
+    setSearchQuery("");
+    setStatusFilter("");
+    setPaymentFilter("");
+    setCurrentPage(1);
   };
 
   return (
@@ -87,27 +103,25 @@ export default function OrdersPage() {
           <InlineErrorFallback error={error} reset={reset} label="order statistics" />
         )}
       >
-        <Suspense fallback={<StatsLoading />}>
-          <Show when={statsData()}>
-            {(stats) => <StatsDisplay stats={stats()} />}
-          </Show>
-        </Suspense>
+        <Show when={statsData()}>
+          {(stats) => <StatsDisplay stats={stats()} />}
+        </Show>
       </SafeErrorBoundary>
 
       <FilterBar
-        searchQuery={filters.searchQuery}
-        onSearchChange={(val) => handleFilterChange("searchQuery", val)}
-        statusFilter={filters.statusFilter}
-        onStatusChange={(val) => handleFilterChange("statusFilter", val)}
-        paymentFilter={filters.paymentFilter}
-        onPaymentChange={(val) => handleFilterChange("paymentFilter", val)}
+        searchQuery={searchQuery()}
+        onSearchChange={(val) => handleFilterChange(setSearchQuery, val)}
+        statusFilter={statusFilter()}
+        onStatusChange={(val) => handleFilterChange(setStatusFilter, val)}
+        paymentFilter={paymentFilter()}
+        onPaymentChange={(val) => handleFilterChange(setPaymentFilter, val)}
         hasActiveFilters={hasActiveFilters()}
         onClearFilters={clearFilters}
       />
 
       <div class="flex items-center justify-between mb-4">
         <p class="text-sm text-gray-500 dark:text-gray-400">
-          {t("buyer.orders.resultsCount", { showing: ordersData()?.groups?.length ?? 0, total: totalItems() })}
+          {t("buyer.orders.resultsCount", { showing: stableOrders()?.groups?.length ?? 0, total: totalItems() })}
         </p>
         <Show when={hasActiveFilters()}>
           <button
@@ -124,26 +138,30 @@ export default function OrdersPage() {
           <InlineErrorFallback error={error} reset={reset} label="orders" />
         )}
       >
-        <Suspense fallback={<OrdersLoading />}>
-          <Show when={ordersData()}>
-            {(data) => (
-              <>
-                <OrdersTable
-                  groups={data().groups}
-                  hasActiveFilters={hasActiveFilters()}
-                  onClearFilters={clearFilters}
-                />
-                <Pagination
-                  currentPage={filters.page}
-                  totalPages={totalPages()}
-                  totalItems={totalItems()}
-                  itemsPerPage={ITEMS_PER_PAGE}
-                  onPageChange={(page) => setFilters({ page })}
-                />
-              </>
-            )}
-          </Show>
-        </Suspense>
+        <Show
+          when={stableOrders()}
+          fallback={<OrdersLoading />}
+        >
+          {(data) => (
+            <div class="relative">
+              {isRefetching() && (
+                <div class="absolute top-0 left-0 right-0 h-0.5 bg-forest-600 animate-pulse rounded-full z-10" />
+              )}
+              <OrdersTable
+                groups={data().groups}
+                hasActiveFilters={hasActiveFilters()}
+                onClearFilters={clearFilters}
+              />
+              <Pagination
+                currentPage={currentPage()}
+                totalPages={totalPages()}
+                totalItems={totalItems()}
+                itemsPerPage={ITEMS_PER_PAGE}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          )}
+        </Show>
       </SafeErrorBoundary>
     </div>
   );
