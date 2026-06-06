@@ -72,3 +72,6 @@ export * from "./public/plants.types";
 
 // Address types
 export * from "./address.types";
+
+// Order types
+export * from "./order.types";
