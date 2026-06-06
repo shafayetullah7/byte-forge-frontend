@@ -11,6 +11,9 @@ importers:
       '@fontsource-variable/plus-jakarta-sans':
         specifier: ^5.2.8
         version: 5.2.8
+      '@fontsource/noto-sans-bengali':
+        specifier: ^5.2.11
+        version: 5.2.11
       '@modular-forms/solid':
         specifier: ^0.25.1
         version: 0.25.1(solid-js@1.9.10)(typescript@6.0.3)
@@ -568,6 +571,9 @@ packages:
 
   '@fontsource-variable/plus-jakarta-sans@5.2.8':
     resolution: {integrity: sha512-iQecBizIdZxezODNHzOn4SvvRMrZL/S8k4MEXGDynCmUrImVW0VmX+tIAMqnADwH4haXlHSXqMgU6+kcfBQJdw==}
+
+  '@fontsource/noto-sans-bengali@5.2.11':
+    resolution: {integrity: sha512-sDCKgC1u83/7JwulfgyvCDab97OkN375RDeGcXtvmI2Vx9ZY5mAcjb4qBtZbv53sL8i+jLawsWvZQVs4zCNkug==}
 
   '@ioredis/commands@1.5.0':
     resolution: {integrity: sha512-eUgLqrMf8nJkZxT24JvVRrQya1vZkQh8BBeYNwGDqa5I0VUi8ACx7uFvAaLxintokpTenkK6DASvo/bvNbBGow==}
@@ -3603,6 +3609,8 @@ snapshots:
   '@exodus/bytes@1.15.0': {}
 
   '@fontsource-variable/plus-jakarta-sans@5.2.8': {}
+
+  '@fontsource/noto-sans-bengali@5.2.11': {}
 
   '@ioredis/commands@1.5.0': {}
 

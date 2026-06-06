@@ -1,5 +1,10 @@
 @import "tailwindcss";
 @import "@fontsource-variable/plus-jakarta-sans";
+@import "@fontsource/noto-sans-bengali/400.css";
+@import "@fontsource/noto-sans-bengali/500.css";
+@import "@fontsource/noto-sans-bengali/600.css";
+@import "@fontsource/noto-sans-bengali/700.css";
+@import "@fontsource/noto-sans-bengali/800.css";
 
 @theme {
   /* ========================================
@@ -85,7 +90,7 @@
  * Typography System (Balanced Flat)
  * ======================================== */
 @utility h1 {
-  font-family: 'Plus Jakarta Sans Variable', sans-serif;
+  font-family: 'Plus Jakarta Sans Variable', 'Noto Sans Bengali', sans-serif;
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: -0.03em;
@@ -94,7 +99,7 @@
 }
 
 @utility h2 {
-  font-family: 'Plus Jakarta Sans Variable', sans-serif;
+  font-family: 'Plus Jakarta Sans Variable', 'Noto Sans Bengali', sans-serif;
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: -0.025em;
@@ -103,7 +108,7 @@
 }
 
 @utility h3 {
-  font-family: 'Plus Jakarta Sans Variable', sans-serif;
+  font-family: 'Plus Jakarta Sans Variable', 'Noto Sans Bengali', sans-serif;
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.02em;
@@ -112,7 +117,7 @@
 }
 
 @utility h4 {
-  font-family: 'Plus Jakarta Sans Variable', sans-serif;
+  font-family: 'Plus Jakarta Sans Variable', 'Noto Sans Bengali', sans-serif;
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.01em;
@@ -121,7 +126,7 @@
 }
 
 @utility h5 {
-  font-family: 'Plus Jakarta Sans Variable', sans-serif;
+  font-family: 'Plus Jakarta Sans Variable', 'Noto Sans Bengali', sans-serif;
   font-weight: 600;
   line-height: 1.1;
   color: var(--color-forest-900);
@@ -129,7 +134,7 @@
 }
 
 @utility h6 {
-  font-family: 'Plus Jakarta Sans Variable', sans-serif;
+  font-family: 'Plus Jakarta Sans Variable', 'Noto Sans Bengali', sans-serif;
   font-weight: 600;
   line-height: 1.1;
   color: var(--color-forest-900);
@@ -157,7 +162,7 @@
 body {
   background-color: var(--color-cream-50);
   color: var(--color-forest-800);
-  font-family: 'Plus Jakarta Sans Variable', sans-serif;
+  font-family: 'Plus Jakarta Sans Variable', 'Noto Sans Bengali', sans-serif;
   @apply body-base;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
