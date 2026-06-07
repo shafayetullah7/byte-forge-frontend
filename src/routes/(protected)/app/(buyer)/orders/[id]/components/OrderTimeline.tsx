@@ -1,4 +1,4 @@
-import { Component, For, Show } from "solid-js";
+import { Component, For } from "solid-js";
 import { useI18n } from "~/i18n";
 import {
   CheckCircleIcon,
@@ -7,6 +7,7 @@ import {
   PackageIcon,
   XCircleIcon,
 } from "~/components/icons";
+import { formatShortDate, formatHour } from "./utils";
 
 export interface TimelineEvent {
   id: string;
@@ -66,24 +67,6 @@ function getLineColor(isCompleted: boolean): string {
 
 export const OrderTimeline: Component<OrderTimelineProps> = (props) => {
   const { t } = useI18n();
-
-  const formatTime = (dateStr: string): string => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
-
-  const formatHour = (dateStr: string): string => {
-    const date = new Date(dateStr);
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-  };
 
   return (
     <div class="bg-white dark:bg-forest-800 rounded-xl border border-gray-200 dark:border-forest-700 shadow-sm">
@@ -145,7 +128,7 @@ export const OrderTimeline: Component<OrderTimelineProps> = (props) => {
                     {event.description}
                   </p>
                   <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                    {formatTime(event.timestamp)} {formatHour(event.timestamp)}
+                    {formatShortDate(event.timestamp)} {formatHour(event.timestamp)}
                   </p>
                 </div>
               </div>
