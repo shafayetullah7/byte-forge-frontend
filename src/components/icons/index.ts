@@ -69,6 +69,9 @@ export { SproutIcon } from "./SproutIcon";
 export { StarRatingIcon } from "./StarRatingIcon";
 export { CreditCardIcon } from "./CreditCardIcon";
 export { TruckIcon } from "./TruckIcon";
+export { PrinterIcon } from "./PrinterIcon";
+export { FlagIcon } from "./FlagIcon";
+export { ReceiptIcon } from "./ReceiptIcon";
 
 export * from './TagIcon';
 export * from './ArrowsRightLeftIcon';

@@ -1,6 +1,12 @@
 import { query, revalidate } from "@solidjs/router";
 import { fetcher } from "../../api-client";
-import type { OrderListResponse, OrderFilterParams, OrderStats, Order } from "../../types/order.types";
+import type {
+  OrderListResponse,
+  OrderFilterParams,
+  OrderStats,
+  Order,
+  OrderGroupDetailResponse,
+} from "../../types/order.types";
 
 const BASE_PATH = "/api/v1/user/buyer/orders";
 
@@ -48,6 +54,18 @@ export const getOrderById = query(
 );
 
 /**
+ * Get detailed order group with all orders, items, addresses, and status history
+ */
+export const getOrderGroup = query(
+  async (groupId: string): Promise<OrderGroupDetailResponse> => {
+    return fetcher<OrderGroupDetailResponse>(`${BASE_PATH}/${groupId}`, {
+      unwrapData: false,
+    });
+  },
+  "buyer-order-group-detail"
+);
+
+/**
  * Cancel an order
  */
 export const cancelOrder = async (orderId: string): Promise<Order> => {
@@ -81,5 +99,6 @@ export const ordersApi = {
   get: getOrders,
   getStats: getOrdersStats,
   getById: getOrderById,
+  getGroup: getOrderGroup,
   cancel: cancelOrder,
 };
