@@ -1,4 +1,4 @@
-import { Show, createMemo, createSignal, createResource, Suspense } from "solid-js";
+import { Show, createMemo, createSignal, createEffect, Suspense } from "solid-js";
 import { createAsync } from "@solidjs/router";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 import { useI18n } from "~/i18n";
@@ -35,10 +35,21 @@ export default function OrdersPage() {
   );
 
   const statsData = createAsync(() => getOrdersStats());
-  const [ordersData, { refetch: refetchOrders }] = createResource(
-    () => filterParams(),
-    (params) => getOrders(params)
+  const ordersData = createAsync(
+    () => getOrders(filterParams()),
+    { deferStream: true }
   );
+
+  const [isRefetching, setIsRefetching] = createSignal(false);
+  createEffect(() => {
+    const current = ordersData();
+    const latest = ordersData.latest;
+    if (current !== undefined) {
+      setIsRefetching(false);
+    } else if (latest !== undefined) {
+      setIsRefetching(true);
+    }
+  });
 
   const totalItems = createMemo(() => ordersData.latest?.meta?.total ?? 0);
   const totalPages = createMemo(() => Math.ceil(totalItems() / ITEMS_PER_PAGE) || 1);
@@ -115,31 +126,11 @@ export default function OrdersPage() {
       >
         <Show
           when={ordersData.latest}
-          fallback={
-            ordersData.error ? (
-              <div class="bg-white dark:bg-forest-800 rounded-xl border border-red-200 dark:border-red-800 py-12 px-4 text-center shadow-sm">
-                <ShoppingBagIcon class="w-10 h-10 text-red-400 dark:text-red-500 mx-auto mb-4" />
-                <h3 class="text-lg font-semibold text-red-900 dark:text-red-300 mb-2">
-                  {t("buyer.orders.error.failedToLoad") || "Failed to load orders"}
-                </h3>
-                <p class="text-gray-500 dark:text-gray-400 mb-4">
-                  {ordersData.error.message}
-                </p>
-                <button
-                  onClick={() => refetchOrders()}
-                  class="px-4 py-2 bg-red-100 dark:bg-red-800 text-red-700 dark:text-red-200 rounded-lg hover:bg-red-200 dark:hover:bg-red-700 transition-colors text-sm font-medium"
-                >
-                  {t("buyer.orders.error.retry") || "Retry"}
-                </button>
-              </div>
-            ) : (
-              <OrdersLoading />
-            )
-          }
+          fallback={<OrdersLoading />}
         >
           {(data) => (
             <div class="relative">
-              {ordersData.loading && (
+              {isRefetching() && (
                 <div class="absolute top-0 left-0 right-0 h-0.5 bg-forest-600 animate-pulse rounded-full z-10" />
               )}
               <OrdersTable
