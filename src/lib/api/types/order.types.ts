@@ -36,11 +36,14 @@ export interface OrderStats {
 }
 
 export interface OrderListResponse {
-  groups: OrderGroup[];
+  success: boolean;
+  message: string;
+  data: OrderGroup[];
   meta: {
     page: number;
     limit: number;
     total: number;
+    pages: number;
   };
 }
 

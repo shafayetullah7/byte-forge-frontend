@@ -19,7 +19,10 @@ export const getOrders = query(
       if (params.paymentStatus !== undefined) queryParams.paymentStatus = params.paymentStatus;
       if (params.search !== undefined) queryParams.search = params.search;
     }
-    return fetcher<OrderListResponse>(BASE_PATH, { params: queryParams });
+    return fetcher<OrderListResponse>(BASE_PATH, {
+      params: queryParams,
+      unwrapData: false,
+    });
   },
   "buyer-orders"
 );
