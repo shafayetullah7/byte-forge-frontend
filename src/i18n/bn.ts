@@ -281,6 +281,7 @@ export const dict = {
       },
       details: {
         title: "অর্ডারের বিবরণ",
+        loading: "অর্ডারের বিবরণ লোড হচ্ছে...",
         items: "আইটেমসমূহ",
         timeline: "অর্ডার টাইমলাইন",
         summary: "অর্ডারের সারাংশ",

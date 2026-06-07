@@ -279,6 +279,7 @@ export const dict = {
       },
       details: {
         title: "Order Details",
+        loading: "Loading order details...",
         items: "Items",
         timeline: "Order Timeline",
         summary: "Order Summary",

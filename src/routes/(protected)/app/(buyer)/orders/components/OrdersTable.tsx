@@ -67,7 +67,7 @@ export function OrdersTable(props: {
                 <For each={group.orders}>
                   {(order) => (
                     <A
-                      href={`/app/orders/${order.id}`}
+                      href={`/app/orders/${group.id}`}
                       class={`block px-5 py-3 border-l-4 ${getStatusColor(order.status)} hover:bg-gray-50 dark:hover:bg-forest-700/50 transition-colors`}
                     >
                       <div class="flex items-center justify-between mb-2">
