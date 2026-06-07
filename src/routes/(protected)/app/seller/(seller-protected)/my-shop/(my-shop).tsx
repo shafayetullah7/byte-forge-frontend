@@ -351,8 +351,8 @@ export default function MyShopPage() {
         <InlineErrorFallback error={err} reset={reset} label="my shop" />
       )}
     >
-      <div class="min-h-screen py-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="min-h-screen">
+        <div class="mx-auto max-w-[1400px]">
           {/* Page Header */}
           <div class="mb-8">
             <div class="flex items-center gap-3">

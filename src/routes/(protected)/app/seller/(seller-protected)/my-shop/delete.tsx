@@ -46,8 +46,8 @@ export default function DeleteShopPage() {
         <InlineErrorFallback error={err} reset={reset} label="delete shop" />
       )}
     >
-      <div class="min-h-screen bg-cream-50 dark:bg-forest-900 py-12">
-        <div class="max-w-2xl mx-auto px-4">
+      <div class="min-h-screen bg-cream-50 dark:bg-forest-900">
+        <div class="mx-auto max-w-2xl">
           <Card title="Delete Shop">
             <div class="space-y-6">
               {/* Warning */}

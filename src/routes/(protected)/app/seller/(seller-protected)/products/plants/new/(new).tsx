@@ -439,7 +439,7 @@ export default function NewPlantPage() {
   return (
     <ErrorBoundary
       fallback={(error) => (
-        <div class="max-w-5xl mx-auto py-12 px-6">
+        <div class="mx-auto max-w-5xl">
           <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-8 max-w-md mx-auto">
             <div class="flex items-center gap-3 mb-4">
               <svg class="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

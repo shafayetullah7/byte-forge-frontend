@@ -237,8 +237,8 @@ const EditAddressPage: Component = () => {
                 <InlineErrorFallback error={err} reset={reset} label={t("buyer.addresses.title")} />
             )}
         >
-        <div class="min-h-screen py-8">
-            <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="min-h-screen">
+            <div class="mx-auto max-w-4xl">
                 {/* Page Header */}
                 <div class="mb-8">
                     <div class="flex items-center gap-3">

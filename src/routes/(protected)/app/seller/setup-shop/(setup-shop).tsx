@@ -209,8 +209,8 @@ export default function SetupShop() {
 
     return (
         <Suspense fallback={<div class="flex justify-center py-20">{t("common.loading")}</div>}>
-            <div class="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-                <div class="max-w-3xl w-full space-y-8">
+            <div class="min-h-full flex items-center justify-center py-12">
+                <div class="mx-auto max-w-3xl w-full space-y-8">
                     {/* Header */}
                     <div class="text-center">
                         <h1 class="h1 mb-3">

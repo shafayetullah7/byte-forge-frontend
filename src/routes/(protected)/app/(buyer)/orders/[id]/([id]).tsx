@@ -633,7 +633,7 @@ const OrderDetails: Component = () => {
         <InlineErrorFallback error={error} reset={reset} label={t("buyer.orders.details.title")} />
       )}
     >
-      <div class="px-6 py-8 mx-auto max-w-[1400px]">
+      <div class="mx-auto max-w-[1400px]">
         {/* Header */}
         <div class="mb-8">
           <div class="flex items-center gap-3 mb-4">

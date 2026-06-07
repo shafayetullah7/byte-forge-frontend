@@ -62,8 +62,8 @@ export default function VerificationHistoryPage() {
         <InlineErrorFallback error={err} reset={reset} label="verification history" />
       )}
     >
-      <div class="min-h-screen bg-cream-50 dark:bg-forest-900 py-12">
-        <div class="max-w-4xl mx-auto px-4">
+      <div class="min-h-screen bg-cream-50 dark:bg-forest-900">
+        <div class="mx-auto max-w-4xl">
           {/* Header */}
           <div class="mb-8">
             <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">

@@ -75,7 +75,7 @@ export default function OrdersPage() {
   };
 
   return (
-    <div class="px-6 py-8 mx-auto max-w-[1400px]">
+    <div class="mx-auto max-w-[1400px]">
       <div class="mb-8">
         <div class="flex items-center gap-3">
           <div class="w-12 h-12 rounded-xl bg-forest-600 flex items-center justify-center shadow-sm">

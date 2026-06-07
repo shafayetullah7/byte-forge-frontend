@@ -146,7 +146,7 @@ export default function ProductsPage() {
   return (
     <ErrorBoundary
       fallback={(error) => (
-        <div class="px-6 py-8 mx-auto max-w-[1400px]">
+        <div class="mx-auto max-w-[1400px]">
           <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6">
             <div class="flex items-start gap-3">
               <ExclamationCircleIcon class="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
@@ -169,7 +169,7 @@ export default function ProductsPage() {
         </div>
       )}
     >
-      <div class="px-6 py-8 mx-auto max-w-[1400px]">
+      <div class="mx-auto max-w-[1400px]">
         <div class="mb-8">
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div class="flex items-center gap-3">

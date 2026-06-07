@@ -33,7 +33,7 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
   };
 
   return (
-    <div class="px-6 py-8 mx-auto max-w-[1400px]">
+    <div class="mx-auto max-w-[1400px]">
       <ErrorBoundary
         fallback={(error) => (
           <div class="min-h-screen flex items-center justify-center p-6">

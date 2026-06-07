@@ -212,8 +212,8 @@ export default function ShippingRatesPage() {
         <InlineErrorFallback error={err} reset={reset} label={t("seller.shippingRates.title")} />
       )}
     >
-      <div class="min-h-screen bg-cream-50 dark:bg-forest-900 py-8 pb-24">
-        <div class="max-w-6xl mx-auto px-4">
+      <div class="min-h-screen bg-cream-50 dark:bg-forest-900 pb-24">
+        <div class="mx-auto max-w-[1400px]">
           <div class="mb-8">
             <div class="flex items-center gap-3 mb-2">
               <div class="w-10 h-10 rounded-xl bg-terracotta-100 dark:bg-terracotta-900/40 flex items-center justify-center">

@@ -22,8 +22,8 @@ const Profile: Component = () => {
     };
 
     return (
-        <div class="min-h-screen bg-cream-50 dark:bg-forest-900 py-12 px-4 sm:px-6 lg:px-8">
-            <div class="max-w-4xl mx-auto">
+        <div class="min-h-screen bg-cream-50 dark:bg-forest-900">
+        <div class="mx-auto max-w-4xl">
                 {/* Header */}
                 <div class="mb-8">
                     <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">

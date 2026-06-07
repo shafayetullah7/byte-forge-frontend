@@ -269,7 +269,7 @@ export default function PlantsPage() {
   });
 
   return (
-    <div class="px-6 py-8 mx-auto max-w-[1400px]">
+    <div class="mx-auto max-w-[1400px]">
       {/* Page Header */}
       <div class="mb-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

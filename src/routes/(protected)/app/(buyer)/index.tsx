@@ -20,8 +20,8 @@ const BuyerDashboard: Component = () => {
     return (
         <div class="min-h-screen bg-cream-50 dark:bg-forest-900">
             {/* Hero Section */}
-            <section class="bg-linear-to-br from-forest-400 via-forest-500 to-forest-600 dark:from-forest-600 dark:via-forest-700 dark:to-sage-700 text-white py-12 md:py-16 px-4">
-                <div class="max-w-7xl mx-auto">
+            <section class="bg-linear-to-br from-forest-400 via-forest-500 to-forest-600 dark:from-forest-600 dark:via-forest-700 dark:to-sage-700 text-white py-12 md:py-16">
+                <div class="mx-auto max-w-[1400px]">
                     <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold mb-3 tracking-tight">
                         {t("buyer.dashboard.welcome")}, {user()?.userName}! 👋
                     </h1>
@@ -32,7 +32,7 @@ const BuyerDashboard: Component = () => {
             </section>
 
             {/* Stats Cards */}
-            <section class="max-w-7xl mx-auto px-4 -mt-8">
+            <section class="mx-auto max-w-[1400px] -mt-8">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Orders Card */}
                     <div class="flat-card flat-card-hover p-6 bg-white dark:bg-forest-800 dark:border-forest-600">
@@ -91,7 +91,7 @@ const BuyerDashboard: Component = () => {
             </section>
 
             {/* Quick Actions */}
-            <section class="max-w-7xl mx-auto px-4 mt-8 md:mt-12">
+            <section class="mx-auto max-w-[1400px] mt-8 md:mt-12">
                 <h2 class="text-2xl md:text-3xl font-bold text-forest-800 dark:text-cream-50 mb-6">
                     {t("buyer.dashboard.quickActions.title")}
                 </h2>
@@ -179,7 +179,7 @@ const BuyerDashboard: Component = () => {
             </section>
 
             {/* Recent Orders */}
-            <section class="max-w-7xl mx-auto px-4 mt-8 md:mt-12 pb-12">
+            <section class="mx-auto max-w-[1400px] mt-8 md:mt-12 pb-12">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-2xl md:text-3xl font-bold text-forest-800 dark:text-cream-50">
                         {t("buyer.dashboard.recentOrders")}

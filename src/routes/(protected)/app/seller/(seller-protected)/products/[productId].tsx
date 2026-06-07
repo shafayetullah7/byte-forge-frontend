@@ -41,7 +41,7 @@ export default function ProductDetailLayout(props: RouteSectionProps) {
   };
 
   return (
-    <div class="px-6 py-8 mx-auto max-w-[1400px]">
+    <div class="mx-auto max-w-[1400px]">
       <ErrorBoundary
         fallback={(error) => (
           <PageErrorFallback
