@@ -35,10 +35,7 @@ export default function OrdersPage() {
   );
 
   const statsData = createAsync(() => getOrdersStats());
-  const ordersData = createAsync(
-    () => getOrders(filterParams()),
-    { deferStream: true }
-  );
+  const ordersData = createAsync(() => getOrders(filterParams()));
 
   const [isRefetching, setIsRefetching] = createSignal(false);
   createEffect(() => {
