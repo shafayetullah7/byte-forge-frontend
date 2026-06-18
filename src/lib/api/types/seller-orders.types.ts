@@ -15,9 +15,31 @@ export type PaymentStatus =
   | "REFUNDED"
   | "PARTIALLY_REFUNDED";
 
+export type SellerOrderActionKey =
+  | "CONFIRM"
+  | "START_PROCESSING"
+  | "SHIP"
+  | "MARK_DELIVERED"
+  | "CANCEL";
+
+export type StatusHistoryActor = "BUYER" | "SELLER" | "SYSTEM";
+
+export interface SellerOrderActionDescriptor {
+  key: SellerOrderActionKey;
+  method: "PATCH" | "POST";
+  endpoint: "status" | "ship" | "cancel";
+  targetStatus?: OrderStatus;
+  requiresConfirmation: boolean;
+  requiresForm: boolean;
+  primary: boolean;
+  disabled: boolean;
+  disabledReason: string | null;
+}
+
 export interface SellerOrderItem {
   id: string;
   productId: string;
+  variantId: string;
   productName: string;
   variantTitle: string | null;
   sku: string | null;
@@ -36,6 +58,8 @@ export interface SellerOrderAddress {
   state: string | null;
   postalCode: string | null;
   country: string;
+  companyName: string | null;
+  deliveryInstructions: string | null;
 }
 
 export interface SellerOrderShipment {
@@ -70,6 +94,7 @@ export interface SellerOrderSummary {
 }
 
 export interface SellerOrderDetail extends SellerOrderSummary {
+  groupId: string | null;
   paymentMethod: string | null;
   paymentMethodId: string | null;
   paymentMethodLogoUrl: string | null;
@@ -89,8 +114,20 @@ export interface SellerOrderDetail extends SellerOrderSummary {
     toStatus: string;
     notes: string | null;
     createdAt: string;
+    actor: StatusHistoryActor;
+    actorLabel: string | null;
   }>;
   shipment: SellerOrderShipment | null;
+  isReadOnly: boolean;
+  availableActions: SellerOrderActionDescriptor[];
+  payment: {
+    collectOnDelivery: boolean;
+    completesOnDeliver: boolean;
+  };
+  shop: {
+    id: string;
+    status: string;
+  };
 }
 
 export interface SellerOrderStats {
@@ -128,14 +165,17 @@ export interface SellerOrderListResponse {
 export interface UpdateSellerOrderStatusRequest {
   status: OrderStatus;
   notes?: string;
+  expectedUpdatedAt?: string;
 }
 
 export interface ShipSellerOrderRequest {
   carrier: string;
   trackingNumber: string;
   estimatedDelivery?: string;
+  expectedUpdatedAt?: string;
 }
 
 export interface CancelSellerOrderRequest {
   reason: string;
+  expectedUpdatedAt?: string;
 }

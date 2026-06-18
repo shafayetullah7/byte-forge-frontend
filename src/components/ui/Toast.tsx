@@ -29,6 +29,8 @@ export const toaster = {
     toaster.add(message, "success", duration),
   error: (message: string, duration = 4000) =>
     toaster.add(message, "error", duration),
+  warning: (message: string, duration = 4000) =>
+    toaster.add(message, "warning", duration),
   dismiss: (id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   },

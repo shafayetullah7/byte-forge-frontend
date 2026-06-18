@@ -1,9 +1,9 @@
 import { For, createMemo, Show } from "solid-js";
 import { ErrorBoundary } from "solid-js";
-import { useParams, createAsync } from "@solidjs/router";
+import { useParams, createAsync, A } from "@solidjs/router";
 import { getProductSummary, getProductOverview } from "~/lib/api/endpoints/seller/products.api";
 import { getSellerOrders } from "~/lib/api/endpoints/seller/orders.api";
-import { filterOrdersByProduct, flattenProductOrderRows } from "~/lib/orders/seller-order.utils";
+import { buildSellerOrderHref, filterOrdersByProduct, flattenProductOrderRows } from "~/lib/orders/seller-order.utils";
 import { getStatusVariant, formatPrice, formatNumber, formatCurrency, getStatusLabel } from "./helpers";
 import { MOCK_PRODUCT_STATS, MOCK_REVIEWS_SUMMARY } from "./mock-data";
 import { OrderStatusBadge } from "~/components/orders";
@@ -249,17 +249,23 @@ export default function ProductOverviewRoute() {
                     {(order) => {
                       const StatusIcon = ORDER_STATUS_ICONS[order.status] || ClipboardListIcon;
                       return (
-                        <tr class="hover:bg-cream-50 dark:hover:bg-forest-700/30 transition-colors">
-                          <td class="px-6 py-3 font-mono text-xs text-gray-600 dark:text-gray-400">{order.orderNumber}</td>
-                          <td class="px-6 py-3 text-gray-700 dark:text-gray-300 hidden sm:table-cell">{order.customerName}</td>
-                          <td class="px-6 py-3 font-medium text-forest-800 dark:text-cream-50">{formatCurrency(parseFloat(order.total))}</td>
-                          <td class="px-6 py-3">
-                            <div class="flex items-center gap-1.5">
-                              <StatusIcon class="w-3.5 h-3.5" />
-                              <OrderStatusBadge status={order.status} paymentMethodKey={order.paymentMethodKey} />
-                            </div>
+                        <tr>
+                          <td colspan={5} class="p-0">
+                            <A
+                              href={buildSellerOrderHref(order.orderId)}
+                              class="grid grid-cols-5 gap-3 px-6 py-3 hover:bg-cream-50 dark:hover:bg-forest-700/30 transition-colors no-underline text-inherit"
+                              aria-label={t("seller.orders.viewOrder", { orderNumber: order.orderNumber })}
+                            >
+                              <span class="font-mono text-xs text-gray-600 dark:text-gray-400 self-center">{order.orderNumber}</span>
+                              <span class="text-gray-700 dark:text-gray-300 hidden sm:block self-center truncate">{order.customerName}</span>
+                              <span class="font-medium text-forest-800 dark:text-cream-50 self-center">{formatCurrency(parseFloat(order.total))}</span>
+                              <div class="flex items-center gap-1.5 self-center">
+                                <StatusIcon class="w-3.5 h-3.5" />
+                                <OrderStatusBadge status={order.status} paymentMethodKey={order.paymentMethodKey} />
+                              </div>
+                              <span class="text-gray-500 dark:text-gray-400 text-xs self-center">{timeAgo(order.createdAt)}</span>
+                            </A>
                           </td>
-                          <td class="px-6 py-3 text-gray-500 dark:text-gray-400 text-xs">{timeAgo(order.createdAt)}</td>
                         </tr>
                       );
                     }}

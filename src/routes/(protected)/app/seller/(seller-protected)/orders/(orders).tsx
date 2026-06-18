@@ -1,41 +1,21 @@
-import { createSignal, createMemo, Show, Suspense, createEffect } from "solid-js";
-import { createAsync, useSearchParams } from "@solidjs/router";
+import { createMemo, Show, Suspense } from "solid-js";
+import { createAsync } from "@solidjs/router";
 import { ErrorBoundary } from "solid-js";
 import { FilterSelect } from "~/components/ui/FilterSelect";
 import { SectionErrorFallback } from "~/components/seller/SectionErrorFallback";
 import { MagnifyingGlassIcon } from "~/components/icons";
 import { useI18n } from "~/i18n";
 import { getShop } from "~/lib/context/shop-context";
-import {
-  getSellerOrders,
-  getSellerOrderStats,
-  getSellerOrder,
-  updateSellerOrderStatus,
-  shipSellerOrder,
-  cancelSellerOrder,
-  invalidateSellerOrders,
-  invalidateSellerOrderDetail,
-} from "~/lib/api/endpoints/seller/orders.api";
-import type { OrderStatus, PaymentStatus, SellerOrderSummary } from "~/lib/api/types/seller-orders.types";
+import { getSellerOrders, getSellerOrderStats } from "~/lib/api/endpoints/seller/orders.api";
+import { buildSellerOrderHref } from "~/lib/orders/seller-order.utils";
 import { Pagination } from "~/routes/(protected)/app/(buyer)/orders/components/Pagination";
-import { toaster } from "~/components/ui/Toast";
 import { useSellerOrderFilters } from "./hooks/useSellerOrderFilters";
 import { SellerOrderStatsCards } from "./components/SellerOrderStats";
 import { SellerOrdersTable } from "./components/SellerOrdersTable";
-import { SellerOrderDetailModal } from "./components/SellerOrderDetailModal";
 
 export default function SellerOrdersRoute() {
   const { t } = useI18n();
-  const [searchParams] = useSearchParams();
   const filters = useSellerOrderFilters();
-
-  const [selectedOrderId, setSelectedOrderId] = createSignal<string | null>(null);
-  const [showDetailModal, setShowDetailModal] = createSignal(false);
-  const [isActionLoading, setIsActionLoading] = createSignal(false);
-  const [shipCarrier, setShipCarrier] = createSignal("");
-  const [shipTracking, setShipTracking] = createSignal("");
-  const [shipEstimatedDelivery, setShipEstimatedDelivery] = createSignal("");
-  const [cancelReason, setCancelReason] = createSignal("");
 
   const shop = createAsync(() => getShop(), { deferStream: true });
 
@@ -43,24 +23,11 @@ export default function SellerOrdersRoute() {
     deferStream: true,
   });
   const stats = createAsync(() => getSellerOrderStats(), { deferStream: true });
-  const orderDetail = createAsync(
-    () => {
-      const id = selectedOrderId();
-      return id ? getSellerOrder(id) : Promise.resolve(undefined);
-    },
-    { deferStream: true },
-  );
 
   const orders = createMemo(() => ordersResponse()?.data ?? []);
   const meta = createMemo(() => ordersResponse()?.meta);
 
-  createEffect(() => {
-    const orderId = searchParams.orderId as string | undefined;
-    if (orderId && orderId !== selectedOrderId()) {
-      setSelectedOrderId(orderId);
-      setShowDetailModal(true);
-    }
-  });
+  const getOrderHref = (orderId: string) => buildSellerOrderHref(orderId, filters.filterParams());
 
   const orderStatusOptions = createMemo(() => [
     { value: "", label: t("seller.orders.filters.allStatuses") },
@@ -77,41 +44,6 @@ export default function SellerOrdersRoute() {
     { value: "PENDING", label: t("seller.orders.payment.pending"), dotColor: "bg-cream-400" },
     { value: "COMPLETED", label: t("seller.orders.payment.completed"), dotColor: "bg-forest-500" },
   ]);
-
-  const openOrderDetail = (order: SellerOrderSummary) => {
-    setSelectedOrderId(order.id);
-    setShowDetailModal(true);
-  };
-
-  const closeDetailModal = () => {
-    setShowDetailModal(false);
-    setTimeout(() => {
-      setSelectedOrderId(null);
-      setShipCarrier("");
-      setShipTracking("");
-      setShipEstimatedDelivery("");
-      setCancelReason("");
-    }, 200);
-  };
-
-  const refreshOrders = (orderId?: string) => {
-    invalidateSellerOrders();
-    if (orderId) invalidateSellerOrderDetail(orderId);
-  };
-
-  const runAction = async (action: () => Promise<unknown>, successMessage: string) => {
-    const orderId = selectedOrderId();
-    setIsActionLoading(true);
-    try {
-      await action();
-      toaster.success(successMessage);
-      refreshOrders(orderId ?? undefined);
-    } catch (error) {
-      toaster.error(error instanceof Error ? error.message : t("seller.orders.actionFailed"));
-    } finally {
-      setIsActionLoading(false);
-    }
-  };
 
   const handleFilterChange = <T,>(setter: (value: T) => void) => (value: T) => {
     setter(value);
@@ -184,7 +116,7 @@ export default function SellerOrdersRoute() {
           </div>
 
           <Suspense fallback={<div class="p-8 text-center text-sm text-gray-500">{t("seller.orders.loading")}</div>}>
-            <SellerOrdersTable orders={orders()} onView={openOrderDetail} />
+            <SellerOrdersTable orders={orders()} getOrderHref={getOrderHref} />
           </Suspense>
 
           <div class="px-5 py-4 border-t border-gray-200 dark:border-forest-700 text-sm text-gray-500">
@@ -203,59 +135,6 @@ export default function SellerOrdersRoute() {
             itemsPerPage={filters.limit}
             onPageChange={filters.setPage}
           />
-        </Show>
-
-        <Show when={showDetailModal() && orderDetail()}>
-          {(order) => (
-            <SellerOrderDetailModal
-              order={order()}
-              isActionLoading={isActionLoading()}
-              shipCarrier={shipCarrier()}
-              shipTracking={shipTracking()}
-              shipEstimatedDelivery={shipEstimatedDelivery()}
-              cancelReason={cancelReason()}
-              onShipCarrierChange={setShipCarrier}
-              onShipTrackingChange={setShipTracking}
-              onShipEstimatedDeliveryChange={setShipEstimatedDelivery}
-              onCancelReasonChange={setCancelReason}
-              onClose={closeDetailModal}
-              onConfirm={() =>
-                runAction(
-                  () => updateSellerOrderStatus(order().id, { status: "CONFIRMED" as OrderStatus }),
-                  t("seller.orders.toast.confirmed"),
-                )
-              }
-              onStartProcessing={() =>
-                runAction(
-                  () => updateSellerOrderStatus(order().id, { status: "PROCESSING" as OrderStatus }),
-                  t("seller.orders.toast.processing"),
-                )
-              }
-              onShip={() =>
-                runAction(
-                  () =>
-                    shipSellerOrder(order().id, {
-                      carrier: shipCarrier(),
-                      trackingNumber: shipTracking(),
-                      estimatedDelivery: shipEstimatedDelivery() || undefined,
-                    }),
-                  t("seller.orders.toast.shipped"),
-                )
-              }
-              onMarkDelivered={() =>
-                runAction(
-                  () => updateSellerOrderStatus(order().id, { status: "DELIVERED" as OrderStatus }),
-                  t("seller.orders.toast.delivered"),
-                )
-              }
-              onCancel={() =>
-                runAction(
-                  () => cancelSellerOrder(order().id, { reason: cancelReason() }),
-                  t("seller.orders.toast.cancelled"),
-                )
-              }
-            />
-          )}
         </Show>
       </div>
     </ErrorBoundary>

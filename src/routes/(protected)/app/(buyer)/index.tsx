@@ -207,7 +207,10 @@ const BuyerDashboard: Component = () => {
                                         group.orders.flatMap((order) => order.items),
                                     );
                                     return (
-                                        <div class="flat-card flat-card-hover p-6 bg-white dark:bg-forest-800 dark:border-forest-600">
+                                        <A
+                                            href={`/app/orders/${group.id}`}
+                                            class="block flat-card flat-card-hover p-6 bg-white dark:bg-forest-800 dark:border-forest-600 no-underline text-inherit"
+                                        >
                                             <div class="flex items-start justify-between mb-4 gap-3">
                                                 <div class="flex-1 min-w-0">
                                                     <h5 class="text-forest-800 dark:text-cream-50 mb-1 truncate">
@@ -232,14 +235,11 @@ const BuyerDashboard: Component = () => {
                                                 <span class="text-xl font-bold text-forest-700 dark:text-cream-100">
                                                     ৳{parseFloat(group.totalAmount).toFixed(2)}
                                                 </span>
-                                                <A
-                                                    href={`/app/orders/${group.id}`}
-                                                    class="body-small font-semibold text-forest-600 dark:text-cream-100 hover:underline flex items-center gap-1"
-                                                >
+                                                <span class="body-small font-semibold text-forest-600 dark:text-cream-100 flex items-center gap-1">
                                                     {t("buyer.dashboard.viewDetails")} <ChevronRightIcon class="w-4 h-4" />
-                                                </A>
+                                                </span>
                                             </div>
-                                        </div>
+                                        </A>
                                     );
                                 }}
                             </For>

@@ -7,6 +7,8 @@ export function ShipOrderForm(props: {
   trackingNumber: string;
   estimatedDelivery: string;
   loading: boolean;
+  disabled?: boolean;
+  disabledReason?: string | null;
   onCarrierChange: (value: string) => void;
   onTrackingChange: (value: string) => void;
   onEstimatedDeliveryChange: (value: string) => void;
@@ -38,7 +40,12 @@ export function ShipOrderForm(props: {
       />
       <Button
         loading={props.loading}
-        disabled={!props.carrier.trim() || !props.trackingNumber.trim()}
+        disabled={
+          props.disabled ||
+          !props.carrier.trim() ||
+          !props.trackingNumber.trim()
+        }
+        title={props.disabled ? props.disabledReason ?? undefined : undefined}
         onClick={props.onSubmit}
       >
         <TruckIcon class="w-4 h-4" />

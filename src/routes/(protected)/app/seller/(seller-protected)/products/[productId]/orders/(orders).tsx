@@ -1,15 +1,16 @@
 import { createSignal, createMemo, For, Show, Suspense } from "solid-js";
 import { ErrorBoundary } from "solid-js";
 import { useParams, createAsync, A } from "@solidjs/router";
-import Button from "~/components/ui/Button";
 import { SectionErrorFallback } from "~/components/seller/SectionErrorFallback";
-import { MagnifyingGlassIcon, EyeIcon } from "~/components/icons";
+import { MagnifyingGlassIcon } from "~/components/icons";
 import { useI18n } from "~/i18n";
 import { getSellerOrders } from "~/lib/api/endpoints/seller/orders.api";
 import type { OrderStatus } from "~/lib/api/types/seller-orders.types";
-import { filterOrdersByProduct, flattenProductOrderRows } from "~/lib/orders/seller-order.utils";
+import { buildSellerOrderHref, filterOrdersByProduct, flattenProductOrderRows } from "~/lib/orders/seller-order.utils";
 import { OrderStatusBadge } from "~/components/orders";
 import { formatPrice, formatDate } from "../helpers";
+
+const COLUMN_COUNT = 7;
 
 export default function ProductOrdersRoute() {
   const { t } = useI18n();
@@ -78,7 +79,6 @@ export default function ProductOrdersRoute() {
                   <th class="text-left px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">{t("seller.orders.table.total")}</th>
                   <th class="text-left px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">{t("seller.orders.table.status")}</th>
                   <th class="text-left px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">{t("seller.products.productOverview.orderTableDate")}</th>
-                  <th class="text-right px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">{t("seller.orders.table.action")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -86,7 +86,7 @@ export default function ProductOrdersRoute() {
                   when={orderRows().length > 0}
                   fallback={
                     <tr>
-                      <td colspan="8" class="px-4 py-12 text-center text-sm text-gray-500">
+                      <td colspan={COLUMN_COUNT} class="px-4 py-12 text-center text-sm text-gray-500">
                         {t("seller.orders.noOrders")}
                       </td>
                     </tr>
@@ -94,37 +94,25 @@ export default function ProductOrdersRoute() {
                 >
                   <For each={orderRows()}>
                     {(row) => (
-                      <tr class="border-b border-cream-100 dark:border-forest-700/50 hover:bg-cream-50 dark:hover:bg-forest-900/30 transition-colors">
-                        <td class="px-4 py-3">
-                          <span class="font-mono text-sm text-forest-800 dark:text-cream-50">{row.orderNumber}</span>
-                        </td>
-                        <td class="px-4 py-3">
-                          <div>
-                            <p class="text-sm font-medium text-forest-800 dark:text-cream-50">{row.customerName}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">{row.customerEmail ?? "—"}</p>
-                          </div>
-                        </td>
-                        <td class="px-4 py-3">
-                          <p class="text-sm text-forest-800 dark:text-cream-50">{row.variantTitle ?? "—"}</p>
-                        </td>
-                        <td class="px-4 py-3">
-                          <span class="text-sm text-gray-700 dark:text-gray-300">{row.quantity}</span>
-                        </td>
-                        <td class="px-4 py-3">
-                          <span class="text-sm font-semibold text-forest-800 dark:text-cream-50">{formatPrice(parseFloat(row.total))}</span>
-                        </td>
-                        <td class="px-4 py-3">
-                          <OrderStatusBadge status={row.status} paymentMethodKey={row.paymentMethodKey} />
-                        </td>
-                        <td class="px-4 py-3">
-                          <span class="text-sm text-gray-500 dark:text-gray-400">{formatDate(row.createdAt)}</span>
-                        </td>
-                        <td class="px-4 py-3 text-right">
-                          <A href={`/app/seller/orders?orderId=${row.orderId}`}>
-                            <Button variant="ghost" size="sm">
-                              <EyeIcon class="w-4 h-4" />
-                              {t("seller.orders.view")}
-                            </Button>
+                      <tr>
+                        <td colspan={COLUMN_COUNT} class="p-0 border-b border-cream-100 dark:border-forest-700/50">
+                          <A
+                            href={buildSellerOrderHref(row.orderId)}
+                            class="grid grid-cols-7 gap-3 px-4 py-3 hover:bg-cream-50 dark:hover:bg-forest-900/30 transition-colors no-underline text-inherit"
+                            aria-label={t("seller.orders.viewOrder", { orderNumber: row.orderNumber })}
+                          >
+                            <span class="font-mono text-sm text-forest-800 dark:text-cream-50 self-center">{row.orderNumber}</span>
+                            <div class="min-w-0 self-center">
+                              <p class="text-sm font-medium text-forest-800 dark:text-cream-50">{row.customerName}</p>
+                              <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{row.customerEmail ?? "—"}</p>
+                            </div>
+                            <p class="text-sm text-forest-800 dark:text-cream-50 self-center truncate">{row.variantTitle ?? "—"}</p>
+                            <span class="text-sm text-gray-700 dark:text-gray-300 self-center">{row.quantity}</span>
+                            <span class="text-sm font-semibold text-forest-800 dark:text-cream-50 self-center">{formatPrice(parseFloat(row.total))}</span>
+                            <div class="self-center">
+                              <OrderStatusBadge status={row.status} paymentMethodKey={row.paymentMethodKey} />
+                            </div>
+                            <span class="text-sm text-gray-500 dark:text-gray-400 self-center">{formatDate(row.createdAt)}</span>
                           </A>
                         </td>
                       </tr>
