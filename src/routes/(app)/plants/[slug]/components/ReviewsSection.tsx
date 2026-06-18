@@ -4,6 +4,7 @@ import { formatPrice } from "../../constants";
 import { StarRatingIcon } from "~/components/icons";
 import SectionHeader from "./SectionHeader";
 import { ChatBubbleLeftRightIcon } from "~/components/icons";
+import type { ReviewSummary } from "~/lib/api/types/review.types";
 
 export interface ReviewItem {
   id: string;
@@ -17,14 +18,24 @@ export interface ReviewItem {
 
 const ReviewsSection: Component<{
   reviews: ReviewItem[];
+  summary?: ReviewSummary;
 }> = (props) => {
   const avgRating = createMemo(() => {
+    if (props.summary) return props.summary.average.toFixed(1);
     if (props.reviews.length === 0) return "0.0";
     const total = props.reviews.reduce((sum, r) => sum + r.rating, 0);
     return (total / props.reviews.length).toFixed(1);
   });
 
   const ratingDistribution = createMemo(() => {
+    if (props.summary) {
+      return props.summary.distribution.map((item) => ({
+        star: item.rating,
+        count: item.count,
+        pct: item.percentage,
+      }));
+    }
+
     return [5, 4, 3, 2, 1].map((star) => {
       const count = props.reviews.filter((r) => r.rating === star).length;
       const pct = props.reviews.length > 0 ? (count / props.reviews.length) * 100 : 0;
@@ -38,8 +49,8 @@ const ReviewsSection: Component<{
         <SectionHeader
           icon={ChatBubbleLeftRightIcon}
           title="Customer Reviews"
-          subtitle={`${props.reviews.length} reviews`}
-          action={{ label: "Write a Review", href: "#" }}
+          subtitle={`${props.summary?.total ?? props.reviews.length} reviews`}
+          action={{ label: "Review after purchase", href: "/app/orders" }}
         />
 
         <div class="flex items-center gap-4 p-4 bg-cream-50 dark:bg-forest-900/30 rounded-xl mb-6">
@@ -70,7 +81,19 @@ const ReviewsSection: Component<{
         </div>
 
         <div class="space-y-4">
-          <For each={props.reviews}>
+          <For
+            each={props.reviews}
+            fallback={
+              <div class="rounded-xl border border-dashed border-cream-300 dark:border-forest-700 p-8 text-center">
+                <p class="text-sm font-semibold text-forest-800 dark:text-cream-50">
+                  No reviews yet
+                </p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Be the first verified buyer to review this plant.
+                </p>
+              </div>
+            }
+          >
             {(review) => (
               <div class="p-4 rounded-xl border border-cream-200 dark:border-forest-700 hover:border-forest-300 dark:hover:border-forest-600 transition-colors">
                 <div class="flex items-start justify-between mb-2">

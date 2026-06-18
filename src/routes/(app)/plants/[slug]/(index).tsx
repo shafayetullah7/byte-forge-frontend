@@ -28,6 +28,7 @@ import { Button } from "~/components/ui";
 import { toaster } from "~/components/ui/Toast";
 import { formatPrice, getDifficultyLabel, getDifficultyColor, lightLabel, wateringLabel } from "../constants";
 import { getPublicPlantBySlug } from "~/lib/api/endpoints/public/plants.api";
+import { getPublicPlantReviews } from "~/lib/api/endpoints/public/reviews.api";
 import { cartApi, invalidateAllCart } from "~/lib/api/endpoints/buyer/cart.api";
 import {
   ImageGallery,
@@ -44,7 +45,6 @@ import {
 import {
   MOCK_SIMILAR_PLANTS,
   MOCK_YOU_MIGHT_LIKE,
-  MOCK_REVIEWS,
   MOCK_MORE_FROM_SHOP,
   MOCK_BUNDLE_ITEMS,
   MOCK_RECENTLY_VIEWED,
@@ -68,6 +68,7 @@ export default function PlantDetailPage() {
   const { t } = useI18n();
   const params = useParams<{ slug: string }>();
   const plant = createAsync(() => getPublicPlantBySlug(params.slug));
+  const reviewData = createAsync(() => getPublicPlantReviews(params.slug));
   const [selectedVariant, setSelectedVariant] = createSignal<string | undefined>(undefined);
   const [quantity, setQuantity] = createSignal(1);
 
@@ -506,7 +507,20 @@ export default function PlantDetailPage() {
                   bundleItems={MOCK_BUNDLE_ITEMS}
                 />
 
-                <ReviewsSection reviews={MOCK_REVIEWS} />
+                <ReviewsSection
+                  summary={reviewData()?.summary}
+                  reviews={
+                    reviewData()?.reviews.map((review) => ({
+                      id: review.id,
+                      author: review.customerName,
+                      rating: review.rating,
+                      date: review.createdAt,
+                      title: review.title ?? "Verified purchase review",
+                      content: review.comment ?? "",
+                      verified: review.isVerifiedPurchase,
+                    })) ?? []
+                  }
+                />
 
                 <PlantGridSection
                   icon={LeafIcon}

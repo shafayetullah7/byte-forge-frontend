@@ -5,7 +5,7 @@ import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 import { OrderStatusBadge, ShipmentTrackingCard } from "~/components/orders";
 import { getOrderStatusLabel } from "~/lib/orders/order-display.utils";
 import { getOrderGroup } from "~/lib/api/endpoints/buyer/orders.api";
-import type { OrderDetail } from "~/lib/api/types/order.types";
+import type { OrderDetail, OrderItemDetail } from "~/lib/api/types/order.types";
 import { toaster } from "~/components/ui/Toast";
 import { ConfirmDialog } from "~/components/ui/ConfirmDialog";
 import Button from "~/components/ui/Button";
@@ -28,7 +28,7 @@ import {
   buildTimelineFromHistory,
   formatCurrency,
 } from "./components";
-import { cancelOrderAction, confirmDeliveryAction } from "./actions";
+import { cancelOrderAction, confirmDeliveryAction, submitReviewAction } from "./actions";
 
 function OrderStatusBanner(props: { order: OrderDetail }) {
   const { t } = useI18n();
@@ -88,7 +88,11 @@ function OrderCard(props: { order: OrderDetail; groupId: string }) {
   const order = props.order;
   const [isCancelModalOpen, setIsCancelModalOpen] = createSignal(false);
   const [isConfirmReceiptOpen, setIsConfirmReceiptOpen] = createSignal(false);
+  const [reviewItem, setReviewItem] = createSignal<OrderItemDetail | null>(null);
   const [cancelReason, setCancelReason] = createSignal("");
+  const [reviewRating, setReviewRating] = createSignal(5);
+  const [reviewTitle, setReviewTitle] = createSignal("");
+  const [reviewComment, setReviewComment] = createSignal("");
 
   const canCancel =
     order.status === "PENDING_PAYMENT" || order.status === "PROCESSING";
@@ -104,8 +108,10 @@ function OrderCard(props: { order: OrderDetail; groupId: string }) {
 
   const cancelTrigger = useAction(cancelOrderAction);
   const confirmDeliveryTrigger = useAction(confirmDeliveryAction);
+  const submitReviewTrigger = useAction(submitReviewAction);
   const cancelSubmission = useSubmission(cancelOrderAction);
   const confirmDeliverySubmission = useSubmission(confirmDeliveryAction);
+  const submitReviewSubmission = useSubmission(submitReviewAction);
 
   createEffect(() => {
     const result = cancelSubmission.result;
@@ -117,6 +123,21 @@ function OrderCard(props: { order: OrderDetail; groupId: string }) {
       setIsCancelModalOpen(false);
     } else if (result.success === false && result.error) {
       toaster.error(result.error.message || t("buyer.orders.details.cancelFailed"));
+    }
+  });
+
+  createEffect(() => {
+    const result = submitReviewSubmission.result;
+    if (!result) return;
+
+    if (result.success === true) {
+      toaster.success("Review submitted for moderation");
+      setReviewItem(null);
+      setReviewRating(5);
+      setReviewTitle("");
+      setReviewComment("");
+    } else if (result.success === false && result.error) {
+      toaster.error(result.error.message || "Failed to submit review");
     }
   });
 
@@ -144,6 +165,19 @@ function OrderCard(props: { order: OrderDetail; groupId: string }) {
     confirmDeliveryTrigger({
       orderId: order.id,
       groupId: props.groupId,
+    });
+  };
+
+  const executeSubmitReview = () => {
+    const item = reviewItem();
+    if (!item) return;
+
+    submitReviewTrigger({
+      groupId: props.groupId,
+      orderItemId: item.id,
+      rating: reviewRating(),
+      title: reviewTitle().trim() || undefined,
+      comment: reviewComment().trim() || undefined,
     });
   };
 
@@ -209,7 +243,10 @@ function OrderCard(props: { order: OrderDetail; groupId: string }) {
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 space-y-6">
-          <OrderItemsSection items={order.items} />
+          <OrderItemsSection
+            items={order.items}
+            onReview={(item) => setReviewItem(item)}
+          />
           <Show when={order.shipment}>
             {(shipment) => <ShipmentTrackingCard shipment={shipment()} />}
           </Show>
@@ -316,6 +353,61 @@ function OrderCard(props: { order: OrderDetail; groupId: string }) {
         confirmLabel={t("buyer.orders.details.confirmReceiptButton")}
         cancelLabel={t("common.cancel")}
       />
+
+      <ConfirmDialog
+        isOpen={reviewItem() !== null}
+        onClose={() => setReviewItem(null)}
+        onConfirm={executeSubmitReview}
+        title="Write a review"
+        description={
+          reviewItem()
+            ? `Share your experience with ${reviewItem()!.productName}. Reviews are published after moderation.`
+            : "Share your experience with this product."
+        }
+        confirmLabel="Submit review"
+        cancelLabel={t("common.cancel")}
+      >
+        <div class="w-full mb-4 space-y-3 text-left">
+          <label class="block">
+            <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Rating
+            </span>
+            <select
+              value={reviewRating()}
+              onChange={(e) => setReviewRating(Number(e.currentTarget.value))}
+              class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-forest-600 bg-white dark:bg-forest-900 text-sm"
+            >
+              <For each={[5, 4, 3, 2, 1]}>
+                {(rating) => <option value={rating}>{rating} stars</option>}
+              </For>
+            </select>
+          </label>
+          <label class="block">
+            <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Title
+            </span>
+            <input
+              value={reviewTitle()}
+              onInput={(e) => setReviewTitle(e.currentTarget.value)}
+              maxLength={255}
+              class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-forest-600 bg-white dark:bg-forest-900 text-sm"
+              placeholder="Healthy plant and good packaging"
+            />
+          </label>
+          <label class="block">
+            <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Comment
+            </span>
+            <textarea
+              value={reviewComment()}
+              onInput={(e) => setReviewComment(e.currentTarget.value)}
+              maxLength={3000}
+              class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-forest-600 bg-white dark:bg-forest-900 text-sm min-h-24"
+              placeholder="Tell other buyers about product quality, packaging, and delivery."
+            />
+          </label>
+        </div>
+      </ConfirmDialog>
     </div>
   );
 }

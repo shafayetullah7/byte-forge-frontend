@@ -3,9 +3,10 @@ import { ErrorBoundary } from "solid-js";
 import { useParams, createAsync, A } from "@solidjs/router";
 import { getProductSummary, getProductOverview } from "~/lib/api/endpoints/seller/products.api";
 import { getSellerOrders } from "~/lib/api/endpoints/seller/orders.api";
+import { getSellerProductReviews } from "~/lib/api/endpoints/seller/reviews.api";
 import { buildSellerOrderHref, filterOrdersByProduct, flattenProductOrderRows } from "~/lib/orders/seller-order.utils";
 import { getStatusVariant, formatPrice, formatNumber, formatCurrency, getStatusLabel } from "./helpers";
-import { MOCK_PRODUCT_STATS, MOCK_REVIEWS_SUMMARY } from "./mock-data";
+import { MOCK_PRODUCT_STATS } from "./mock-data";
 import { OrderStatusBadge } from "~/components/orders";
 import Badge from "~/components/ui/Badge";
 import { PackageIcon, DollarSignIcon, CubeIcon, EyeIcon, ShoppingBagIcon, StarIcon, AlertTriangleIcon, ClipboardListIcon, CheckCircleIcon, XCircleIcon, PencilIcon, ArchiveIcon, ArrowPathIcon, TrashIcon, ArrowTopRightOnSquareIcon } from "~/components/icons";
@@ -39,6 +40,11 @@ export default function ProductOverviewRoute() {
     () => getSellerOrders({ limit: 50 }),
     { deferStream: true },
   );
+  const reviewResponse = createAsync(
+    () => getSellerProductReviews(params.productId as string),
+    { deferStream: true },
+  );
+  const reviewSummary = () => reviewResponse()?.summary;
 
   const recentOrders = createMemo(() => {
     const response = sellerOrdersResponse();
@@ -335,25 +341,25 @@ export default function ProductOverviewRoute() {
             </div>
             <div class="flex items-center gap-4 mb-4">
               <div class="text-center">
-                <p class="text-3xl font-bold text-forest-800 dark:text-cream-50">{MOCK_REVIEWS_SUMMARY.average}</p>
+                <p class="text-3xl font-bold text-forest-800 dark:text-cream-50">{(reviewSummary()?.average ?? 0).toFixed(1)}</p>
                 <div class="flex items-center gap-0.5 mt-1">
                   {Array.from({ length: 5 }, (_, i) => (
                     <StarIcon
                       class={`w-3.5 h-3.5 ${
-                        i < Math.round(MOCK_REVIEWS_SUMMARY.average)
+                        i < Math.round(reviewSummary()?.average ?? 0)
                           ? "text-cream-500"
                           : "text-gray-300 dark:text-gray-600"
                       }`}
                     />
                   ))}
                 </div>
-                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{t("seller.products.productOverview.reviews", MOCK_REVIEWS_SUMMARY.total)}</p>
+                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{t("seller.products.productOverview.reviews", reviewSummary()?.total ?? 0)}</p>
               </div>
               <div class="flex-1 space-y-1.5">
-                <For each={MOCK_REVIEWS_SUMMARY.distribution}>
+                <For each={reviewSummary()?.distribution ?? []}>
                   {(dist) => (
                     <div class="flex items-center gap-2">
-                      <span class="text-xs text-gray-500 dark:text-gray-400 w-6 text-right">{dist.stars}★</span>
+                      <span class="text-xs text-gray-500 dark:text-gray-400 w-6 text-right">{dist.rating}★</span>
                       <div class="flex-1 h-2 bg-cream-100 dark:bg-forest-700 rounded-full overflow-hidden">
                         <div
                           class="h-full bg-cream-500 rounded-full"
@@ -369,11 +375,11 @@ export default function ProductOverviewRoute() {
             <div class="border-t border-cream-200 dark:border-forest-700 pt-3">
               <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">{t("seller.products.productOverview.commonMentions")}</p>
               <div class="flex flex-wrap gap-1.5">
-                <For each={MOCK_REVIEWS_SUMMARY.highlights}>
-                  {(highlight) => (
+                <For each={reviewSummary()?.distribution.filter((item) => item.count > 0) ?? []}>
+                  {(item) => (
                     <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-cream-50 dark:bg-cream-900/20 text-cream-700 dark:text-cream-400 rounded-full text-xs">
-                      {highlight.label}
-                      <span class="text-gray-400 dark:text-gray-500">({highlight.count})</span>
+                      {item.rating} star
+                      <span class="text-gray-400 dark:text-gray-500">({item.count})</span>
                     </span>
                   )}
                 </For>

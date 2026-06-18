@@ -80,6 +80,7 @@ export interface OrderFilterParams {
 
 export interface OrderItemDetail {
   id: string;
+  productId: string;
   productName: string;
   variantTitle: string | null;
   sku: string | null;
@@ -87,6 +88,9 @@ export interface OrderItemDetail {
   quantity: number;
   subtotal: string;
   thumbnail: { id: string; url: string } | null;
+  canReview: boolean;
+  reviewId: string | null;
+  reviewStatus: "PENDING" | "APPROVED" | "REJECTED" | null;
 }
 
 export interface OrderAddressDetail {
