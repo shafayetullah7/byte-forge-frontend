@@ -1,6 +1,6 @@
-import { createSignal, For } from "solid-js";
+import { createSignal, For, Show } from "solid-js";
 import { ErrorBoundary } from "solid-js";
-import { createAsync, useParams } from "@solidjs/router";
+import { action, createAsync, useAction, useParams, useSubmission } from "@solidjs/router";
 import {
   ChatBubbleLeftRightIcon,
   CheckBadgeIcon,
@@ -11,7 +11,28 @@ import { SectionCard } from "../components/SectionCard";
 import { StarRatingDisplay } from "../components/StarRatingDisplay";
 import { SectionErrorFallback } from "~/components/seller/SectionErrorFallback";
 import { formatDate } from "../helpers";
-import { getSellerProductReviews } from "~/lib/api/endpoints/seller/reviews.api";
+import { getSellerProductReviews, reportSellerReview } from "~/lib/api/endpoints/seller/reviews.api";
+import { ApiError } from "~/lib/api/types";
+
+const reportReviewAction = action(
+  async (input: { reviewId: string; reason: string; details?: string }) => {
+    "use server";
+    try {
+      await reportSellerReview(input.reviewId, {
+        reason: input.reason,
+        details: input.details,
+      });
+      return { success: true };
+    } catch (error) {
+      const apiError = error as ApiError;
+      return {
+        success: false,
+        error: apiError.response?.message ?? apiError.message,
+      };
+    }
+  },
+  "seller-report-review-action"
+);
 
 export default function ProductReviewsRoute() {
   const params = useParams<{ productId: string }>();
@@ -24,6 +45,9 @@ export default function ProductReviewsRoute() {
 
   const summary = () => reviewsData()?.summary;
   const reviews = () => reviewsData()?.reviews ?? [];
+  const reportTrigger = useAction(reportReviewAction);
+  const reportSubmission = useSubmission(reportReviewAction);
+  const [reportingId, setReportingId] = createSignal<string | null>(null);
 
   return (
     <ErrorBoundary
@@ -172,7 +196,36 @@ export default function ProductReviewsRoute() {
                   <span class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
                     <CheckBadgeIcon class="w-3.5 h-3.5" /> Verified purchase
                   </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setReportingId(review.id);
+                      reportTrigger({
+                        reviewId: review.id,
+                        reason: "Seller requested policy review",
+                      });
+                    }}
+                    disabled={reportSubmission.pending === true && reportingId() === review.id}
+                    class="ml-auto text-xs rounded-md border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-2 py-1 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-60"
+                  >
+                    {reportSubmission.pending === true && reportingId() === review.id
+                      ? "Reporting..."
+                      : "Report to Admin"}
+                  </button>
                 </div>
+                <Show when={reportSubmission.result && reportingId() === review.id}>
+                  <p
+                    class={`mt-2 text-xs ${
+                      reportSubmission.result?.success === true
+                        ? "text-forest-700 dark:text-forest-300"
+                        : "text-red-700 dark:text-red-300"
+                    }`}
+                  >
+                    {reportSubmission.result?.success === true
+                      ? "Reported successfully"
+                      : reportSubmission.result?.error ?? "Failed to report"}
+                  </p>
+                </Show>
               </div>
             )}
           </For>

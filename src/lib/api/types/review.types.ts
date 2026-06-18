@@ -28,6 +28,15 @@ export interface PublicReview {
   images: ReviewImage[];
 }
 
+export interface FeaturedPublicReview extends PublicReview {
+  product: {
+    id: string;
+    slug: string;
+    thumbnail: { id: string; url: string } | null;
+  } | null;
+  featuredAt: string | null;
+}
+
 export interface PublicReviewResponse {
   summary: ReviewSummary;
   reviews: PublicReview[];

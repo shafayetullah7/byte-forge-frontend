@@ -1,4 +1,4 @@
-import { query } from "@solidjs/router";
+import { query, revalidate } from "@solidjs/router";
 import { fetcher } from "../../api-client";
 import type {
   ReviewStatus,
@@ -29,3 +29,20 @@ export const getSellerProductReviews = query(
   },
   "seller-product-reviews"
 );
+
+export interface ReportSellerReviewRequest {
+  reason: string;
+  details?: string;
+}
+
+export const reportSellerReview = async (
+  reviewId: string,
+  body: ReportSellerReviewRequest
+) => {
+  const data = await fetcher(`/api/v1/user/seller/reviews/${reviewId}/report`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+  revalidate(getSellerProductReviews.keyFor());
+  return data;
+};
