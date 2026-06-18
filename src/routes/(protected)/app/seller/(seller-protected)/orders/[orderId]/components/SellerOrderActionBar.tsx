@@ -12,14 +12,18 @@ export function SellerOrderActionBar(props: {
 
   const labelFor = (key: SellerOrderActionDescriptor["key"]) => {
     switch (key) {
-      case "CONFIRM":
-        return t("seller.orders.detail.confirm");
-      case "START_PROCESSING":
-        return t("seller.orders.detail.startProcessing");
+      case "ACCEPT":
+        return t("seller.orders.detailPage.acceptOrder");
+      case "REJECT":
+        return t("seller.orders.detailPage.rejectOrder");
+      case "MARK_PACKED":
+        return t("seller.orders.detailPage.markPacked");
       case "SHIP":
         return t("seller.orders.detail.shipOrder");
       case "MARK_DELIVERED":
-        return t("seller.orders.detail.markDelivered");
+        return t("seller.orders.detailPage.selfDeliveryMarkDelivered");
+      case "CONFIRM_PAYMENT":
+        return t("seller.orders.detailPage.confirmPaymentReceived");
       case "CANCEL":
         return t("seller.orders.detail.cancelOrder");
       default:
@@ -29,7 +33,11 @@ export function SellerOrderActionBar(props: {
 
   const barActions = () =>
     props.actions.filter(
-      (action) => action.key !== "SHIP" && action.key !== "CANCEL",
+      (action) =>
+        action.key !== "SHIP" &&
+        action.key !== "CANCEL" &&
+        action.key !== "REJECT" &&
+        action.key !== "ACCEPT",
     );
 
   return (

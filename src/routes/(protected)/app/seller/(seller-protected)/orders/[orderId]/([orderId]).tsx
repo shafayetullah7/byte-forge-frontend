@@ -36,7 +36,12 @@ import { SellerOrderCancelledBanner } from "./components/SellerOrderCancelledBan
 import { SellerOrderHeader } from "./components/SellerOrderHeader";
 import { SellerOrderItemsSection } from "./components/SellerOrderItemsSection";
 import { SellerOrderPackingSlip } from "./components/SellerOrderPackingSlip";
+import type { ShippingMethod } from "~/lib/api/types/seller-orders.types";
 import { SellerOrderCancelPanel, SellerOrderShipPanel } from "./components/SellerOrderPanels";
+import {
+  SellerOrderAcceptRejectPanel,
+  SellerOrderConfirmPaymentPanel,
+} from "./components/SellerOrderAcceptRejectPanel";
 import {
   SellerOrderCustomerCard,
   SellerOrderShippingCard,
@@ -58,7 +63,10 @@ const SellerOrderDetailPage: Component = () => {
   const [shipCarrier, setShipCarrier] = createSignal("");
   const [shipTracking, setShipTracking] = createSignal("");
   const [shipEstimatedDelivery, setShipEstimatedDelivery] = createSignal("");
+  const [shipMethod, setShipMethod] = createSignal<ShippingMethod>("COURIER");
+  const [shipNotes, setShipNotes] = createSignal("");
   const [cancelReason, setCancelReason] = createSignal("");
+  const [rejectReason, setRejectReason] = createSignal("");
   const [confirmAction, setConfirmAction] = createSignal<SellerOrderActionDescriptor | null>(
     null,
   );
@@ -98,6 +106,8 @@ const SellerOrderDetailPage: Component = () => {
       setShipCarrier("");
       setShipTracking("");
       setShipEstimatedDelivery("");
+      setShipNotes("");
+      setRejectReason("");
       return;
     }
     if (result.stale) {
@@ -134,19 +144,22 @@ const SellerOrderDetailPage: Component = () => {
     if (!current?.updatedAt) return;
     shipTrigger({
       orderId: current.id,
-      carrier: shipCarrier(),
-      trackingNumber: shipTracking(),
+      carrier: shipCarrier() || undefined,
+      trackingNumber: shipTracking() || undefined,
+      shippingMethod: shipMethod(),
       estimatedDelivery: shipEstimatedDelivery() || undefined,
+      notes: shipNotes() || undefined,
       expectedUpdatedAt: current.updatedAt,
     });
   };
 
-  const runCancel = () => {
+  const runCancel = (reason?: string) => {
     const current = order();
-    if (!current?.updatedAt || !cancelReason().trim()) return;
+    const finalReason = (reason ?? cancelReason()).trim();
+    if (!current?.updatedAt || !finalReason) return;
     cancelTrigger({
       orderId: current.id,
-      reason: cancelReason().trim(),
+      reason: finalReason,
       expectedUpdatedAt: current.updatedAt,
     });
   };
@@ -159,8 +172,9 @@ const SellerOrderDetailPage: Component = () => {
       return;
     }
 
-    if (action.key === "CANCEL") {
-      if (!cancelReason().trim()) {
+    if (action.key === "CANCEL" || action.key === "REJECT") {
+      const reason = action.key === "REJECT" ? rejectReason() : cancelReason();
+      if (!reason.trim()) {
         toaster.error(t("seller.orders.detailPage.cancelReasonRequired"));
         return;
       }
@@ -173,6 +187,11 @@ const SellerOrderDetailPage: Component = () => {
 
     if (action.key === "SHIP") {
       runShip();
+      return;
+    }
+
+    if (action.key === "REJECT") {
+      runCancel(rejectReason());
       return;
     }
 
@@ -190,6 +209,11 @@ const SellerOrderDetailPage: Component = () => {
       return;
     }
 
+    if (action.key === "REJECT") {
+      runCancel(rejectReason());
+      return;
+    }
+
     runStatusAction(action);
   };
 
@@ -202,8 +226,21 @@ const SellerOrderDetailPage: Component = () => {
       return t("seller.orders.detailPage.confirmCancel");
     }
 
-    if (action.key === "MARK_DELIVERED" && current.payment.completesOnDeliver) {
-      return t("seller.orders.detailPage.confirmCodDeliver");
+    if (action.key === "REJECT") {
+      return t("seller.orders.detailPage.confirmCancel");
+    }
+
+    if (action.key === "MARK_DELIVERED") {
+      return t("seller.orders.detailPage.selfDeliveryConfirmDialog", {
+        amount: current.total,
+      });
+    }
+
+    if (action.key === "CONFIRM_PAYMENT") {
+      return t("seller.orders.detailPage.confirmPaymentDialog", {
+        amount: current.total,
+        orderNumber: current.orderNumber,
+      });
     }
 
     return t("seller.orders.detailPage.confirmAction");
@@ -264,6 +301,25 @@ const SellerOrderDetailPage: Component = () => {
                 cancelledAt={currentOrder().cancelledAt}
               />
 
+              <SellerOrderAcceptRejectPanel
+                order={currentOrder()}
+                pending={isPending()}
+                rejectReason={rejectReason()}
+                onRejectReasonChange={setRejectReason}
+                onAccept={() => {
+                  const acceptAction = currentOrder().availableActions.find(
+                    (action) => action.key === "ACCEPT",
+                  );
+                  if (acceptAction) handleAction(acceptAction);
+                }}
+                onReject={() => {
+                  const rejectAction = currentOrder().availableActions.find(
+                    (action) => action.key === "REJECT",
+                  );
+                  if (rejectAction) handleAction(rejectAction);
+                }}
+              />
+
               <Show when={!currentOrder().isReadOnly}>
                 <SellerOrderActionBar
                   actions={currentOrder().availableActions}
@@ -304,13 +360,28 @@ const SellerOrderDetailPage: Component = () => {
                   <SellerOrderShipPanel
                     order={currentOrder()}
                     pending={isPending()}
+                    shippingMethod={shipMethod()}
                     carrier={shipCarrier()}
                     trackingNumber={shipTracking()}
                     estimatedDelivery={shipEstimatedDelivery()}
+                    shipNotes={shipNotes()}
+                    onShippingMethodChange={setShipMethod}
                     onCarrierChange={setShipCarrier}
                     onTrackingChange={setShipTracking}
                     onEstimatedDeliveryChange={setShipEstimatedDelivery}
+                    onShipNotesChange={setShipNotes}
                     onSubmit={runShip}
+                  />
+
+                  <SellerOrderConfirmPaymentPanel
+                    order={currentOrder()}
+                    pending={isPending()}
+                    onConfirm={() => {
+                      const paymentAction = currentOrder().availableActions.find(
+                        (action) => action.key === "CONFIRM_PAYMENT",
+                      );
+                      if (paymentAction) handleAction(paymentAction);
+                    }}
                   />
 
                   <SellerOrderCancelPanel
@@ -345,11 +416,14 @@ const SellerOrderDetailPage: Component = () => {
                       {(shipment) => (
                         <ShipmentTrackingCard
                           shipment={{
+                            id: shipment().id,
                             carrier: shipment().carrier,
                             trackingNumber: shipment().trackingNumber,
+                            shippingMethod: shipment().shippingMethod,
                             status: shipment().status,
                             shippedAt: shipment().shippedAt,
                             deliveredAt: shipment().deliveredAt,
+                            estimatedDelivery: shipment().estimatedDelivery,
                           }}
                         />
                       )}

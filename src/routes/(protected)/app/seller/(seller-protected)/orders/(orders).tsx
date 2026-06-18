@@ -36,6 +36,7 @@ export default function SellerOrdersRoute() {
     { value: "PROCESSING", label: t("seller.orders.processing"), dotColor: "bg-cream-400" },
     { value: "SHIPPED", label: t("seller.orders.shipped"), dotColor: "bg-forest-400" },
     { value: "DELIVERED", label: t("seller.orders.delivered"), dotColor: "bg-forest-500" },
+    { value: "COMPLETED", label: t("seller.orders.status.completed"), dotColor: "bg-forest-600" },
     { value: "CANCELLED", label: t("seller.orders.cancelled"), dotColor: "bg-terracotta-400" },
   ]);
 

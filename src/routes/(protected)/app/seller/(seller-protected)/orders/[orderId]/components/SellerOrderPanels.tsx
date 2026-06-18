@@ -3,17 +3,21 @@ import { useI18n } from "~/i18n";
 import Button from "~/components/ui/Button";
 import { ShipOrderForm } from "../../components/ShipOrderForm";
 import { getSellerOrderAction } from "~/lib/orders/seller-order.utils";
-import type { SellerOrderActionDescriptor, SellerOrderDetail } from "~/lib/api/types/seller-orders.types";
+import type { ShippingMethod, SellerOrderActionDescriptor, SellerOrderDetail } from "~/lib/api/types/seller-orders.types";
 
 export function SellerOrderShipPanel(props: {
   order: SellerOrderDetail;
   pending: boolean;
+  shippingMethod: ShippingMethod;
   carrier: string;
   trackingNumber: string;
   estimatedDelivery: string;
+  shipNotes: string;
+  onShippingMethodChange: (value: ShippingMethod) => void;
   onCarrierChange: (value: string) => void;
   onTrackingChange: (value: string) => void;
   onEstimatedDeliveryChange: (value: string) => void;
+  onShipNotesChange: (value: string) => void;
   onSubmit: () => void;
 }) {
   const shipAction = () => getSellerOrderAction(props.order.availableActions, "SHIP");
@@ -23,15 +27,19 @@ export function SellerOrderShipPanel(props: {
       {(action) => (
         <div class="print:hidden">
           <ShipOrderForm
+            shippingMethod={props.shippingMethod}
             carrier={props.carrier}
             trackingNumber={props.trackingNumber}
             estimatedDelivery={props.estimatedDelivery}
+            notes={props.shipNotes}
             loading={props.pending}
             disabled={action().disabled}
             disabledReason={action().disabledReason}
+            onShippingMethodChange={props.onShippingMethodChange}
             onCarrierChange={props.onCarrierChange}
             onTrackingChange={props.onTrackingChange}
             onEstimatedDeliveryChange={props.onEstimatedDeliveryChange}
+            onNotesChange={props.onShipNotesChange}
             onSubmit={props.onSubmit}
           />
         </div>

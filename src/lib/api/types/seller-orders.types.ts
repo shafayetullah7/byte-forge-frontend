@@ -4,6 +4,7 @@ export type OrderStatus =
   | "PROCESSING"
   | "SHIPPED"
   | "DELIVERED"
+  | "COMPLETED"
   | "CANCELLED"
   | "EXPIRED";
 
@@ -15,11 +16,15 @@ export type PaymentStatus =
   | "REFUNDED"
   | "PARTIALLY_REFUNDED";
 
+export type ShippingMethod = "COURIER" | "SELF_DELIVERY" | "CUSTOMER_PICKUP";
+
 export type SellerOrderActionKey =
-  | "CONFIRM"
-  | "START_PROCESSING"
+  | "ACCEPT"
+  | "REJECT"
+  | "MARK_PACKED"
   | "SHIP"
   | "MARK_DELIVERED"
+  | "CONFIRM_PAYMENT"
   | "CANCEL";
 
 export type StatusHistoryActor = "BUYER" | "SELLER" | "SYSTEM";
@@ -66,6 +71,7 @@ export interface SellerOrderShipment {
   id: string;
   trackingNumber: string | null;
   carrier: string | null;
+  shippingMethod: ShippingMethod | string | null;
   status: string;
   shippedAt: string | null;
   deliveredAt: string | null;
@@ -104,6 +110,7 @@ export interface SellerOrderDetail extends SellerOrderSummary {
   notes: string | null;
   cancelledAt: string | null;
   cancelledReason: string | null;
+  buyerDeliveryConfirmedAt: string | null;
   updatedAt: string;
   customerPhone: string;
   address: SellerOrderAddress | null;
@@ -123,6 +130,7 @@ export interface SellerOrderDetail extends SellerOrderSummary {
   payment: {
     collectOnDelivery: boolean;
     completesOnDeliver: boolean;
+    requiresPaymentConfirmation: boolean;
   };
   shop: {
     id: string;
@@ -169,9 +177,11 @@ export interface UpdateSellerOrderStatusRequest {
 }
 
 export interface ShipSellerOrderRequest {
-  carrier: string;
-  trackingNumber: string;
+  carrier?: string;
+  trackingNumber?: string;
+  shippingMethod?: ShippingMethod;
   estimatedDelivery?: string;
+  notes?: string;
   expectedUpdatedAt?: string;
 }
 

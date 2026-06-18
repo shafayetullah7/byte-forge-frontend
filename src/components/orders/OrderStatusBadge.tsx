@@ -5,13 +5,14 @@ import { getOrderStatusLabel, getOrderStatusVariant } from "~/lib/orders/order-d
 export function OrderStatusBadge(props: {
   status: string;
   paymentMethodKey?: string | null;
+  labelOverride?: string;
   class?: string;
 }) {
   const { t } = useI18n();
 
   return (
     <Badge variant={getOrderStatusVariant(props.status)} class={props.class}>
-      {getOrderStatusLabel(props.status, t, props.paymentMethodKey)}
+      {props.labelOverride ?? getOrderStatusLabel(props.status, t, props.paymentMethodKey)}
     </Badge>
   );
 }

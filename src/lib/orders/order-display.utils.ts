@@ -13,6 +13,7 @@ export function getPaymentMethodLabel(payment: OrderPaymentFields): string {
 
 export function getOrderStatusVariant(status: string): OrderStatusVariant {
   switch (status) {
+    case "COMPLETED":
     case "DELIVERED":
     case "SHIPPED":
       return "forest";
@@ -44,12 +45,44 @@ export function getOrderStatusLabel(
     PROCESSING: "buyer.orders.status.processing",
     SHIPPED: "buyer.orders.status.shipped",
     DELIVERED: "buyer.orders.status.delivered",
+    COMPLETED: "buyer.orders.status.completed",
     CANCELLED: "buyer.orders.status.cancelled",
     EXPIRED: "buyer.orders.status.expired",
   };
 
   const key = keyMap[status];
   return key ? t(key) : status.replace(/_/g, " ");
+}
+
+export function getSellerOrderStatusLabel(status: string, t: TranslateFn): string {
+  const keyMap: Record<string, string> = {
+    PENDING_PAYMENT: "seller.orders.status.pendingPayment",
+    PROCESSING: "seller.orders.status.processing",
+    CONFIRMED: "seller.orders.status.confirmed",
+    SHIPPED: "seller.orders.status.shipped",
+    DELIVERED: "seller.orders.status.delivered",
+    COMPLETED: "seller.orders.status.completed",
+    CANCELLED: "seller.orders.status.cancelled",
+    EXPIRED: "seller.orders.status.expired",
+  };
+
+  const key = keyMap[status];
+  return key ? t(key) : status.replace(/_/g, " ");
+}
+
+export function getOrderStage(status: string): { current: number; total: number } | null {
+  const stageMap: Record<string, number> = {
+    PENDING_PAYMENT: 1,
+    PROCESSING: 2,
+    CONFIRMED: 3,
+    SHIPPED: 4,
+    DELIVERED: 5,
+    COMPLETED: 6,
+  };
+
+  const current = stageMap[status];
+  if (!current) return null;
+  return { current, total: 6 };
 }
 
 export function getPaymentStatusLabel(status: string, t: TranslateFn): string {
@@ -66,6 +99,32 @@ export function getPaymentStatusLabel(status: string, t: TranslateFn): string {
   return key ? t(key) : status.replace(/_/g, " ");
 }
 
+export function getShipmentStatusLabel(status: string, t: TranslateFn): string {
+  const keyMap: Record<string, string> = {
+    PENDING: "buyer.orders.details.shipmentStatusPending",
+    IN_TRANSIT: "buyer.orders.details.shipmentStatusInTransit",
+    DELIVERED: "buyer.orders.details.shipmentStatusDelivered",
+    FAILED: "buyer.orders.details.shipmentStatusFailed",
+    RETURNED: "buyer.orders.details.shipmentStatusReturned",
+  };
+
+  const key = keyMap[status];
+  return key ? t(key) : status.replace(/_/g, " ");
+}
+
+export function getShippingMethodLabel(method: string | null | undefined, t: TranslateFn): string {
+  switch (method) {
+    case "COURIER":
+      return t("buyer.orders.details.shippingMethodCourier");
+    case "SELF_DELIVERY":
+      return t("buyer.orders.details.shippingMethodSelfDelivery");
+    case "CUSTOMER_PICKUP":
+      return t("buyer.orders.details.shippingMethodPickup");
+    default:
+      return method?.replace(/_/g, " ") ?? "—";
+  }
+}
+
 export function getOrderStatusBorderColor(status: string): string {
   switch (status) {
     case "PENDING_PAYMENT":
@@ -78,6 +137,8 @@ export function getOrderStatusBorderColor(status: string): string {
       return "border-l-forest-400";
     case "DELIVERED":
       return "border-l-forest-500";
+    case "COMPLETED":
+      return "border-l-forest-600";
     case "CANCELLED":
     case "EXPIRED":
       return "border-l-terracotta-400";
@@ -93,6 +154,8 @@ export function mapSidebarStatusParam(status: string | undefined): string | unde
       return "PENDING_PAYMENT";
     case "delivered":
       return "DELIVERED";
+    case "completed":
+      return "COMPLETED";
     case "processing":
       return "PROCESSING";
     case "shipped":

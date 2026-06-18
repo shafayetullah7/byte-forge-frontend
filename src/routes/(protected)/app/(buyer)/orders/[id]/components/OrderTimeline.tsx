@@ -17,6 +17,7 @@ export interface TimelineEvent {
   timestamp: string;
   isCompleted: boolean;
   isCurrent?: boolean;
+  actorLabel?: string | null;
 }
 
 interface OrderTimelineProps {
@@ -26,10 +27,11 @@ interface OrderTimelineProps {
 
 const STATUS_ICON_MAP: Record<string, Component<{ class?: string }>> = {
   PENDING_PAYMENT: ClockIcon,
-  CONFIRMED: CheckCircleIcon,
+  CONFIRMED: PackageIcon,
   PROCESSING: PackageIcon,
   SHIPPED: TruckIcon,
   DELIVERED: CheckCircleIcon,
+  COMPLETED: CheckCircleIcon,
   CANCELLED: XCircleIcon,
   EXPIRED: XCircleIcon,
 };
@@ -39,12 +41,13 @@ function getStatusColor(status: string, isCompleted: boolean, isCurrent?: boolea
     switch (status) {
       case "PENDING_PAYMENT":
       case "CONFIRMED":
-        return "bg-cream-400";
+        return "bg-sage-400";
       case "PROCESSING":
         return "bg-cream-400";
       case "SHIPPED":
         return "bg-forest-400";
       case "DELIVERED":
+      case "COMPLETED":
         return "bg-forest-500";
       case "CANCELLED":
       case "EXPIRED":
@@ -117,6 +120,11 @@ export const OrderTimeline: Component<OrderTimelineProps> = (props) => {
                     {event.isCurrent && (
                       <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-forest-100 text-forest-700 dark:bg-forest-900/40 dark:text-forest-300">
                         {t("buyer.orders.details.current")}
+                      </span>
+                    )}
+                    {event.actorLabel && (
+                      <span class="text-xs text-gray-400 dark:text-gray-500">
+                        · {event.actorLabel}
                       </span>
                     )}
                   </div>

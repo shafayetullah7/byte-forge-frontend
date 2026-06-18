@@ -1,6 +1,10 @@
 import { Show } from "solid-js";
 import { useI18n } from "~/i18n";
 import { TruckIcon } from "~/components/icons";
+import {
+  getShipmentStatusLabel,
+  getShippingMethodLabel,
+} from "~/lib/orders/order-display.utils";
 import type { OrderShipment } from "~/lib/api/types/order.types";
 
 function formatDateTime(dateStr: string | null): string {
@@ -12,6 +16,16 @@ function formatDateTime(dateStr: string | null): string {
     year: "numeric",
     hour: "numeric",
     minute: "2-digit",
+  });
+}
+
+function formatDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return "—";
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    timeZone: "UTC",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   });
 }
 
@@ -29,22 +43,46 @@ export function ShipmentTrackingCard(props: { shipment: OrderShipment; class?: s
         </h3>
       </div>
       <div class="p-5 space-y-2 text-sm">
-        <div class="flex justify-between gap-4">
-          <span class="text-gray-500 dark:text-gray-400">{t("buyer.orders.details.carrier")}</span>
-          <span class="font-medium text-gray-900 dark:text-white">{props.shipment.carrier ?? "—"}</span>
-        </div>
-        <div class="flex justify-between gap-4">
-          <span class="text-gray-500 dark:text-gray-400">{t("buyer.orders.details.trackingNumber")}</span>
-          <span class="font-mono font-medium text-gray-900 dark:text-white">
-            {props.shipment.trackingNumber ?? "—"}
-          </span>
-        </div>
+        <Show when={props.shipment.shippingMethod}>
+          <div class="flex justify-between gap-4">
+            <span class="text-gray-500 dark:text-gray-400">
+              {t("seller.orders.detailPage.shippingMethodLabel")}
+            </span>
+            <span class="font-medium text-gray-900 dark:text-white">
+              {getShippingMethodLabel(props.shipment.shippingMethod, t)}
+            </span>
+          </div>
+        </Show>
+        <Show when={props.shipment.carrier}>
+          <div class="flex justify-between gap-4">
+            <span class="text-gray-500 dark:text-gray-400">{t("buyer.orders.details.carrier")}</span>
+            <span class="font-medium text-gray-900 dark:text-white">{props.shipment.carrier ?? "—"}</span>
+          </div>
+        </Show>
+        <Show when={props.shipment.trackingNumber}>
+          <div class="flex justify-between gap-4">
+            <span class="text-gray-500 dark:text-gray-400">{t("buyer.orders.details.trackingNumber")}</span>
+            <span class="font-mono font-medium text-gray-900 dark:text-white">
+              {props.shipment.trackingNumber ?? "—"}
+            </span>
+          </div>
+        </Show>
         <div class="flex justify-between gap-4">
           <span class="text-gray-500 dark:text-gray-400">{t("buyer.orders.details.shipmentStatus")}</span>
           <span class="font-medium text-gray-900 dark:text-white">
-            {props.shipment.status.replace(/_/g, " ")}
+            {getShipmentStatusLabel(props.shipment.status, t)}
           </span>
         </div>
+        <Show when={props.shipment.estimatedDelivery}>
+          <div class="flex justify-between gap-4">
+            <span class="text-gray-500 dark:text-gray-400">
+              {t("buyer.orders.details.estimatedDelivery")}
+            </span>
+            <span class="font-medium text-gray-900 dark:text-white">
+              {formatDate(props.shipment.estimatedDelivery ?? null)}
+            </span>
+          </div>
+        </Show>
         <Show when={props.shipment.shippedAt}>
           {(shippedAt) => (
             <div class="flex justify-between gap-4">

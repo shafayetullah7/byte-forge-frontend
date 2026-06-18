@@ -8,12 +8,14 @@ import { getOrderGroup } from "~/lib/api/endpoints/buyer/orders.api";
 import type { OrderDetail } from "~/lib/api/types/order.types";
 import { toaster } from "~/components/ui/Toast";
 import { ConfirmDialog } from "~/components/ui/ConfirmDialog";
+import Button from "~/components/ui/Button";
 import {
   ChevronLeftIcon,
   PackageIcon,
   XCircleIcon,
   PrinterIcon,
   ShoppingBagIcon,
+  CheckCircleIcon,
 } from "~/components/icons";
 import {
   OrderTimeline,
@@ -26,16 +28,73 @@ import {
   buildTimelineFromHistory,
   formatCurrency,
 } from "./components";
-import { cancelOrderAction } from "./actions";
+import { cancelOrderAction, confirmDeliveryAction } from "./actions";
+
+function OrderStatusBanner(props: { order: OrderDetail }) {
+  const { t } = useI18n();
+  const isCod = () => props.order.paymentMethodKey === "COD";
+
+  const bannerKey = () => {
+    switch (props.order.status) {
+      case "PENDING_PAYMENT":
+        return "awaitingSellerBanner";
+      case "PROCESSING":
+        return "orderAcceptedBanner";
+      case "CONFIRMED":
+        return "packedBanner";
+      case "SHIPPED":
+        return "shippedBanner";
+      case "DELIVERED":
+        return "deliveredBanner";
+      case "COMPLETED":
+        return "completedBanner";
+      case "CANCELLED":
+        return props.order.cancelledReason
+          ? "cancelledBySeller"
+          : "orderCancelled";
+      case "EXPIRED":
+        return "expiredBanner";
+      default:
+        return null;
+    }
+  };
+
+  const key = bannerKey();
+  if (!key) return null;
+
+  return (
+    <div class="rounded-xl border border-cream-200 dark:border-cream-800 bg-cream-50 dark:bg-cream-900/20 p-4 mb-4">
+      <p class="text-sm text-cream-800 dark:text-cream-200">
+        {t(`buyer.orders.details.${key}`)}
+      </p>
+      <Show when={isCod() && (props.order.status === "SHIPPED" || props.order.status === "DELIVERED")}>
+        <p class="text-sm font-medium text-cream-900 dark:text-cream-100 mt-2">
+          {t("buyer.orders.details.codReadyReminder", { amount: props.order.total })}
+        </p>
+      </Show>
+      <Show when={props.order.buyerDeliveryConfirmedAt}>
+        {(date) => (
+          <p class="text-xs text-forest-700 dark:text-forest-300 mt-2">
+            {t("buyer.orders.details.deliveryConfirmedBy")} · {formatFullDate(date())}
+          </p>
+        )}
+      </Show>
+    </div>
+  );
+}
 
 function OrderCard(props: { order: OrderDetail; groupId: string }) {
   const { t } = useI18n();
   const order = props.order;
   const [isCancelModalOpen, setIsCancelModalOpen] = createSignal(false);
+  const [isConfirmReceiptOpen, setIsConfirmReceiptOpen] = createSignal(false);
   const [cancelReason, setCancelReason] = createSignal("");
 
-  const canCancel = order.status === "PENDING_PAYMENT" || order.status === "CONFIRMED" || order.status === "PROCESSING";
+  const canCancel =
+    order.status === "PENDING_PAYMENT" || order.status === "PROCESSING";
+  const canConfirmReceipt = order.status === "SHIPPED";
   const isCancelled = order.status === "CANCELLED" || order.status === "EXPIRED";
+  const isCod = order.paymentMethodKey === "COD";
 
   const timelineEvents = createMemo(() =>
     buildTimelineFromHistory(order.statusHistory, (status) =>
@@ -44,7 +103,9 @@ function OrderCard(props: { order: OrderDetail; groupId: string }) {
   );
 
   const cancelTrigger = useAction(cancelOrderAction);
+  const confirmDeliveryTrigger = useAction(confirmDeliveryAction);
   const cancelSubmission = useSubmission(cancelOrderAction);
+  const confirmDeliverySubmission = useSubmission(confirmDeliveryAction);
 
   createEffect(() => {
     const result = cancelSubmission.result;
@@ -53,8 +114,21 @@ function OrderCard(props: { order: OrderDetail; groupId: string }) {
     if (result.success === true) {
       toaster.success(t("buyer.orders.details.cancelSuccess"));
       setCancelReason("");
+      setIsCancelModalOpen(false);
     } else if (result.success === false && result.error) {
       toaster.error(result.error.message || t("buyer.orders.details.cancelFailed"));
+    }
+  });
+
+  createEffect(() => {
+    const result = confirmDeliverySubmission.result;
+    if (!result) return;
+
+    if (result.success === true) {
+      toaster.success(t("buyer.orders.details.confirmReceiptSuccess"));
+      setIsConfirmReceiptOpen(false);
+    } else if (result.success === false && result.error) {
+      toaster.error(result.error.message || t("buyer.orders.details.confirmReceiptFailed"));
     }
   });
 
@@ -66,7 +140,15 @@ function OrderCard(props: { order: OrderDetail; groupId: string }) {
     });
   };
 
+  const executeConfirmReceipt = () => {
+    confirmDeliveryTrigger({
+      orderId: order.id,
+      groupId: props.groupId,
+    });
+  };
+
   const isCancelling = createMemo(() => cancelSubmission.pending === true);
+  const isConfirming = createMemo(() => confirmDeliverySubmission.pending === true);
 
   return (
     <div class="space-y-5">
@@ -76,6 +158,14 @@ function OrderCard(props: { order: OrderDetail; groupId: string }) {
         </h2>
         <OrderStatusBadge status={order.status} paymentMethodKey={order.paymentMethodKey} />
       </div>
+
+      <OrderStatusBanner order={order} />
+
+      <Show when={isCod && order.status !== "COMPLETED" && order.status !== "CANCELLED" && order.status !== "EXPIRED"}>
+        <div class="rounded-xl border border-forest-200 dark:border-forest-700 bg-forest-50 dark:bg-forest-900/20 px-4 py-3 text-sm text-forest-800 dark:text-forest-200">
+          {t("buyer.orders.details.payOnDeliveryAmount", { amount: order.total })}
+        </div>
+      </Show>
 
       <Show when={order.notes}>
         {(notes) => (
@@ -148,6 +238,19 @@ function OrderCard(props: { order: OrderDetail; groupId: string }) {
             </Show>
 
             <div class="space-y-2.5">
+              <Show when={canConfirmReceipt}>
+                <Button
+                  variant="primary"
+                  class="w-full"
+                  loading={isConfirming()}
+                  disabled={isConfirming()}
+                  onClick={() => setIsConfirmReceiptOpen(true)}
+                >
+                  <CheckCircleIcon class="w-4 h-4" />
+                  {t("buyer.orders.details.confirmReceiptButton")}
+                </Button>
+              </Show>
+
               <Show when={canCancel}>
                 <button
                   onClick={() => setIsCancelModalOpen(true)}
@@ -157,6 +260,15 @@ function OrderCard(props: { order: OrderDetail; groupId: string }) {
                   <XCircleIcon class="w-4 h-4" />
                   {isCancelling() ? t("buyer.orders.details.cancelling") : t("buyer.orders.details.cancelOrder")}
                 </button>
+              </Show>
+
+              <Show when={order.status === "COMPLETED"}>
+                <A
+                  href="/app/products"
+                  class="block w-full text-center px-4 py-2.5 bg-forest-600 hover:bg-forest-700 text-white rounded-xl font-semibold text-sm transition-colors shadow-sm"
+                >
+                  {t("buyer.orders.details.orderAgain")}
+                </A>
               </Show>
 
               <A
@@ -192,6 +304,18 @@ function OrderCard(props: { order: OrderDetail; groupId: string }) {
           />
         </div>
       </ConfirmDialog>
+
+      <ConfirmDialog
+        isOpen={isConfirmReceiptOpen()}
+        onClose={() => setIsConfirmReceiptOpen(false)}
+        onConfirm={executeConfirmReceipt}
+        title={t("buyer.orders.details.confirmReceiptDialogTitle")}
+        description={t("buyer.orders.details.confirmReceiptDialogBody", {
+          shopName: order.shopName,
+        })}
+        confirmLabel={t("buyer.orders.details.confirmReceiptButton")}
+        cancelLabel={t("common.cancel")}
+      />
     </div>
   );
 }
@@ -221,7 +345,25 @@ const OrderDetails: Component = () => {
           </div>
         }
       >
-        <Show when={group()}>
+        <Show
+          when={group()}
+          fallback={
+            <div class="mx-auto max-w-lg text-center py-16">
+              <h1 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                {t("buyer.orders.details.notFound")}
+              </h1>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                {t("buyer.orders.details.notFoundDescription")}
+              </p>
+              <A
+                href="/app/orders"
+                class="inline-flex px-4 py-2 rounded-xl bg-forest-600 text-white text-sm font-semibold"
+              >
+                {t("buyer.orders.details.backToOrders")}
+              </A>
+            </div>
+          }
+        >
           {(g) => (
             <div class="mx-auto max-w-[1400px]">
               <div class="mb-8">

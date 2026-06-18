@@ -12,6 +12,7 @@ export function getOrderStatusOptions(t: TranslateFn): FilterOption[] {
     { value: "PROCESSING", label: t("buyer.orders.status.processing"), dotColor: "bg-cream-400" },
     { value: "SHIPPED", label: t("buyer.orders.status.shipped"), dotColor: "bg-forest-400" },
     { value: "DELIVERED", label: t("buyer.orders.status.delivered"), dotColor: "bg-forest-500" },
+    { value: "COMPLETED", label: t("buyer.orders.status.completed"), dotColor: "bg-forest-600" },
     { value: "CANCELLED", label: t("buyer.orders.status.cancelled"), dotColor: "bg-terracotta-400" },
     { value: "EXPIRED", label: t("buyer.orders.status.expired"), dotColor: "bg-terracotta-400" },
   ];
@@ -31,7 +32,7 @@ export function getPaymentStatusOptions(t: TranslateFn): FilterOption[] {
 
 export function mapStatus(status: string): StatusType {
   const s = status.toUpperCase();
-  if (s === "DELIVERED") return "delivered";
+  if (s === "COMPLETED" || s === "DELIVERED") return "delivered";
   if (s === "SHIPPED") return "shipped";
   if (s === "CANCELLED") return "cancelled";
   return "pending";
@@ -44,6 +45,7 @@ export function getStatusColor(status: string): string {
     case "PROCESSING": return "border-l-cream-400";
     case "SHIPPED": return "border-l-forest-400";
     case "DELIVERED": return "border-l-forest-500";
+    case "COMPLETED": return "border-l-forest-600";
     case "CANCELLED": return "border-l-terracotta-400";
     case "EXPIRED": return "border-l-terracotta-400";
     default: return "border-l-gray-300";

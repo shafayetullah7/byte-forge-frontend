@@ -58,5 +58,6 @@ export function buildTimelineFromHistory(
     timestamp: h.createdAt,
     isCompleted: i < history.length - 1,
     isCurrent: i === history.length - 1,
+    actorLabel: h.actorLabel ?? null,
   }));
 }

@@ -4,7 +4,11 @@ import { useI18n } from "~/i18n";
 import { ChevronLeftIcon, PrinterIcon } from "~/components/icons";
 import { OrderStatusBadge, PaymentMethodBadge } from "~/components/orders";
 import Badge from "~/components/ui/Badge";
-import { getPaymentStatusLabel } from "~/lib/orders/order-display.utils";
+import {
+  getOrderStage,
+  getPaymentStatusLabel,
+  getSellerOrderStatusLabel,
+} from "~/lib/orders/order-display.utils";
 import type { SellerOrderDetail } from "~/lib/api/types/seller-orders.types";
 import { buildSellerOrdersListHref } from "~/lib/orders/seller-order.utils";
 import { formatDateTime, formatFullDate, formatTime } from "./utils";
@@ -15,6 +19,7 @@ export function SellerOrderHeader(props: {
 }) {
   const { t } = useI18n();
   const backHref = buildSellerOrdersListHref(props.returnTo);
+  const stage = () => getOrderStage(props.order.status);
 
   return (
     <div class="mb-8">
@@ -55,6 +60,7 @@ export function SellerOrderHeader(props: {
         <OrderStatusBadge
           status={props.order.status}
           paymentMethodKey={props.order.paymentMethodKey}
+          labelOverride={getSellerOrderStatusLabel(props.order.status, t)}
         />
         <Badge variant="default">{getPaymentStatusLabel(props.order.paymentStatus, t)}</Badge>
         <PaymentMethodBadge
@@ -64,17 +70,44 @@ export function SellerOrderHeader(props: {
           paymentMethodDisplayName={props.order.paymentMethodDisplayName}
           paymentMethodLogoUrl={props.order.paymentMethodLogoUrl}
         />
+        <Show when={stage()}>
+          {(s) => (
+            <Badge variant="default">
+              {t("seller.orders.detailPage.stage", {
+                current: s().current,
+                total: s().total,
+              })}
+            </Badge>
+          )}
+        </Show>
       </div>
 
-      <Show
-        when={
-          props.order.payment.collectOnDelivery &&
-          props.order.status === "PENDING_PAYMENT"
-        }
-      >
+      <Show when={props.order.payment.collectOnDelivery}>
         <div class="mt-4 rounded-xl border border-cream-300 dark:border-cream-700 bg-cream-50 dark:bg-cream-900/20 px-4 py-3 text-sm text-cream-800 dark:text-cream-200">
-          {t("seller.orders.detailPage.codCallout")}
+          {t("seller.orders.detailPage.codPaymentCallout", { amount: props.order.total })}
         </div>
+      </Show>
+
+      <Show when={props.order.status === "COMPLETED"}>
+        <div class="mt-4 rounded-xl border border-forest-300 dark:border-forest-700 bg-forest-50 dark:bg-forest-900/20 px-4 py-3 text-sm text-forest-800 dark:text-forest-200">
+          {t("seller.orders.detailPage.completedBanner")}
+        </div>
+      </Show>
+
+      <Show when={props.order.status === "SHIPPED" && !props.order.buyerDeliveryConfirmedAt}>
+        <div class="mt-4 rounded-xl border border-cream-300 dark:border-cream-700 bg-cream-50 dark:bg-cream-900/20 px-4 py-3 text-sm text-cream-800 dark:text-cream-200">
+          {t("seller.orders.detailPage.waitingForBuyerConfirmation")}
+        </div>
+      </Show>
+
+      <Show when={props.order.buyerDeliveryConfirmedAt}>
+        {(date) => (
+          <div class="mt-4 rounded-xl border border-forest-200 dark:border-forest-700 bg-forest-50 dark:bg-forest-900/20 px-4 py-3 text-sm text-forest-800 dark:text-forest-200">
+            {t("seller.orders.detailPage.buyerConfirmedDelivery", {
+              date: formatFullDate(date()),
+            })}
+          </div>
+        )}
       </Show>
     </div>
   );

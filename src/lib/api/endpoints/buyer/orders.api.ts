@@ -68,6 +68,15 @@ export const cancelOrder = async (
 };
 
 /**
+ * Confirm order delivery (buyer)
+ */
+export const confirmDelivery = async (orderId: string): Promise<void> => {
+  await fetcher<null>(`${BASE_PATH}/${orderId}/confirm-delivery`, {
+    method: "POST",
+  });
+};
+
+/**
  * Invalidate orders cache
  */
 export const invalidateOrders = () => revalidate(getOrders.keyFor());
@@ -96,4 +105,5 @@ export const ordersApi = {
   getStats: getOrdersStats,
   getGroup: getOrderGroup,
   cancel: cancelOrder,
+  confirmDelivery,
 };

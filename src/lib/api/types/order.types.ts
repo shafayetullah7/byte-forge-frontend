@@ -10,9 +10,11 @@ export interface OrderShipment {
   id: string;
   trackingNumber: string | null;
   carrier: string | null;
+  shippingMethod?: string | null;
   status: string;
   shippedAt: string | null;
   deliveredAt: string | null;
+  estimatedDelivery?: string | null;
 }
 
 export interface OrderItem {
@@ -107,6 +109,8 @@ export interface OrderStatusHistoryDetail {
   toStatus: string;
   notes: string | null;
   createdAt: string;
+  actor?: "BUYER" | "SELLER" | "SYSTEM";
+  actorLabel?: string | null;
 }
 
 export interface OrderDetail extends OrderPaymentFields {
@@ -124,6 +128,7 @@ export interface OrderDetail extends OrderPaymentFields {
   notes: string | null;
   cancelledAt: string | null;
   cancelledReason: string | null;
+  buyerDeliveryConfirmedAt?: string | null;
   createdAt: string;
   updatedAt: string;
   address: OrderAddressDetail | null;
