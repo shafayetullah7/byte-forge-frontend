@@ -1,5 +1,12 @@
 export type PaymentMethod = 'COD' | 'CARD' | 'BKASH' | 'NAGAD' | 'SSLCOMMERCE';
 
+export interface CheckoutPaymentMethodOption {
+  key: PaymentMethod;
+  displayName: string;
+  logoUrl: string | null;
+  description: string | null;
+}
+
 export interface PriceBreakdown {
   subtotal: string;
   shipping: string;

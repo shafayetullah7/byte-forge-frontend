@@ -4,6 +4,7 @@ import { useI18n } from "~/i18n";
 import type { OrderGroup } from "~/lib/api/types/order.types";
 import { PackageIcon } from "~/components/icons";
 import { StatusBadge } from "~/components/ui/StatusBadge";
+import { getPaymentMethodLabel } from "~/lib/orders/order-display.utils";
 import { mapStatus, getStatusColor, formatTotal, formatDate, getOrderItemsPreview } from "./utils";
 
 export function OrdersTable(props: {
@@ -92,6 +93,9 @@ export function OrdersTable(props: {
                         </div>
                         <div class="flex items-center gap-2 flex-shrink-0">
                           <StatusBadge status={mapStatus(order.status)} />
+                          <span class="text-[11px] text-gray-400 dark:text-gray-500 hidden sm:inline">
+                            {getPaymentMethodLabel(order)}
+                          </span>
                         </div>
                       </div>
 

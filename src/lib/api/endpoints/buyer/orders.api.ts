@@ -4,7 +4,6 @@ import type {
   OrderListResponse,
   OrderFilterParams,
   OrderStats,
-  Order,
   OrderGroupDetailResponse,
 } from "../../types/order.types";
 
@@ -44,16 +43,6 @@ export const getOrdersStats = query(
 );
 
 /**
- * Get single order by ID
- */
-export const getOrderById = query(
-  async (orderId: string): Promise<Order> => {
-    return fetcher<Order>(`${BASE_PATH}/${orderId}`);
-  },
-  "buyer-order-detail"
-);
-
-/**
  * Get detailed order group with all orders, items, addresses, and status history
  */
 export const getOrderGroup = query(
@@ -68,9 +57,13 @@ export const getOrderGroup = query(
 /**
  * Cancel an order
  */
-export const cancelOrder = async (orderId: string): Promise<Order> => {
-  return fetcher<Order>(`${BASE_PATH}/${orderId}/cancel`, {
+export const cancelOrder = async (
+  orderId: string,
+  reason?: string
+): Promise<void> => {
+  await fetcher<null>(`${BASE_PATH}/${orderId}/cancel`, {
     method: "POST",
+    body: JSON.stringify({ reason }),
   });
 };
 
@@ -87,9 +80,12 @@ export const invalidateOrdersStats = () => revalidate(getOrdersStats.keyFor());
 /**
  * Invalidate all orders-related caches
  */
-export const invalidateAllOrders = () => {
+export const invalidateAllOrders = (groupId?: string) => {
   revalidate(getOrders.keyFor());
   revalidate(getOrdersStats.keyFor());
+  if (groupId) {
+    revalidate(getOrderGroup.keyFor(groupId));
+  }
 };
 
 /**
@@ -98,7 +94,6 @@ export const invalidateAllOrders = () => {
 export const ordersApi = {
   get: getOrders,
   getStats: getOrdersStats,
-  getById: getOrderById,
   getGroup: getOrderGroup,
   cancel: cancelOrder,
 };

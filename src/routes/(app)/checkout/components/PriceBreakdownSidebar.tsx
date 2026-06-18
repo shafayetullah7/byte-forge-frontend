@@ -7,31 +7,24 @@ import {
   SparklesIcon,
   TruckIcon,
 } from "~/components/icons";
-import type { PriceBreakdown, PaymentMethod } from "~/lib/api/types/checkout.types";
+import type { PriceBreakdown, PaymentMethod, CheckoutPaymentMethodOption } from "~/lib/api/types/checkout.types";
 
 interface PriceBreakdownSidebarProps {
   breakdown: PriceBreakdown | undefined;
   paymentMethod?: PaymentMethod;
+  paymentMethods?: CheckoutPaymentMethodOption[];
 }
-
-const PaymentMethodLabel: Record<PaymentMethod, string> = {
-  COD: "Cash on Delivery",
-  CARD: "Credit/Debit Card",
-  BKASH: "bKash",
-  NAGAD: "Nagad",
-  SSLCOMMERCE: "SSLCommerz",
-};
-
-const PaymentMethodIcon: Record<PaymentMethod, string> = {
-  COD: "💵",
-  CARD: "💳",
-  BKASH: "📱",
-  NAGAD: "📱",
-  SSLCOMMERCE: "🌐",
-};
 
 const PriceBreakdownSidebar: Component<PriceBreakdownSidebarProps> = (props) => {
   const { t } = useI18n();
+
+  const selectedPaymentLabel = () => {
+    const method = props.paymentMethod;
+    if (!method) return "";
+    const catalog = props.paymentMethods?.find((m) => m.key === method);
+    if (catalog?.displayName) return catalog.displayName;
+    return method.replace(/_/g, " ");
+  };
 
   const subtotal = () => props.breakdown ? parseFloat(props.breakdown.subtotal) : 0;
   const shipping = () => props.breakdown ? parseFloat(props.breakdown.shipping) : 0;
@@ -109,9 +102,16 @@ const PriceBreakdownSidebar: Component<PriceBreakdownSidebarProps> = (props) => 
               {t("checkout.paymentMethod")}
             </span>
             <div class="flex items-center gap-2 mt-1">
-              <span class="text-base">{PaymentMethodIcon[props.paymentMethod!]}</span>
+              <Show
+                when={props.paymentMethods?.find((m) => m.key === props.paymentMethod)?.logoUrl}
+                fallback={<span class="text-base">{props.paymentMethod === "COD" ? "💵" : "💰"}</span>}
+              >
+                {(logoUrl) => (
+                  <img src={logoUrl()} alt={selectedPaymentLabel()} class="w-5 h-5 object-contain" />
+                )}
+              </Show>
               <span class="text-sm font-medium text-forest-800 dark:text-cream-50">
-                {PaymentMethodLabel[props.paymentMethod!]}
+                {selectedPaymentLabel()}
               </span>
             </div>
           </div>

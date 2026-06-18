@@ -1,22 +1,16 @@
-import { ErrorBoundary, Suspense, Show } from "solid-js";
-import { useNavigate, A, useSearchParams, Navigate } from "@solidjs/router";
+import { ErrorBoundary, Suspense, Show, createMemo } from "solid-js";
+import { useNavigate, A, useSearchParams, Navigate, createAsync } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import { requireAuth } from "~/lib/auth/guards";
 import { ApiError } from "~/lib/api";
+import { getActivePaymentMethods } from "~/lib/api/endpoints/public/payment-methods.api";
 import {
   ExclamationCircleIcon,
   SpinnerIcon,
 } from "~/components/icons";
 import { Button } from "~/components/ui";
 import type { PaymentMethod } from "~/lib/api/types/checkout.types";
-
-const PaymentMethodIcon: Record<PaymentMethod, string> = {
-  COD: "💵",
-  CARD: "💳",
-  BKASH: "📱",
-  NAGAD: "📱",
-  SSLCOMMERCE: "🌐",
-};
+import { PaymentMethodBadge } from "~/components/orders";
 
 export const route = {
   load: () => requireAuth(),
@@ -40,14 +34,18 @@ export default function ConfirmationPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const paymentMethods = createAsync(() => getActivePaymentMethods());
 
   const orderNumber = () => (searchParams.order as string) ?? "";
   const paymentMethod = () => (searchParams.method as PaymentMethod) ?? null;
+  const groupId = () => (searchParams.groupId as string) ?? "";
 
-  const getPaymentLabel = (method: PaymentMethod): string => {
-    const key = `checkout.payment.${method.toLowerCase()}` as const;
-    return t(key) || method;
-  };
+  const selectedMethod = createMemo(() => {
+    const method = paymentMethod();
+    const methods = paymentMethods();
+    if (!method || !methods) return null;
+    return methods.find((entry) => entry.key === method) ?? null;
+  });
 
   if (!orderNumber()) {
     return <Navigate href="/cart" />;
@@ -86,7 +84,6 @@ export default function ConfirmationPage() {
       <Suspense fallback={<LoadingFallback />}>
         <div class="min-h-screen bg-cream-50 dark:bg-forest-900">
           <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            {/* Breadcrumb */}
             <nav class="flex items-center gap-2 text-sm mb-10">
               <A
                 href="/"
@@ -107,7 +104,6 @@ export default function ConfirmationPage() {
               </span>
             </nav>
 
-            {/* Success content */}
             <div class="text-center">
               <div class="w-24 h-24 rounded-full bg-forest-100 dark:bg-forest-900/40 flex items-center justify-center mx-auto mb-8">
                 <svg class="w-14 h-14 text-forest-600 dark:text-forest-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -123,12 +119,30 @@ export default function ConfirmationPage() {
               </p>
 
               <Show when={paymentMethod()}>
-                {(method) => (
+                {() => (
                   <div class="inline-flex items-center gap-2 px-5 py-2.5 bg-cream-50 dark:bg-forest-800 rounded-lg border border-cream-200 dark:border-forest-700 mb-8">
-                    <span class="text-xl">{PaymentMethodIcon[method()]}</span>
-                    <span class="text-sm font-medium text-forest-800 dark:text-cream-50">
-                      {t("checkout.paymentMethod")}: {getPaymentLabel(method())}
-                    </span>
+                    <Show
+                      when={selectedMethod()}
+                      fallback={
+                        <span class="text-sm font-medium text-forest-800 dark:text-cream-50">
+                          {t("checkout.paymentMethod")}: {paymentMethod()}
+                        </span>
+                      }
+                    >
+                      {(method) => (
+                        <>
+                          <span class="text-sm text-gray-500 dark:text-gray-400">
+                            {t("checkout.paymentMethod")}:
+                          </span>
+                          <PaymentMethodBadge
+                            paymentMethod={method().key}
+                            paymentMethodKey={method().key}
+                            paymentMethodDisplayName={method().displayName}
+                            paymentMethodLogoUrl={method().logoUrl}
+                          />
+                        </>
+                      )}
+                    </Show>
                   </div>
                 )}
               </Show>
@@ -140,7 +154,9 @@ export default function ConfirmationPage() {
               <div class="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button
                   variant="primary"
-                  onClick={() => navigate("/app/orders")}
+                  onClick={() =>
+                    navigate(groupId() ? `/app/orders/${groupId()}` : "/app/orders")
+                  }
                 >
                   {t("checkout.viewOrders")}
                 </Button>

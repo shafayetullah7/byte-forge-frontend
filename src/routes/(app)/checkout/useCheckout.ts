@@ -5,20 +5,23 @@ import { useSession } from "~/lib/auth";
 import { getCart } from "~/lib/api/endpoints/buyer/cart.api";
 import { getAddresses } from "~/lib/api/endpoints/buyer/address.api";
 import { calculatePriceBreakdown, placeOrder } from "~/lib/api/endpoints/buyer/checkout.api";
+import { getActivePaymentMethods } from "~/lib/api/endpoints/public/payment-methods.api";
 import type { Address } from "~/lib/api/types/address.types";
-import type { PriceBreakdown, PriceBreakdownResponse, PaymentMethod } from "~/lib/api/types/checkout.types";
+import type {
+  PriceBreakdown,
+  PriceBreakdownResponse,
+  PaymentMethod,
+  CheckoutPaymentMethodOption,
+} from "~/lib/api/types/checkout.types";
 import { toaster } from "~/components/ui/Toast";
 
 export type CheckoutStep = "address" | "review" | "payment";
-
-const PAYMENT_METHODS: PaymentMethod[] = ["COD", "CARD", "BKASH", "NAGAD", "SSLCOMMERCE"];
 
 export function useCheckout() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const session = useSession();
 
-  // Client-side backup guard: redirect to login if session expires
   createEffect(() => {
     const user = session();
     if (user === undefined) return;
@@ -30,19 +33,42 @@ export function useCheckout() {
   const [currentStep, setCurrentStep] = createSignal<CheckoutStep>("address");
   const [selectedAddressId, setSelectedAddressId] = createSignal<string | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = createSignal<PaymentMethod>("COD");
+  const [orderNotes, setOrderNotes] = createSignal("");
   const [isPlacingOrder, setIsPlacingOrder] = createSignal(false);
   const [itemsInitialized, setItemsInitialized] = createSignal(false);
   const [addressInitialized, setAddressInitialized] = createSignal(false);
 
-  // Fetch cart data
+  const activePaymentMethods = createAsync(
+    () => getActivePaymentMethods(),
+    { deferStream: true }
+  );
+
+  const paymentMethods = createMemo<CheckoutPaymentMethodOption[]>(() => {
+    const methods = activePaymentMethods();
+    if (!methods?.length) return [];
+    return methods.map((method) => ({
+      key: method.key,
+      displayName: method.displayName,
+      logoUrl: method.logoUrl,
+      description: method.description,
+    }));
+  });
+
+  createEffect(() => {
+    const methods = paymentMethods();
+    if (methods.length === 0) return;
+    const selected = selectedPaymentMethod();
+    if (!methods.some((method) => method.key === selected)) {
+      setSelectedPaymentMethod(methods[0].key);
+    }
+  });
+
   const cart = createAsync(() => getCart(), { deferStream: true });
   const cartItems = createMemo(() => cart()?.items ?? []);
   const cartLoaded = createMemo(() => cart() !== undefined);
 
-  // Track selected item IDs (default to all items)
   const [selectedItemIds, setSelectedItemIds] = createSignal<Set<string>>(new Set());
 
-  // Auto-select all items when cart loads (runs once)
   createEffect(() => {
     const items = cartItems();
     if (items.length > 0 && !itemsInitialized()) {
@@ -51,15 +77,12 @@ export function useCheckout() {
     }
   });
 
-  // Get selected items
   const selectedItems = createMemo(() =>
     cartItems().filter((item) => selectedItemIds().has(item.id))
   );
 
-  // Fetch addresses
   const addresses = createAsync(() => getAddresses({ type: "shipping" }));
 
-  // Set default address when addresses load (runs once)
   createEffect(() => {
     const addrList = addresses();
     if (addrList && addrList.length > 0 && !selectedAddressId() && !addressInitialized()) {
@@ -69,7 +92,6 @@ export function useCheckout() {
     }
   });
 
-  // Calculate price breakdown using createAsync + query() for SSR/caching
   const priceBreakdown = createAsync<PriceBreakdownResponse | undefined>(
     () => {
       const addressId = selectedAddressId();
@@ -85,11 +107,13 @@ export function useCheckout() {
     { deferStream: true }
   );
 
-  // Flatten the breakdown from the response wrapper
   const breakdown = createMemo(() => priceBreakdown()?.breakdown);
 
   const canPlaceOrder = createMemo(
-    () => selectedAddressId() !== null && selectedItems().length > 0
+    () =>
+      selectedAddressId() !== null &&
+      selectedItems().length > 0 &&
+      paymentMethods().length > 0
   );
 
   const handlePlaceOrder = async () => {
@@ -104,10 +128,13 @@ export function useCheckout() {
         addressId,
         itemIds: items.map((item) => item.id),
         paymentMethod,
+        notes: orderNotes().trim() || undefined,
       });
 
       const firstOrderNumber = result.orderGroup.orderNumbers[0] ?? "";
-      navigate(`/checkout/confirmation?order=${firstOrderNumber}&method=${paymentMethod}`);
+      navigate(
+        `/checkout/confirmation?order=${firstOrderNumber}&method=${paymentMethod}&groupId=${result.orderGroup.orderGroupId}`
+      );
       toaster.success(t("checkout.orderPlaced"));
     } catch (error) {
       toaster.error(error instanceof Error ? error.message : "Failed to place order");
@@ -115,8 +142,6 @@ export function useCheckout() {
       setIsPlacingOrder(false);
     }
   };
-
-  const paymentMethods = PAYMENT_METHODS;
 
   return {
     currentStep,
@@ -133,5 +158,8 @@ export function useCheckout() {
     cartItems,
     cartLoaded,
     paymentMethods,
+    paymentMethodsLoading: () => activePaymentMethods() === undefined,
+    orderNotes,
+    setOrderNotes,
   };
 }

@@ -44,13 +44,16 @@ export function formatHour(dateStr: string): string {
 
 export function buildTimelineFromHistory(
   history: OrderStatusHistoryDetail[],
+  getStatusLabel?: (status: string) => string,
 ): TimelineEvent[] {
   if (history.length === 0) return [];
 
   return history.map((h, i) => ({
     id: h.id,
     status: h.toStatus,
-    title: h.toStatus.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+    title: getStatusLabel
+      ? getStatusLabel(h.toStatus)
+      : h.toStatus.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
     description: h.notes ?? `Order status changed to ${h.toStatus.replace(/_/g, " ").toLowerCase()}`,
     timestamp: h.createdAt,
     isCompleted: i < history.length - 1,

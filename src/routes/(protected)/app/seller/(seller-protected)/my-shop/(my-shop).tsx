@@ -396,7 +396,7 @@ export default function MyShopPage() {
                       <p class="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto leading-relaxed">
                         {t("seller.shop.myShop.noShopYet.description")}
                       </p>
-                      <A href="/seller/setup-shop">
+                      <A href="/app/seller/setup-shop">
                         <button class="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-terracotta-500 to-terracotta-600 hover:from-terracotta-600 hover:to-terracotta-700 text-white rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all">
                           <PlusIcon class="w-5 h-5" />
                           {t("seller.shop.myShop.noShopYet.createButton")}
@@ -531,7 +531,7 @@ export default function MyShopPage() {
                      
                       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                           {shop.status === "ACTIVE" && (
-                           <A href="/seller/products">
+                           <A href="/app/seller/products">
                              <button class="w-full p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-terracotta-500 dark:hover:border-terracotta-500 hover:bg-terracotta-50 dark:hover:bg-terracotta-900/20 transition-all group text-left">
                                <div class="flex items-center gap-3">
                                  <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-terracotta-500 to-terracotta-600 flex items-center justify-center flex-shrink-0">

@@ -1,3 +1,20 @@
+export interface OrderPaymentFields {
+  paymentMethod: string | null;
+  paymentMethodId?: string | null;
+  paymentMethodKey?: string | null;
+  paymentMethodDisplayName?: string | null;
+  paymentMethodLogoUrl?: string | null;
+}
+
+export interface OrderShipment {
+  id: string;
+  trackingNumber: string | null;
+  carrier: string | null;
+  status: string;
+  shippedAt: string | null;
+  deliveredAt: string | null;
+}
+
 export interface OrderItem {
   id: string;
   productName: string;
@@ -7,7 +24,7 @@ export interface OrderItem {
   thumbnail: { id: string; url: string } | null;
 }
 
-export interface Order {
+export interface Order extends OrderPaymentFields {
   id: string;
   orderNumber: string;
   shopId: string;
@@ -92,7 +109,7 @@ export interface OrderStatusHistoryDetail {
   createdAt: string;
 }
 
-export interface OrderDetail {
+export interface OrderDetail extends OrderPaymentFields {
   id: string;
   orderNumber: string;
   shopId: string;
@@ -100,7 +117,6 @@ export interface OrderDetail {
   shopLogo: string | null;
   status: string;
   paymentStatus: string;
-  paymentMethod: string | null;
   subtotal: string;
   shippingCost: string;
   tax: string;
@@ -113,6 +129,7 @@ export interface OrderDetail {
   address: OrderAddressDetail | null;
   items: OrderItemDetail[];
   statusHistory: OrderStatusHistoryDetail[];
+  shipment?: OrderShipment | null;
 }
 
 export interface OrderGroupDetail {

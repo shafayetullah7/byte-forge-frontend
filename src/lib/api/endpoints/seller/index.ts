@@ -7,6 +7,15 @@ export { sellerShopApi } from "./shop-detail.api";
 export { getPlants, getPlantById, createPlant, updatePlant, deletePlant };
 export { getProducts };
 export { getShippingRates, bulkUpdateShippingRates } from "./shipping-rates.api";
+export {
+  getSellerOrders,
+  getSellerOrderStats,
+  getSellerOrder,
+  updateSellerOrderStatus,
+  shipSellerOrder,
+  cancelSellerOrder,
+  sellerOrdersApi,
+} from "./orders.api";
 export type {
   Shop,
   ShopStatus,

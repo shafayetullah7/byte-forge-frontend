@@ -1,6 +1,9 @@
 import { createMemo } from "solid-js";
 import { useI18n } from "~/i18n";
 import { TruckIcon, CreditCardIcon, CheckCircleIcon, XCircleIcon, ArrowPathIcon } from "~/components/icons";
+import { PaymentMethodBadge } from "~/components/orders";
+import type { OrderPaymentFields } from "~/lib/api/types/order.types";
+import { getPaymentStatusLabel } from "~/lib/orders/order-display.utils";
 import { formatCurrency } from "./utils";
 
 function getPaymentStatusInfo(status: string) {
@@ -15,9 +18,8 @@ export function OrderSummaryWithPayment(props: {
   shippingCost: string;
   tax: string;
   total: string;
-  paymentMethod: string | null;
   paymentStatus: string;
-}) {
+} & OrderPaymentFields) {
   const { t } = useI18n();
 
   const paymentInfo = createMemo(() => getPaymentStatusInfo(props.paymentStatus));
@@ -65,14 +67,12 @@ export function OrderSummaryWithPayment(props: {
         </div>
 
         <div class="pt-3 border-t border-gray-100 dark:border-forest-700 space-y-2">
-          <div class="flex justify-between text-sm">
-            <span class="text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+          <div class="flex justify-between items-center text-sm gap-3">
+            <span class="text-gray-500 dark:text-gray-400 flex items-center gap-1.5 shrink-0">
               <CreditCardIcon class="w-3.5 h-3.5" />
               {t("buyer.orders.details.method")}
             </span>
-            <span class="font-medium text-gray-900 dark:text-white">
-              {props.paymentMethod?.replace(/_/g, " ") ?? "—"}
-            </span>
+            <PaymentMethodBadge {...props} />
           </div>
           <div class="flex justify-between text-sm">
             <span class="text-gray-500 dark:text-gray-400">
@@ -80,7 +80,7 @@ export function OrderSummaryWithPayment(props: {
             </span>
             <span class={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${paymentInfo().class}`}>
               {paymentInfo().icon}
-              {props.paymentStatus.replace(/_/g, " ")}
+              {getPaymentStatusLabel(props.paymentStatus, t)}
             </span>
           </div>
         </div>

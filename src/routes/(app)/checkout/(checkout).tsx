@@ -146,7 +146,10 @@ export default function CheckoutPage() {
                     <Match when={checkout.currentStep() === "payment"}>
                       <PaymentStepContent
                         selectedPaymentMethod={checkout.selectedPaymentMethod()}
-                        paymentMethods={checkout.paymentMethods}
+                        paymentMethods={checkout.paymentMethods()}
+                        paymentMethodsLoading={checkout.paymentMethodsLoading()}
+                        orderNotes={checkout.orderNotes()}
+                        onOrderNotesChange={checkout.setOrderNotes}
                         onSelectPaymentMethod={checkout.setSelectedPaymentMethod}
                         onBack={() => checkout.setCurrentStep("review")}
                         onPlaceOrder={checkout.handlePlaceOrder}
@@ -162,6 +165,7 @@ export default function CheckoutPage() {
                   <PriceBreakdownSidebar
                     breakdown={checkout.breakdown()}
                     paymentMethod={checkout.selectedPaymentMethod()}
+                    paymentMethods={checkout.paymentMethods()}
                   />
                 </div>
               </div>

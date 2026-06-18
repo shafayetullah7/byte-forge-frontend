@@ -1,9 +1,12 @@
-import { For, createMemo } from "solid-js";
+import { For, createMemo, Show } from "solid-js";
 import { ErrorBoundary } from "solid-js";
 import { useParams, createAsync } from "@solidjs/router";
 import { getProductSummary, getProductOverview } from "~/lib/api/endpoints/seller/products.api";
-import { getStatusVariant, formatPrice, formatNumber, formatCurrency, getOrderStatusVariant, getOrderStatusLabel, getStatusLabel } from "./helpers";
-import { MOCK_PRODUCT_STATS, MOCK_ORDERS, MOCK_REVIEWS_SUMMARY } from "./mock-data";
+import { getSellerOrders } from "~/lib/api/endpoints/seller/orders.api";
+import { filterOrdersByProduct, flattenProductOrderRows } from "~/lib/orders/seller-order.utils";
+import { getStatusVariant, formatPrice, formatNumber, formatCurrency, getStatusLabel } from "./helpers";
+import { MOCK_PRODUCT_STATS, MOCK_REVIEWS_SUMMARY } from "./mock-data";
+import { OrderStatusBadge } from "~/components/orders";
 import Badge from "~/components/ui/Badge";
 import { PackageIcon, DollarSignIcon, CubeIcon, EyeIcon, ShoppingBagIcon, StarIcon, AlertTriangleIcon, ClipboardListIcon, CheckCircleIcon, XCircleIcon, PencilIcon, ArchiveIcon, ArrowPathIcon, TrashIcon, ArrowTopRightOnSquareIcon } from "~/components/icons";
 import { StatCard } from "./components/StatCard";
@@ -31,7 +34,18 @@ export default function ProductOverviewRoute() {
   );
 
   const stats = MOCK_PRODUCT_STATS;
-  const recentOrders = MOCK_ORDERS.slice(0, 5);
+
+  const sellerOrdersResponse = createAsync(
+    () => getSellerOrders({ limit: 50 }),
+    { deferStream: true },
+  );
+
+  const recentOrders = createMemo(() => {
+    const response = sellerOrdersResponse();
+    if (!response) return [];
+    const filtered = filterOrdersByProduct(response.data, params.productId as string);
+    return flattenProductOrderRows(filtered, params.productId as string).slice(0, 5);
+  });
 
   const lowStockVariants = createMemo(() =>
     (overview()?.variants ?? []).filter((v) => v.inventoryCount > 0 && v.inventoryCount <= v.lowStockThreshold),
@@ -231,23 +245,21 @@ export default function ProductOverviewRoute() {
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-cream-100 dark:divide-forest-700/50">
-                  <For each={recentOrders}>
+                  <For each={recentOrders()}>
                     {(order) => {
                       const StatusIcon = ORDER_STATUS_ICONS[order.status] || ClipboardListIcon;
                       return (
                         <tr class="hover:bg-cream-50 dark:hover:bg-forest-700/30 transition-colors">
-                          <td class="px-6 py-3 font-mono text-xs text-gray-600 dark:text-gray-400">{order.id}</td>
+                          <td class="px-6 py-3 font-mono text-xs text-gray-600 dark:text-gray-400">{order.orderNumber}</td>
                           <td class="px-6 py-3 text-gray-700 dark:text-gray-300 hidden sm:table-cell">{order.customerName}</td>
-                          <td class="px-6 py-3 font-medium text-forest-800 dark:text-cream-50">{formatCurrency(order.totalAmount)}</td>
+                          <td class="px-6 py-3 font-medium text-forest-800 dark:text-cream-50">{formatCurrency(parseFloat(order.total))}</td>
                           <td class="px-6 py-3">
                             <div class="flex items-center gap-1.5">
                               <StatusIcon class="w-3.5 h-3.5" />
-                              <Badge variant={getOrderStatusVariant(order.status)}>
-                                {getOrderStatusLabel(order.status)}
-                              </Badge>
+                              <OrderStatusBadge status={order.status} paymentMethodKey={order.paymentMethodKey} />
                             </div>
                           </td>
-                          <td class="px-6 py-3 text-gray-500 dark:text-gray-400 text-xs">{timeAgo(order.orderDate)}</td>
+                          <td class="px-6 py-3 text-gray-500 dark:text-gray-400 text-xs">{timeAgo(order.createdAt)}</td>
                         </tr>
                       );
                     }}

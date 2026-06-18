@@ -2,9 +2,8 @@ import { Component, Show, For, createMemo, createEffect, createSignal, Suspense 
 import { createAsync, useParams, A, useAction, useSubmission } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
-import { StatusBadge } from "~/components/ui/StatusBadge";
-import type { StatusType } from "~/components/ui/StatusBadge";
-import { mapStatus } from "../components/utils";
+import { OrderStatusBadge, ShipmentTrackingCard } from "~/components/orders";
+import { getOrderStatusLabel } from "~/lib/orders/order-display.utils";
 import { getOrderGroup } from "~/lib/api/endpoints/buyer/orders.api";
 import type { OrderDetail } from "~/lib/api/types/order.types";
 import { toaster } from "~/components/ui/Toast";
@@ -13,7 +12,6 @@ import {
   ChevronLeftIcon,
   PackageIcon,
   XCircleIcon,
-  FlagIcon,
   PrinterIcon,
   ShoppingBagIcon,
 } from "~/components/icons";
@@ -34,13 +32,16 @@ function OrderCard(props: { order: OrderDetail; groupId: string }) {
   const { t } = useI18n();
   const order = props.order;
   const [isCancelModalOpen, setIsCancelModalOpen] = createSignal(false);
+  const [cancelReason, setCancelReason] = createSignal("");
 
-  const statusType = createMemo((): StatusType => mapStatus(order.status));
   const canCancel = order.status === "PENDING_PAYMENT" || order.status === "CONFIRMED" || order.status === "PROCESSING";
   const isCancelled = order.status === "CANCELLED" || order.status === "EXPIRED";
-  const isDelivered = order.status === "DELIVERED";
 
-  const timelineEvents = createMemo(() => buildTimelineFromHistory(order.statusHistory));
+  const timelineEvents = createMemo(() =>
+    buildTimelineFromHistory(order.statusHistory, (status) =>
+      getOrderStatusLabel(status, t, order.paymentMethodKey),
+    ),
+  );
 
   const cancelTrigger = useAction(cancelOrderAction);
   const cancelSubmission = useSubmission(cancelOrderAction);
@@ -51,17 +52,18 @@ function OrderCard(props: { order: OrderDetail; groupId: string }) {
 
     if (result.success === true) {
       toaster.success(t("buyer.orders.details.cancelSuccess"));
+      setCancelReason("");
     } else if (result.success === false && result.error) {
       toaster.error(result.error.message || t("buyer.orders.details.cancelFailed"));
     }
   });
 
-  const handleCancel = () => {
-    setIsCancelModalOpen(true);
-  };
-
   const executeCancel = () => {
-    cancelTrigger({ orderId: order.id, groupId: props.groupId });
+    cancelTrigger({
+      orderId: order.id,
+      groupId: props.groupId,
+      reason: cancelReason().trim() || undefined,
+    });
   };
 
   const isCancelling = createMemo(() => cancelSubmission.pending === true);
@@ -72,7 +74,7 @@ function OrderCard(props: { order: OrderDetail; groupId: string }) {
         <h2 class="text-xl font-bold text-gray-900 dark:text-white">
           {order.orderNumber}
         </h2>
-        <StatusBadge status={statusType()} class="text-sm px-3 py-1" />
+        <OrderStatusBadge status={order.status} paymentMethodKey={order.paymentMethodKey} />
       </div>
 
       <Show when={order.notes}>
@@ -118,6 +120,9 @@ function OrderCard(props: { order: OrderDetail; groupId: string }) {
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 space-y-6">
           <OrderItemsSection items={order.items} />
+          <Show when={order.shipment}>
+            {(shipment) => <ShipmentTrackingCard shipment={shipment()} />}
+          </Show>
           <OrderTimeline events={timelineEvents()} currentStatus={order.status} />
         </div>
 
@@ -129,6 +134,10 @@ function OrderCard(props: { order: OrderDetail; groupId: string }) {
               tax={order.tax}
               total={order.total}
               paymentMethod={order.paymentMethod}
+              paymentMethodId={order.paymentMethodId}
+              paymentMethodKey={order.paymentMethodKey}
+              paymentMethodDisplayName={order.paymentMethodDisplayName}
+              paymentMethodLogoUrl={order.paymentMethodLogoUrl}
               paymentStatus={order.paymentStatus}
             />
 
@@ -141,21 +150,12 @@ function OrderCard(props: { order: OrderDetail; groupId: string }) {
             <div class="space-y-2.5">
               <Show when={canCancel}>
                 <button
-                  onClick={handleCancel}
+                  onClick={() => setIsCancelModalOpen(true)}
                   disabled={isCancelling()}
                   class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-semibold text-sm transition-colors shadow-sm"
                 >
                   <XCircleIcon class="w-4 h-4" />
                   {isCancelling() ? t("buyer.orders.details.cancelling") : t("buyer.orders.details.cancelOrder")}
-                </button>
-              </Show>
-
-              <Show when={isDelivered}>
-                <button
-                  class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-forest-600 hover:bg-forest-700 text-white rounded-xl font-semibold text-sm transition-colors shadow-sm"
-                >
-                  <FlagIcon class="w-4 h-4" />
-                  {t("buyer.orders.details.writeReview")}
                 </button>
               </Show>
 
@@ -179,7 +179,19 @@ function OrderCard(props: { order: OrderDetail; groupId: string }) {
         confirmLabel={t("buyer.orders.details.cancelOrder")}
         cancelLabel={t("common.cancel")}
         variant="danger"
-      />
+      >
+        <div class="w-full mb-4 text-left">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            {t("buyer.orders.details.cancelReasonLabel")}
+          </label>
+          <textarea
+            value={cancelReason()}
+            onInput={(e) => setCancelReason(e.currentTarget.value)}
+            placeholder={t("buyer.orders.details.cancelReasonPlaceholder")}
+            class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-forest-600 bg-white dark:bg-forest-900 text-sm min-h-20"
+          />
+        </div>
+      </ConfirmDialog>
     </div>
   );
 }
