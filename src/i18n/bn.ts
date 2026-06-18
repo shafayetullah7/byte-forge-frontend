@@ -881,6 +881,10 @@ export const dict = {
     shopManagement: "দোকান ব্যবস্থাপনা",
     myShop: "আমার দোকান",
     history: "ইতিহাস",
+    sidebar: {
+      shopOverview: "দোকানের সারাংশ",
+      allProducts: "সকল পণ্য",
+    },
     products: {
       title: "পণ্য",
       allProducts: "সকল পণ্য",
@@ -1285,6 +1289,7 @@ export const dict = {
       managePotProducts: "আপনার কুঁজ পণ্য পরিচালনা করুন",
       manageSeedProducts: "আপনার বীজ পণ্য পরিচালনা করুন",
       manageFertilizerProducts: "আপনার সার পণ্য পরিচালনা করুন",
+      comingSoon: "ফিচারটি শীঘ্রই আসছে",
       addPlant: "গাছপালা যোগ করুন",
       addPot: "কুঁজ যোগ করুন",
       addSeed: "বীজ যোগ করুন",
@@ -1598,6 +1603,7 @@ export const dict = {
       processing: "প্রসেসিং",
       shipped: "শিপ করা হয়েছে",
       delivered: "ডেলিভারি হয়েছে",
+      completed: "সম্পন্ন",
       cancelled: "বাতিল",
       subtitle: "আপনার দোকানের গ্রাহক অর্ডার পরিচালনা ও ট্র্যাক করুন",
       loading: "অর্ডার লোড হচ্ছে...",

@@ -24,6 +24,23 @@ interface SidebarProps {
 
 const isParentLink = (link: NavLink): boolean => !!link.children && link.children.length > 0;
 
+function linkMatchesCurrent(linkHref: string, pathname: string, search: string): boolean {
+    const [path, query = ""] = linkHref.split("?");
+    if (pathname !== path) return false;
+
+    const current = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
+
+    if (query) {
+        const expected = new URLSearchParams(query);
+        for (const [key, value] of expected.entries()) {
+            if (current.get(key) !== value) return false;
+        }
+        return true;
+    }
+
+    return !current.has("status");
+}
+
 const PlainNavItem: Component<{
     link: NavLink;
     brandColor: "forest" | "terracotta";
@@ -31,9 +48,9 @@ const PlainNavItem: Component<{
     variant?: "default" | "child";
 }> = (props) => {
     const isChild = props.variant === "child";
-    const partialMatch = isChild ? useMatch(() => props.link.href + "/*") : undefined;
-    const exactMatch = useMatch(() => props.link.href, { exact: true });
-    const isActive = () => !!(partialMatch?.() || exactMatch());
+    const location = useLocation();
+    const isActive = () =>
+        linkMatchesCurrent(props.link.href, location.pathname, location.search);
 
     const activeStyles = createMemo(() => {
         if (props.variant === "child") {
@@ -194,11 +211,12 @@ export const Sidebar: Component<SidebarProps> = (props) => {
 
     const autoExpanded = createMemo(() => {
         const currentPath = location.pathname;
+        const currentSearch = location.search;
         const expanded: Record<string, boolean> = {};
         for (const link of props.config.links) {
             if (!isParentLink(link)) continue;
             for (const child of link.children!) {
-                if (currentPath.startsWith(child.href)) {
+                if (linkMatchesCurrent(child.href, currentPath, currentSearch)) {
                     expanded[getLinkKey(link)] = true;
                     break;
                 }

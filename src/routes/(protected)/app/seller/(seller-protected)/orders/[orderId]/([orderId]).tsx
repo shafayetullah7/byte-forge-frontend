@@ -81,9 +81,9 @@ const SellerOrderDetailPage: Component = () => {
 
   const isPending = createMemo(
     () =>
-      updateStatusSubmission.pending ||
-      shipSubmission.pending ||
-      cancelSubmission.pending,
+      updateStatusSubmission.pending === true ||
+      shipSubmission.pending === true ||
+      cancelSubmission.pending === true,
   );
 
   const timelineEvents = createMemo(() => {

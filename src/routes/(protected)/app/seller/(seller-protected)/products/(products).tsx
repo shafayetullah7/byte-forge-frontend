@@ -5,7 +5,6 @@ import { getProducts } from "~/lib/api/endpoints/seller/products.api";
 import type { ProductFilter } from "~/lib/api/types/seller.types";
 import {
   PackageIcon,
-  PlusIcon,
   ExclamationCircleIcon,
   Squares2x2Icon,
   CheckCircleIcon,
@@ -185,13 +184,6 @@ export default function ProductsPage() {
                 </p>
               </div>
             </div>
-            <A
-              href="/app/seller/products/new"
-              class="inline-flex items-center gap-2 px-5 py-2.5 bg-forest-600 hover:bg-forest-700 text-white rounded-lg font-semibold shadow-sm hover:shadow-md transition-colors"
-            >
-              <PlusIcon class="w-5 h-5" />
-              {t("seller.products.addProduct")}
-            </A>
           </div>
         </div>
 

@@ -877,6 +877,10 @@ export const dict = {
     shopManagement: "Shop Management",
     myShop: "My Shop",
     history: "History",
+    sidebar: {
+      shopOverview: "Shop overview",
+      allProducts: "All products",
+    },
     products: {
       title: "Products",
       allProducts: "All Products",
@@ -1281,6 +1285,7 @@ export const dict = {
       managePotProducts: "Manage your pot products",
       manageSeedProducts: "Manage your seed products",
       manageFertilizerProducts: "Manage your fertilizer products",
+      comingSoon: "Upcoming feature",
       addPlant: "Add Plant",
       addPot: "Add Pot",
       addSeed: "Add Seed",
@@ -1595,6 +1600,7 @@ export const dict = {
       processing: "Processing",
       shipped: "Shipped",
       delivered: "Delivered",
+      completed: "Completed",
       cancelled: "Cancelled",
       subtitle: "Manage and track customer orders for your shop",
       loading: "Loading orders...",

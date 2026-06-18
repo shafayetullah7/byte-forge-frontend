@@ -1,5 +1,5 @@
 import { useI18n } from "~/i18n";
-import { CubeIcon, PlusIcon } from "~/components/icons";
+import { CubeIcon } from "~/components/icons";
 
 export default function SeedsPage() {
   const { t } = useI18n();
@@ -22,13 +22,9 @@ export default function SeedsPage() {
                 </p>
               </div>
             </div>
-            <a
-              href="/app/seller/products/new"
-              class="inline-flex items-center gap-2 px-5 py-2.5 bg-forest-600 hover:bg-forest-700 text-white rounded-lg font-semibold shadow-sm hover:shadow-md transition-colors"
-            >
-              <PlusIcon class="w-5 h-5" />
-              {t("seller.products.addSeed")}
-            </a>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-cream-100 text-cream-800 dark:bg-cream-900/40 dark:text-cream-200 border border-cream-200 dark:border-cream-800">
+              {t("seller.products.comingSoon")}
+            </span>
           </div>
         </div>
 
@@ -41,13 +37,6 @@ export default function SeedsPage() {
           <p class="text-gray-500 dark:text-gray-400 mb-6">
             {t("seller.products.seedManagementComingSoon")}
           </p>
-          <a
-            href="/app/seller/products/new"
-            class="inline-flex items-center gap-2 px-5 py-2.5 bg-forest-600 hover:bg-forest-700 text-white rounded-lg font-semibold shadow-sm hover:shadow-md transition-colors"
-          >
-            <PlusIcon class="w-5 h-5" />
-            {t("seller.products.addYourFirstSeed")}
-          </a>
         </div>
     </>
   );
