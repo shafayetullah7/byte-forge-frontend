@@ -7,11 +7,8 @@ import {
     CubeIcon,
     ClipboardListIcon,
     ClockIcon,
-    CheckCircleIcon,
     BoltIcon,
     MapPinIcon,
-    TruckIcon,
-    PackageIcon,
 } from "~/components/icons";
 import { useI18n } from "~/i18n";
 
@@ -89,37 +86,9 @@ export const SellerLayout: ParentComponent = (props) => {
                 ],
             },
             {
-                id: "orders",
                 href: "/app/seller/orders",
                 icon: ClipboardListIcon,
                 label: t("seller.orders.title"),
-                children: [
-                    {
-                        href: "/app/seller/orders",
-                        icon: ClipboardListIcon,
-                        label: t("seller.orders.allOrders"),
-                    },
-                    {
-                        href: "/app/seller/orders?status=pending",
-                        icon: ClockIcon,
-                        label: t("seller.orders.pending"),
-                    },
-                    {
-                        href: "/app/seller/orders?status=processing",
-                        icon: PackageIcon,
-                        label: t("seller.orders.processing"),
-                    },
-                    {
-                        href: "/app/seller/orders?status=shipped",
-                        icon: TruckIcon,
-                        label: t("seller.orders.shipped"),
-                    },
-                    {
-                        href: "/app/seller/orders?status=completed",
-                        icon: CheckCircleIcon,
-                        label: t("seller.orders.completed"),
-                    },
-                ],
             },
         ],
     }));
