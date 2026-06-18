@@ -1,0 +1,7 @@
+# API Client and Auth Rules
+
+- Route API calls through shared `fetcher` in `lib/api/api-client.ts`.
+- Preserve locale header injection, credential handling, and CSRF behavior.
+- Respect auth error handling strategy (`strict`, auth hooks, redirects).
+- Keep SSR-safe behavior in shared API utilities.
+- Avoid ad-hoc raw fetch calls for internal API endpoints.

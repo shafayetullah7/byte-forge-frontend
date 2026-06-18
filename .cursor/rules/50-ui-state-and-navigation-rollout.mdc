@@ -1,0 +1,7 @@
+# UI State and Navigation Rollout Rules
+
+- Every interactive page should cover loading, empty, and error states.
+- Mutating flows must show pending state and user feedback.
+- Keep sidebar/nav synchronized with actual route readiness.
+- For upcoming features, use explicit “coming soon/upcoming” UX instead of broken redirects.
+- Preserve existing status and badge mappings via shared display utilities.

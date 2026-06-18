@@ -1,0 +1,10 @@
+# Done Criteria Rules
+
+A frontend change is complete only when:
+
+- `npm run build` passes
+- No new TypeScript/lint regressions in touched files
+- Query/action separation remains consistent
+- API calls still use shared fetcher path
+- i18n updates exist for both locales when copy changes
+- Navigation and route behavior match implementation state

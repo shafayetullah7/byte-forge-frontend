@@ -1,0 +1,7 @@
+# Routing and Layout Rules
+
+- Follow existing route-group conventions in `src/routes`.
+- Keep protected/auth route boundaries intact.
+- Use route-level orchestration; avoid deeply embedding route concerns into generic components.
+- Use `A` links for navigation in rendered route UI unless non-router behavior is needed.
+- Keep route params/query contracts stable for existing flows (`returnTo`, status filters, etc.).

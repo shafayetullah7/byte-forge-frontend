@@ -1,0 +1,7 @@
+# Global Safety Rules
+
+- Keep edits scoped and feature-targeted.
+- Do not enable dead links or remove existing functional routes without request.
+- Prefer existing UI/data patterns over introducing parallel abstractions.
+- Preserve user-visible behavior unless change is explicitly requested.
+- Never commit secrets or environment credentials.
