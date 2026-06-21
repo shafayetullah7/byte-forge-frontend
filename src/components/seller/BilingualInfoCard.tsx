@@ -116,8 +116,8 @@ function LanguageSection(props: LanguageSectionProps) {
 
 export default function BilingualInfoCard(props: BilingualInfoCardProps) {
   const { t } = useI18n();
-  const hasEnglish = props.enData.name || props.enData.description;
-  const hasBengali = props.bnData.name || props.bnData.description;
+  const hasEnglish = !!(props.enData.name || props.enData.description);
+  const hasBengali = !!(props.bnData.name || props.bnData.description);
 
   return (
     <div class="bg-white dark:bg-forest-800 rounded-2xl p-6 sm:p-8 mb-8 border border-gray-200 dark:border-gray-700 shadow-sm">

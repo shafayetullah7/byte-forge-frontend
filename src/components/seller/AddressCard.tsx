@@ -1,6 +1,6 @@
 import { createSignal, Show, createEffect } from "solid-js";
 import { useI18n } from "~/i18n";
-import type { ShopAddress } from "~/lib/api/endpoints/seller/shop-detail.api";
+import type { ShopAddress, UpdateAddressDto } from "~/lib/api/endpoints/seller/shop-detail.api";
 import AddressEditModal from "./AddressEditModal";
 import { MapPinIcon, PencilIcon, HashIcon, CheckIcon } from "~/components/icons";
 
@@ -47,7 +47,7 @@ export default function AddressCard(props: AddressCardProps) {
     setIsModalOpen(true);
   };
 
-  const handleSave = async (data: AddressFormData) => {
+  const handleSave = async (data: UpdateAddressDto) => {
     if (props.onSave) {
       const result = await props.onSave(data);
       console.log("AddressCard handleSave result:", result);
@@ -137,7 +137,7 @@ export default function AddressCard(props: AddressCardProps) {
                   {/* Map Link */}
                   <Show when={address?.googleMapsLink}>
                     <a
-                      href={address?.googleMapsLink}
+                      href={address!.googleMapsLink!}
                       target="_blank"
                       rel="noopener noreferrer"
                       class="inline-flex items-center gap-2 text-terracotta-600 dark:text-terracotta-400 hover:text-terracotta-700 dark:hover:text-terracotta-300 transition-colors text-sm mt-3"

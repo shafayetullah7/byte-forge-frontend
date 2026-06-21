@@ -36,6 +36,7 @@ export interface ReportSellerReviewRequest {
 }
 
 export const reportSellerReview = async (
+  productId: string,
   reviewId: string,
   body: ReportSellerReviewRequest
 ) => {
@@ -43,6 +44,6 @@ export const reportSellerReview = async (
     method: "POST",
     body: JSON.stringify(body),
   });
-  revalidate(getSellerProductReviews.keyFor());
+  revalidate(getSellerProductReviews.keyFor(productId));
   return data;
 };

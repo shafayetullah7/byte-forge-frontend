@@ -15,10 +15,10 @@ import { getSellerProductReviews, reportSellerReview } from "~/lib/api/endpoints
 import { ApiError } from "~/lib/api/types";
 
 const reportReviewAction = action(
-  async (input: { reviewId: string; reason: string; details?: string }) => {
+  async (input: { productId: string; reviewId: string; reason: string; details?: string }) => {
     "use server";
     try {
-      await reportSellerReview(input.reviewId, {
+      await reportSellerReview(input.productId, input.reviewId, {
         reason: input.reason,
         details: input.details,
       });
@@ -201,6 +201,7 @@ export default function ProductReviewsRoute() {
                     onClick={() => {
                       setReportingId(review.id);
                       reportTrigger({
+                        productId: params.productId,
                         reviewId: review.id,
                         reason: "Seller requested policy review",
                       });

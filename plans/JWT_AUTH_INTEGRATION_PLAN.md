@@ -2,13 +2,13 @@
 
 ## Overview
 
-This plan outlines the integration of the new JWT-based authentication system with automatic token refresh from `byte-forge-auth` into the `byte-forge-frontend` SolidStart application.
+This plan outlines the integration of the new JWT-based authentication system with automatic token refresh from `byte-forge-backend` into the `byte-forge-frontend` SolidStart application.
 
 ## Backend Summary
 
 ### New Authentication Flow
 
-The backend (`byte-forge-auth`) now implements:
+The backend (`byte-forge-backend`) now implements:
 
 1. **Session-based login** - Returns session cookie on login
 2. **JWT Access Token** - Short-lived token for API authorization (stored in `userAccessToken` cookie)

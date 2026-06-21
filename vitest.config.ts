@@ -15,11 +15,10 @@ export default defineConfig({
   },
   test: {
     environment: 'jsdom',
-    transformMode: {
-      web: [/\.[jt]sx?$/],
-    },
-    deps: {
-      inline: [/solid-js/, /@solidjs/],
+    server: {
+      deps: {
+        inline: [/solid-js/, /@solidjs/],
+      },
     },
     setupFiles: ['./src/test/setup.ts'],
     globals: true,

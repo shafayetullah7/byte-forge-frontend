@@ -157,7 +157,7 @@ export function CategorySearchSelect(props: CategorySearchSelectProps) {
                         ? "bg-forest-100 text-forest-800 dark:bg-forest-900/40 dark:text-forest-300 font-medium"
                         : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-forest-700"
                     }`}
-                    style={{ paddingLeft: `${12 + depth * 20}px` }}
+                    style={{ "padding-left": `${12 + depth * 20}px` }}
                   >
                     {depth === 0 ? (
                       <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">

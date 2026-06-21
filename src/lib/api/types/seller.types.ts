@@ -70,6 +70,14 @@ export interface Shop {
   status: ShopStatusType;
   createdAt: string;
   updatedAt: string;
+  name: string;
+  description: string | null;
+  businessHours: string | null;
+  logo: MediaAttachment | null;
+  banner: MediaAttachment | null;
+  translations: ShopTranslation[];
+  contact: ShopContact | null;
+  address: ShopAddress | null;
 }
 
 /**

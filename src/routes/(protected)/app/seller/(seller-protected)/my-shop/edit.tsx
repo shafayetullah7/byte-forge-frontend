@@ -30,12 +30,12 @@ export default function EditShopPage() {
     const bn = shop.translations?.find(t => t.locale === "bn");
     if (en) {
       setNameEn(en.name);
-      setDescriptionEn(en.description);
+      setDescriptionEn(en.description ?? "");
       setBusinessHours(en.businessHours || "");
     }
     if (bn) {
       setNameBn(bn.name);
-      setDescriptionBn(bn.description);
+      setDescriptionBn(bn.description ?? "");
     }
   }
 
@@ -48,16 +48,23 @@ export default function EditShopPage() {
     setIsSubmitting(true);
     try {
       const dto = {
-        translations: [
-          { locale: "en", name: nameEn(), description: descriptionEn(), businessHours: businessHours() },
-          { locale: "bn", name: nameBn(), description: descriptionBn() },
-        ],
+        translations: {
+          en: {
+            name: nameEn(),
+            description: descriptionEn(),
+            businessHours: businessHours(),
+          },
+          bn: {
+            name: nameBn(),
+            description: descriptionBn(),
+          },
+        },
       };
 
       if (isMajorChange()) {
         await sellerShopApi.submitForReview(dto);
       } else {
-        await sellerShopApi.update(dto);
+        await sellerShopApi.updateShopInfo(dto);
       }
 
       navigate("/seller/my-shop");

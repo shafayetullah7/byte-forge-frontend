@@ -56,3 +56,25 @@ export interface PublicTagGroup {
 export interface TagFilter {
   locale?: 'en' | 'bn';
 }
+
+export interface CategoryTranslationInput {
+  locale: string;
+  name: string;
+  description?: string | null;
+}
+
+export interface CreateCategoryRequest {
+  slug: string;
+  parentId?: string | null;
+  isActive?: boolean;
+  commissionRate?: number;
+  translations: CategoryTranslationInput[];
+}
+
+export interface UpdateCategoryRequest {
+  slug?: string;
+  parentId?: string | null;
+  isActive?: boolean;
+  commissionRate?: number;
+  translations?: CategoryTranslationInput[];
+}
