@@ -6,7 +6,7 @@ import Button from "~/components/ui/Button";
 
 export default function ShopDetailPage() {
   const params = useParams();
-  const shopData = createAsync(() => publicShopsApi.getById(params.shop_id));
+  const shopData = createAsync(() => publicShopsApi.getById(params.shop_id!));
 
   return (
     <div class="min-h-screen bg-cream-50 dark:bg-forest-900">

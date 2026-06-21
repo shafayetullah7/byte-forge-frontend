@@ -104,7 +104,7 @@ export default function ComponentShowcase() {
             </Card>
 
             <Card
-              variant="elevated"
+              variant="bordered"
               title="Elevated Card"
               description="Card with shadow for depth"
             >

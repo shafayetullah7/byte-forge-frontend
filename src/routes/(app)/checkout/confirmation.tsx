@@ -119,32 +119,30 @@ export default function ConfirmationPage() {
               </p>
 
               <Show when={paymentMethod()}>
-                {() => (
-                  <div class="inline-flex items-center gap-2 px-5 py-2.5 bg-cream-50 dark:bg-forest-800 rounded-lg border border-cream-200 dark:border-forest-700 mb-8">
-                    <Show
-                      when={selectedMethod()}
-                      fallback={
-                        <span class="text-sm font-medium text-forest-800 dark:text-cream-50">
-                          {t("checkout.paymentMethod")}: {paymentMethod()}
+                <div class="inline-flex items-center gap-2 px-5 py-2.5 bg-cream-50 dark:bg-forest-800 rounded-lg border border-cream-200 dark:border-forest-700 mb-8">
+                  <Show
+                    when={selectedMethod()}
+                    fallback={
+                      <span class="text-sm font-medium text-forest-800 dark:text-cream-50">
+                        {t("checkout.paymentMethod")}: {paymentMethod()}
+                      </span>
+                    }
+                  >
+                    {(method) => (
+                      <>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">
+                          {t("checkout.paymentMethod")}:
                         </span>
-                      }
-                    >
-                      {(method) => (
-                        <>
-                          <span class="text-sm text-gray-500 dark:text-gray-400">
-                            {t("checkout.paymentMethod")}:
-                          </span>
-                          <PaymentMethodBadge
-                            paymentMethod={method().key}
-                            paymentMethodKey={method().key}
-                            paymentMethodDisplayName={method().displayName}
-                            paymentMethodLogoUrl={method().logoUrl}
-                          />
-                        </>
-                      )}
-                    </Show>
-                  </div>
-                )}
+                        <PaymentMethodBadge
+                          paymentMethod={method().key}
+                          paymentMethodKey={method().key}
+                          paymentMethodDisplayName={method().displayName}
+                          paymentMethodLogoUrl={method().logoUrl}
+                        />
+                      </>
+                    )}
+                  </Show>
+                </div>
               </Show>
 
               <p class="text-sm text-gray-500 dark:text-gray-400 mb-10 max-w-md mx-auto">

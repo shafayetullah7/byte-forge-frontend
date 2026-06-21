@@ -4,7 +4,7 @@ import Button from "~/components/ui/Button";
 import { ImageUpload } from "~/components/ui";
 import { useImageUpload } from "~/lib/hooks/useImageUpload";
 import { useI18n } from "~/i18n";
-import type { Shop } from "~/lib/api/endpoints/seller/shop-detail.api";
+import type { Shop } from "~/lib/api/types/seller.types";
 
 export interface ShopBrandingModalProps {
   isOpen: boolean;
@@ -83,8 +83,7 @@ export default function ShopBrandingModal(props: ShopBrandingModalProps) {
             onFileSelect={logoUpload.upload}
             onDelete={logoUpload.deleteMedia}
             accept="image/*"
-            maxSizeText="PNG, JPG up to 5MB"
-            requirementsText="Recommended: 500x500px, square format"
+            description="PNG, JPG up to 5MB. Recommended: 500x500px, square format"
           />
         </div>
 
@@ -106,8 +105,7 @@ export default function ShopBrandingModal(props: ShopBrandingModalProps) {
             onFileSelect={bannerUpload.upload}
             onDelete={bannerUpload.deleteMedia}
             accept="image/*"
-            maxSizeText="PNG, JPG up to 10MB"
-            requirementsText="Recommended: 1920x400px, landscape format"
+            description="PNG, JPG up to 10MB. Recommended: 1920x400px, landscape format"
           />
         </div>
 

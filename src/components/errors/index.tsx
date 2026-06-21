@@ -1,4 +1,6 @@
-import { Component, ErrorBoundary, JSX, Reset } from "solid-js";
+import { Component, ErrorBoundary, JSX } from "solid-js";
+
+type Reset = () => void;
 
 interface ErrorFallbackProps {
   error: Error;

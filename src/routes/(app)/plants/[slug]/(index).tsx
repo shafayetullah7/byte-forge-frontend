@@ -80,7 +80,7 @@ export default function PlantDetailPage() {
       toaster.success(t("public.plants.detail.addedToCart"));
       invalidateAllCart();
     } else if (addToCartSubmission.result?.success === false) {
-      toaster.error(addToCartSubmission.result.error.message);
+      toaster.error(addToCartSubmission.result.error?.message ?? t("common.error"));
     }
   });
 

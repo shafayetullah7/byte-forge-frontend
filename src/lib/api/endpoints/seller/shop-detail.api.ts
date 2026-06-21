@@ -195,7 +195,7 @@ export const sellerShopApi = {
   /**
    * Submit shop for review (major changes)
    */
-  submitForReview: async (dto: Partial<CreateShopDto>): Promise<Shop> => {
+  submitForReview: async (dto: UpdateShopInfoDto): Promise<Shop> => {
     return fetcher<Shop>('/api/v1/user/seller/shops/my-shop/submit-for-review', {
       method: 'PATCH',
       body: JSON.stringify(dto),
