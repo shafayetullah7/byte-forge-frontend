@@ -1,14 +1,22 @@
 {
   "name": "byte-forge-frontend",
   "type": "module",
+  "packageManager": "pnpm@10.24.0",
   "scripts": {
     "dev": "vinxi dev",
     "build": "vinxi build",
-    "start": "vinxi start",
+    "start": "vinxi start --host 0.0.0.0",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
-    "test:run": "vitest run"
+    "test:run": "vitest run --passWithNoTests",
+    "docker:dev": "NODE_ENV=development docker compose --env-file .env.development up",
+    "docker:dev:build": "NODE_ENV=development docker compose --env-file .env.development build --no-cache",
+    "docker:dev:down": "NODE_ENV=development docker compose --env-file .env.development down",
+    "docker:prod": "NODE_ENV=production DOCKER_BUILD_TARGET=production docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.production up --remove-orphans",
+    "docker:prod:build": "NODE_ENV=production DOCKER_BUILD_TARGET=production docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.production build --no-cache",
+    "docker:prod:down": "NODE_ENV=production DOCKER_BUILD_TARGET=production docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.production down",
+    "docker:logs:prod": "NODE_ENV=production docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.production logs -f app"
   },
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "^5.2.8",

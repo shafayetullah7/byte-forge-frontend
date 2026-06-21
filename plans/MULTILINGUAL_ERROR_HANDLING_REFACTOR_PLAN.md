@@ -77,5 +77,5 @@ For authentication errors, only the `message` is used - displayed in toast.
 - [`byte-forge-frontend/src/components/ui/Toast`](byte-forge-frontend/src/components/ui/Toast:1)
 
 ### Backend
-- [`byte-forge-auth/src/api/user/user-auth/user-auth.service.ts`](byte-forge-auth/src/api/user/user-auth/user-auth.service.ts:1)
-- [`byte-forge-auth/src/common/exception-filters/all.exception.filter.ts`](byte-forge-auth/src/common/exception-filters/all.exception.filter.ts:1)
+- [`byte-forge-backend/src/api/user/user-auth/user-auth.service.ts`](byte-forge-backend/src/api/user/user-auth/user-auth.service.ts:1)
+- [`byte-forge-backend/src/common/exception-filters/all.exception.filter.ts`](byte-forge-backend/src/common/exception-filters/all.exception.filter.ts:1)

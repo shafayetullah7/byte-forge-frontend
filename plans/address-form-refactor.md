@@ -94,7 +94,7 @@ CREATE TABLE shop_address_translations (
 
 ## Implementation Phases
 
-### Phase 1: Backend Changes (`byte-forge-auth`)
+### Phase 1: Backend Changes (`byte-forge-backend`)
 
 #### 1.1 Update DTO Schema
 
@@ -1131,7 +1131,7 @@ describe('updateMyShopAddress', () => {
 
 ## Files to Modify
 
-### Backend (`byte-forge-auth`)
+### Backend (`byte-forge-backend`)
 
 | File | Changes | Estimated Time |
 |------|---------|----------------|
