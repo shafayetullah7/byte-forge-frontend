@@ -246,8 +246,8 @@ export interface PaginatedResult<T> {
   };
 }
 
-export type PublicShopDetailTab =
-  | "overview"
+export type PublicShopDetailSection =
+  | ""
   | "products"
   | "reviews"
   | "campaigns"

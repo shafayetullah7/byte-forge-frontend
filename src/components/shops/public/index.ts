@@ -4,7 +4,7 @@ export { MiniTrendChart } from "./MiniTrendChart";
 export { ShopDiscoveryCard, ShopDiscoveryCardLink } from "./ShopDiscoveryCard";
 export { ShopTrustSnapshot } from "./ShopTrustSnapshot";
 export { ShopHero } from "./ShopHero";
-export { ShopDetailTabs } from "./ShopDetailTabs";
+export { ShopDetailNav } from "./ShopDetailNav";
 export { ShopDirectoryToolbar, ShopDirectoryGridSkeleton } from "./ShopDirectoryToolbar";
 export { ShopAboutSection, ShopReputationSection } from "./ShopAboutSection";
 export { ShopStatisticsSection, ShopCommunitySection } from "./ShopStatisticsSection";
