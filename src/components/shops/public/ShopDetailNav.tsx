@@ -33,6 +33,7 @@ export const ShopDetailNav: Component<{
               return (
                 <A
                   href={hrefFor(section.path)}
+                  noScroll
                   aria-current={isActive() ? "page" : undefined}
                   class={`shrink-0 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-forest-500 focus-visible:ring-inset ${
                     isActive()
