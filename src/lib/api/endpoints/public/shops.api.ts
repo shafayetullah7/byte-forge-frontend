@@ -39,7 +39,10 @@ export interface PublicProduct {
 }
 
 /**
- * Get all approved shops (public endpoint)
+ * Public Shops API client.
+ *
+ * Phase 2: wire to backend when list/products endpoints exist.
+ * Until then, use ~/lib/public-shops/public-shop.service.ts (mock facade).
  */
 export const getShops = query(
   async (params?: {

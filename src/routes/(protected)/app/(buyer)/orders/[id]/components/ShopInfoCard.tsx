@@ -2,8 +2,15 @@ import { useI18n } from "~/i18n";
 import { A } from "@solidjs/router";
 import { ArrowTopRightOnSquareIcon } from "~/components/icons";
 
-export function ShopInfoCard(props: { shopName: string; shopLogo: string | null; shopId: string }) {
+export function ShopInfoCard(props: {
+  shopName: string;
+  shopLogo: string | null;
+  shopId: string;
+  shopSlug?: string | null;
+}) {
   const { t } = useI18n();
+  const shopHref = () =>
+    props.shopSlug ? `/shops/${props.shopSlug}` : `/shops`;
 
   return (
     <div class="bg-white dark:bg-forest-800 rounded-xl border border-gray-200 dark:border-forest-700 shadow-sm">
@@ -28,7 +35,7 @@ export function ShopInfoCard(props: { shopName: string; shopLogo: string | null;
               {props.shopName || 'Unknown Shop'}
             </p>
             <A
-              href={`/app/shops/${props.shopId}`}
+              href={shopHref()}
               class="text-xs text-forest-600 dark:text-forest-400 hover:underline flex items-center gap-0.5"
             >
               {t("buyer.orders.details.viewShop")}
