@@ -1,10 +1,10 @@
 import { sellerShopsApi } from "./shops.api";
 import { sellerVerificationApi } from "./verification.api";
-import { plantsApi, getPlants, getPlantById, createPlant, updatePlant, deletePlant } from "./plants.api";
+import { plantsApi, getPlants, getPlantById, createPlant, updatePlant, updatePlantStatus, deletePlant, invalidatePlant, invalidatePlants, invalidateAllPlantCaches } from "./plants.api";
 import { productsApi, getProducts } from "./products.api";
 
 export { sellerShopApi } from "./shop-detail.api";
-export { getPlants, getPlantById, createPlant, updatePlant, deletePlant };
+export { getPlants, getPlantById, createPlant, updatePlant, updatePlantStatus, deletePlant, invalidatePlant, invalidatePlants, invalidateAllPlantCaches };
 export { getProducts };
 export { getShippingRates, bulkUpdateShippingRates } from "./shipping-rates.api";
 export {

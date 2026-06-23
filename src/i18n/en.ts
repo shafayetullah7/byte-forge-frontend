@@ -1302,6 +1302,16 @@ export const dict = {
       addYourFirstPot: "Add Your First Pot",
       addYourFirstSeed: "Add Your First Seed",
       addYourFirstFertilizer: "Add Your First Fertilizer",
+      // Edit Plant Form
+      editPlant: {
+        pageTitle: "Edit Plant",
+        pageSubtitle: "Update your plant listing",
+        saveChanges: "Save changes",
+        plantUpdated: "Plant updated successfully",
+        manageStockOnInventory: "Manage stock levels on the",
+        inventoryPage: "Inventory page",
+        slugChangeWarning: "Changing the URL slug may break existing links to this plant.",
+      },
       // New Plant Form
       newPlant: {
         pageTitle: "Add New Plant",

@@ -1,6 +1,6 @@
 import { For, Show } from "solid-js";
 import { ErrorBoundary } from "solid-js";
-import { useParams, createAsync } from "@solidjs/router";
+import { A, useParams, createAsync } from "@solidjs/router";
 import { getPlantById } from "~/lib/api/endpoints/seller/plants.api";
 import Badge from "~/components/ui/Badge";
 import { PencilIcon, PackageIcon, ImageIcon } from "~/components/icons";
@@ -72,10 +72,13 @@ export default function VariantsRoute() {
                             {variant.isActive ? "Active" : "Inactive"}
                           </Badge>
                         </div>
-                        <button class="inline-flex items-center gap-1.5 text-sm text-forest-600 dark:text-forest-400 hover:underline font-medium">
+                        <A
+                          href={`/app/seller/products/plants/${plantData().id}/edit?step=4`}
+                          class="inline-flex items-center gap-1.5 text-sm text-forest-600 dark:text-forest-400 hover:underline font-medium"
+                        >
                           <PencilIcon class="w-3.5 h-3.5" />
                           Edit
-                        </button>
+                        </A>
                       </div>
                       <div class="p-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

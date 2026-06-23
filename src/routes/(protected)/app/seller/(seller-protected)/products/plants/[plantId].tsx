@@ -1,8 +1,12 @@
 import { ErrorBoundary, Suspense, Show, For, createMemo } from "solid-js";
 import { A, useParams, useLocation, createAsync, type RouteSectionProps, type RouteDefinition } from "@solidjs/router";
-import { ChevronLeftIcon, ChevronRightIcon, ExclamationCircleIcon } from "~/components/icons";
+import { ChevronLeftIcon, ChevronRightIcon, ExclamationCircleIcon, PencilIcon } from "~/components/icons";
+import Button from "~/components/ui/Button";
 import { getPlantById } from "~/lib/api/endpoints/seller/plants.api";
 import { useI18n } from "~/i18n";
+import Badge from "~/components/ui/Badge";
+import { getStatusVariant, getStatusLabel } from "./[plantId]/helpers";
+import type { ProductStatus } from "~/lib/api/types/seller.types";
 
 export const route = {
   preload: ({ params }) => getPlantById(params.plantId as string),
@@ -31,6 +35,8 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
     }
     return location.pathname.startsWith(`/app/seller/products/plants/${params.plantId}/${path}`);
   };
+
+  const isEditRoute = () => location.pathname.endsWith("/edit");
 
   return (
     <div class="mx-auto max-w-[1400px]">
@@ -94,6 +100,11 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
                           {plantData().translations?.find(t => t.locale === "en")?.name
                             ?? plantData().translations?.[0]?.name ?? ""}
                         </h1>
+                        <div class="mt-2">
+                          <Badge variant={getStatusVariant(plantData().status as ProductStatus)}>
+                            {getStatusLabel(plantData().status as ProductStatus)}
+                          </Badge>
+                        </div>
                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                           {plantData().plantDetails?.scientificName ?? ""}
                         </p>
@@ -108,6 +119,14 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
                         </A>
                       </div>
                     </div>
+                    <Show when={!isEditRoute()}>
+                      <A href={`/app/seller/products/plants/${plantData().id}/edit`}>
+                        <Button variant="accent" class="inline-flex items-center gap-2">
+                          <PencilIcon class="w-4 h-4" />
+                          {t("seller.products.plantOverview.editPlant")}
+                        </Button>
+                      </A>
+                    </Show>
                   </div>
                 </div>
 

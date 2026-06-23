@@ -74,7 +74,6 @@ function VariantImageUpload(props: {
   t: (key: string) => string;
 }) {
   const [isUploading, setIsUploading] = createSignal(false);
-  const [isDeleting, setIsDeleting] = createSignal(false);
 
   const handleUpload = async (file: File) => {
     if (file.size > 5 * 1024 * 1024) {
@@ -97,22 +96,12 @@ function VariantImageUpload(props: {
     }
   };
 
-  const handleDelete = async (idx: number) => {
-    const id = props.mediaIds[idx];
-    if (!id) return;
-    setIsDeleting(true);
-    try {
-      await mediaApi.delete(id);
-      props.setVariants(v => v.map((item, i) => i === props.variantIndex ? {
-        ...item,
-        mediaIds: item.mediaIds.filter((_, j) => j !== idx),
-        mediaUrls: item.mediaUrls.filter((_, j) => j !== idx)
-      } : item));
-    } catch (err: any) {
-      toaster.error(err.message || props.t("seller.products.newPlant.imageDeleteFailed"));
-    } finally {
-      setIsDeleting(false);
-    }
+  const handleDelete = (idx: number) => {
+    props.setVariants(v => v.map((item, i) => i === props.variantIndex ? {
+      ...item,
+      mediaIds: item.mediaIds.filter((_, j) => j !== idx),
+      mediaUrls: item.mediaUrls.filter((_, j) => j !== idx)
+    } : item));
   };
 
   return (
@@ -136,10 +125,9 @@ function VariantImageUpload(props: {
                 <button
                   type="button"
                   onClick={() => handleDelete(idx())}
-                  disabled={isDeleting()}
-                  class="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
                 >
-                  {isDeleting() ? "…" : "×"}
+                  ×
                 </button>
               </div>
             )}
@@ -200,6 +188,8 @@ export function Step4Variants(props: {
   leafDensityOptions: SelectOption[];
   propagationTypeOptions: SelectOption[];
   containerTypeOptions: SelectOption[];
+  stockFieldsDisabled?: boolean;
+  inventoryLinkHref?: string;
   t: (key: string) => string;
   onWarningChange: (hasWarning: boolean, missingFields: string[]) => void;
 }) {
@@ -417,8 +407,18 @@ export function Step4Variants(props: {
                       props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, inventoryCount: v === "" ? "" : parseFloat(v) } : item));
                     }}
                     min={0}
+                    disabled={props.stockFieldsDisabled}
                   />
                 </div>
+
+                <Show when={props.stockFieldsDisabled && props.inventoryLinkHref}>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                    {props.t("seller.products.editPlant.manageStockOnInventory") || "Manage stock levels on the"}{" "}
+                    <a href={props.inventoryLinkHref!} class="text-forest-600 dark:text-forest-400 underline font-medium">
+                      {props.t("seller.products.editPlant.inventoryPage") || "Inventory page"}
+                    </a>.
+                  </p>
+                </Show>
 
                 {/* Variant Title (Bilingual) */}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -456,6 +456,7 @@ export function Step4Variants(props: {
                     id={`variant-${i}-track`}
                     label={props.t("seller.products.newPlant.trackInventoryLabel")}
                     checked={variant().trackInventory}
+                    disabled={props.stockFieldsDisabled}
                     onChange={(v) => props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, trackInventory: v } : item))}
                   />
                   <label for={`variant-${i}-base`} class="flex items-center gap-2.5 cursor-pointer group">
@@ -492,7 +493,7 @@ export function Step4Variants(props: {
                 </div>
 
                 {/* Low stock threshold */}
-                <Show when={variant().trackInventory}>
+                <Show when={variant().trackInventory && !props.stockFieldsDisabled}>
                   <Input
                     type="number"
                     id={`variant-${i}-low-stock`}

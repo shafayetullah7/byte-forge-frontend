@@ -1,7 +1,9 @@
-import { For, Show, type JSX } from "solid-js";
+import { For, Show, createSignal, type JSX } from "solid-js";
 import { ErrorBoundary } from "solid-js";
-import { useParams, createAsync } from "@solidjs/router";
-import { getPlantById } from "~/lib/api/endpoints/seller/plants.api";
+import { A, useParams, createAsync, useNavigate } from "@solidjs/router";
+import { getPlantById, updatePlantStatus, deletePlant, invalidateAllPlantCaches } from "~/lib/api/endpoints/seller/plants.api";
+import { PRODUCT_STATUS } from "~/lib/api/types/seller.types";
+import { toaster } from "~/components/ui/Toast";
 import {
   FolderIcon,
   InfoCircleIcon,
@@ -21,7 +23,6 @@ import {
   CheckBadgeIcon,
   PencilIcon,
   ArchiveIcon,
-  ArrowPathIcon,
   TrashIcon,
   CloudIcon,
   ScissorsIcon,
@@ -122,6 +123,8 @@ function InstructionRow(props: {
 export default function OverviewRoute() {
   const { t } = useI18n();
   const params = useParams();
+  const navigate = useNavigate();
+  const [actionLoading, setActionLoading] = createSignal(false);
 
   const plant = createAsync(
     () => getPlantById(params.plantId as string),
@@ -715,19 +718,84 @@ export default function OverviewRoute() {
                       <h3 class="text-base font-semibold text-forest-800 dark:text-cream-50">{t("seller.products.plantOverview.quickActions")}</h3>
                     </div>
                     <div class="p-4 space-y-1">
-                      <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors text-gray-700 dark:text-gray-300">
+                      <A
+                        href={`/app/seller/products/plants/${plantData().id}/edit`}
+                        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors text-gray-700 dark:text-gray-300"
+                      >
                         <PencilIcon class="w-4 h-4" />
                         {t("seller.products.plantOverview.editPlant")}
-                      </button>
-                      <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors text-gray-700 dark:text-gray-300">
-                        <ArchiveIcon class="w-4 h-4" />
-                        {t("seller.products.plantOverview.archivePlant")}
-                      </button>
-                      <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors text-gray-700 dark:text-gray-300">
-                        <ArrowPathIcon class="w-4 h-4" />
-                        {t("seller.products.plantOverview.duplicatePlant")}
-                      </button>
-                      <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-terracotta-600 dark:text-terracotta-400">
+                      </A>
+                      <Show when={plantData().status !== PRODUCT_STATUS.ACTIVE}>
+                        <button
+                          type="button"
+                          disabled={actionLoading()}
+                          class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors text-gray-700 dark:text-gray-300 disabled:opacity-50"
+                          onClick={async () => {
+                            if (!confirm(t("seller.products.plantOverview.confirmPublish") || "Publish this plant?")) return;
+                            setActionLoading(true);
+                            try {
+                              await updatePlantStatus(plantData().id, PRODUCT_STATUS.ACTIVE);
+                              invalidateAllPlantCaches(plantData().id);
+                              toaster.success(t("seller.products.plantOverview.publishSuccess") || "Plant published");
+                            } catch (error: unknown) {
+                              const err = error as { message?: string };
+                              toaster.error(err.message || "Failed to publish plant");
+                            } finally {
+                              setActionLoading(false);
+                            }
+                          }}
+                        >
+                          <SunIcon class="w-4 h-4" />
+                          {t("seller.products.plantOverview.publishPlant") || "Publish plant"}
+                        </button>
+                      </Show>
+                      <Show when={plantData().status === PRODUCT_STATUS.ACTIVE}>
+                        <button
+                          type="button"
+                          disabled={actionLoading()}
+                          class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors text-gray-700 dark:text-gray-300 disabled:opacity-50"
+                          onClick={async () => {
+                            if (!confirm(t("seller.products.plantOverview.confirmArchive") || "Archive this plant?")) return;
+                            setActionLoading(true);
+                            try {
+                              await updatePlantStatus(plantData().id, PRODUCT_STATUS.ARCHIVED);
+                              invalidateAllPlantCaches(plantData().id);
+                              toaster.success(t("seller.products.plantOverview.archiveSuccess") || "Plant archived");
+                            } catch (error: unknown) {
+                              const err = error as { message?: string };
+                              toaster.error(err.message || "Failed to archive plant");
+                            } finally {
+                              setActionLoading(false);
+                            }
+                          }}
+                        >
+                          <ArchiveIcon class="w-4 h-4" />
+                          {t("seller.products.plantOverview.archivePlant")}
+                        </button>
+                      </Show>
+                      <button
+                        type="button"
+                        disabled={actionLoading()}
+                        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-terracotta-600 dark:text-terracotta-400 disabled:opacity-50"
+                        onClick={async () => {
+                          const name = plantData().translations?.find((tr) => tr.locale === "en")?.name ?? "";
+                          const prompt = t("seller.products.plantOverview.confirmDelete") || `Type the plant name to delete: ${name}`;
+                          const typed = window.prompt(prompt);
+                          if (typed !== name) return;
+                          setActionLoading(true);
+                          try {
+                            await deletePlant(plantData().id);
+                            invalidateAllPlantCaches(plantData().id);
+                            toaster.success(t("seller.products.plantOverview.deleteSuccess") || "Plant deleted");
+                            navigate("/app/seller/products/plants");
+                          } catch (error: unknown) {
+                            const err = error as { message?: string };
+                            toaster.error(err.message || "Failed to delete plant");
+                          } finally {
+                            setActionLoading(false);
+                          }
+                        }}
+                      >
                         <TrashIcon class="w-4 h-4" />
                         {t("seller.products.plantOverview.deletePlant")}
                       </button>

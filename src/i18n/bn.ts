@@ -1306,6 +1306,16 @@ export const dict = {
       addYourFirstPot: "আপনার প্রথম কুঁজ যোগ করুন",
       addYourFirstSeed: "আপনার প্রথম বীজ যোগ করুন",
       addYourFirstFertilizer: "আপনার প্রথম সার যোগ করুন",
+      // Edit Plant Form
+      editPlant: {
+        pageTitle: "গাছ সম্পাদনা",
+        pageSubtitle: "আপনার গাছের তালিকা আপডেট করুন",
+        saveChanges: "পরিবর্তন সংরক্ষণ করুন",
+        plantUpdated: "গাছ সফলভাবে আপডেট হয়েছে",
+        manageStockOnInventory: "স্টক পরিচালনা করুন",
+        inventoryPage: "ইনভেন্টরি পৃষ্ঠায়",
+        slugChangeWarning: "ইউআরএল স্লাগ পরিবর্তন করলে এই গাছের বিদ্যমান লিংক ভেঙে যেতে পারে।",
+      },
       // New Plant Form
       newPlant: {
         pageTitle: "নতুন গাছপালা যোগ করুন",

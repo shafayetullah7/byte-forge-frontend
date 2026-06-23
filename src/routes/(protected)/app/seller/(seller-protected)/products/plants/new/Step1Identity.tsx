@@ -36,6 +36,11 @@ export function Step1Identity(props: {
     upload: (file: File) => void;
     deleteMedia: () => void;
   };
+  thumbnailPreview: () => string | null;
+  hasThumbnail: () => boolean;
+  allowThumbnailDelete?: boolean;
+  isEditMode?: boolean;
+  originalSlug?: string;
   status: string;
   onStatusChange: (v: string) => void;
   slug: string;
@@ -68,7 +73,7 @@ export function Step1Identity(props: {
 
   createEffect(() => {
     const missing: string[] = [];
-    if (!props.thumbnailUpload.preview()) {
+    if (!props.hasThumbnail()) {
       missing.push(props.t("seller.products.newPlant.thumbnailRequired"));
     }
     if (!props.enName.trim()) missing.push(props.t("seller.products.newPlant.nameRequired"));
@@ -94,11 +99,11 @@ export function Step1Identity(props: {
         <div class="lg:col-span-3">
           <div class="h-full min-h-[280px]">
             <ImageUpload
-              preview={props.thumbnailUpload.preview()}
+              preview={props.thumbnailPreview()}
               isUploading={props.thumbnailUpload.isUploading()}
               isDeleting={props.thumbnailUpload.isDeleting()}
               onFileSelect={props.thumbnailUpload.upload}
-              onDelete={props.thumbnailUpload.deleteMedia}
+              onDelete={props.allowThumbnailDelete !== false ? props.thumbnailUpload.deleteMedia : undefined}
               label={props.t("seller.products.newPlant.thumbnailLabel")}
               description={props.t("seller.products.newPlant.thumbnailDesc")}
               required
@@ -153,6 +158,13 @@ export function Step1Identity(props: {
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {props.t("seller.products.newPlant.slugHint")}
             </p>
+            <Show when={props.isEditMode && props.originalSlug && props.slug.trim() !== props.originalSlug}>
+              <div class="mt-2 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 px-3 py-2">
+                <p class="text-xs text-amber-800 dark:text-amber-200">
+                  {props.t("seller.products.editPlant.slugChangeWarning")}
+                </p>
+              </div>
+            </Show>
           </div>
 
           <InlineFieldset
