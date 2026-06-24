@@ -1201,7 +1201,6 @@ export const dict = {
           overview: "Overview",
           variants: "Variants",
           care: "Care Guide",
-          inventory: "Inventory",
         },
         breadcrumb: {
           dashboard: "Dashboard",
@@ -1212,7 +1211,6 @@ export const dict = {
         retry: "Retry",
         backToPlants: "Back to Plants",
         slug: "Slug",
-        viewProductDetails: "View Product Details",
         ordersAndReviews: "Orders & reviews",
       },
       plantSection: {
@@ -1223,6 +1221,9 @@ export const dict = {
         saved: "Section saved",
         saveFailed: "Failed to save section",
         validationFailed: "Please fix the highlighted fields",
+        slugChangeWarning: "Changing the URL slug may break existing links to this plant.",
+        manageStockOnInventory: "Manage stock levels on the",
+        inventoryPage: "Inventory page",
       },
       // Plant Overview
       plantOverview: {
@@ -1293,9 +1294,7 @@ export const dict = {
         plantId: "Plant ID",
         // Quick actions
         quickActions: "Quick Actions",
-        editPlant: "Edit Plant",
         archivePlant: "Archive Plant",
-        duplicatePlant: "Duplicate Plant",
         deletePlant: "Delete Plant",
       },
       plantVariants: {
@@ -1324,16 +1323,6 @@ export const dict = {
       addYourFirstPot: "Add Your First Pot",
       addYourFirstSeed: "Add Your First Seed",
       addYourFirstFertilizer: "Add Your First Fertilizer",
-      // Edit Plant Form
-      editPlant: {
-        pageTitle: "Edit Plant",
-        pageSubtitle: "Update your plant listing",
-        saveChanges: "Save changes",
-        plantUpdated: "Plant updated successfully",
-        manageStockOnInventory: "Manage stock levels on the",
-        inventoryPage: "Inventory page",
-        slugChangeWarning: "Changing the URL slug may break existing links to this plant.",
-      },
       // New Plant Form
       newPlant: {
         pageTitle: "Add New Plant",

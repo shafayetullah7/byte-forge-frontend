@@ -1205,7 +1205,6 @@ export const dict = {
           overview: "ওভারভিউ",
           variants: "ভেরিয়েন্ট",
           care: "যত্ন নির্দেশিকা",
-          inventory: "ইনভেন্টরি",
         },
         breadcrumb: {
           dashboard: "ড্যাশবোর্ড",
@@ -1216,7 +1215,6 @@ export const dict = {
         retry: "আবার চেষ্টা করুন",
         backToPlants: "গাছপালায় ফিরে যান",
         slug: "স্লাগ",
-        viewProductDetails: "পণ্যের বিবরণ দেখুন",
         ordersAndReviews: "অর্ডার ও রিভিউ",
       },
       plantSection: {
@@ -1227,6 +1225,9 @@ export const dict = {
         saved: "সেকশন সংরক্ষিত হয়েছে",
         saveFailed: "সেকশন সংরক্ষণ ব্যর্থ",
         validationFailed: "হাইলাইট করা ক্ষেত্রগুলো ঠিক করুন",
+        slugChangeWarning: "ইউআরএল স্লাগ পরিবর্তন করলে এই গাছের বিদ্যমান লিংক ভেঙে যেতে পারে।",
+        manageStockOnInventory: "স্টক পরিচালনা করুন",
+        inventoryPage: "ইনভেন্টরি পৃষ্ঠায়",
       },
       // Plant Overview
       plantOverview: {
@@ -1297,9 +1298,7 @@ export const dict = {
         plantId: "গাছের আইডি",
         // Quick actions
         quickActions: "দ্রুত কার্যক্রম",
-        editPlant: "গাছ সম্পাদনা",
         archivePlant: "গাছ আর্কাইভ",
-        duplicatePlant: "গাছ নকল",
         deletePlant: "গাছ মুছুন",
       },
       plantVariants: {
@@ -1329,16 +1328,6 @@ export const dict = {
       addYourFirstPot: "আপনার প্রথম কুঁজ যোগ করুন",
       addYourFirstSeed: "আপনার প্রথম বীজ যোগ করুন",
       addYourFirstFertilizer: "আপনার প্রথম সার যোগ করুন",
-      // Edit Plant Form
-      editPlant: {
-        pageTitle: "গাছ সম্পাদনা",
-        pageSubtitle: "আপনার গাছের তালিকা আপডেট করুন",
-        saveChanges: "পরিবর্তন সংরক্ষণ করুন",
-        plantUpdated: "গাছ সফলভাবে আপডেট হয়েছে",
-        manageStockOnInventory: "স্টক পরিচালনা করুন",
-        inventoryPage: "ইনভেন্টরি পৃষ্ঠায়",
-        slugChangeWarning: "ইউআরএল স্লাগ পরিবর্তন করলে এই গাছের বিদ্যমান লিংক ভেঙে যেতে পারে।",
-      },
       // New Plant Form
       newPlant: {
         pageTitle: "নতুন গাছপালা যোগ করুন",

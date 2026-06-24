@@ -1,5 +1,4 @@
-import type { PlantFormState, PlantVariantForm } from "~/lib/types/plant-form";
-import { toUpdatePlantDto } from "~/lib/types/plant-form";
+import type { PlantFormState } from "~/lib/types/plant-form";
 
 export type PlantSectionId =
   | "identity"
@@ -92,62 +91,6 @@ export function sectionTouchesVariants(sectionId: PlantSectionId): boolean {
   return isVariantSectionId(sectionId);
 }
 
-export function buildUpdateDto(form: PlantFormState): Record<string, unknown> {
-  return toUpdatePlantDto(form);
-}
-
 export function cloneForm(form: PlantFormState): PlantFormState {
   return JSON.parse(JSON.stringify(form)) as PlantFormState;
-}
-
-export function updateVariantInForm(
-  form: PlantFormState,
-  variantId: string,
-  updater: (v: PlantVariantForm) => PlantVariantForm,
-): PlantFormState {
-  return {
-    ...form,
-    variants: form.variants.map((v) => (v.id === variantId ? updater(v) : v)),
-  };
-}
-
-export function applySectionToForm(
-  form: PlantFormState,
-  sectionId: PlantSectionId,
-  draft: Partial<PlantFormState>,
-): PlantFormState {
-  const merged = cloneForm(form);
-  if (sectionId === "identity") {
-    if (draft.thumbnail) merged.thumbnail = draft.thumbnail;
-    if (draft.status) merged.status = draft.status;
-    if (draft.slug !== undefined) merged.slug = draft.slug;
-    if (draft.translations) merged.translations = { ...merged.translations, ...draft.translations };
-    if (draft.plantDetails?.scientificName !== undefined) {
-      merged.plantDetails.scientificName = draft.plantDetails.scientificName;
-    }
-  }
-  if (sectionId === "categoryTags" && draft.plantDetails) {
-    if (draft.plantDetails.categoryId !== undefined) merged.plantDetails.categoryId = draft.plantDetails.categoryId;
-    if (draft.plantDetails.tagIds) merged.plantDetails.tagIds = draft.plantDetails.tagIds;
-  }
-  if (sectionId === "classification" && draft.plantDetails?.translations) {
-    merged.plantDetails.translations = {
-      en: { ...merged.plantDetails.translations.en, ...draft.plantDetails.translations.en },
-      bn: { ...merged.plantDetails.translations.bn, ...draft.plantDetails.translations.bn },
-    };
-  }
-  if (sectionId === "careProfile" && draft.plantDetails) {
-    Object.assign(merged.plantDetails, draft.plantDetails);
-  }
-  if (sectionId === "careGuide" && draft.careGuide) {
-    merged.careGuide = draft.careGuide;
-  }
-  if (isVariantSectionId(sectionId) && draft.variants) {
-    const variantId = variantIdFromSection(sectionId);
-    const draftVariant = draft.variants.find((v) => v.id === variantId);
-    if (draftVariant) {
-      merged.variants = merged.variants.map((v) => (v.id === variantId ? draftVariant : v));
-    }
-  }
-  return merged;
 }

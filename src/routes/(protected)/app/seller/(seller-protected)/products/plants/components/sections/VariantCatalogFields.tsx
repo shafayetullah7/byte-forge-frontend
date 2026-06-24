@@ -426,9 +426,9 @@ export function VariantCatalogFields(props: {
 
                 <Show when={props.stockFieldsDisabled && props.inventoryLinkHref}>
                   <p class="text-sm text-gray-600 dark:text-gray-400">
-                    {props.t("seller.products.editPlant.manageStockOnInventory") || "Manage stock levels on the"}{" "}
+                    {props.t("seller.products.plantSection.manageStockOnInventory")}{" "}
                     <a href={props.inventoryLinkHref!} class="text-forest-600 dark:text-forest-400 underline font-medium">
-                      {props.t("seller.products.editPlant.inventoryPage") || "Inventory page"}
+                      {props.t("seller.products.plantSection.inventoryPage")}
                     </a>.
                   </p>
                 </Show>
