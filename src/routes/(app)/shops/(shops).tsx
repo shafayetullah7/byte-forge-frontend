@@ -1,8 +1,8 @@
-import { createResource, createSignal, createMemo, Show, For } from "solid-js";
+import { createSignal, createMemo, createEffect, Show, For, onCleanup } from "solid-js";
+import { createAsync } from "@solidjs/router";
 import { A } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import { listShops } from "~/lib/public-shops/public-shop.service";
-import { MOCK_SHOP_CATEGORIES } from "~/lib/mocks/public-shops";
 import type { PublicShopSortOption } from "~/lib/types/public/shops.types";
 import {
   ShopDiscoveryCard,
@@ -16,21 +16,34 @@ import Button from "~/components/ui/Button";
 export default function ShopsDirectoryPage() {
   const { t } = useI18n();
   const [search, setSearch] = createSignal("");
-  const [category, setCategory] = createSignal("");
+  const [debouncedSearch, setDebouncedSearch] = createSignal("");
   const [sort, setSort] = createSignal<PublicShopSortOption>("popular");
   const [page, setPage] = createSignal(1);
 
-  const [shopsResult] = createResource(
-    () => ({ search: search(), category: category(), sort: sort(), page: page() }),
-    (params) => listShops({ ...params, limit: 9 }),
-  );
+  let debounceTimer: ReturnType<typeof setTimeout>;
+  createEffect(() => {
+    const query = search();
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      setDebouncedSearch(query);
+      setPage(1);
+    }, 300);
+    onCleanup(() => clearTimeout(debounceTimer));
+  });
+
+  const filterParams = createMemo(() => ({
+    search: debouncedSearch(),
+    sort: sort(),
+    page: page(),
+    limit: 9,
+  }));
+
+  const shopsResult = createAsync(() => listShops(filterParams()), { deferStream: true });
 
   const sortOptions = () => [
     { value: "popular", label: t("public.shops.directory.sortPopular") },
     { value: "rating", label: t("public.shops.directory.sortRating") },
     { value: "products", label: t("public.shops.directory.sortProducts") },
-    { value: "followers", label: t("public.shops.directory.sortFollowers") },
-    { value: "engagement", label: t("public.shops.directory.sortEngagement") },
     { value: "newest", label: t("public.shops.directory.sortNewest") },
   ];
 
@@ -59,15 +72,11 @@ export default function ShopsDirectoryPage() {
       <div class="max-w-7xl mx-auto px-4 py-10">
         <ShopDirectoryToolbar
           search={search()}
-          category={category()}
           sort={sort()}
-          categories={MOCK_SHOP_CATEGORIES}
           sortOptions={sortOptions()}
           resultsCount={shopsResult()?.meta.total ?? 0}
           searchPlaceholder={t("public.shops.directory.searchPlaceholder")}
-          allCategoriesLabel={t("public.shops.directory.allCategories")}
-          onSearchChange={(v) => { setSearch(v); resetPage(); }}
-          onCategoryChange={(v) => { setCategory(v); resetPage(); }}
+          onSearchChange={(v) => { setSearch(v); }}
           onSortChange={(v) => { setSort(v as PublicShopSortOption); resetPage(); }}
         />
 
@@ -76,7 +85,7 @@ export default function ShopsDirectoryPage() {
             <InlineErrorFallback error={err} reset={reset} label="shop directory" />
           )}
         >
-          <Show when={!shopsResult.loading} fallback={<ShopDirectoryGridSkeleton />}>
+          <Show when={shopsResult() !== undefined} fallback={<ShopDirectoryGridSkeleton />}>
             <Show
               when={(shopsResult()?.data.length ?? 0) > 0}
               fallback={

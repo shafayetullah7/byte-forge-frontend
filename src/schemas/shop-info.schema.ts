@@ -1,11 +1,9 @@
 import { z } from "zod";
 
-/**
- * Zod schema for shop info form validation
- * Validates shop name, description, business hours (bilingual) and branding colors
- */
+const optionalText = (max: number) =>
+  z.string().max(max, "message.validation.maxLength").optional().or(z.literal(""));
+
 export const shopInfoSchema = z.object({
-  // Shop slug
   slug: z
     .string()
     .min(3, "message.validation.shop.slugMin")
@@ -13,8 +11,6 @@ export const shopInfoSchema = z.object({
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "message.validation.shop.slugFormat")
     .optional()
     .or(z.literal("")),
-  
-  // English translations
   nameEn: z
     .string()
     .min(1, "message.validation.notEmpty")
@@ -29,8 +25,6 @@ export const shopInfoSchema = z.object({
     .string()
     .max(500, "message.validation.maxLength")
     .optional(),
-  
-  // Bengali translations
   nameBn: z
     .string()
     .min(1, "message.validation.notEmpty")
@@ -45,8 +39,6 @@ export const shopInfoSchema = z.object({
     .string()
     .max(500, "message.validation.maxLength")
     .optional(),
-  
-  // Branding colors
   primaryColor: z
     .string()
     .regex(/^#[0-9A-Fa-f]{6}$/, "message.validation.invalidHexColor")
@@ -64,7 +56,17 @@ export const shopInfoSchema = z.object({
     .or(z.literal("")),
 });
 
-/**
- * Type inferred from the zod schema
- */
 export type ShopInfoFormData = z.infer<typeof shopInfoSchema>;
+
+export const storefrontProfileSchema = z.object({
+  taglineEn: optionalText(255),
+  taglineBn: optionalText(255),
+  aboutEn: optionalText(5000),
+  aboutBn: optionalText(5000),
+  sellerStoryEn: optionalText(5000),
+  sellerStoryBn: optionalText(5000),
+  brandMissionEn: optionalText(2000),
+  brandMissionBn: optionalText(2000),
+});
+
+export type StorefrontProfileFormData = z.infer<typeof storefrontProfileSchema>;

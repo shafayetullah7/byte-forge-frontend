@@ -1,4 +1,5 @@
-import { createResource, Show, For } from "solid-js";
+import { Show, For } from "solid-js";
+import { createAsync } from "@solidjs/router";
 import { LinkButton } from "~/components/ui";
 import { useI18n } from "~/i18n";
 import { listShops } from "~/lib/public-shops/public-shop.service";
@@ -9,7 +10,9 @@ import {
 
 export function FeaturedShops() {
   const { t } = useI18n();
-  const [shops] = createResource(() => listShops({ sort: "popular", limit: 3 }));
+  const shops = createAsync(() => listShops({ sort: "popular", limit: 3 }), {
+    deferStream: true,
+  });
 
   const cardLabels = () => ({
     verifiedLabel: t("public.shops.directory.verified"),
@@ -32,7 +35,7 @@ export function FeaturedShops() {
         </div>
 
         <Show
-          when={!shops.loading}
+          when={shops() !== undefined}
           fallback={
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <For each={[1, 2, 3]}>

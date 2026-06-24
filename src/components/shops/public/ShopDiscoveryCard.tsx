@@ -61,7 +61,11 @@ export const ShopDiscoveryCard: Component<{
           </span>
         </div>
 
-        <p class="text-xs font-medium text-forest-600 dark:text-forest-400 mb-1">{props.shop.category}</p>
+        <Show when={props.shop.category}>
+          <p class="text-xs font-medium text-forest-600 dark:text-forest-400 mb-1">
+            {props.shop.category}
+          </p>
+        </Show>
         <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">{props.shop.tagline}</p>
 
         <div class="flex items-center text-xs text-gray-500 dark:text-gray-400 gap-1 mb-3">
@@ -72,7 +76,11 @@ export const ShopDiscoveryCard: Component<{
         </div>
 
         <Show when={!props.compact}>
-          <div class="grid grid-cols-3 gap-2 text-center text-xs mb-3 py-2 border-y border-cream-100 dark:border-forest-700">
+          <div
+            class={`grid gap-2 text-center text-xs mb-3 py-2 border-y border-cream-100 dark:border-forest-700 ${
+              m().followerCount > 0 ? "grid-cols-3" : "grid-cols-2"
+            }`}
+          >
             <div>
               <p class="font-bold text-forest-800 dark:text-cream-50">{m().totalProducts}</p>
               <p class="text-gray-500 dark:text-gray-400">{props.productsLabel}</p>
@@ -81,10 +89,12 @@ export const ShopDiscoveryCard: Component<{
               <p class="font-bold text-forest-800 dark:text-cream-50">{m().completedOrders.toLocaleString()}</p>
               <p class="text-gray-500 dark:text-gray-400">{props.ordersLabel}</p>
             </div>
-            <div>
-              <p class="font-bold text-forest-800 dark:text-cream-50">{m().followerCount.toLocaleString()}</p>
-              <p class="text-gray-500 dark:text-gray-400">Followers</p>
-            </div>
+            <Show when={m().followerCount > 0}>
+              <div>
+                <p class="font-bold text-forest-800 dark:text-cream-50">{m().followerCount.toLocaleString()}</p>
+                <p class="text-gray-500 dark:text-gray-400">Followers</p>
+              </div>
+            </Show>
           </div>
 
           <Show when={props.shop.featuredProductPreviews.length > 0}>

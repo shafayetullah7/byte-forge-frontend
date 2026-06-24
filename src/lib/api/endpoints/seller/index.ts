@@ -8,6 +8,13 @@ export { getPlants, getPlantById, createPlant, updatePlant, updatePlantStatus, d
 export { getProducts };
 export { getShippingRates, bulkUpdateShippingRates } from "./shipping-rates.api";
 export {
+  getSellerStorefront,
+  updateStorefrontProfile,
+  replaceWhyChooseUs,
+  replaceValuePoints,
+  invalidateSellerStorefront,
+} from "./storefront.api";
+export {
   getSellerOrders,
   getSellerOrderStats,
   getSellerOrder,

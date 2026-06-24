@@ -1,5 +1,5 @@
-import { createResource, createSignal, createMemo, Show } from "solid-js";
-import { useParams } from "@solidjs/router";
+import { createSignal, createMemo, Show } from "solid-js";
+import { createAsync, useParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { useI18n } from "~/i18n";
 import { getShopBySlug, getShopProducts } from "~/lib/public-shops/public-shop.service";
@@ -12,30 +12,44 @@ export default function ShopProductsPage() {
 
   const slug = () => params.slug;
 
-  const [shop] = createResource(slug, getShopBySlug);
+  const shop = createAsync(() => getShopBySlug(slug()), { deferStream: true });
   const [productSearch, setProductSearch] = createSignal("");
   const [productCategory, setProductCategory] = createSignal("");
   const [productSort, setProductSort] = createSignal<PublicProductSortOption>("popular");
 
-  const [products] = createResource(
-    () => ({
-      slug: slug(),
-      search: productSearch(),
-      category: productCategory(),
-      sort: productSort(),
-    }),
-    (p) =>
-      getShopProducts(p.slug, {
-        search: p.search,
-        category: p.category || undefined,
-        sort: p.sort,
+  const productParams = createMemo(() => ({
+    slug: slug(),
+    search: productSearch(),
+    category: productCategory(),
+    sort: productSort(),
+  }));
+
+  const products = createAsync(
+    () =>
+      getShopProducts(productParams().slug, {
+        search: productParams().search,
+        category: productParams().category || undefined,
+        sort: productParams().sort,
         limit: 50,
       }),
+    { deferStream: true },
   );
 
   const productCategories = createMemo(() => {
     const items = products()?.data ?? [];
     return [...new Set(items.map((p) => p.category))].sort();
+  });
+
+  const catalogLabels = () => ({
+    searchProducts: t("public.shops.detail.searchProducts"),
+    allCategories: t("public.shops.detail.allCategories"),
+    sortPopular: t("public.shops.detail.sortPopular"),
+    sortNewest: t("public.shops.detail.sortNewest"),
+    sortPriceAsc: t("public.shops.detail.sortPriceAsc"),
+    sortPriceDesc: t("public.shops.detail.sortPriceDesc"),
+    sortRating: t("public.shops.detail.sortRating"),
+    noProducts: t("public.shops.detail.noProducts"),
+    noProductsDescription: t("public.shops.detail.noProductsDescription"),
   });
 
   return (
@@ -57,17 +71,8 @@ export default function ShopProductsPage() {
               category={productCategory()}
               sort={productSort()}
               categories={productCategories()}
+              labels={catalogLabels()}
               outOfStockLabel={t("public.shops.detail.outOfStock")}
-              labels={{
-                searchProducts: t("public.shops.detail.searchProducts"),
-                allCategories: t("public.shops.directory.allCategories"),
-                sortPopular: t("public.shops.detail.sortPopular"),
-                sortNewest: t("public.shops.detail.sortNewest"),
-                sortPriceAsc: t("public.shops.detail.sortPriceAsc"),
-                sortPriceDesc: t("public.shops.detail.sortPriceDesc"),
-                sortRating: t("public.shops.detail.sortRating"),
-                noProducts: t("public.shops.detail.noProducts"),
-              }}
               onSearchChange={setProductSearch}
               onCategoryChange={setProductCategory}
               onSortChange={(v) => setProductSort(v as PublicProductSortOption)}

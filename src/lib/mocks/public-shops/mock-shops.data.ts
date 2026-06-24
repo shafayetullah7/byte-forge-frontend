@@ -7,14 +7,6 @@ import type {
 const img = (id: string) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=800&q=80`;
 
-export const MOCK_SHOP_CATEGORIES = [
-  "Indoor Plants",
-  "Outdoor & Garden",
-  "Nursery & Saplings",
-  "Bonsai & Ornamental",
-  "Herbs & Vegetables",
-] as const;
-
 function baseMetrics(overrides: Partial<PublicShopListItem["metrics"]>) {
   return {
     totalProducts: 24,

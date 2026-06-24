@@ -1,5 +1,5 @@
-import { createResource, Show } from "solid-js";
-import { useParams } from "@solidjs/router";
+import { Show } from "solid-js";
+import { createAsync, useParams } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import {
   getShopBySlug,
@@ -22,11 +22,11 @@ export default function ShopOverviewPage() {
 
   const slug = () => params.slug;
 
-  const [shop] = createResource(slug, getShopBySlug);
-  const [reviews] = createResource(slug, getShopReviews);
-  const [statistics] = createResource(slug, getShopStatistics);
-  const [community] = createResource(slug, getShopCommunityMetrics);
-  const [similar] = createResource(slug, (s) => getSimilarShops(s, 4));
+  const shop = createAsync(() => getShopBySlug(slug()), { deferStream: true });
+  const reviews = createAsync(() => getShopReviews(slug()), { deferStream: true });
+  const statistics = createAsync(() => getShopStatistics(slug()), { deferStream: true });
+  const community = createAsync(() => getShopCommunityMetrics(slug()), { deferStream: true });
+  const similar = createAsync(() => getSimilarShops(slug(), 4), { deferStream: true });
 
   const aboutLabels = () => ({
     about: t("public.shops.detail.about"),

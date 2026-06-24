@@ -1,9 +1,10 @@
-import { createResource, createEffect, Show } from "solid-js";
+import { createEffect, Show } from "solid-js";
 import {
   A,
   useParams,
   useSearchParams,
   useNavigate,
+  createAsync,
   type RouteSectionProps,
   type RouteDefinition,
 } from "@solidjs/router";
@@ -34,7 +35,7 @@ export default function ShopDetailLayout(props: RouteSectionProps) {
 
   const slug = () => params.slug;
 
-  const [shop] = createResource(slug, getShopBySlug);
+  const shop = createAsync(() => getShopBySlug(slug()), { deferStream: true });
 
   createEffect(() => {
     const tab = searchParams.tab;
@@ -82,7 +83,7 @@ export default function ShopDetailLayout(props: RouteSectionProps) {
       )}
     >
       <Show
-        when={!shop.loading && shop()}
+        when={shop() !== undefined && shop()}
         fallback={
           <div class="min-h-screen bg-cream-50 dark:bg-forest-900">
             <div class="h-64 bg-cream-200 dark:bg-forest-800 animate-pulse" />
@@ -124,7 +125,7 @@ export default function ShopDetailLayout(props: RouteSectionProps) {
         )}
       </Show>
 
-      <Show when={!shop.loading && !shop()}>
+      <Show when={shop() !== undefined && !shop()}>
         <div class="min-h-screen bg-cream-50 dark:bg-forest-900 flex items-center justify-center px-4">
           <div class="text-center">
             <h1 class="text-2xl font-bold text-forest-800 dark:text-cream-50">

@@ -1,24 +1,17 @@
-import { query } from "@solidjs/router";
-import { fetcher } from '../../api-client';
-
-export interface PublicShop {
-  id: string;
-  slug: string;
-  name: string;
-  description: string;
-  businessHours: string | null;
-  division: string;
-  city: string;
-  address: string | null;
-  logo?: {
-    id: string;
-    url: string;
-  } | null;
-  banner?: {
-    id: string;
-    url: string;
-  } | null;
-}
+import { query, revalidate } from "@solidjs/router";
+import { fetcher } from "../../api-client";
+import type {
+  ApiPaginatedEnvelope,
+  ApiPublicShopListItem,
+  ApiPublicShopProduct,
+  ApiPublicShopProfile,
+  ApiPublicShopReview,
+  ApiPublicShopReviewSummary,
+  ApiSuccessEnvelope,
+  PublicShopListFilter,
+  PublicShopProductsFilter,
+  PublicShopReviewsFilter,
+} from "../../types/public/shops.api.types";
 
 export interface PublicShippingRate {
   shopId: string;
@@ -26,94 +19,100 @@ export interface PublicShippingRate {
   cost: string;
 }
 
-export interface PublicProduct {
-  id: string;
-  name: string;
-  description: string;
-  basePrice: string;
-  slug: string;
-  images?: Array<{
-    url: string;
-    isPrimary: boolean;
-  }>;
+function buildParams(
+  params?: Record<string, string | number | boolean | undefined>,
+): Record<string, string | number | boolean | undefined> | undefined {
+  if (!params) return undefined;
+  const out: Record<string, string | number | boolean | undefined> = {};
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== "") {
+      out[key] = value;
+    }
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
 }
 
-/**
- * Public Shops API client.
- *
- * Phase 2: wire to backend when list/products endpoints exist.
- * Until then, use ~/lib/public-shops/public-shop.service.ts (mock facade).
- */
-export const getShops = query(
-  async (params?: {
-    division?: string;
-    search?: string;
-    page?: number;
-    limit?: number;
-  }) => {
-    const searchParams = new URLSearchParams();
-    if (params) {
-      if (params.division) searchParams.set('division', params.division);
-      if (params.search) searchParams.set('search', params.search);
-      if (params.page) searchParams.set('page', params.page.toString());
-      if (params.limit) searchParams.set('limit', params.limit.toString());
-    }
-    const qs = searchParams.toString();
-    const url = qs ? `/api/v1/shops?${qs}` : '/api/v1/shops';
-    return fetcher<{ data: PublicShop[]; pagination: any }>(url);
+export const getPublicShops = query(
+  async (filter?: PublicShopListFilter) => {
+    return fetcher<ApiPaginatedEnvelope<ApiPublicShopListItem>>("/api/v1/shops", {
+      params: buildParams(filter as Record<string, string | number | undefined>),
+      unwrapData: false,
+    });
   },
-  "public-shops"
+  "public-shops",
 );
 
-/**
- * Get single shop detail (public)
- */
-export const getShopById = query(
-  async (id: string) => {
-    return fetcher<PublicShop>(`/api/v1/shops/${id}`);
+export const getPublicShopBySlug = query(
+  async (slug: string) => {
+    return fetcher<ApiSuccessEnvelope<ApiPublicShopProfile>>(
+      `/api/v1/shops/${slug}`,
+      { unwrapData: false },
+    );
   },
-  "public-shop-detail"
+  "public-shop-detail",
 );
 
-/**
- * Get products by shop (public)
- */
-export const getShopProducts = query(
-  async (shopId: string, params?: {
-    page?: number;
-    limit?: number;
-  }) => {
-    const searchParams = new URLSearchParams();
-    if (params) {
-      if (params.page) searchParams.set('page', params.page.toString());
-      if (params.limit) searchParams.set('limit', params.limit.toString());
-    }
-    const qs = searchParams.toString();
-    const url = qs ? `/api/v1/shops/${shopId}/products?${qs}` : `/api/v1/shops/${shopId}/products`;
-    return fetcher<{ data: PublicProduct[]; pagination: any }>(url);
+export const getPublicShopProducts = query(
+  async (slug: string, filter?: PublicShopProductsFilter) => {
+    return fetcher<ApiPaginatedEnvelope<ApiPublicShopProduct>>(
+      `/api/v1/shops/${slug}/products`,
+      {
+        params: buildParams(filter as Record<string, string | number | undefined>),
+        unwrapData: false,
+      },
+    );
   },
-  "public-shop-products"
+  "public-shop-products",
 );
+
+export const getPublicShopReviews = query(
+  async (slug: string, filter?: PublicShopReviewsFilter) => {
+    return fetcher<
+      ApiSuccessEnvelope<{
+        summary: ApiPublicShopReviewSummary;
+        reviews: ApiPublicShopReview[];
+        meta: { page: number; limit: number; total: number; pages: number };
+      }>
+    >(`/api/v1/shops/${slug}/reviews`, {
+      params: buildParams(filter as Record<string, string | number | undefined>),
+      unwrapData: false,
+    });
+  },
+  "public-shop-reviews",
+);
+
+export const invalidatePublicShops = () => revalidate(getPublicShops.keyFor());
+
+export const invalidatePublicShop = (slug: string) => {
+  revalidate(getPublicShopBySlug.keyFor(slug));
+  revalidate(getPublicShopProducts.keyFor(slug));
+  revalidate(getPublicShopReviews.keyFor(slug));
+};
 
 export const publicShopsApi = {
-  getAll: getShops,
-  getById: getShopById,
-  getProducts: getShopProducts,
+  getAll: getPublicShops,
+  getBySlug: getPublicShopBySlug,
+  getProducts: getPublicShopProducts,
+  getReviews: getPublicShopReviews,
+  invalidateAll: invalidatePublicShops,
+  invalidateShop: invalidatePublicShop,
 
-  /**
-   * Get shipping rate for a shop and district (public)
-   * Returns null if no rate is configured
-   */
   getShippingRate: async (
     shopId: string,
-    districtId: string
+    districtId: string,
   ): Promise<PublicShippingRate | null> => {
     try {
       return await fetcher<PublicShippingRate>(
-        `/api/v1/public/shops/${shopId}/shipping-rate/${districtId}`
+        `/api/v1/public/shops/${shopId}/shipping-rate/${districtId}`,
       );
-    } catch (error: any) {
+    } catch {
       return null;
     }
   },
 };
+
+// Legacy aliases for OrderSummary shipping rate import
+export type { ApiPublicShopListItem as PublicShop };
+export const getShops = getPublicShops;
+export const getShopById = getPublicShopBySlug;
+export const getShopProducts = getPublicShopProducts;

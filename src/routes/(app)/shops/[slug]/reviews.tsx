@@ -1,5 +1,5 @@
-import { createResource, Show } from "solid-js";
-import { useParams } from "@solidjs/router";
+import { Show } from "solid-js";
+import { createAsync, useParams } from "@solidjs/router";
 import { Title } from "@solidjs/meta";
 import { useI18n } from "~/i18n";
 import { getShopBySlug, getShopReviews } from "~/lib/public-shops/public-shop.service";
@@ -11,8 +11,8 @@ export default function ShopReviewsPage() {
 
   const slug = () => params.slug;
 
-  const [shop] = createResource(slug, getShopBySlug);
-  const [reviews] = createResource(slug, getShopReviews);
+  const shop = createAsync(() => getShopBySlug(slug()), { deferStream: true });
+  const reviews = createAsync(() => getShopReviews(slug()), { deferStream: true });
 
   return (
     <Show when={shop()}>

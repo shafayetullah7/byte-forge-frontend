@@ -2,15 +2,11 @@ import type { Component } from "solid-js";
 
 export const ShopDirectoryToolbar: Component<{
   search: string;
-  category: string;
   sort: string;
-  categories: readonly string[];
   sortOptions: Array<{ value: string; label: string }>;
   resultsCount: number;
   searchPlaceholder: string;
-  allCategoriesLabel: string;
   onSearchChange: (value: string) => void;
-  onCategoryChange: (value: string) => void;
   onSortChange: (value: string) => void;
 }> = (props) => (
   <div class="flex flex-col lg:flex-row gap-4 mb-8 items-stretch lg:items-center justify-between bg-white dark:bg-forest-800 p-4 rounded-xl shadow-sm border border-cream-200 dark:border-forest-700">
@@ -26,17 +22,6 @@ export const ShopDirectoryToolbar: Component<{
       />
     </div>
     <div class="flex flex-wrap gap-3 items-center">
-      <select
-        aria-label={props.allCategoriesLabel}
-        value={props.category}
-        onChange={(e) => props.onCategoryChange(e.currentTarget.value)}
-        class="h-11 px-3 rounded-lg border border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-900 text-sm text-forest-800 dark:text-cream-50 outline-none focus:ring-2 focus:ring-forest-500/20"
-      >
-        <option value="">{props.allCategoriesLabel}</option>
-        {props.categories.map((cat) => (
-          <option value={cat}>{cat}</option>
-        ))}
-      </select>
       <select
         aria-label="Sort shops"
         value={props.sort}

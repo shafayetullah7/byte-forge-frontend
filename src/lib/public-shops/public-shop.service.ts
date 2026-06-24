@@ -10,6 +10,22 @@ import {
   getMockReviewSummary,
   MOCK_SHOP_STATISTICS,
 } from "~/lib/mocks/public-shops";
+import { config } from "~/lib/config";
+import {
+  getPublicShops,
+  getPublicShopBySlug,
+  getPublicShopProducts,
+  getPublicShopReviews,
+} from "~/lib/api/endpoints/public/shops.api";
+import {
+  mapApiListItem,
+  mapApiProfile,
+  mapApiProduct,
+  mapApiReview,
+  mapApiReviewSummary,
+  mapPaginatedEnvelope,
+  unwrapSuccess,
+} from "~/lib/public-shops/shop.mappers";
 import type {
   ListShopProductsParams,
   ListShopsParams,
@@ -30,9 +46,17 @@ import type {
 
 const DEFAULT_DELAY_MS = 200;
 
+type PublicShopApiSlice = keyof typeof config.publicShopApi;
+
 async function maybeDelay(simulateNetwork = true): Promise<void> {
   if (!simulateNetwork) return;
   await new Promise((r) => setTimeout(r, DEFAULT_DELAY_MS));
+}
+
+function logApiFallback(slice: PublicShopApiSlice, error: unknown) {
+  if (config.isDev) {
+    console.warn(`[public-shop] ${slice} API failed, using mock`, error);
+  }
 }
 
 function paginate<T>(items: T[], page = 1, limit = 12): PaginatedResult<T> {
@@ -44,40 +68,6 @@ function paginate<T>(items: T[], page = 1, limit = 12): PaginatedResult<T> {
     data: items.slice(start, start + limit),
     meta: { page: safePage, limit, total, totalPages },
   };
-}
-
-function sortShops(
-  items: PublicShopListItem[],
-  sort: PublicShopSortOption = "popular",
-): PublicShopListItem[] {
-  const copy = [...items];
-  switch (sort) {
-    case "rating":
-      return copy.sort((a, b) => b.metrics.averageRating - a.metrics.averageRating);
-    case "products":
-      return copy.sort((a, b) => b.metrics.totalProducts - a.metrics.totalProducts);
-    case "followers":
-      return copy.sort((a, b) => b.metrics.followerCount - a.metrics.followerCount);
-    case "engagement":
-      return copy.sort((a, b) => b.engagementScore - a.engagementScore);
-    case "newest":
-      return copy.sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
-    case "popular":
-    default:
-      return copy.sort((a, b) => {
-        const scoreA =
-          a.metrics.completedOrders * 0.4 +
-          a.metrics.followerCount * 0.3 +
-          a.engagementScore * 10;
-        const scoreB =
-          b.metrics.completedOrders * 0.4 +
-          b.metrics.followerCount * 0.3 +
-          b.engagementScore * 10;
-        return scoreB - scoreA;
-      });
-  }
 }
 
 function sortProducts(
@@ -98,29 +88,6 @@ function sortProducts(
     default:
       return copy.sort((a, b) => b.soldCount - a.soldCount);
   }
-}
-
-function filterShops(
-  items: PublicShopListItem[],
-  params: ListShopsParams,
-): PublicShopListItem[] {
-  let result = items.filter((s) => s.isVerified && s.status === "ACTIVE");
-
-  if (params.search?.trim()) {
-    const q = params.search.toLowerCase();
-    result = result.filter(
-      (s) =>
-        s.name.toLowerCase().includes(q) ||
-        s.tagline.toLowerCase().includes(q) ||
-        s.city.toLowerCase().includes(q),
-    );
-  }
-
-  if (params.category) {
-    result = result.filter((s) => s.category === params.category);
-  }
-
-  return sortShops(result, params.sort);
 }
 
 function filterProducts(
@@ -144,17 +111,35 @@ function filterProducts(
 export async function listShops(
   params: ListShopsParams = {},
 ): Promise<PaginatedResult<PublicShopListItem>> {
-  await maybeDelay();
-  const filtered = filterShops(MOCK_SHOP_LIST, params);
-  return paginate(filtered, params.page ?? 1, params.limit ?? 9);
+  const envelope = await getPublicShops({
+    page: params.page,
+    limit: params.limit,
+    search: params.search,
+    sort: params.sort,
+  });
+  return mapPaginatedEnvelope(envelope, mapApiListItem);
 }
 
-export async function getShopBySlug(slug: string): Promise<PublicShopProfile | null> {
+async function getShopBySlugMock(slug: string): Promise<PublicShopProfile | null> {
   await maybeDelay();
   return getMockShopProfileBySlug(slug) ?? null;
 }
 
-export async function getShopProducts(
+export async function getShopBySlug(slug: string): Promise<PublicShopProfile | null> {
+  if (!config.publicShopApi.profile) {
+    return getShopBySlugMock(slug);
+  }
+
+  try {
+    const envelope = await getPublicShopBySlug(slug);
+    return mapApiProfile(unwrapSuccess(envelope));
+  } catch (error) {
+    logApiFallback("profile", error);
+    return getShopBySlugMock(slug);
+  }
+}
+
+async function getShopProductsMock(
   slug: string,
   params: ListShopProductsParams = {},
 ): Promise<PaginatedResult<PublicShopProduct>> {
@@ -164,7 +149,29 @@ export async function getShopProducts(
   return paginate(filtered, params.page ?? 1, params.limit ?? 12);
 }
 
-export async function getShopReviews(
+export async function getShopProducts(
+  slug: string,
+  params: ListShopProductsParams = {},
+): Promise<PaginatedResult<PublicShopProduct>> {
+  if (!config.publicShopApi.products) {
+    return getShopProductsMock(slug, params);
+  }
+
+  try {
+    const envelope = await getPublicShopProducts(slug, {
+      page: params.page,
+      limit: params.limit,
+      search: params.search,
+      sort: params.sort,
+    });
+    return mapPaginatedEnvelope(envelope, mapApiProduct);
+  } catch (error) {
+    logApiFallback("products", error);
+    return getShopProductsMock(slug, params);
+  }
+}
+
+async function getShopReviewsMock(
   slug: string,
 ): Promise<{ summary: PublicShopReviewSummary; reviews: PublicShopReview[] }> {
   await maybeDelay();
@@ -172,6 +179,27 @@ export async function getShopReviews(
     summary: getMockReviewSummary(slug),
     reviews: MOCK_SHOP_REVIEWS[slug] ?? [],
   };
+}
+
+export async function getShopReviews(
+  slug: string,
+  params: { page?: number; limit?: number } = {},
+): Promise<{ summary: PublicShopReviewSummary; reviews: PublicShopReview[] }> {
+  if (!config.publicShopApi.reviews) {
+    return getShopReviewsMock(slug);
+  }
+
+  try {
+    const envelope = await getPublicShopReviews(slug, params);
+    const data = unwrapSuccess(envelope);
+    return {
+      summary: mapApiReviewSummary(data.summary),
+      reviews: data.reviews.map(mapApiReview),
+    };
+  } catch (error) {
+    logApiFallback("reviews", error);
+    return getShopReviewsMock(slug);
+  }
 }
 
 export async function getShopCampaigns(slug: string): Promise<PublicShopCampaign[]> {
