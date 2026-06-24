@@ -17,11 +17,6 @@ export const config = {
     registerUrl: "/register",
     verifyUrl: "/verify-account",
   },
-  publicShopApi: {
-    profile: import.meta.env.VITE_PUBLIC_SHOP_API_PROFILE === "true",
-    products: import.meta.env.VITE_PUBLIC_SHOP_API_PRODUCTS === "true",
-    reviews: import.meta.env.VITE_PUBLIC_SHOP_API_REVIEWS === "true",
-  },
   isDev: import.meta.env.DEV,
   isServer: typeof window === "undefined",
 } as const;

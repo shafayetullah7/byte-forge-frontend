@@ -149,3 +149,6 @@ export function mapPaginatedEnvelope<T, U>(
 export function unwrapSuccess<T>(envelope: ApiSuccessEnvelope<T>): T {
   return envelope.data;
 }
+
+export { mergeProfileWithPlaceholders } from "./profile-placeholders";
+export { mergeProductWithPlaceholders } from "./product-placeholders";

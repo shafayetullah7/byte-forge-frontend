@@ -1,15 +1,15 @@
 # Public Shop Phase A — Field matrix
 
-Maps API-backed fields vs mock-defaulted UI fields. Mocks are **retained** as fallback until each slice is enabled via env flags.
+Public shop facade functions always call the API. Static placeholders fill UI fields the backend does not expose yet (see `*-placeholders.ts` under `src/lib/public-shops/`).
 
-## Env flags
+## Always API
 
-| Flag | Facade function |
-|------|-----------------|
-| _(none — always API)_ | `listShops` |
-| `VITE_PUBLIC_SHOP_API_PROFILE` | `getShopBySlug` |
-| `VITE_PUBLIC_SHOP_API_PRODUCTS` | `getShopProducts` |
-| `VITE_PUBLIC_SHOP_API_REVIEWS` | `getShopReviews` |
+| Facade function | Endpoint |
+|-----------------|----------|
+| `listShops` | `GET /shops` |
+| `getShopBySlug` | `GET /shops/:slug` + profile placeholders |
+| `getShopProducts` | `GET /shops/:slug/products` + product placeholders |
+| `getShopReviews` | `GET /shops/:slug/reviews` + review placeholders when empty |
 
 ## API-backed (Phase A + storefront refactor)
 
@@ -35,13 +35,13 @@ Maps API-backed fields vs mock-defaulted UI fields. Mocks are **retained** as fa
 | Why choose us / values lists | `PUT /user/seller/storefront/why-choose-us`, `PUT .../value-points` |
 | Categories served | Read-only preview on `GET /user/seller/storefront` |
 
-## Mock-defaulted in mappers (Phase B/C)
+## Static placeholders (temporary — refine in later phases)
 
-| UI field | Default |
-|----------|---------|
-| `badges` | `[]` — see [shop-badges-phase-b.md](./shop-badges-phase-b.md) |
-| `metrics.followerCount`, engagement extras | `0` |
-| `featuredProductPreviews` | `[]` |
+| UI field | Placeholder |
+|----------|-------------|
+| `badges`, extended profile metrics | `profile-placeholders.ts` |
+| Product `category` | `product-placeholders.ts` (`Indoor` until API returns category) |
+| Reviews when API returns none | `review-placeholders.ts` (mock templates per slug) |
 | Statistics, community, campaigns, articles, similar shops | Mock facade functions |
 
 ## Explicitly mock (unchanged)
