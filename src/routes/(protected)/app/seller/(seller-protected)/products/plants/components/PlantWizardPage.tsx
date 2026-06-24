@@ -9,7 +9,7 @@ import Button from "~/components/ui/Button";
 import { type SelectOption } from "~/components/ui/Select";
 import { useImageUpload } from "~/lib/hooks/useImageUpload";
 import { toaster } from "~/components/ui/Toast";
-import { createPlant, updatePlant, invalidatePlants, invalidateAllPlantCaches } from "~/lib/api/endpoints/seller/plants.api";
+import { createPlant, invalidatePlants } from "~/lib/api/endpoints/seller/plants.api";
 import { SunIcon, ChevronLeftIcon, SpinnerIcon } from "~/components/icons";
 import { StepIndicator } from "../new/StepIndicator";
 import { Step1Identity } from "../new/Step1Identity";
@@ -20,7 +20,7 @@ import { Step5CareProfile } from "../new/Step5CareProfile";
 import { Step6Care } from "../new/Step6Care";
 import { Step7Preview } from "../new/Step7Preview";
 import type { PlantFormState } from "~/lib/types/plant-form";
-import { createEmptyVariant, toCreatePlantDto, toUpdatePlantDto, createEmptyForm } from "~/lib/types/plant-form";
+import { createEmptyVariant, toCreatePlantDto, createEmptyForm } from "~/lib/types/plant-form";
 import { PRODUCT_STATUS, type PlantStatus } from "~/lib/api/types/seller.types";
 
 // ========================
@@ -36,8 +36,6 @@ interface FormErrors {
 // ========================
 
 interface SavePlantActionData {
-  mode: "create" | "edit";
-  plantId?: string;
   dto: Record<string, unknown>;
   saveAsDraft: boolean;
 }
@@ -47,14 +45,6 @@ const savePlantAction = action(async (data: SavePlantActionData) => {
   try {
     if (data.saveAsDraft) {
       (data.dto as { status?: string }).status = PRODUCT_STATUS.DRAFT;
-    }
-
-    if (data.mode === "edit" && data.plantId) {
-      await updatePlant(
-        data.plantId,
-        data.dto as unknown as import("~/lib/api/types/seller.types").CreatePlantRequest,
-      );
-      return { success: true, id: data.plantId };
     }
 
     const created = await createPlant(
@@ -86,18 +76,10 @@ const savePlantAction = action(async (data: SavePlantActionData) => {
   }
 }, "save-plant-action");
 
-export interface PlantWizardPageProps {
-  mode: "create" | "edit";
-  plantId?: string;
-  initialForm?: PlantFormState;
-  originalSlug?: string;
-}
-
-export function PlantWizardPage(props: PlantWizardPageProps) {
+export function PlantWizardPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const isEditMode = () => props.mode === "edit";
 
   // ---- Category Tree ----
   const categoryTree = createAsync(() => getCategoryTree());
@@ -208,9 +190,7 @@ export function PlantWizardPage(props: PlantWizardPageProps) {
   const plantSubmission = useSubmission(savePlantAction);
   const isSubmitting = () => plantSubmission.pending;
 
-  const [form, setForm] = createStore<PlantFormState>(
-    props.initialForm ?? createEmptyForm(),
-  );
+  const [form, setForm] = createStore<PlantFormState>(createEmptyForm());
 
   // Thumbnail upload — hook handles upload logic, state syncs to form via callbacks
   const thumbnailUpload = useImageUpload({
@@ -231,18 +211,6 @@ export function PlantWizardPage(props: PlantWizardPageProps) {
   );
 
   onMount(() => {
-    if (props.initialForm) {
-      setForm(props.initialForm);
-      if (props.originalSlug) {
-        setForm("slug", props.originalSlug);
-        setIsSlugManual(true);
-      }
-      const thumb = props.initialForm.thumbnail;
-      if (thumb.id && thumb.url) {
-        thumbnailUpload.seed(thumb.id, thumb.url);
-      }
-    }
-
     const stepParam = searchParams.step;
     const stepStr = Array.isArray(stepParam) ? stepParam[0] : stepParam;
     if (stepStr) {
@@ -261,11 +229,7 @@ export function PlantWizardPage(props: PlantWizardPageProps) {
     if (result.success === true) {
       setValidationErrors([]);
       const plantId = result.id;
-      if (isEditMode() && plantId) {
-        invalidateAllPlantCaches(plantId);
-        toaster.success(t("seller.products.editPlant.plantUpdated") || t("seller.products.newPlant.plantCreated"));
-        navigate(`/app/seller/products/plants/${plantId}`);
-      } else if (plantId) {
+      if (plantId) {
         invalidatePlants();
         toaster.success(t("seller.products.newPlant.plantCreated"));
         navigate(`/app/seller/products/plants/${plantId}`);
@@ -483,12 +447,8 @@ export function PlantWizardPage(props: PlantWizardPageProps) {
       return;
     }
 
-    const dto = isEditMode()
-      ? toUpdatePlantDto(form)
-      : toCreatePlantDto(form);
+    const dto = toCreatePlantDto(form);
     savePlantTrigger({
-      mode: props.mode,
-      plantId: props.plantId,
       dto,
       saveAsDraft,
     });
@@ -564,14 +524,10 @@ export function PlantWizardPage(props: PlantWizardPageProps) {
                 </div>
                 <div>
                   <h1 class="text-2xl md:text-3xl font-bold text-forest-800 dark:text-cream-50">
-                    {isEditMode()
-                      ? (t("seller.products.editPlant.pageTitle") || t("seller.products.plantOverview.editPlant"))
-                      : t("seller.products.newPlant.pageTitle")}
+                    {t("seller.products.newPlant.pageTitle")}
                   </h1>
                   <p class="text-sm text-gray-600 dark:text-gray-400">
-                    {isEditMode()
-                      ? t("seller.products.editPlant.pageSubtitle")
-                      : `${t("seller.products.newPlant.step")} ${currentStep()} ${t("seller.products.newPlant.of")} ${totalSteps} — ${stepTitle()}`}
+                    {`${t("seller.products.newPlant.step")} ${currentStep()} ${t("seller.products.newPlant.of")} ${totalSteps} — ${stepTitle()}`}
                   </p>
                 </div>
               </div>
@@ -622,9 +578,7 @@ export function PlantWizardPage(props: PlantWizardPageProps) {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
               <p class="text-sm font-medium text-forest-800 dark:text-forest-200">
-                {isEditMode()
-                  ? t("seller.products.editPlant.plantUpdated")
-                  : t("seller.products.newPlant.plantCreated")}
+                {t("seller.products.newPlant.plantCreated")}
               </p>
             </div>
           </Show>
@@ -661,9 +615,7 @@ export function PlantWizardPage(props: PlantWizardPageProps) {
                     thumbnailUpload={thumbnailUpload}
                     thumbnailPreview={effectiveThumbnailPreview}
                     hasThumbnail={hasThumbnail}
-                    allowThumbnailDelete={!isEditMode()}
-                    isEditMode={isEditMode()}
-                    originalSlug={props.originalSlug}
+                    allowThumbnailDelete
                     status={form.status}
                     onStatusChange={(v) => setForm("status", v as PlantStatus)}
                     slug={effectiveSlug()}
@@ -750,8 +702,6 @@ export function PlantWizardPage(props: PlantWizardPageProps) {
                     leafDensityOptions={leafDensityOptions()}
                     propagationTypeOptions={propagationTypeOptions()}
                     containerTypeOptions={containerTypeOptions()}
-                    stockFieldsDisabled={isEditMode()}
-                    inventoryLinkHref={isEditMode() && props.plantId ? `/app/seller/products/${props.plantId}/inventory` : undefined}
                     t={t}
                     onWarningChange={warningCallbacks()[4]}
                   />
@@ -865,16 +815,14 @@ export function PlantWizardPage(props: PlantWizardPageProps) {
 
                 <Show when={currentStep() < totalSteps} fallback={
                   <div class="flex items-center gap-3">
-                    <Show when={!isEditMode()}>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        disabled={isSubmitting()}
-                        onClick={() => handleSubmit(true)}
-                      >
-                        {t("seller.products.newPlant.saveAsDraft") || "Save as draft"}
-                      </Button>
-                    </Show>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={isSubmitting()}
+                      onClick={() => handleSubmit(true)}
+                    >
+                      {t("seller.products.newPlant.saveAsDraft") || "Save as draft"}
+                    </Button>
                     <Button
                       type="submit"
                       variant="accent"
@@ -882,10 +830,8 @@ export function PlantWizardPage(props: PlantWizardPageProps) {
                       loading={isSubmitting()}
                     >
                       {isSubmitting()
-                        ? (isEditMode() ? t("common.saving") || "Saving..." : t("seller.products.newPlant.creating"))
-                        : (isEditMode()
-                          ? (t("seller.products.editPlant.saveChanges") || "Save changes")
-                          : t("seller.products.newPlant.submitActive"))}
+                        ? t("seller.products.newPlant.creating")
+                        : t("seller.products.newPlant.submitActive")}
                     </Button>
                   </div>
                 }>

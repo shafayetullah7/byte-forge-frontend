@@ -1201,6 +1201,7 @@ export const dict = {
           overview: "Overview",
           variants: "Variants",
           care: "Care Guide",
+          inventory: "Inventory",
         },
         breadcrumb: {
           dashboard: "Dashboard",
@@ -1212,6 +1213,16 @@ export const dict = {
         backToPlants: "Back to Plants",
         slug: "Slug",
         viewProductDetails: "View Product Details",
+        ordersAndReviews: "Orders & reviews",
+      },
+      plantSection: {
+        edit: "Edit",
+        cancel: "Cancel",
+        save: "Save",
+        saving: "Saving...",
+        saved: "Section saved",
+        saveFailed: "Failed to save section",
+        validationFailed: "Please fix the highlighted fields",
       },
       // Plant Overview
       plantOverview: {
@@ -1269,6 +1280,12 @@ export const dict = {
         price: "Price",
         stock: "Stock",
         variant: (id: string) => `Variant ${id}`,
+        manageInventory: "Manage inventory",
+        manageStock: "Manage stock",
+        adjustStock: "Adjust",
+        categoryAndTags: "Category & Tags",
+        plantIdentity: "Plant Identity",
+        viewCareGuide: "View full care guide",
         // Details
         details: "Details",
         created: "Created",
@@ -1281,7 +1298,12 @@ export const dict = {
         duplicatePlant: "Duplicate Plant",
         deletePlant: "Delete Plant",
       },
-      managePlantProducts: "Manage your plant products",
+      plantVariants: {
+        addVariant: "Add variant",
+        removeVariant: "Remove variant",
+        confirmRemove: "Remove this variant? This cannot be undone if the variant has order history.",
+        noVariants: "No variants found for this plant.",
+      },
       managePotProducts: "Manage your pot products",
       manageSeedProducts: "Manage your seed products",
       manageFertilizerProducts: "Manage your fertilizer products",

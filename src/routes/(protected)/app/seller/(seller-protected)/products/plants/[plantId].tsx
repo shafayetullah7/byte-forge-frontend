@@ -1,7 +1,6 @@
 import { ErrorBoundary, Suspense, Show, For, createMemo } from "solid-js";
 import { A, useParams, useLocation, createAsync, type RouteSectionProps, type RouteDefinition } from "@solidjs/router";
-import { ChevronLeftIcon, ChevronRightIcon, ExclamationCircleIcon, PencilIcon } from "~/components/icons";
-import Button from "~/components/ui/Button";
+import { ChevronLeftIcon, ChevronRightIcon, ExclamationCircleIcon } from "~/components/icons";
 import { getPlantById } from "~/lib/api/endpoints/seller/plants.api";
 import { useI18n } from "~/i18n";
 import Badge from "~/components/ui/Badge";
@@ -35,8 +34,6 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
     }
     return location.pathname.startsWith(`/app/seller/products/plants/${params.plantId}/${path}`);
   };
-
-  const isEditRoute = () => location.pathname.endsWith("/edit");
 
   return (
     <div class="mx-auto max-w-[1400px]">
@@ -115,18 +112,10 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
                           href={`/app/seller/products/${plantData().id}`}
                           class="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-lg border border-forest-200 dark:border-forest-700 text-forest-700 dark:text-forest-300 hover:bg-forest-50 dark:hover:bg-forest-900/30 text-xs font-medium transition-colors"
                         >
-                          {t("seller.products.plantDetail.viewProductDetails")}
+                          {t("seller.products.plantDetail.ordersAndReviews")}
                         </A>
                       </div>
                     </div>
-                    <Show when={!isEditRoute()}>
-                      <A href={`/app/seller/products/plants/${plantData().id}/edit`}>
-                        <Button variant="accent" class="inline-flex items-center gap-2">
-                          <PencilIcon class="w-4 h-4" />
-                          {t("seller.products.plantOverview.editPlant")}
-                        </Button>
-                      </A>
-                    </Show>
                   </div>
                 </div>
 

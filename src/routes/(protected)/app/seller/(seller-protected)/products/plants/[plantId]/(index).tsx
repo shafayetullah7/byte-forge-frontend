@@ -4,9 +4,11 @@ import { A, useParams, createAsync, useNavigate } from "@solidjs/router";
 import { getPlantById, updatePlantStatus, deletePlant, invalidateAllPlantCaches } from "~/lib/api/endpoints/seller/plants.api";
 import { PRODUCT_STATUS } from "~/lib/api/types/seller.types";
 import { toaster } from "~/components/ui/Toast";
+import { usePlantSectionEdit } from "~/lib/plants/usePlantSectionEdit";
+import { EditableSectionCard } from "./components/EditableSectionCard";
+import { PlantSectionFieldEditor } from "../components/PlantSectionFieldEditor";
 import {
   FolderIcon,
-  InfoCircleIcon,
   ChatBubbleLeftRightIcon,
   GlobeAltIcon,
   CubeIcon,
@@ -21,7 +23,6 @@ import {
   ClockIcon,
   CalendarIcon,
   CheckBadgeIcon,
-  PencilIcon,
   ArchiveIcon,
   TrashIcon,
   CloudIcon,
@@ -131,6 +132,8 @@ export default function OverviewRoute() {
     { deferStream: true }
   );
 
+  const sectionEdit = usePlantSectionEdit(params.plantId as string, plant);
+
   return (
     <ErrorBoundary fallback={(error) => (
       <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
@@ -148,53 +151,70 @@ export default function OverviewRoute() {
             <div class="space-y-6">
 
               {/* ─── Thumbnail + Translations Card ─── */}
-              <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm overflow-hidden">
-                <div class="flex flex-col sm:flex-row">
-                  {/* Thumbnail */}
-                  <div class="sm:w-64 md:w-72 h-56 sm:h-auto bg-cream-100 dark:bg-forest-900/50 flex items-center justify-center flex-shrink-0 border-b sm:border-b-0 sm:border-r border-cream-200 dark:border-forest-700">
-                    {plantData().thumbnail?.url ? (
-                      <img
-                        src={plantData().thumbnail!.url}
-                        alt={
-                          plantData().translations?.find(t => t.locale === "en")?.name
-                            ?? plantData().translations?.[0]?.name ?? ""
-                        }
-                        class="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <LeafIcon class="w-20 h-20 text-gray-300 dark:text-gray-600" />
-                    )}
-                  </div>
-
-                  {/* Translations & Info */}
-                  <div class="flex-1 p-6">
-                    <h2 class="text-lg font-bold text-forest-800 dark:text-cream-50 mb-1">{t("seller.products.plantOverview.english")}</h2>
-                    <p class="text-xl font-semibold text-forest-800 dark:text-cream-50 mb-2">
-                      {plantData().translations?.find(t => t.locale === "en")?.name
-                        ?? plantData().translations?.[0]?.name ?? ""}
-                    </p>
-                    <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                      {plantData().translations?.find(t => t.locale === "en")?.shortDescription
-                        ?? plantData().translations?.[0]?.shortDescription ?? ""}
-                    </p>
-
-                    {plantData().translations?.find(t => t.locale === "bn") && (
-                      <div class="mt-4 pt-4 border-t border-cream-200 dark:border-forest-700">
-                        <h2 class="text-lg font-bold text-forest-800 dark:text-cream-50 mb-1">{t("seller.products.plantOverview.bengali")}</h2>
-                        <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                          {plantData().translations?.find(t => t.locale === "bn")?.description ?? ""}
-                        </p>
+              <EditableSectionCard
+                title={t("seller.products.plantOverview.plantIdentity")}
+                icon={<LeafIcon class="w-4 h-4 text-gray-400" />}
+                isEditing={sectionEdit.isEditing("identity")}
+                isSaving={sectionEdit.isSaving()}
+                onEdit={() => sectionEdit.startEdit("identity")}
+                onCancel={sectionEdit.cancelEdit}
+                onSave={sectionEdit.save}
+              >
+                <Show
+                  when={sectionEdit.isEditing("identity")}
+                  fallback={
+                    <div class="flex flex-col sm:flex-row">
+                      <div class="sm:w-64 md:w-72 h-56 sm:h-auto bg-cream-100 dark:bg-forest-900/50 flex items-center justify-center flex-shrink-0 border-b sm:border-b-0 sm:border-r border-cream-200 dark:border-forest-700">
+                        {plantData().thumbnail?.url ? (
+                          <img
+                            src={plantData().thumbnail!.url}
+                            alt={
+                              plantData().translations?.find(t => t.locale === "en")?.name
+                                ?? plantData().translations?.[0]?.name ?? ""
+                            }
+                            class="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <LeafIcon class="w-20 h-20 text-gray-300 dark:text-gray-600" />
+                        )}
                       </div>
-                    )}
-
-                    <div class="mt-4 pt-4 border-t border-cream-200 dark:border-forest-700">
-                      <p class="text-xs text-gray-500 dark:text-gray-400">
-                        {t("seller.products.plantOverview.scientificName")}: <span class="text-gray-700 dark:text-gray-300 italic">{plantData().plantDetails?.scientificName ?? "—"}</span>
-                      </p>
+                      <div class="flex-1 p-6">
+                        <h2 class="text-lg font-bold text-forest-800 dark:text-cream-50 mb-1">{t("seller.products.plantOverview.english")}</h2>
+                        <p class="text-xl font-semibold text-forest-800 dark:text-cream-50 mb-2">
+                          {plantData().translations?.find(t => t.locale === "en")?.name
+                            ?? plantData().translations?.[0]?.name ?? ""}
+                        </p>
+                        <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                          {plantData().translations?.find(t => t.locale === "en")?.shortDescription
+                            ?? plantData().translations?.[0]?.shortDescription ?? ""}
+                        </p>
+                        {plantData().translations?.find(t => t.locale === "bn") && (
+                          <div class="mt-4 pt-4 border-t border-cream-200 dark:border-forest-700">
+                            <h2 class="text-lg font-bold text-forest-800 dark:text-cream-50 mb-1">{t("seller.products.plantOverview.bengali")}</h2>
+                            <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                              {plantData().translations?.find(t => t.locale === "bn")?.description ?? ""}
+                            </p>
+                          </div>
+                        )}
+                        <div class="mt-4 pt-4 border-t border-cream-200 dark:border-forest-700">
+                          <p class="text-xs text-gray-500 dark:text-gray-400">
+                            {t("seller.products.plantOverview.scientificName")}: <span class="text-gray-700 dark:text-gray-300 italic">{plantData().plantDetails?.scientificName ?? "—"}</span>
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </div>
+                  }
+                >
+                  <PlantSectionFieldEditor
+                    sectionId="identity"
+                    form={sectionEdit.draftForm}
+                    setForm={sectionEdit.setDraftForm}
+                    errors={sectionEdit.errors()}
+                    plantId={plantData().id}
+                    originalSlug={plantData().slug}
+                  />
+                </Show>
+              </EditableSectionCard>
 
               {/* ─── Two-Column Layout ─── */}
               <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -202,235 +222,281 @@ export default function OverviewRoute() {
                 {/* Left Column (2/3) */}
                 <div class="lg:col-span-2 space-y-6">
 
+                  {/* ─── Category & Tags ─── */}
+                  <EditableSectionCard
+                    title={t("seller.products.plantOverview.categoryAndTags")}
+                    icon={<TagIcon class="w-4 h-4 text-gray-400" />}
+                    isEditing={sectionEdit.isEditing("categoryTags")}
+                    isSaving={sectionEdit.isSaving()}
+                    onEdit={() => sectionEdit.startEdit("categoryTags")}
+                    onCancel={sectionEdit.cancelEdit}
+                    onSave={sectionEdit.save}
+                  >
+                    <Show
+                      when={sectionEdit.isEditing("categoryTags")}
+                      fallback={
+                        <>
+                          <DetailRow
+                            label={t("seller.products.plantOverview.categoryEn")}
+                            value={
+                              plantData().plantDetails?.category?.translations?.find(t => t.locale === "en")?.name
+                                ?? plantData().plantDetails?.category?.translations?.[0]?.name ?? "—"
+                            }
+                            icon={() => <FolderIcon class="w-4 h-4" />}
+                          />
+                          <DetailRow
+                            label={t("seller.products.plantOverview.categoryBn")}
+                            value={
+                              plantData().plantDetails?.category?.translations?.find(t => t.locale === "bn")?.name
+                                ?? "—"
+                            }
+                            icon={() => <FolderIcon class="w-4 h-4" />}
+                          />
+                          <Show when={(plantData().plantDetails?.tags ?? []).length > 0}>
+                            <div class="mt-4 pt-4 border-t border-cream-100 dark:border-forest-700/50">
+                              <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">{t("seller.products.plantOverview.tags")}</p>
+                              <div class="flex flex-wrap gap-2">
+                                <For each={plantData().plantDetails?.tags ?? []}>
+                                  {(tag) => {
+                                    const nameEn = tag.translations?.find(t => t.locale === "en")?.name
+                                      ?? tag.translations?.[0]?.name ?? tag.slug;
+                                    const nameBn = tag.translations?.find(t => t.locale === "bn")?.name;
+                                    return (
+                                      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 rounded-full text-xs font-medium border border-forest-200 dark:border-forest-700">
+                                        <TagIcon class="w-3 h-3" />
+                                        {nameEn}
+                                        {nameBn && (
+                                          <span class="text-forest-500 dark:text-forest-400">({nameBn})</span>
+                                        )}
+                                      </span>
+                                    );
+                                  }}
+                                </For>
+                              </div>
+                            </div>
+                          </Show>
+                        </>
+                      }
+                    >
+                      <PlantSectionFieldEditor
+                        sectionId="categoryTags"
+                        form={sectionEdit.draftForm}
+                        setForm={sectionEdit.setDraftForm}
+                        errors={sectionEdit.errors()}
+                        plantId={plantData().id}
+                      />
+                    </Show>
+                  </EditableSectionCard>
+
                   {/* ─── Classification & Details ─── */}
-                  <SectionCard
+                  <EditableSectionCard
                     title={t("seller.products.plantOverview.classificationDetails")}
                     icon={<SproutIcon class="w-4 h-4 text-gray-400" />}
+                    isEditing={sectionEdit.isEditing("classification")}
+                    isSaving={sectionEdit.isSaving()}
+                    onEdit={() => sectionEdit.startEdit("classification")}
+                    onCancel={sectionEdit.cancelEdit}
+                    onSave={sectionEdit.save}
                   >
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8">
-                      <div>
-                        <DetailRow
-                          label={t("seller.products.plantOverview.categoryEn")}
-                          value={
-                            plantData().plantDetails?.category?.translations?.find(t => t.locale === "en")?.name
-                              ?? plantData().plantDetails?.category?.translations?.[0]?.name ?? "—"
-                          }
-                          icon={() => <FolderIcon class="w-4 h-4" />}
-                        />
-                        <DetailRow
-                          label={t("seller.products.plantOverview.categoryBn")}
-                          value={
-                            plantData().plantDetails?.category?.translations?.find(t => t.locale === "bn")?.name
-                              ?? "—"
-                          }
-                          icon={() => <FolderIcon class="w-4 h-4" />}
-                        />
-                        <DetailRow
-                          label={t("seller.products.plantOverview.scientificName")}
-                          value={plantData().plantDetails?.scientificName ?? "—"}
-                          icon={() => <InfoCircleIcon class="w-4 h-4" />}
-                        />
-                        <DetailRow
-                          label={t("seller.products.plantOverview.commonNamesEn")}
-                          value={
-                            plantData().plantDetails?.translations?.find(t => t.locale === "en")?.commonNames
-                              ?? plantData().plantDetails?.translations?.[0]?.commonNames ?? "—"
-                          }
-                          icon={() => <ChatBubbleLeftRightIcon class="w-4 h-4" />}
-                        />
-                        <DetailRow
-                          label={t("seller.products.plantOverview.commonNamesBn")}
-                          value={
-                            plantData().plantDetails?.translations?.find(t => t.locale === "bn")?.commonNames
-                              ?? "—"
-                          }
-                          icon={() => <ChatBubbleLeftRightIcon class="w-4 h-4" />}
-                        />
-                        <DetailRow
-                          label={t("seller.products.plantOverview.originEn")}
-                          value={
-                            plantData().plantDetails?.translations?.find(t => t.locale === "en")?.origin
-                              ?? plantData().plantDetails?.translations?.[0]?.origin ?? "—"
-                          }
-                          icon={() => <GlobeAltIcon class="w-4 h-4" />}
-                        />
-                        <DetailRow
-                          label={t("seller.products.plantOverview.originBn")}
-                          value={
-                            plantData().plantDetails?.translations?.find(t => t.locale === "bn")?.origin
-                              ?? "—"
-                          }
-                          icon={() => <GlobeAltIcon class="w-4 h-4" />}
-                        />
-                      </div>
-                      <div>
-                        <DetailRow
-                          label={t("seller.products.plantOverview.soilTypeEn")}
-                          value={
-                            plantData().plantDetails?.translations?.find(t => t.locale === "en")?.soilType
-                              ?? plantData().plantDetails?.translations?.[0]?.soilType ?? "—"
-                          }
-                          icon={() => <BeakerIcon class="w-4 h-4" />}
-                        />
-                        <DetailRow
-                          label={t("seller.products.plantOverview.soilTypeBn")}
-                          value={
-                            plantData().plantDetails?.translations?.find(t => t.locale === "bn")?.soilType
-                              ?? "—"
-                          }
-                          icon={() => <BeakerIcon class="w-4 h-4" />}
-                        />
-                        <DetailRow
-                          label={t("seller.products.plantOverview.matureHeight")}
-                          value={plantData().plantDetails?.matureHeight ?? "—"}
-                          icon={() => <RulerIcon class="w-4 h-4" />}
-                        />
-                        <DetailRow
-                          label={t("seller.products.plantOverview.matureSpread")}
-                          value={plantData().plantDetails?.matureSpread ?? "—"}
-                          icon={() => <RulerIcon class="w-4 h-4" />}
-                        />
-                        <DetailRow
-                          label={t("seller.products.plantOverview.toxicityEn")}
-                          value={
-                            plantData().plantDetails?.translations?.find(t => t.locale === "en")?.toxicityInfo
-                              ?? plantData().plantDetails?.translations?.[0]?.toxicityInfo ?? "—"
-                          }
-                          icon={() => <ExclamationCircleIcon class="w-4 h-4" />}
-                        />
-                        <DetailRow
-                          label={t("seller.products.plantOverview.toxicityBn")}
-                          value={
-                            plantData().plantDetails?.translations?.find(t => t.locale === "bn")?.toxicityInfo
-                              ?? "—"
-                          }
-                          icon={() => <ExclamationCircleIcon class="w-4 h-4" />}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Tags */}
-                    <Show when={(plantData().plantDetails?.tags ?? []).length > 0}>
-                      <div class="mt-4 pt-4 border-t border-cream-100 dark:border-forest-700/50">
-                        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">{t("seller.products.plantOverview.tags")}</p>
-                        <div class="flex flex-wrap gap-2">
-                          <For each={plantData().plantDetails?.tags ?? []}>
-                            {(tag) => {
-                              const nameEn = tag.translations?.find(t => t.locale === "en")?.name
-                                ?? tag.translations?.[0]?.name ?? tag.slug;
-                              const nameBn = tag.translations?.find(t => t.locale === "bn")?.name;
-                              return (
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 rounded-full text-xs font-medium border border-forest-200 dark:border-forest-700">
-                                  <TagIcon class="w-3 h-3" />
-                                  {nameEn}
-                                  {nameBn && (
-                                    <span class="text-forest-500 dark:text-forest-400">({nameBn})</span>
-                                  )}
-                                </span>
-                              );
-                            }}
-                          </For>
+                    <Show
+                      when={sectionEdit.isEditing("classification")}
+                      fallback={
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8">
+                          <div>
+                            <DetailRow
+                              label={t("seller.products.plantOverview.commonNamesEn")}
+                              value={
+                                plantData().plantDetails?.translations?.find(t => t.locale === "en")?.commonNames
+                                  ?? plantData().plantDetails?.translations?.[0]?.commonNames ?? "—"
+                              }
+                              icon={() => <ChatBubbleLeftRightIcon class="w-4 h-4" />}
+                            />
+                            <DetailRow
+                              label={t("seller.products.plantOverview.commonNamesBn")}
+                              value={
+                                plantData().plantDetails?.translations?.find(t => t.locale === "bn")?.commonNames
+                                  ?? "—"
+                              }
+                              icon={() => <ChatBubbleLeftRightIcon class="w-4 h-4" />}
+                            />
+                            <DetailRow
+                              label={t("seller.products.plantOverview.originEn")}
+                              value={
+                                plantData().plantDetails?.translations?.find(t => t.locale === "en")?.origin
+                                  ?? plantData().plantDetails?.translations?.[0]?.origin ?? "—"
+                              }
+                              icon={() => <GlobeAltIcon class="w-4 h-4" />}
+                            />
+                            <DetailRow
+                              label={t("seller.products.plantOverview.originBn")}
+                              value={
+                                plantData().plantDetails?.translations?.find(t => t.locale === "bn")?.origin
+                                  ?? "—"
+                              }
+                              icon={() => <GlobeAltIcon class="w-4 h-4" />}
+                            />
+                          </div>
+                          <div>
+                            <DetailRow
+                              label={t("seller.products.plantOverview.soilTypeEn")}
+                              value={
+                                plantData().plantDetails?.translations?.find(t => t.locale === "en")?.soilType
+                                  ?? plantData().plantDetails?.translations?.[0]?.soilType ?? "—"
+                              }
+                              icon={() => <BeakerIcon class="w-4 h-4" />}
+                            />
+                            <DetailRow
+                              label={t("seller.products.plantOverview.soilTypeBn")}
+                              value={
+                                plantData().plantDetails?.translations?.find(t => t.locale === "bn")?.soilType
+                                  ?? "—"
+                              }
+                              icon={() => <BeakerIcon class="w-4 h-4" />}
+                            />
+                            <DetailRow
+                              label={t("seller.products.plantOverview.toxicityEn")}
+                              value={
+                                plantData().plantDetails?.translations?.find(t => t.locale === "en")?.toxicityInfo
+                                  ?? plantData().plantDetails?.translations?.[0]?.toxicityInfo ?? "—"
+                              }
+                              icon={() => <ExclamationCircleIcon class="w-4 h-4" />}
+                            />
+                            <DetailRow
+                              label={t("seller.products.plantOverview.toxicityBn")}
+                              value={
+                                plantData().plantDetails?.translations?.find(t => t.locale === "bn")?.toxicityInfo
+                                  ?? "—"
+                              }
+                              icon={() => <ExclamationCircleIcon class="w-4 h-4" />}
+                            />
+                          </div>
                         </div>
-                      </div>
+                      }
+                    >
+                      <PlantSectionFieldEditor
+                        sectionId="classification"
+                        form={sectionEdit.draftForm}
+                        setForm={sectionEdit.setDraftForm}
+                        errors={sectionEdit.errors()}
+                        plantId={plantData().id}
+                      />
                     </Show>
-                  </SectionCard>
+                  </EditableSectionCard>
 
                   {/* ─── Care Requirements (Cards) ─── */}
                   <Show when={plantData().plantDetails}>
                     {(pd) => (
-                      <SectionCard
+                      <EditableSectionCard
                         title={t("seller.products.plantOverview.careRequirements")}
                         icon={<CloudIcon class="w-4 h-4 text-gray-400" />}
+                        isEditing={sectionEdit.isEditing("careProfile")}
+                        isSaving={sectionEdit.isSaving()}
+                        onEdit={() => sectionEdit.startEdit("careProfile")}
+                        onCancel={sectionEdit.cancelEdit}
+                        onSave={sectionEdit.save}
                       >
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <Show when={pd().lightRequirement}>
-                            {(light) => (
-                              <CareCard
-                                icon={<SunIcon class="w-5 h-5 text-forest-600 dark:text-forest-400" />}
-                                titleEn={t("seller.products.plantOverview.light")}
-                                titleBn="আলো"
-                                badge={{
-                                  text: getLightLabel(light() as any),
-                                  ...getLightColor(light() as any),
-                                }}
-                                description={t("seller.products.plantOverview.lightDescription")}
-                              />
-                            )}
-                          </Show>
-                          <Show when={pd().wateringFrequency}>
-                            {(watering) => (
-                              <CareCard
-                                icon={<DropletIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" />}
-                                titleEn={t("seller.products.plantOverview.watering")}
-                                titleBn="পানি"
-                                badge={{
-                                  text: getWateringLabel(watering() as any),
-                                  ...getWateringColor(watering() as any),
-                                }}
-                                description={t("seller.products.plantOverview.wateringDescription")}
-                              />
-                            )}
-                          </Show>
-                          <Show when={pd().humidityLevel}>
-                            {(humidity) => (
-                              <CareCard
-                                icon={<CloudIcon class="w-5 h-5 text-sky-600 dark:text-sky-400" />}
-                                titleEn={t("seller.products.plantOverview.humidity")}
-                                titleBn="আর্দ্রতা"
-                                badge={{
-                                  text: getHumidityLabel(humidity() as any),
-                                  ...getHumidityColor(humidity() as any),
-                                }}
-                                description={t("seller.products.plantOverview.humidityDescription")}
-                              />
-                            )}
-                          </Show>
-                          <Show when={pd().temperatureRange}>
-                            {(temp) => (
-                              <CareCard
-                                icon={<ThermometerIcon class="w-5 h-5 text-red-600 dark:text-red-400" />}
-                                titleEn={t("seller.products.plantOverview.temperature")}
-                                titleBn="তাপমাত্রা"
-                                badge={{
-                                  text: temp(),
-                                  bg: "bg-red-100 dark:bg-red-900/40",
-                                  textColor: "text-red-700 dark:text-red-300",
-                                }}
-                                description={t("seller.products.plantOverview.temperatureDescription")}
-                              />
-                            )}
-                          </Show>
-                          <Show when={pd().careDifficulty}>
-                            {(difficulty) => (
-                              <CareCard
-                                icon={<SparklesIcon class="w-5 h-5 text-cream-600 dark:text-cream-400" />}
-                                titleEn={t("seller.products.plantOverview.careDifficulty")}
-                                titleBn="যত্নের জটিলতা"
-                                badge={{
-                                  text: getDifficultyLabel(difficulty() as any),
-                                  ...getDifficultyColor(difficulty() as any),
-                                }}
-                                description={t("seller.products.plantOverview.careDifficultyDescription")}
-                              />
-                            )}
-                          </Show>
-                          <Show when={pd().growthRate}>
-                            {(growth) => (
-                              <CareCard
-                                icon={<SproutIcon class="w-5 h-5 text-sage-600 dark:text-sage-400" />}
-                                titleEn={t("seller.products.plantOverview.growthRate")}
-                                titleBn="বৃদ্ধির হার"
-                                badge={{
-                                  text: getGrowthRateLabel(growth() as any),
-                                  bg: "bg-sage-100 dark:bg-sage-900/40",
-                                  textColor: "text-sage-700 dark:text-sage-300",
-                                }}
-                                description={t("seller.products.plantOverview.growthRateDescription")}
-                              />
-                            )}
-                          </Show>
-                        </div>
-                      </SectionCard>
+                        <Show
+                          when={sectionEdit.isEditing("careProfile")}
+                          fallback={
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              <Show when={pd().lightRequirement}>
+                                {(light) => (
+                                  <CareCard
+                                    icon={<SunIcon class="w-5 h-5 text-forest-600 dark:text-forest-400" />}
+                                    titleEn={t("seller.products.plantOverview.light")}
+                                    titleBn="আলো"
+                                    badge={{
+                                      text: getLightLabel(light() as any),
+                                      ...getLightColor(light() as any),
+                                    }}
+                                    description={t("seller.products.plantOverview.lightDescription")}
+                                  />
+                                )}
+                              </Show>
+                              <Show when={pd().wateringFrequency}>
+                                {(watering) => (
+                                  <CareCard
+                                    icon={<DropletIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" />}
+                                    titleEn={t("seller.products.plantOverview.watering")}
+                                    titleBn="পানি"
+                                    badge={{
+                                      text: getWateringLabel(watering() as any),
+                                      ...getWateringColor(watering() as any),
+                                    }}
+                                    description={t("seller.products.plantOverview.wateringDescription")}
+                                  />
+                                )}
+                              </Show>
+                              <Show when={pd().humidityLevel}>
+                                {(humidity) => (
+                                  <CareCard
+                                    icon={<CloudIcon class="w-5 h-5 text-sky-600 dark:text-sky-400" />}
+                                    titleEn={t("seller.products.plantOverview.humidity")}
+                                    titleBn="আর্দ্রতা"
+                                    badge={{
+                                      text: getHumidityLabel(humidity() as any),
+                                      ...getHumidityColor(humidity() as any),
+                                    }}
+                                    description={t("seller.products.plantOverview.humidityDescription")}
+                                  />
+                                )}
+                              </Show>
+                              <Show when={pd().temperatureRange}>
+                                {(temp) => (
+                                  <CareCard
+                                    icon={<ThermometerIcon class="w-5 h-5 text-red-600 dark:text-red-400" />}
+                                    titleEn={t("seller.products.plantOverview.temperature")}
+                                    titleBn="তাপমাত্রা"
+                                    badge={{
+                                      text: temp(),
+                                      bg: "bg-red-100 dark:bg-red-900/40",
+                                      textColor: "text-red-700 dark:text-red-300",
+                                    }}
+                                    description={t("seller.products.plantOverview.temperatureDescription")}
+                                  />
+                                )}
+                              </Show>
+                              <Show when={pd().careDifficulty}>
+                                {(difficulty) => (
+                                  <CareCard
+                                    icon={<SparklesIcon class="w-5 h-5 text-cream-600 dark:text-cream-400" />}
+                                    titleEn={t("seller.products.plantOverview.careDifficulty")}
+                                    titleBn="যত্নের জটিলতা"
+                                    badge={{
+                                      text: getDifficultyLabel(difficulty() as any),
+                                      ...getDifficultyColor(difficulty() as any),
+                                    }}
+                                    description={t("seller.products.plantOverview.careDifficultyDescription")}
+                                  />
+                                )}
+                              </Show>
+                              <Show when={pd().growthRate}>
+                                {(growth) => (
+                                  <CareCard
+                                    icon={<SproutIcon class="w-5 h-5 text-sage-600 dark:text-sage-400" />}
+                                    titleEn={t("seller.products.plantOverview.growthRate")}
+                                    titleBn="বৃদ্ধির হার"
+                                    badge={{
+                                      text: getGrowthRateLabel(growth() as any),
+                                      bg: "bg-sage-100 dark:bg-sage-900/40",
+                                      textColor: "text-sage-700 dark:text-sage-300",
+                                    }}
+                                    description={t("seller.products.plantOverview.growthRateDescription")}
+                                  />
+                                )}
+                              </Show>
+                            </div>
+                          }
+                        >
+                          <PlantSectionFieldEditor
+                            sectionId="careProfile"
+                            form={sectionEdit.draftForm}
+                            setForm={sectionEdit.setDraftForm}
+                            errors={sectionEdit.errors()}
+                            plantId={plantData().id}
+                          />
+                        </Show>
+                      </EditableSectionCard>
                     )}
                   </Show>
 
@@ -443,6 +509,14 @@ export default function OverviewRoute() {
                         <SectionCard
                           title={t("seller.products.plantOverview.careInstructions")}
                           icon={<ClockIcon class="w-4 h-4 text-gray-400" />}
+                          action={
+                            <A
+                              href={`/app/seller/products/plants/${plantData().id}/care`}
+                              class="text-xs text-forest-600 dark:text-forest-400 hover:underline"
+                            >
+                              {t("seller.products.plantOverview.viewCareGuide")}
+                            </A>
+                          }
                         >
                           <div class="space-y-4">
                             <InstructionRow
@@ -560,6 +634,12 @@ export default function OverviewRoute() {
                         </p>
                       </div>
                     </div>
+                    <A
+                      href={`/app/seller/products/plants/${plantData().id}/inventory`}
+                      class="inline-flex items-center gap-1.5 mt-4 text-sm font-medium text-forest-600 dark:text-forest-400 hover:underline"
+                    >
+                      {t("seller.products.plantOverview.manageInventory")}
+                    </A>
                   </SectionCard>
                 </div>
 
@@ -718,13 +798,6 @@ export default function OverviewRoute() {
                       <h3 class="text-base font-semibold text-forest-800 dark:text-cream-50">{t("seller.products.plantOverview.quickActions")}</h3>
                     </div>
                     <div class="p-4 space-y-1">
-                      <A
-                        href={`/app/seller/products/plants/${plantData().id}/edit`}
-                        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors text-gray-700 dark:text-gray-300"
-                      >
-                        <PencilIcon class="w-4 h-4" />
-                        {t("seller.products.plantOverview.editPlant")}
-                      </A>
                       <Show when={plantData().status !== PRODUCT_STATUS.ACTIVE}>
                         <button
                           type="button"

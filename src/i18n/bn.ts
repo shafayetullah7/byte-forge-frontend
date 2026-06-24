@@ -1205,6 +1205,7 @@ export const dict = {
           overview: "ওভারভিউ",
           variants: "ভেরিয়েন্ট",
           care: "যত্ন নির্দেশিকা",
+          inventory: "ইনভেন্টরি",
         },
         breadcrumb: {
           dashboard: "ড্যাশবোর্ড",
@@ -1216,6 +1217,16 @@ export const dict = {
         backToPlants: "গাছপালায় ফিরে যান",
         slug: "স্লাগ",
         viewProductDetails: "পণ্যের বিবরণ দেখুন",
+        ordersAndReviews: "অর্ডার ও রিভিউ",
+      },
+      plantSection: {
+        edit: "সম্পাদনা",
+        cancel: "বাতিল",
+        save: "সংরক্ষণ",
+        saving: "সংরক্ষণ হচ্ছে...",
+        saved: "সেকশন সংরক্ষিত হয়েছে",
+        saveFailed: "সেকশন সংরক্ষণ ব্যর্থ",
+        validationFailed: "হাইলাইট করা ক্ষেত্রগুলো ঠিক করুন",
       },
       // Plant Overview
       plantOverview: {
@@ -1273,6 +1284,12 @@ export const dict = {
         price: "মূল্য",
         stock: "স্টক",
         variant: (id: string) => `ভেরিয়েন্ট ${id}`,
+        manageInventory: "ইনভেন্টরি পরিচালনা",
+        manageStock: "স্টক পরিচালনা",
+        adjustStock: "সামঞ্জস্য",
+        categoryAndTags: "ক্যাটাগরি ও ট্যাগ",
+        plantIdentity: "গাছের পরিচয়",
+        viewCareGuide: "সম্পূর্ণ যত্ন নির্দেশিকা দেখুন",
         // Details
         details: "বিবরণ",
         created: "তৈরি",
@@ -1284,6 +1301,12 @@ export const dict = {
         archivePlant: "গাছ আর্কাইভ",
         duplicatePlant: "গাছ নকল",
         deletePlant: "গাছ মুছুন",
+      },
+      plantVariants: {
+        addVariant: "ভেরিয়েন্ট যোগ করুন",
+        removeVariant: "ভেরিয়েন্ট সরান",
+        confirmRemove: "এই ভেরিয়েন্ট সরাবেন? অর্ডার ইতিহাস থাকলে এটি পূর্বাবস্থায় ফেরানো যাবে না।",
+        noVariants: "এই গাছের জন্য কোনো ভেরিয়েন্ট নেই।",
       },
       managePlantProducts: "আপনার গাছপালা পণ্য পরিচালনা করুন",
       managePotProducts: "আপনার কুঁজ পণ্য পরিচালনা করুন",
