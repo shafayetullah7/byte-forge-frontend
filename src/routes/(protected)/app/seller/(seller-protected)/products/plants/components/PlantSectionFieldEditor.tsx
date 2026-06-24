@@ -1,3 +1,4 @@
+import type { Accessor } from "solid-js";
 import { Show, createMemo, onMount } from "solid-js";
 import type { SetStoreFunction } from "solid-js/store";
 import { createAsync } from "@solidjs/router";
@@ -16,6 +17,7 @@ import { CareProfileFields } from "./sections/CareProfileFields";
 import { CareGuideFields } from "./sections/CareGuideFields";
 import { VariantCatalogFields } from "./sections/VariantCatalogFields";
 import type { PlantStatus } from "~/lib/api/types/seller.types";
+import type { KnownTagOption } from "~/components/ui/TagGroupSelector";
 
 export function PlantSectionFieldEditor(props: {
   sectionId: PlantSectionId;
@@ -24,6 +26,7 @@ export function PlantSectionFieldEditor(props: {
   errors: Record<string, string>;
   plantId: string;
   originalSlug?: string;
+  knownPlantTags?: Accessor<KnownTagOption[]>;
 }) {
   const { t } = useI18n();
   const categoryTree = createAsync(() => getCategoryTree());
@@ -107,6 +110,7 @@ export function PlantSectionFieldEditor(props: {
           errors={props.errors}
           categoryTree={categoryTree}
           tags={tags}
+          knownTags={props.knownPlantTags}
           t={t}
           onWarningChange={noopWarning}
         />

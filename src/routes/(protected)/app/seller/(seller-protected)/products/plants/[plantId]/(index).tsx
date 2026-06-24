@@ -1,4 +1,4 @@
-import { For, Show, createSignal, type JSX } from "solid-js";
+import { For, Show, createSignal, createMemo, type JSX } from "solid-js";
 import { ErrorBoundary } from "solid-js";
 import { A, useParams, createAsync, useNavigate } from "@solidjs/router";
 import { getPlantById, updatePlantStatus, deletePlant, invalidateAllPlantCaches } from "~/lib/api/endpoints/seller/plants.api";
@@ -122,7 +122,7 @@ function InstructionRow(props: {
 // ─── Main Overview Route ────────────────────────────────────────────
 
 export default function OverviewRoute() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const params = useParams();
   const navigate = useNavigate();
   const [actionLoading, setActionLoading] = createSignal(false);
@@ -133,6 +133,20 @@ export default function OverviewRoute() {
   );
 
   const sectionEdit = usePlantSectionEdit(params.plantId as string, plant);
+
+  const knownPlantTags = createMemo(() => {
+    const p = plant();
+    if (!p?.plantDetails?.tags?.length) return [];
+    const loc = locale();
+    return p.plantDetails.tags.map((tag) => ({
+      id: tag.id,
+      name:
+        tag.translations?.find((tr) => tr.locale === loc)?.name
+        ?? tag.translations?.find((tr) => tr.locale === "en")?.name
+        ?? tag.translations?.[0]?.name
+        ?? tag.slug,
+    }));
+  });
 
   return (
     <ErrorBoundary fallback={(error) => (
@@ -284,6 +298,7 @@ export default function OverviewRoute() {
                         setForm={sectionEdit.setDraftForm}
                         errors={sectionEdit.errors()}
                         plantId={plantData().id}
+                        knownPlantTags={knownPlantTags}
                       />
                     </Show>
                   </EditableSectionCard>

@@ -1,6 +1,6 @@
 import { createEffect, createMemo, type Accessor } from "solid-js";
 import { CategoryTreeSelect } from "~/components/ui/CategoryTreeSelect";
-import { TagGroupSelector } from "~/components/ui/TagGroupSelector";
+import { TagGroupSelector, type KnownTagOption } from "~/components/ui/TagGroupSelector";
 import type { CategoryTree } from "~/lib/api/endpoints/public/categories.api";
 import type { TagGroup } from "~/lib/api/endpoints/public/tags.api";
 
@@ -12,6 +12,7 @@ export function CategoryTagsFields(props: {
   errors: Record<string, string>;
   categoryTree: Accessor<CategoryTree[] | undefined>;
   tags: Accessor<TagGroup[] | undefined>;
+  knownTags?: Accessor<KnownTagOption[]>;
   t: (key: string) => string;
   onWarningChange: (hasWarning: boolean, missingFields: string[]) => void;
 }) {
@@ -72,7 +73,8 @@ export function CategoryTagsFields(props: {
         <TagGroupSelector
           selectedTags={props.tagIds}
           onToggle={props.onTagToggle}
-          groups={tagGroups()}
+          groups={tagGroups}
+          knownTags={props.knownTags}
           isLoading={props.tags() === undefined}
         />
       </div>
