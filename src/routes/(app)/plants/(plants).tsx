@@ -1,5 +1,6 @@
 import { createSignal, createMemo, createEffect, Show, ErrorBoundary, onCleanup } from "solid-js";
 import { createAsync } from "@solidjs/router";
+import { Title, Meta, Link } from "@solidjs/meta";
 import { useI18n } from "~/i18n";
 import type { PublicPlantFilter } from "~/lib/api/types/public/plants.types";
 import { getPublicPlants } from "~/lib/api/endpoints/public/plants.api";
@@ -12,6 +13,8 @@ import { FilterToolbar } from "~/components/plants/filter-toolbar";
 import { ActiveFilters } from "~/components/plants/active-filters";
 import { PlantGrid } from "~/components/plants/plant-grid";
 import { Pagination } from "~/components/plants/pagination";
+import HreflangLinks from "~/components/seo/HreflangLinks";
+import { absoluteUrl, formatPageTitle } from "~/lib/seo/meta";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -151,6 +154,13 @@ export default function PlantsPage() {
   };
 
   return (
+  <>
+    <Title>{formatPageTitle(t("seo.plants.title"))}</Title>
+    <Meta name="description" content={t("seo.plants.description")} />
+    <Meta property="og:title" content={formatPageTitle(t("seo.plants.title"))} />
+    <Meta property="og:description" content={t("seo.plants.description")} />
+    <Link rel="canonical" href={absoluteUrl("/plants")} />
+    <HreflangLinks path="/plants" />
     <ErrorBoundary
       fallback={(error) => (
         <div class="min-h-screen bg-cream-50 dark:bg-forest-900 flex items-center justify-center p-6">
@@ -306,5 +316,6 @@ export default function PlantsPage() {
         </div>
       </div>
     </ErrorBoundary>
+  </>
   );
 }

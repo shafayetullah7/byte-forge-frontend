@@ -39,12 +39,19 @@ Public shop facade functions always call the API. Static placeholders fill UI fi
 
 | UI field | Placeholder |
 |----------|-------------|
-| `badges`, extended profile metrics | `profile-placeholders.ts` |
+| `badges`, extended profile metrics | `profile-placeholders.ts` (non-factual defaults only in Phase 1) |
 | Product `category` | `product-placeholders.ts` (`Indoor` until API returns category) |
-| Reviews when API returns none | `review-placeholders.ts` (mock templates per slug) |
-| Statistics, community, campaigns, articles, similar shops | Mock facade functions |
+| Reviews when API returns none | `review-placeholders.ts` — **empty state only** (no mock review injection in Phase 1) |
 
-## Explicitly mock (unchanged)
+## Phase 1 production gating (`config.shopPhaseCEnabled = false`)
+
+- Shop nav limited to **overview**, **products**, **reviews**
+- Hidden on overview: statistics, community, similar shops
+- `/shops/{slug}/campaigns` and `/articles` redirect to overview with `noindex`
+- Hero KPIs: API-backed metrics only (products, orders, rating, reviews, shop age)
+- Follow button remains disabled with “coming soon” tooltip
+
+## Explicitly mock (unchanged — unreachable or Phase 3)
 
 - `getShopStatistics`, `getShopCommunityMetrics`, `getSimilarShops`
 - `getShopCampaigns`, `getShopCampaignHighlights`, `getShopArticles`

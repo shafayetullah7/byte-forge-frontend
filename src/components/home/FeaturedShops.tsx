@@ -22,28 +22,19 @@ export function FeaturedShops() {
   });
 
   return (
-    <section class="py-24 px-4 bg-cream-50 dark:bg-forest-950">
-      <div class="max-w-7xl mx-auto">
-        <div class="text-center mb-16">
-          <span class="body-small text-terracotta-600 dark:text-terracotta-400 uppercase tracking-widest font-semibold">
-            {t("landing.featuredShops.label")}
-          </span>
-          <h2 class="h2 mt-3 mb-4">{t("landing.featuredShops.title")}</h2>
-          <p class="body-large text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            {t("public.shops.directory.subtitle")}
-          </p>
-        </div>
+    <Show when={shops() !== undefined && (shops()?.data.length ?? 0) > 0}>
+      <section class="py-24 px-4 bg-cream-50 dark:bg-forest-950">
+        <div class="max-w-7xl mx-auto">
+          <div class="text-center mb-16">
+            <span class="body-small text-terracotta-600 dark:text-terracotta-400 uppercase tracking-widest font-semibold">
+              {t("landing.featuredShops.label")}
+            </span>
+            <h2 class="h2 mt-3 mb-4">{t("landing.featuredShops.title")}</h2>
+            <p class="body-large text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              {t("public.shops.directory.subtitle")}
+            </p>
+          </div>
 
-        <Show
-          when={shops() !== undefined}
-          fallback={
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <For each={[1, 2, 3]}>
-                {() => <div class="h-72 rounded-2xl bg-cream-200 dark:bg-forest-800 animate-pulse" />}
-              </For>
-            </div>
-          }
-        >
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <For each={shops()?.data ?? []}>
               {(shop) => (
@@ -53,14 +44,14 @@ export function FeaturedShops() {
               )}
             </For>
           </div>
-        </Show>
 
-        <div class="text-center mt-12">
-          <LinkButton href="/shops" variant="primary" size="lg">
-            {t("landing.featuredShops.viewAll")} →
-          </LinkButton>
+          <div class="text-center mt-12">
+            <LinkButton href="/shops" variant="primary" size="lg">
+              {t("landing.featuredShops.viewAll")} →
+            </LinkButton>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </Show>
   );
 }

@@ -8,12 +8,16 @@ import {
   type RouteSectionProps,
   type RouteDefinition,
 } from "@solidjs/router";
-import { Title, Meta } from "@solidjs/meta";
+import { Title, Meta, Link } from "@solidjs/meta";
+import { HttpStatusCode } from "@solidjs/start";
 import { useI18n } from "~/i18n";
 import { getShopBySlug } from "~/lib/public-shops/public-shop.service";
 import type { PublicShopDetailSection } from "~/lib/types/public/shops.types";
 import { ShopHero, ShopDetailNav } from "~/components/shops/public";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
+import { config } from "~/lib/config";
+import HreflangLinks from "~/components/seo/HreflangLinks";
+import { absoluteUrl, formatPageTitle } from "~/lib/seo/meta";
 
 const TAB_TO_SECTION: Record<string, PublicShopDetailSection> = {
   overview: "",
@@ -46,13 +50,21 @@ export default function ShopDetailLayout(props: RouteSectionProps) {
     navigate(target, { replace: true });
   });
 
-  const sections = () => [
-    { path: "" as const, label: t("public.shops.detail.tabs.overview") },
-    { path: "products" as const, label: t("public.shops.detail.tabs.products") },
-    { path: "reviews" as const, label: t("public.shops.detail.tabs.reviews") },
-    { path: "campaigns" as const, label: t("public.shops.detail.tabs.campaigns") },
-    { path: "articles" as const, label: t("public.shops.detail.tabs.articles") },
-  ];
+  const sections = () => {
+    const base = [
+      { path: "" as const, label: t("public.shops.detail.tabs.overview") },
+      { path: "products" as const, label: t("public.shops.detail.tabs.products") },
+      { path: "reviews" as const, label: t("public.shops.detail.tabs.reviews") },
+    ];
+    if (config.shopPhaseCEnabled) {
+      return [
+        ...base,
+        { path: "campaigns" as const, label: t("public.shops.detail.tabs.campaigns") },
+        { path: "articles" as const, label: t("public.shops.detail.tabs.articles") },
+      ];
+    }
+    return base;
+  };
 
   const heroLabels = () => ({
     verified: t("public.shops.directory.verified"),
@@ -96,10 +108,12 @@ export default function ShopDetailLayout(props: RouteSectionProps) {
       >
         {(shopData) => (
           <>
-            <Title>{shopData().name} | Byte Forge</Title>
-            <Meta name="description" content={shopData().tagline} />
-            <Meta property="og:title" content={`${shopData().name} | Byte Forge`} />
-            <Meta property="og:description" content={shopData().tagline} />
+            <Title>{formatPageTitle(shopData().name)}</Title>
+            <Meta name="description" content={shopData().tagline || shopData().description || ""} />
+            <Meta property="og:title" content={formatPageTitle(shopData().name)} />
+            <Meta property="og:description" content={shopData().tagline || shopData().description || ""} />
+            <Link rel="canonical" href={absoluteUrl(`/shops/${slug()}`)} />
+            <HreflangLinks path={`/shops/${slug()}`} />
             <Show when={shopData().banner?.url}>
               <Meta property="og:image" content={shopData().banner!.url} />
             </Show>
@@ -126,6 +140,8 @@ export default function ShopDetailLayout(props: RouteSectionProps) {
       </Show>
 
       <Show when={shop() !== undefined && !shop()}>
+        <HttpStatusCode code={404} />
+        <Meta name="robots" content="noindex, nofollow" />
         <div class="min-h-screen bg-cream-50 dark:bg-forest-900 flex items-center justify-center px-4">
           <div class="text-center">
             <h1 class="text-2xl font-bold text-forest-800 dark:text-cream-50">

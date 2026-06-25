@@ -386,6 +386,13 @@ export const dict = {
     },
     favorites: {
       title: "Favorites",
+      comingSoonTitle: "Wishlist coming soon",
+      comingSoonDescription:
+        "Save plants you love and come back to them later. This feature is planned for a future release.",
+      browsePlants: "Browse plants",
+    },
+    settings: {
+      placeholder: "Account settings will appear here.",
     },
     addresses: {
       title: "My Addresses",
@@ -2171,6 +2178,18 @@ export const dict = {
         verifiedShop: "Verified Shop",
         visitShop: "Visit Shop",
         lastUpdated: "Last Updated",
+        pageTitle: "Plant Details",
+        metaDescription: "Shop live plants from verified nurseries on Byte Forge.",
+        notFoundTitle: "Plant not found",
+        notFoundDescription: "This plant may have been removed or the link is incorrect.",
+        reviewsTitle: "Customer Reviews",
+        reviewsCount: "{{ count }} reviews",
+        reviewAfterPurchase: "Review after purchase",
+        outOfFive: "out of 5",
+        noReviewsTitle: "No reviews yet",
+        noReviewsDescription: "Verified buyers can leave a review after delivery.",
+        verifiedPurchase: "Verified purchase",
+        verifiedPurchaseReview: "Verified purchase review",
       },
       variant: {
         variantDetails: "Variant Details",
@@ -2347,6 +2366,147 @@ export const dict = {
     },
   },
 
+  seo: {
+    home: {
+      title: "Plant Marketplace for Bangladesh",
+      description:
+        "Discover live plants from verified nurseries across Bangladesh. Shop with confidence and pay cash on delivery.",
+    },
+    plants: {
+      title: "Browse Plants",
+      description:
+        "Explore indoor and outdoor plants from verified sellers. Filter by care level, light, and price.",
+    },
+  },
+
+  legal: {
+    privacy: {
+      title: "Privacy Policy",
+      description: "How Byte Forge collects, uses, and protects your personal information.",
+      sections: {
+        intro: {
+          title: "Overview",
+          body: "Byte Forge respects your privacy. This policy explains what we collect when you use our marketplace and how we use that information to operate orders, accounts, and seller verification.",
+        },
+        data: {
+          title: "Information we collect",
+          bullets: [
+            "Account details such as name, email, and phone number",
+            "Order and delivery information required to fulfill purchases",
+            "Shop verification documents submitted by sellers",
+            "Technical logs used for security and service reliability",
+          ],
+        },
+        use: {
+          title: "How we use information",
+          bullets: [
+            "Process orders, payments on delivery, and customer support",
+            "Send transactional emails about orders and verification status",
+            "Improve marketplace safety and prevent fraud",
+            "Comply with applicable law and platform policies",
+          ],
+        },
+        contact: {
+          title: "Contact",
+          body: "Questions about privacy can be sent to hello@byteforge.com.bd.",
+        },
+      },
+    },
+    terms: {
+      title: "Terms of Service",
+      description: "Rules for using the Byte Forge plant marketplace as a buyer or seller.",
+      sections: {
+        intro: {
+          title: "Agreement",
+          body: "By using Byte Forge you agree to these terms. If you do not agree, please do not use the platform.",
+        },
+        buyers: {
+          title: "Buyer responsibilities",
+          bullets: [
+            "Provide accurate delivery details and be available for COD orders",
+            "Inspect live plants on delivery and report issues promptly",
+            "Use reviews honestly and only for verified purchases",
+          ],
+        },
+        sellers: {
+          title: "Seller responsibilities",
+          bullets: [
+            "List accurate plant descriptions, photos, and inventory",
+            "Fulfill accepted orders on time with healthy plants",
+            "Maintain valid verification documents and shop contact details",
+          ],
+        },
+        liability: {
+          title: "Limitation",
+          body: "Byte Forge connects buyers and sellers. Sellers remain responsible for product quality and fulfillment unless otherwise required by law.",
+        },
+      },
+    },
+  },
+
+  help: {
+    hub: {
+      title: "Help Center",
+      description: "Answers about shopping, delivery, returns, and cash on delivery on Byte Forge.",
+      sections: {
+        intro: {
+          title: "How can we help?",
+          body: "Browse the topics below or contact support at hello@byteforge.com.bd.",
+        },
+      },
+      links: {
+        shipping: "Shipping & returns",
+        cod: "Cash on delivery (COD)",
+        privacy: "Privacy policy",
+        terms: "Terms of service",
+      },
+    },
+    shipping: {
+      title: "Shipping & Returns",
+      description: "Delivery expectations and live plant policies for Byte Forge orders.",
+      sections: {
+        delivery: {
+          title: "Delivery",
+          body: "Shipping fees and timelines depend on the seller and your district. Rates are shown at checkout when an address is selected.",
+        },
+        livePlants: {
+          title: "Live plant policy",
+          bullets: [
+            "Inspect plants on delivery before completing COD payment when possible",
+            "Report damage or wrong items through your order details as soon as possible",
+            "Sellers may offer replacement or refund according to their stated policy",
+          ],
+        },
+        returns: {
+          title: "Returns",
+          body: "Because plants are perishable, return eligibility depends on the issue, delivery condition, and seller policy. Contact support if you need help resolving an order.",
+        },
+      },
+    },
+    cod: {
+      title: "Cash on Delivery (COD)",
+      description: "How COD works when you order plants on Byte Forge.",
+      sections: {
+        how: {
+          title: "How COD works",
+          bullets: [
+            "Select Cash on Delivery at checkout",
+            "Pay the courier or seller when your order arrives",
+            "Confirm delivery in your account after you receive the plants",
+          ],
+        },
+        notes: {
+          title: "Good to know",
+          bullets: [
+            "Keep your phone reachable for delivery coordination",
+            "Have the exact order total ready when possible",
+            "COD availability may vary by seller and location",
+          ],
+        },
+      },
+    },
+  },
+
   cart: {
     title: "Shopping Cart",
     itemCount: (p: { count: number | string }) => `${p.count} item${Number(p.count) !== 1 ? "s" : ""} in your cart`,
@@ -2378,6 +2538,8 @@ export const dict = {
     secure: "Secure Payment",
     fastDelivery: "Fast Delivery",
     quality: "Quality Plants",
+    policyLinks: "Shipping & returns",
+    codPolicy: "COD policy",
     loadError: "Failed to load cart",
     each: "each",
     variant: "variant",
@@ -2427,6 +2589,7 @@ export const dict = {
     payment: {
       cod: "Cash on Delivery",
       codDescription: "Pay when you receive your order",
+      codPolicyLink: "Read our COD policy",
       card: "Credit/Debit Card",
       cardDescription: "Visa, Mastercard, and other major cards",
       bkash: "bKash",

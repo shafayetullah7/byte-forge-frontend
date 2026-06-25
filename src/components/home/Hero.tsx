@@ -3,6 +3,7 @@ import { createSignal } from "solid-js";
 import { MagnifyingGlassIcon, ShopIcon, HeartIcon } from "~/components/icons";
 import { LinkButton } from "~/components/ui";
 import { useI18n } from "~/i18n";
+import { config } from "~/lib/config";
 
 const categoryChips = [
   "Monstera",
@@ -86,7 +87,7 @@ export function Hero() {
             {t("landing.hero.shopNow")}
           </LinkButton>
           <LinkButton
-            href="/auth/register"
+            href={config.auth.registerUrl}
             variant="outline"
             size="lg"
             class="w-full sm:w-auto !border-white/30 !text-white hover:!bg-white/10 hover:!border-white/60"
@@ -94,26 +95,6 @@ export function Hero() {
             <ShopIcon class="w-5 h-5 mr-2" />
             {t("landing.hero.startSelling")}
           </LinkButton>
-        </div>
-
-        {/* Social Proof / Stats */}
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 border-t border-white/10 pt-10 w-full max-w-4xl animate-in fade-in duration-1000 delay-300">
-          <div class="text-center group">
-            <div class="h3 text-white mb-1 group-hover:scale-110 transition-standard">500+</div>
-            <div class="body-small text-cream-200 uppercase tracking-widest opacity-80">{t("landing.hero.stats.verifiedShops")}</div>
-          </div>
-          <div class="text-center group">
-            <div class="h3 text-white mb-1 group-hover:scale-110 transition-standard">50k+</div>
-            <div class="body-small text-cream-200 uppercase tracking-widest opacity-80">{t("landing.hero.stats.activeBuyers")}</div>
-          </div>
-          <div class="text-center group">
-            <div class="h3 text-white mb-1 group-hover:scale-110 transition-standard">4.9/5</div>
-            <div class="body-small text-cream-200 uppercase tracking-widest opacity-80">{t("landing.hero.stats.avgRating")}</div>
-          </div>
-          <div class="text-center group">
-            <div class="h3 text-white mb-1 group-hover:scale-110 transition-standard">64</div>
-            <div class="body-small text-cream-200 uppercase tracking-widest opacity-80">{t("landing.hero.stats.districts")}</div>
-          </div>
         </div>
       </div>
 

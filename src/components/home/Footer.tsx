@@ -1,6 +1,7 @@
 import { A } from "@solidjs/router";
 import { SproutIcon, EnvelopeIcon, PhoneIcon, MapPinIcon } from "~/components/icons";
 import { useI18n } from "~/i18n";
+import { config } from "~/lib/config";
 
 const footerLinks = {
   marketplace: [
@@ -10,22 +11,22 @@ const footerLinks = {
     { label: "Best Sellers", href: "/plants" },
   ],
   sellers: [
-    { label: "Start Selling", href: "/auth/register" },
-    { label: "Seller Guide", href: "/about" },
-    { label: "Pricing", href: "/about" },
-    { label: "Success Stories", href: "/about" },
+    { label: "Start Selling", href: config.auth.registerUrl },
+    { label: "Seller Guide", href: "/help" },
+    { label: "Pricing", href: "/help" },
+    { label: "Success Stories", href: "/help" },
   ],
   company: [
-    { label: "About Us", href: "/about" },
-    { label: "Careers", href: "/about" },
-    { label: "Privacy Policy", href: "/about" },
-    { label: "Terms of Service", href: "/about" },
+    { label: "About Us", href: "/help" },
+    { label: "Careers", href: "/help" },
+    { label: "Privacy Policy", href: "/legal/privacy" },
+    { label: "Terms of Service", href: "/legal/terms" },
   ],
   support: [
-    { label: "Help Center", href: "/about" },
-    { label: "Contact Us", href: "/about" },
-    { label: "Shipping Info", href: "/about" },
-    { label: "Returns", href: "/about" },
+    { label: "Help Center", href: "/help" },
+    { label: "Contact Us", href: "/help" },
+    { label: "Shipping Info", href: "/help/shipping-and-returns" },
+    { label: "COD Policy", href: "/help/cod" },
   ],
 };
 
