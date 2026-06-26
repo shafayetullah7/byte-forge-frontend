@@ -1,4 +1,4 @@
-import { A, createAsync } from "@solidjs/router";
+import { A, createAsync, type RouteDefinition } from "@solidjs/router";
 import { For, Show } from "solid-js";
 import { Title, Meta, Link } from "@solidjs/meta";
 import {
@@ -15,6 +15,10 @@ import { getFeaturedPublicReviews } from "~/lib/api/endpoints/public/reviews.api
 import { useI18n } from "~/i18n";
 import HreflangLinks from "~/components/seo/HreflangLinks";
 import { absoluteUrl, formatPageTitle } from "~/lib/seo/meta";
+
+export const route = {
+  preload: () => getFeaturedPublicReviews(6),
+} satisfies RouteDefinition;
 
 export default function Home() {
   const { t } = useI18n();

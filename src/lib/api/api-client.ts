@@ -120,27 +120,6 @@ function appendCookieHeader(
   headers.set("cookie", stripped ? `${stripped}; ${name}=${value}` : `${name}=${value}`);
 }
 
-function propagateSetCookies(event: any, response: Response): Promise<void> {
-  const setCookies = getSetCookies(response);
-  if (setCookies.length === 0) return Promise.resolve();
-
-  return import("vinxi/http")
-    .then(({ appendResponseHeader }) => {
-      const isResponseFinished =
-        event.nativeEvent.node.res.headersSent ||
-        event.nativeEvent.node.res.writableEnded;
-
-      if (!isResponseFinished) {
-        setCookies.forEach((cookie: string) => {
-          appendResponseHeader(event.nativeEvent, "Set-Cookie", cookie);
-        });
-      }
-    })
-    .catch((e) => {
-      console.warn("[API] Failed to propagate cookies during SSR", e);
-    });
-}
-
 /**
  * Global functional fetcher
  *
@@ -237,7 +216,12 @@ export async function fetcher<T>(
         if (csrfMessage.includes("csrf")) {
           const setCookies = getSetCookies(response);
           if (import.meta.env.SSR && event) {
-            await propagateSetCookies(event, response);
+            try {
+              const { propagateSetCookies } = await import("./api-client.server");
+              await propagateSetCookies(event, response);
+            } catch (e) {
+              console.warn("[API] Failed to propagate cookies during SSR", e);
+            }
           }
 
           const bootstrappedToken =
@@ -310,7 +294,12 @@ export async function fetcher<T>(
 
     // 5. SSR Cookie Propagation (Safety First)
     if (import.meta.env.SSR && event) {
-      await propagateSetCookies(event, response);
+      try {
+        const { propagateSetCookies } = await import("./api-client.server");
+        await propagateSetCookies(event, response);
+      } catch (e) {
+        console.warn("[API] Failed to propagate cookies during SSR", e);
+      }
     }
 
     if (response.status === 204) return {} as T;

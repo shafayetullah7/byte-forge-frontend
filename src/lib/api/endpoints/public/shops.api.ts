@@ -34,6 +34,7 @@ function buildParams(
 
 export const getPublicShops = query(
   async (filter?: PublicShopListFilter) => {
+    "use server";
     return fetcher<ApiPaginatedEnvelope<ApiPublicShopListItem>>("/api/v1/shops", {
       params: buildParams(filter as Record<string, string | number | undefined>),
       unwrapData: false,
@@ -44,6 +45,7 @@ export const getPublicShops = query(
 
 export const getPublicShopBySlug = query(
   async (slug: string) => {
+    "use server";
     return fetcher<ApiSuccessEnvelope<ApiPublicShopProfile>>(
       `/api/v1/shops/${slug}`,
       { unwrapData: false },
@@ -54,6 +56,7 @@ export const getPublicShopBySlug = query(
 
 export const getPublicShopProducts = query(
   async (slug: string, filter?: PublicShopProductsFilter) => {
+    "use server";
     return fetcher<ApiPaginatedEnvelope<ApiPublicShopProduct>>(
       `/api/v1/shops/${slug}/products`,
       {
@@ -67,6 +70,7 @@ export const getPublicShopProducts = query(
 
 export const getPublicShopReviews = query(
   async (slug: string, filter?: PublicShopReviewsFilter) => {
+    "use server";
     return fetcher<
       ApiSuccessEnvelope<{
         summary: ApiPublicShopReviewSummary;

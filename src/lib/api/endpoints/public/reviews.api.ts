@@ -4,6 +4,7 @@ import type { FeaturedPublicReview, PublicReviewResponse } from "../../types/rev
 
 export const getPublicPlantReviews = query(
   async (slug: string) => {
+    "use server";
     return fetcher<PublicReviewResponse>(`/api/v1/reviews/plants/${slug}`);
   },
   "public-plant-reviews"
@@ -11,6 +12,7 @@ export const getPublicPlantReviews = query(
 
 export const getPublicProductReviews = query(
   async (productId: string) => {
+    "use server";
     return fetcher<PublicReviewResponse>(
       `/api/v1/reviews/products/${productId}`
     );
@@ -20,6 +22,7 @@ export const getPublicProductReviews = query(
 
 export const getFeaturedPublicReviews = query(
   async (limit = 6) => {
+    "use server";
     return fetcher<FeaturedPublicReview[]>(`/api/v1/reviews/featured`, {
       params: { limit },
     });

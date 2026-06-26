@@ -1,6 +1,5 @@
 import { createSignal, createMemo, createEffect, Show, For, onCleanup } from "solid-js";
-import { createAsync } from "@solidjs/router";
-import { A } from "@solidjs/router";
+import { createAsync, A, type RouteDefinition } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import { listShops } from "~/lib/public-shops/public-shop.service";
 import type { PublicShopSortOption } from "~/lib/types/public/shops.types";
@@ -12,6 +11,15 @@ import {
 } from "~/components/shops/public";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 import Button from "~/components/ui/Button";
+
+export const route = {
+  preload: () =>
+    listShops({
+      sort: "popular",
+      page: 1,
+      limit: 9,
+    }),
+} satisfies RouteDefinition;
 
 export default function ShopsDirectoryPage() {
   const { t } = useI18n();

@@ -1,5 +1,5 @@
 import { createSignal, createMemo, createEffect, Show, ErrorBoundary, onCleanup } from "solid-js";
-import { createAsync } from "@solidjs/router";
+import { createAsync, type RouteDefinition } from "@solidjs/router";
 import { Title, Meta, Link } from "@solidjs/meta";
 import { useI18n } from "~/i18n";
 import type { PublicPlantFilter } from "~/lib/api/types/public/plants.types";
@@ -17,6 +17,19 @@ import HreflangLinks from "~/components/seo/HreflangLinks";
 import { absoluteUrl, formatPageTitle } from "~/lib/seo/meta";
 
 const ITEMS_PER_PAGE = 12;
+
+export const route = {
+  preload: () => {
+    getCategoryTree();
+    getTags();
+    getPublicPlants({
+      page: 1,
+      limit: ITEMS_PER_PAGE,
+      sortBy: "name",
+      sortOrder: "asc",
+    });
+  },
+} satisfies RouteDefinition;
 
 export default function PlantsPage() {
   const { t } = useI18n();

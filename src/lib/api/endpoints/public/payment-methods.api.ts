@@ -13,6 +13,7 @@ export interface PublicPaymentMethod {
 
 export const getActivePaymentMethods = query(
   async (): Promise<PublicPaymentMethod[]> => {
+    "use server";
     return fetcher<PublicPaymentMethod[]>("/api/v1/payment-methods");
   },
   "public-payment-methods"
