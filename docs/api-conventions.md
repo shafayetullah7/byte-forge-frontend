@@ -5,6 +5,12 @@
 - Use `buildURL` + `params` options instead of manual query string construction.
 - Preserve shared auth/csrf/locale behavior.
 
+## Cross-Domain Cookie Auth
+- Browser and SSR requests use `credentials: "include"`.
+- User mutations require the `userXsrfToken` cookie and matching `X-XSRF-TOKEN` header (injected automatically by `fetcher`).
+- After login or first API visit, ensure `sessionId`, `guestToken`, and `userXsrfToken` cookies are present before calling protected `POST`/`PUT`/`PATCH`/`DELETE` routes.
+- `403` with an invalid CSRF message is not an auth logout case; the client retries once after bootstrapping the CSRF cookie from the API response.
+
 ## Endpoint Module Structure
 - Keep feature APIs under `lib/api/endpoints/<domain>/`.
 - Typical organization:

@@ -10,6 +10,8 @@ export interface FetchOptions extends RequestInit {
   strict?: boolean; // If true, redirects to /login on 401. Default: true
   responseType?: "json" | "blob" | "text";
   unwrapData?: boolean; // If false, returns full response (with meta). Default: true
+  /** @internal One-time CSRF bootstrap retry */
+  csrfRetried?: boolean;
 
   // Callbacks for specialized error handling
   /**
@@ -75,6 +77,70 @@ function getUniversalCookie(
   return undefined;
 }
 
+function getUserXsrfToken(headers?: Headers): string | undefined {
+  return (
+    getUniversalCookie("userXsrfToken", headers) ??
+    getUniversalCookie("xsrf-token", headers)
+  );
+}
+
+function getSetCookies(response: Response): string[] {
+  const headersAny = response.headers as Headers & {
+    getSetCookie?: () => string[];
+  };
+  return (
+    headersAny.getSetCookie?.() ||
+    response.headers.get("set-cookie")?.split(", ") ||
+    []
+  );
+}
+
+function extractCookieValue(
+  setCookies: string[],
+  name: string
+): string | undefined {
+  for (const cookie of setCookies) {
+    const match = cookie.match(new RegExp(`(?:^|;\\s*)${name}=([^;]*)`));
+    if (match) return match[1];
+  }
+  return undefined;
+}
+
+function appendCookieHeader(
+  headers: Headers,
+  name: string,
+  value: string
+): void {
+  const existing = headers.get("cookie") || "";
+  const stripped = existing
+    .split(";")
+    .map((part) => part.trim())
+    .filter((part) => part && !part.startsWith(`${name}=`))
+    .join("; ");
+  headers.set("cookie", stripped ? `${stripped}; ${name}=${value}` : `${name}=${value}`);
+}
+
+function propagateSetCookies(event: any, response: Response): Promise<void> {
+  const setCookies = getSetCookies(response);
+  if (setCookies.length === 0) return Promise.resolve();
+
+  return import("vinxi/http")
+    .then(({ appendResponseHeader }) => {
+      const isResponseFinished =
+        event.nativeEvent.node.res.headersSent ||
+        event.nativeEvent.node.res.writableEnded;
+
+      if (!isResponseFinished) {
+        setCookies.forEach((cookie: string) => {
+          appendResponseHeader(event.nativeEvent, "Set-Cookie", cookie);
+        });
+      }
+    })
+    .catch((e) => {
+      console.warn("[API] Failed to propagate cookies during SSR", e);
+    });
+}
+
 /**
  * Global functional fetcher
  *
@@ -95,6 +161,7 @@ export async function fetcher<T>(
     unwrapData = true,
     onAuthError,
     onError,
+    csrfRetried = false,
     ...fetchOptions
   } = options;
 
@@ -135,7 +202,7 @@ export async function fetcher<T>(
   const method = fetchOptions.method?.toUpperCase() || "GET";
   const stateChangingMethods = ["POST", "PUT", "DELETE", "PATCH"];
   if (stateChangingMethods.includes(method)) {
-    const xsrfToken = getUniversalCookie("xsrf-token", headers);
+    const xsrfToken = getUserXsrfToken(headers);
     if (xsrfToken) headers.set("X-XSRF-TOKEN", xsrfToken);
   }
 
@@ -158,7 +225,38 @@ export async function fetcher<T>(
         errorData
       );
 
-      // 4a. Specific 401 Unauthorized Handling
+      // 4a. CSRF bootstrap retry (token may be issued on first 403 response)
+      if (
+        response.status === 403 &&
+        stateChangingMethods.includes(method) &&
+        !csrfRetried
+      ) {
+        const csrfMessage = String(
+          errorData.message || errorData.error || ""
+        ).toLowerCase();
+        if (csrfMessage.includes("csrf")) {
+          const setCookies = getSetCookies(response);
+          if (import.meta.env.SSR && event) {
+            await propagateSetCookies(event, response);
+          }
+
+          const bootstrappedToken =
+            extractCookieValue(setCookies, "userXsrfToken") ??
+            getUserXsrfToken(headers);
+
+          if (bootstrappedToken) {
+            appendCookieHeader(headers, "userXsrfToken", bootstrappedToken);
+            headers.set("X-XSRF-TOKEN", bootstrappedToken);
+            return fetcher<T>(endpoint, {
+              ...options,
+              csrfRetried: true,
+              headers,
+            });
+          }
+        }
+      }
+
+      // 4b. Specific 401 Unauthorized Handling
       if (response.status === 401) {
         const isExcluded = defaultAuthErrorConfig.excludedEndpoints?.some((e) =>
           endpoint.includes(e)
@@ -205,33 +303,14 @@ export async function fetcher<T>(
         }
       }
 
-      // 4b. General Error Hooks
+      // 4c. General Error Hooks
       onError?.(apiError);
       throw apiError;
     }
 
     // 5. SSR Cookie Propagation (Safety First)
     if (import.meta.env.SSR && event) {
-      try {
-        const { appendResponseHeader } = await import("vinxi/http");
-        const isResponseFinished =
-          event.nativeEvent.node.res.headersSent ||
-          event.nativeEvent.node.res.writableEnded;
-
-        if (!isResponseFinished) {
-          const headersAny = response.headers as any;
-          const setCookies =
-            headersAny.getSetCookie?.() ||
-            response.headers.get("set-cookie")?.split(", ") ||
-            [];
-
-          setCookies.forEach((cookie: string) => {
-            appendResponseHeader(event.nativeEvent, "Set-Cookie", cookie);
-          });
-        }
-      } catch (e) {
-        console.warn("[API] Failed to propagate cookies during SSR", e);
-      }
+      await propagateSetCookies(event, response);
     }
 
     if (response.status === 204) return {} as T;

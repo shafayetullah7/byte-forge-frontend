@@ -1,8 +1,9 @@
 import { useNavigate, useLocation, action, useSubmission, useAction } from "@solidjs/router";
-import { createSignal, createEffect, onMount, onCleanup, Show } from "solid-js";
+import { createSignal, createEffect, onMount } from "solid-js";
 import { createForm } from "@modular-forms/solid";
 import { Button, Input } from "~/components/ui";
-import { authApi, ApiError } from "~/lib/api";
+import { authApi } from "~/lib/api";
+import { useOtpCountdown } from "~/lib/auth/use-otp-countdown";
 import { toaster } from "~/components/ui/Toast";
 import { useI18n } from "~/i18n";
 import { z } from "zod";
@@ -59,12 +60,13 @@ export default function VerifyReset() {
     const [expiresAt, setExpiresAt] = createSignal<Date | null>(initialState?.expiresAt ? new Date(initialState.expiresAt) : null);
     const email = initialState?.email;
 
-    // Timer State
-    const [timeLeft, setTimeLeft] = createSignal<string>("");
-    const [canResend, setCanResend] = createSignal(false);
     const [resendStatus, setResendStatus] = createSignal<string | null>(null);
-
     const [errorMessage, setErrorMessage] = createSignal<string | null>(null);
+
+    const { timeLeft, isExpired } = useOtpCountdown(
+        expiresAt,
+        () => t("auth.verifyAccount.expired"),
+    );
 
     // Redirect if no token state
     onMount(() => {
@@ -74,30 +76,15 @@ export default function VerifyReset() {
         }
     });
 
-    // Countdown Logic
-    const updateTimer = () => {
-        const expiry = expiresAt();
-        if (!expiry) return;
-
-        const now = new Date();
-        const diff = expiry.getTime() - now.getTime();
-
-        if (diff <= 0) {
-            setTimeLeft(t("auth.verifyAccount.expired"));
-            setCanResend(true);
-            return;
-        }
-
-        const minutes = Math.floor(diff / 60000);
-        const seconds = Math.floor((diff % 60000) / 1000);
-        setTimeLeft(`${minutes}:${seconds.toString().padStart(2, "0")}`);
-    };
-
+    // Handle Resend Success
     createEffect(() => {
-        if (expiresAt()) {
-            const timer = setInterval(updateTimer, 1000);
-            onCleanup(() => clearInterval(timer));
-            updateTimer();
+        if (resendSubmission.result) {
+            const response = resendSubmission.result;
+            setToken(response.token);
+            setExpiresAt(new Date(response.expiresAt));
+            setResendStatus("sent");
+            toaster.success(t("auth.verifyAccount.resendSent"));
+            setTimeout(() => setResendStatus(null), 3000);
         }
     });
 
@@ -110,9 +97,7 @@ export default function VerifyReset() {
                 expiresAt: response.expiresAt
             };
 
-            // Clear previous stage
             localStorage.removeItem("byteforge_reset_verify");
-            // Set next stage
             localStorage.setItem("byteforge_reset_confirm", JSON.stringify(sessionData));
 
             toaster.success(t("auth.verifyReset.success") || "Code verified! Set your new password.");
@@ -120,19 +105,6 @@ export default function VerifyReset() {
                 state: sessionData,
                 replace: true
             });
-        }
-    });
-
-    // Handle Resend Success
-    createEffect(() => {
-        if (resendSubmission.result) {
-            const response = resendSubmission.result;
-            setToken(response.token);
-            setExpiresAt(new Date(response.expiresAt));
-            setCanResend(false);
-            setResendStatus("sent");
-            toaster.success(t("auth.verifyAccount.resendSent"));
-            setTimeout(() => setResendStatus(null), 3000);
         }
     });
 
@@ -262,7 +234,7 @@ export default function VerifyReset() {
                     <button
                         type="button"
                         onClick={handleResend}
-                        disabled={verifySubmission.pending || resendSubmission.pending || (!canResend() && !timeLeft()?.includes("Expired"))}
+                        disabled={verifySubmission.pending || resendSubmission.pending || (!isExpired() && !!timeLeft())}
                         class="text-sm text-forest-600 dark:text-sage-400 hover:text-forest-700 dark:hover:text-sage-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {resendSubmission.pending ? t("auth.verifyAccount.resending") : t("auth.verifyAccount.resend")}
