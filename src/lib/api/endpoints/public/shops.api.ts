@@ -93,18 +93,9 @@ export const invalidatePublicShop = (slug: string) => {
   revalidate(getPublicShopReviews.keyFor(slug));
 };
 
-export const publicShopsApi = {
-  getAll: getPublicShops,
-  getBySlug: getPublicShopBySlug,
-  getProducts: getPublicShopProducts,
-  getReviews: getPublicShopReviews,
-  invalidateAll: invalidatePublicShops,
-  invalidateShop: invalidatePublicShop,
-
-  getShippingRate: async (
-    shopId: string,
-    districtId: string,
-  ): Promise<PublicShippingRate | null> => {
+export const getPublicShippingRate = query(
+  async (shopId: string, districtId: string) => {
+    "use server";
     try {
       return await fetcher<PublicShippingRate>(
         `/api/v1/public/shops/${shopId}/shipping-rate/${districtId}`,
@@ -113,6 +104,17 @@ export const publicShopsApi = {
       return null;
     }
   },
+  "public-shipping-rate",
+);
+
+export const publicShopsApi = {
+  getAll: getPublicShops,
+  getBySlug: getPublicShopBySlug,
+  getProducts: getPublicShopProducts,
+  getReviews: getPublicShopReviews,
+  getShippingRate: getPublicShippingRate,
+  invalidateAll: invalidatePublicShops,
+  invalidateShop: invalidatePublicShop,
 };
 
 // Legacy aliases for OrderSummary shipping rate import

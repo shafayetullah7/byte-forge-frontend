@@ -5,7 +5,7 @@ import type { CartItem } from "~/lib/api/types/cart.types";
 import { formatPrice } from "../../plants/constants";
 import { Button } from "~/components/ui";
 import { toaster } from "~/components/ui/Toast";
-import { publicShopsApi } from "~/lib/api/endpoints/public/shops.api";
+import { getPublicShippingRate } from "~/lib/api/endpoints/public/shops.api";
 import { A } from "@solidjs/router";
 import {
   TagIcon,
@@ -61,7 +61,7 @@ const OrderSummary: Component<{
 
     for (const [shopId] of shopGroups()) {
       try {
-        const rate = await publicShopsApi.getShippingRate(shopId, districtId);
+        const rate = await getPublicShippingRate(shopId, districtId);
         if (rate) {
           rates.set(shopId, parseFloat(rate.cost));
         }

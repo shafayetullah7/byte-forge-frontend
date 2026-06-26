@@ -40,7 +40,7 @@ export default function ShopsDirectoryPage() {
   });
 
   const filterParams = createMemo(() => ({
-    search: debouncedSearch(),
+    search: debouncedSearch() || undefined,
     sort: sort(),
     page: page(),
     limit: 9,

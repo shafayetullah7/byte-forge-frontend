@@ -24,6 +24,4 @@ export const config = {
   siteUrl: (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/$/, "") || "",
 } as const;
 
-console.log("config: ", config);
-
 export type AppConfig = typeof config;

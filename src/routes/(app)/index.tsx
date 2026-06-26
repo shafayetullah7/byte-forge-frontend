@@ -12,12 +12,16 @@ import {
   Footer,
 } from "~/components/home";
 import { getFeaturedPublicReviews } from "~/lib/api/endpoints/public/reviews.api";
+import { listShops } from "~/lib/public-shops/public-shop.service";
 import { useI18n } from "~/i18n";
 import HreflangLinks from "~/components/seo/HreflangLinks";
 import { absoluteUrl, formatPageTitle } from "~/lib/seo/meta";
 
 export const route = {
-  preload: () => getFeaturedPublicReviews(6),
+  preload: () => {
+    getFeaturedPublicReviews(6);
+    listShops({ sort: "popular", limit: 3 });
+  },
 } satisfies RouteDefinition;
 
 export default function Home() {

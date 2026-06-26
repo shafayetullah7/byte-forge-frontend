@@ -107,14 +107,16 @@ app.tsx
 
 ## `"use server"` Directive
 
-Add `"use server"` inside `query()` functions when:
-- The function needs access to request headers, cookies, or server-only context
-- The function calls a backend API that requires server-side secrets
-- The function does direct database queries
+Add `"use server"` as the **first statement** inside `query()` (and `action()`) functions when they call the Nest API via `fetcher`. This is the BFF pattern: the browser talks to SolidStart only; SolidStart forwards cookies/locale and calls the backend.
 
-Do NOT add `"use server"` when:
-- The function calls a public API that the browser can call directly
-- The function is purely computational with no server dependencies
+Use `"use server"` when:
+- The function calls the Nest API (public or authenticated endpoints)
+- The function needs request headers, cookies, or server-only context
+- The function is a **service wrapper** that maps API responses and is consumed via `createAsync` on public routes
+
+Service-layer wrappers (e.g. `listShops` in `public-shop.service.ts`) should be `query()` + `"use server"`, not plain `async function` — otherwise mapping runs in the client bundle and cache keys diverge from preloads.
+
+Do NOT call `fetcher` directly from client components for SSR-critical or SEO-sensitive data. Use `query()` + `"use server"` and consume with `createAsync`.
 
 ---
 

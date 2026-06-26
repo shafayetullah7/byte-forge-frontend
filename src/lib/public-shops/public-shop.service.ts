@@ -1,3 +1,4 @@
+import { query } from "@solidjs/router";
 import {
   MOCK_SHOP_LIST,
   MOCK_COMMUNITY_METRICS,
@@ -65,58 +66,73 @@ function applyProductCategoryFilter(
   };
 }
 
-export async function listShops(
-  params: ListShopsParams = {},
-): Promise<PaginatedResult<PublicShopListItem>> {
-  const envelope = await getPublicShops({
-    page: params.page,
-    limit: params.limit,
-    search: params.search,
-    sort: params.sort,
-  });
-  return mapPaginatedEnvelope(envelope, mapApiListItem);
-}
+export const listShops = query(
+  async (params: ListShopsParams = {}) => {
+    "use server";
+    const envelope = await getPublicShops({
+      page: params.page,
+      limit: params.limit,
+      search: params.search?.trim() || undefined,
+      sort: params.sort,
+    });
+    return mapPaginatedEnvelope(envelope, mapApiListItem);
+  },
+  "public-shops-list",
+);
 
-export async function getShopBySlug(slug: string): Promise<PublicShopProfile | null> {
-  try {
-    const envelope = await getPublicShopBySlug(slug);
-    return mergeProfileWithPlaceholders(mapApiProfile(unwrapSuccess(envelope)));
-  } catch (error) {
-    if (error instanceof ApiError && error.statusCode === 404) {
-      return null;
+export const getShopBySlug = query(
+  async (slug: string): Promise<PublicShopProfile | null> => {
+    "use server";
+    try {
+      const envelope = await getPublicShopBySlug(slug);
+      return mergeProfileWithPlaceholders(mapApiProfile(unwrapSuccess(envelope)));
+    } catch (error) {
+      if (error instanceof ApiError && error.statusCode === 404) {
+        return null;
+      }
+      throw error;
     }
-    throw error;
-  }
-}
+  },
+  "public-shop-profile",
+);
 
-export async function getShopProducts(
-  slug: string,
-  params: ListShopProductsParams = {},
-): Promise<PaginatedResult<PublicShopProduct>> {
-  const envelope = await getPublicShopProducts(slug, {
-    page: params.page,
-    limit: params.limit,
-    search: params.search,
-    sort: params.sort,
-  });
-  const result = mapPaginatedEnvelope(envelope, (item) =>
-    mergeProductWithPlaceholders(mapApiProduct(item)),
-  );
-  return applyProductCategoryFilter(result, params.category);
-}
+export const getShopProducts = query(
+  async (
+    slug: string,
+    params: ListShopProductsParams = {},
+  ): Promise<PaginatedResult<PublicShopProduct>> => {
+    "use server";
+    const category = params.category?.trim() || undefined;
+    const envelope = await getPublicShopProducts(slug, {
+      page: params.page,
+      limit: params.limit,
+      search: params.search?.trim() || undefined,
+      sort: params.sort,
+    });
+    const result = mapPaginatedEnvelope(envelope, (item) =>
+      mergeProductWithPlaceholders(mapApiProduct(item)),
+    );
+    return applyProductCategoryFilter(result, category);
+  },
+  "public-shop-products-mapped",
+);
 
-export async function getShopReviews(
-  slug: string,
-  params: { page?: number; limit?: number } = {},
-): Promise<{ summary: PublicShopReviewSummary; reviews: PublicShopReview[] }> {
-  const envelope = await getPublicShopReviews(slug, params);
-  const data = unwrapSuccess(envelope);
-  return mergeReviewsWithPlaceholders(
-    slug,
-    mapApiReviewSummary(data.summary),
-    data.reviews.map(mapApiReview),
-  );
-}
+export const getShopReviews = query(
+  async (
+    slug: string,
+    params: { page?: number; limit?: number } = {},
+  ): Promise<{ summary: PublicShopReviewSummary; reviews: PublicShopReview[] }> => {
+    "use server";
+    const envelope = await getPublicShopReviews(slug, params);
+    const data = unwrapSuccess(envelope);
+    return mergeReviewsWithPlaceholders(
+      slug,
+      mapApiReviewSummary(data.summary),
+      data.reviews.map(mapApiReview),
+    );
+  },
+  "public-shop-reviews-mapped",
+);
 
 export async function getShopCampaigns(slug: string): Promise<PublicShopCampaign[]> {
   await maybeDelay();
