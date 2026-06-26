@@ -1,3 +1,4 @@
+import { MetaProvider, Title, Meta } from "@solidjs/meta";
 import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { Suspense, createEffect } from "solid-js";
@@ -73,17 +74,27 @@ export default function App() {
       <ThemeProvider initialTheme={initialTheme}>
         <Router
           root={(props) => (
-            <Suspense
-              fallback={
-                <div class="flex items-center justify-center min-h-screen">
-                  <div class="w-8 h-8 border-2 border-forest-600 border-t-transparent rounded-full animate-spin" />
-                </div>
-              }
-            >
-              <AutoTokenRefreshProvider />
-              {props.children}
-              <Toaster />
-            </Suspense>
+            <MetaProvider>
+              <Title>Byte Forge</Title>
+              <Meta
+                name="description"
+                content="Bangladesh's plant marketplace — discover verified nurseries, shop indoor and outdoor plants, and order with COD."
+              />
+              <Meta property="og:site_name" content="Byte Forge" />
+              <Meta property="og:type" content="website" />
+              <Meta name="twitter:card" content="summary_large_image" />
+              <Suspense
+                fallback={
+                  <div class="flex items-center justify-center min-h-screen">
+                    <div class="w-8 h-8 border-2 border-forest-600 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                }
+              >
+                <AutoTokenRefreshProvider />
+                {props.children}
+                <Toaster />
+              </Suspense>
+            </MetaProvider>
           )}
         >
           <FileRoutes />

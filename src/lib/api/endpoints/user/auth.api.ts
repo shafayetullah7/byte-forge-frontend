@@ -62,8 +62,11 @@ export const authApi = {
   /**
    * Resend email verification code
    */
-  sendVerificationEmail: async (): Promise<{ expiresAt: string }> => {
-    return fetcher<{ expiresAt: string }>(
+  sendVerificationEmail: async (): Promise<{
+    expiresAt: string;
+    sent?: boolean;
+  }> => {
+    return fetcher<{ expiresAt: string; sent?: boolean }>(
       "/api/v1/user/auth/send-verification-email",
       {
         method: "POST",

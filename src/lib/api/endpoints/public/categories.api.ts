@@ -21,6 +21,7 @@ export interface CategoryTree {
  */
 export const getCategoryTree = query(
   async () => {
+    "use server";
     return fetcher<CategoryTree[]>("/api/v1/tree-categories/tree");
   },
   "public-category-tree"

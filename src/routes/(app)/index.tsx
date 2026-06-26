@@ -1,35 +1,42 @@
-import { A, createAsync } from "@solidjs/router";
+import { A, createAsync, type RouteDefinition } from "@solidjs/router";
 import { For, Show } from "solid-js";
+import { Title, Meta, Link } from "@solidjs/meta";
 import {
   Hero,
   TrustBar,
-  LiveCampaigns,
   FeaturedPlants,
-  TrendingPlants,
   FeaturedShops,
   HowItWorks,
-  SeasonalPicks,
   WhyChooseByteForge,
   SellerCTA,
-  Testimonials,
-  Newsletter,
   Footer,
 } from "~/components/home";
 import { getFeaturedPublicReviews } from "~/lib/api/endpoints/public/reviews.api";
+import { useI18n } from "~/i18n";
+import HreflangLinks from "~/components/seo/HreflangLinks";
+import { absoluteUrl, formatPageTitle } from "~/lib/seo/meta";
+
+export const route = {
+  preload: () => getFeaturedPublicReviews(6),
+} satisfies RouteDefinition;
 
 export default function Home() {
+  const { t } = useI18n();
   const featuredReviews = createAsync(() => getFeaturedPublicReviews(6));
 
   return (
     <main class="min-h-screen bg-cream-50 dark:bg-forest-900">
+      <Title>{formatPageTitle(t("seo.home.title"))}</Title>
+      <Meta name="description" content={t("seo.home.description")} />
+      <Meta property="og:title" content={formatPageTitle(t("seo.home.title"))} />
+      <Meta property="og:description" content={t("seo.home.description")} />
+      <Link rel="canonical" href={absoluteUrl("/")} />
+      <HreflangLinks path="/" />
       <Hero />
       <TrustBar />
-      <LiveCampaigns />
       <FeaturedPlants />
-      <TrendingPlants />
       <FeaturedShops />
       <HowItWorks />
-      <SeasonalPicks />
       <WhyChooseByteForge />
       <SellerCTA />
       <Show when={(featuredReviews()?.length ?? 0) > 0}>
@@ -61,8 +68,6 @@ export default function Home() {
           </div>
         </section>
       </Show>
-      <Testimonials />
-      <Newsletter />
       <Footer />
     </main>
   );

@@ -1,5 +1,6 @@
 import { useNavigate } from "@solidjs/router";
 import { Show, createEffect, ParentComponent, ErrorBoundary } from "solid-js";
+import { Meta } from "@solidjs/meta";
 import { useSession } from "~/lib/auth";
 import { requireVerifiedEmail } from "~/lib/auth/guards";
 import { ApiError } from "~/lib/api";
@@ -88,6 +89,7 @@ const ProtectedLayout: ParentComponent = (props) => {
                 );
             }}
         >
+            <Meta name="robots" content="noindex, nofollow" />
             {props.children}
         </ErrorBoundary>
     );

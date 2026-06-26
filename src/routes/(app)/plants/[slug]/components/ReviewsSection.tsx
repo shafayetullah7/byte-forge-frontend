@@ -1,9 +1,8 @@
 import { For, createMemo, type Component } from "solid-js";
-import { Button } from "~/components/ui";
-import { formatPrice } from "../../constants";
-import { StarRatingIcon } from "~/components/icons";
+import { A } from "@solidjs/router";
+import { useI18n } from "~/i18n";
+import { StarRatingIcon, ChatBubbleLeftRightIcon } from "~/components/icons";
 import SectionHeader from "./SectionHeader";
-import { ChatBubbleLeftRightIcon } from "~/components/icons";
 import type { ReviewSummary } from "~/lib/api/types/review.types";
 
 export interface ReviewItem {
@@ -20,6 +19,8 @@ const ReviewsSection: Component<{
   reviews: ReviewItem[];
   summary?: ReviewSummary;
 }> = (props) => {
+  const { t } = useI18n();
+
   const avgRating = createMemo(() => {
     if (props.summary) return props.summary.average.toFixed(1);
     if (props.reviews.length === 0) return "0.0";
@@ -48,16 +49,20 @@ const ReviewsSection: Component<{
       <div class="bg-white dark:bg-forest-800 rounded-2xl border border-cream-200 dark:border-forest-700 p-6">
         <SectionHeader
           icon={ChatBubbleLeftRightIcon}
-          title="Customer Reviews"
-          subtitle={`${props.summary?.total ?? props.reviews.length} reviews`}
-          action={{ label: "Review after purchase", href: "/app/orders" }}
+          title={t("public.plants.detail.reviewsTitle")}
+          subtitle={t("public.plants.detail.reviewsCount", {
+            count: props.summary?.total ?? props.reviews.length,
+          })}
+          action={{ label: t("public.plants.detail.reviewAfterPurchase"), href: "/app/orders" }}
         />
 
         <div class="flex items-center gap-4 p-4 bg-cream-50 dark:bg-forest-900/30 rounded-xl mb-6">
           <div class="text-center">
             <p class="text-4xl font-bold text-forest-800 dark:text-cream-50">{avgRating()}</p>
-                    <StarRatingIcon rating={Math.round(parseFloat(avgRating()))} />
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">out of 5</p>
+            <StarRatingIcon rating={Math.round(parseFloat(avgRating()))} />
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {t("public.plants.detail.outOfFive")}
+            </p>
           </div>
           <div class="flex-1 space-y-1.5">
             <For each={ratingDistribution()}>
@@ -86,10 +91,10 @@ const ReviewsSection: Component<{
             fallback={
               <div class="rounded-xl border border-dashed border-cream-300 dark:border-forest-700 p-8 text-center">
                 <p class="text-sm font-semibold text-forest-800 dark:text-cream-50">
-                  No reviews yet
+                  {t("public.plants.detail.noReviewsTitle")}
                 </p>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  Be the first verified buyer to review this plant.
+                  {t("public.plants.detail.noReviewsDescription")}
                 </p>
               </div>
             }
@@ -108,12 +113,12 @@ const ReviewsSection: Component<{
                         <span class="text-sm font-semibold text-forest-800 dark:text-cream-50">{review.author}</span>
                         {review.verified && (
                           <span class="text-[10px] px-1.5 py-0.5 bg-forest-100 dark:bg-forest-900/40 text-forest-700 dark:text-forest-300 rounded font-medium">
-                            Verified
+                            {t("public.plants.detail.verifiedPurchase")}
                           </span>
                         )}
                       </div>
                       <div class="flex items-center gap-2 mt-0.5">
-                                    <StarRatingIcon rating={review.rating} />
+                        <StarRatingIcon rating={review.rating} />
                         <span class="text-xs text-gray-400 dark:text-gray-500">
                           {new Date(review.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                         </span>
@@ -126,12 +131,6 @@ const ReviewsSection: Component<{
               </div>
             )}
           </For>
-        </div>
-
-        <div class="mt-6 text-center">
-          <Button variant="outline" size="sm">
-            Load More Reviews
-          </Button>
         </div>
       </div>
     </div>

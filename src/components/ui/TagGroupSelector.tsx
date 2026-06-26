@@ -9,10 +9,23 @@ export interface TagGroupOption {
   tags: { id: string; slug: string; name: string }[];
 }
 
+export interface KnownTagOption {
+  id: string;
+  name: string;
+  groupName?: string;
+}
+
+interface TagDisplayInfo {
+  name: string;
+  groupName: string;
+  colorIndex: number;
+}
+
 export interface TagGroupSelectorProps {
   selectedTags: Accessor<string[]>;
   onToggle: (tagId: string) => void;
-  groups: TagGroupOption[];
+  groups: Accessor<TagGroupOption[]>;
+  knownTags?: Accessor<KnownTagOption[]>;
   isLoading?: boolean;
   class?: string;
 }
@@ -30,6 +43,31 @@ function getGroupColorIndex(groupName: string): number {
     hash = groupName.charCodeAt(i) + ((hash << 5) - hash);
   }
   return Math.abs(hash) % GROUP_COLORS.length;
+}
+
+function buildTagLookupMap(
+  groups: TagGroupOption[],
+  knownTags: KnownTagOption[],
+): Map<string, TagDisplayInfo> {
+  const map = new Map<string, TagDisplayInfo>();
+
+  for (const tag of knownTags) {
+    const groupName = tag.groupName ?? "";
+    map.set(tag.id, {
+      name: tag.name,
+      groupName,
+      colorIndex: getGroupColorIndex(groupName || tag.name),
+    });
+  }
+
+  for (const group of groups) {
+    const colorIndex = getGroupColorIndex(group.name);
+    for (const tag of group.tags) {
+      map.set(tag.id, { name: tag.name, groupName: group.name, colorIndex });
+    }
+  }
+
+  return map;
 }
 
 const TagButton: Component<{
@@ -84,13 +122,58 @@ const TagButtonWithGroup: Component<{
   );
 };
 
+const SelectedTagPill: Component<{
+  tagId: string;
+  lookup: Accessor<Map<string, TagDisplayInfo>>;
+  isLoading: boolean;
+  onToggle: (tagId: string) => void;
+}> = (props) => {
+  const info = createMemo(() => props.lookup().get(props.tagId));
+
+  return (
+    <Show
+      when={!props.isLoading || info()}
+      fallback={
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm bg-forest-50 dark:bg-forest-900/30 ring-1 ring-inset ring-forest-200 dark:ring-forest-700 animate-pulse">
+          <span class="h-3 w-12 rounded bg-forest-200 dark:bg-forest-700" />
+          <span class="h-3 w-16 rounded bg-forest-200 dark:bg-forest-700" />
+        </span>
+      }
+    >
+      <button
+        type="button"
+        onClick={() => props.onToggle(props.tagId)}
+        title={info()?.groupName || undefined}
+        class="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-forest-100 text-forest-800 dark:bg-forest-800 dark:text-forest-100 ring-1 ring-inset ring-forest-300 dark:ring-forest-600 hover:bg-terracotta-100 hover:text-terracotta-800 dark:hover:bg-terracotta-800 dark:hover:text-terracotta-100 hover:ring-terracotta-300 dark:hover:ring-terracotta-600 transition-colors"
+      >
+        <Show when={info()?.groupName}>
+          {(groupName) => (
+            <span class={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${
+              GROUP_COLORS[info()?.colorIndex ?? 0]
+            }`}>
+              {groupName()}
+            </span>
+          )}
+        </Show>
+        <span>{info()?.name ?? props.tagId}</span>
+        <XIcon class="w-3.5 h-3.5 text-forest-400 dark:text-forest-500 group-hover:text-terracotta-500" />
+      </button>
+    </Show>
+  );
+};
+
 export function TagGroupSelector(props: TagGroupSelectorProps) {
   const [localSearch, setLocalSearch] = createSignal("");
   const selectedCount = createMemo(() => props.selectedTags().length);
+  const isLoading = () => props.isLoading ?? false;
+
+  const tagLookupMap = createMemo(() =>
+    buildTagLookupMap(props.groups(), props.knownTags?.() ?? []),
+  );
 
   const allFlattenedTags = createMemo(() => {
     const result: { id: string; name: string; groupName: string; colorIndex: number }[] = [];
-    for (const group of props.groups) {
+    for (const group of props.groups()) {
       const colorIndex = getGroupColorIndex(group.name);
       for (const tag of group.tags) {
         result.push({ id: tag.id, name: tag.name, groupName: group.name, colorIndex });
@@ -107,7 +190,7 @@ export function TagGroupSelector(props: TagGroupSelectorProps) {
 
   const groupedFiltered = createMemo(() => {
     if (localSearch().trim()) return [];
-    return props.groups.map((group) => ({
+    return props.groups().map((group) => ({
       ...group,
       colorIndex: getGroupColorIndex(group.name),
     }));
@@ -135,29 +218,18 @@ export function TagGroupSelector(props: TagGroupSelectorProps) {
         </div>
       </div>
 
-      {/* Selected Tags Pills */}
+      {/* Selected Tags Pills — labels resolved reactively from catalog lookup */}
       <Show when={selectedCount() > 0}>
         <div class="flex flex-wrap items-center gap-2">
           <For each={props.selectedTags()}>
-            {(tagId) => {
-              const tagInfo = allFlattenedTags().find((t) => t.id === tagId);
-              return (
-                <button
-                  type="button"
-                  onClick={() => props.onToggle(tagId)}
-                  title={tagInfo?.groupName}
-                  class="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-forest-100 text-forest-800 dark:bg-forest-800 dark:text-forest-100 ring-1 ring-inset ring-forest-300 dark:ring-forest-600 hover:bg-terracotta-100 hover:text-terracotta-800 dark:hover:bg-terracotta-800 dark:hover:text-terracotta-100 hover:ring-terracotta-300 dark:hover:ring-terracotta-600 transition-colors"
-                >
-                  <span class={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${
-                    GROUP_COLORS[tagInfo?.colorIndex ?? 0]
-                  }`}>
-                    {tagInfo?.groupName}
-                  </span>
-                  <span>{tagInfo?.name}</span>
-                  <XIcon class="w-3.5 h-3.5 text-forest-400 dark:text-forest-500 group-hover:text-terracotta-500" />
-                </button>
-              );
-            }}
+            {(tagId) => (
+              <SelectedTagPill
+                tagId={tagId}
+                lookup={tagLookupMap}
+                isLoading={isLoading()}
+                onToggle={props.onToggle}
+              />
+            )}
           </For>
           <button
             type="button"
@@ -174,7 +246,7 @@ export function TagGroupSelector(props: TagGroupSelectorProps) {
 
       {/* Tag Content */}
       <Show
-        when={props.isLoading}
+        when={isLoading()}
         fallback={
           <Show
             when={localSearch() ? filteredTags().length > 0 : groupedFiltered().length > 0}
@@ -187,16 +259,13 @@ export function TagGroupSelector(props: TagGroupSelectorProps) {
               </div>
             }
           >
-            {/* Search results: flat grid */}
             <Show
               when={!!localSearch()}
               fallback={
-                /* Default: grouped inline layout */
                 <div class="space-y-3">
                   <For each={groupedFiltered()}>
                     {(group) => (
                       <div class="rounded-xl border border-gray-200 dark:border-gray-700/50 bg-gray-50/50 dark:bg-forest-900/20 overflow-hidden">
-                        {/* Group Header */}
                         <div class="px-3 py-2.5 border-b border-gray-100 dark:border-gray-700/50">
                           <div class="flex items-center justify-between gap-2">
                             <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -212,8 +281,6 @@ export function TagGroupSelector(props: TagGroupSelectorProps) {
                             </p>
                           </Show>
                         </div>
-
-                        {/* Tags */}
                         <div class="p-3">
                           <div class="flex flex-wrap gap-2">
                             <For each={group.tags}>

@@ -244,6 +244,15 @@ const OrderSummary: Component<{
           </span>
         </div>
       </div>
+
+      <div class="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1 text-center">
+        <A href="/help/shipping-and-returns" class="text-xs text-forest-600 dark:text-forest-400 hover:underline">
+          {t("cart.policyLinks")}
+        </A>
+        <A href="/help/cod" class="text-xs text-forest-600 dark:text-forest-400 hover:underline">
+          {t("cart.codPolicy")}
+        </A>
+      </div>
     </div>
   );
 };

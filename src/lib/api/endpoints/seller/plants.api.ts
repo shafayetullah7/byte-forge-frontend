@@ -1,12 +1,12 @@
 import { query, revalidate } from "@solidjs/router";
 import { fetcher } from "../../api-client";
 import type {
-  PlantListItem,
   PlantListResponse,
   PlantFilter,
   CreatePlantRequest,
   CreatePlantResponse,
   PlantDetail,
+  PlantStatus,
 } from "../../types/seller.types";
 
 /**
@@ -54,6 +54,13 @@ export const getPlantById = query(
 export const invalidatePlant = (id: string) =>
   revalidate(getPlantById.keyFor(id));
 
+export const invalidatePlants = () => revalidate(getPlants.keyFor());
+
+export const invalidateAllPlantCaches = (id: string) => {
+  invalidatePlants();
+  invalidatePlant(id);
+};
+
 /**
  * Create a new plant
  */
@@ -65,17 +72,25 @@ export const createPlant = async (data: CreatePlantRequest): Promise<CreatePlant
 };
 
 /**
- * Update plant details
+ * Update plant catalog (full body or status-only)
  */
-export const updatePlant = async (id: string, data: Partial<CreatePlantRequest>): Promise<PlantListItem> => {
-  return fetcher<PlantListItem>(`/api/v1/user/seller/plants/${id}`, {
+export const updatePlant = async (
+  id: string,
+  data: CreatePlantRequest | { status: PlantStatus },
+): Promise<PlantDetail> => {
+  return fetcher<PlantDetail>(`/api/v1/user/seller/plants/${id}`, {
     method: "PATCH",
     body: JSON.stringify(data),
   });
 };
 
+export const updatePlantStatus = async (
+  id: string,
+  status: PlantStatus,
+): Promise<PlantDetail> => updatePlant(id, { status });
+
 /**
- * Delete a plant
+ * Delete a plant (soft-delete to ARCHIVED)
  */
 export const deletePlant = async (id: string): Promise<void> => {
   return fetcher<void>(`/api/v1/user/seller/plants/${id}`, {
@@ -91,5 +106,6 @@ export const plantsApi = {
   getById: getPlantById,
   create: createPlant,
   update: updatePlant,
+  updateStatus: updatePlantStatus,
   delete: deletePlant,
 };

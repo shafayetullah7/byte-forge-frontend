@@ -120,6 +120,7 @@ export interface RegisterResponse {
 export interface LoginResponse {
   session: UserSession;
   user: AuthUser;
+  verification?: { expiresAt: string; sent?: boolean };
 }
 // === Password Reset ===
 export interface ForgotPasswordRequest {

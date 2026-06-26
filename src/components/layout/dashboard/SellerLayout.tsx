@@ -36,6 +36,11 @@ export const SellerLayout: ParentComponent = (props) => {
                         label: t("seller.sidebar.shopOverview"),
                     },
                     {
+                        href: "/app/seller/my-shop/storefront",
+                        icon: ShoppingBagIcon,
+                        label: t("seller.shop.storefront.title"),
+                    },
+                    {
                         href: "/app/seller/verification",
                         icon: BoltIcon,
                         label: t("seller.verification.title"),

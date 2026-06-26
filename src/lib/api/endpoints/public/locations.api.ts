@@ -26,6 +26,7 @@ export interface Division {
  */
 export const getDivisions = query(
   async (): Promise<Division[]> => {
+    "use server";
     return fetcher<Division[]>('/api/v1/locations/divisions');
   },
   "public-divisions"
@@ -37,6 +38,7 @@ export const getDivisions = query(
  */
 export const getDistricts = query(
   async (): Promise<District[]> => {
+    "use server";
     return fetcher<District[]>('/api/v1/locations/districts');
   },
   "public-districts"

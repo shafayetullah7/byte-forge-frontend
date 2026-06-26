@@ -1,5 +1,6 @@
 import { A, useNavigate, action, useSubmission, useAction } from "@solidjs/router";
 import { createSignal, createEffect } from "solid-js";
+import { revalidate } from "@solidjs/router";
 import { createForm } from "@modular-forms/solid";
 import { Button, Input } from "~/components/ui";
 import { EyeIcon, EyeSlashIcon } from "~/components/icons";
@@ -22,8 +23,14 @@ const loginAction = action(async (data: LoginFormData) => {
       password: data.password,
     });
 
+    await revalidate("user-session");
+
     if (result.user && !result.user.emailVerified) {
-      return { success: true, target: "/verify-account" };
+      return {
+        success: true,
+        target: "/verify-account",
+        verificationExpiresAt: result.verification?.expiresAt,
+      };
     }
 
     return { success: true, target: "/" };
@@ -81,7 +88,15 @@ export default function Login() {
   createEffect(() => {
     if (submission.result?.success) {
       toaster.success(t("auth.login.success"));
-      navigate(submission.result.target || "/", { replace: true });
+      const result = submission.result;
+      if (result.target === "/verify-account") {
+        navigate("/verify-account", {
+          replace: true,
+          state: { verificationExpiresAt: result.verificationExpiresAt },
+        });
+      } else {
+        navigate(result.target || "/", { replace: true });
+      }
     }
   });
 

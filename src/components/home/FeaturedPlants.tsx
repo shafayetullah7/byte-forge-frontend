@@ -1,3 +1,4 @@
+import { Show } from "solid-js";
 import { SproutIcon, LeafIcon, DropletIcon, CubeIcon } from "~/components/icons";
 import { LinkButton } from "~/components/ui";
 import { useI18n } from "~/i18n";
@@ -6,7 +7,7 @@ const plantCategories = [
   {
     title: "Indoor Plants",
     description: "Low-maintenance beauties for your home",
-    count: "120+",
+    count: "",
     icon: SproutIcon,
     color: "forest",
     image: "https://images.unsplash.com/photo-1459411552884-841db9b30b77?w=400&h=300&fit=crop",
@@ -14,7 +15,7 @@ const plantCategories = [
   {
     title: "Rare & Exotic",
     description: "Collectible specimens for enthusiasts",
-    count: "85+",
+    count: "",
     icon: LeafIcon,
     color: "sage",
     image: "https://images.unsplash.com/photo-1463320726281-696a4859787d?w=400&h=300&fit=crop",
@@ -22,7 +23,7 @@ const plantCategories = [
   {
     title: "Succulents & Cacti",
     description: "Drought-friendly, endlessly charming",
-    count: "200+",
+    count: "",
     icon: DropletIcon,
     color: "terracotta",
     image: "https://images.unsplash.com/photo-1509423350716-97f936044a00?w=400&h=300&fit=crop",
@@ -30,7 +31,7 @@ const plantCategories = [
   {
     title: "Pots & Planters",
     description: "The perfect home for every plant",
-    count: "150+",
+    count: "",
     icon: CubeIcon,
     color: "cream",
     image: "https://images.unsplash.com/photo-1491147334523-76d5e6616330?w=400&h=300&fit=crop",
@@ -96,9 +97,11 @@ export function FeaturedPlants() {
                   />
                   <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                   <div class="absolute bottom-4 left-4">
-                    <span class={`body-small ${colors.badge} px-3 py-1 rounded-full font-semibold`}>
-                      {category.count} {t("landing.categories.items")}
-                    </span>
+                    <Show when={category.count}>
+                      <span class={`body-small ${colors.badge} px-3 py-1 rounded-full font-semibold`}>
+                        {category.count} {t("landing.categories.items")}
+                      </span>
+                    </Show>
                   </div>
                 </div>
 

@@ -331,3 +331,149 @@ export function toCreatePlantDto(form: PlantFormState): Record<string, unknown> 
     ...(careGuide && { careGuide }),
   };
 }
+
+const SERVER_UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export function isServerUuid(id: string): boolean {
+  return SERVER_UUID_REGEX.test(id);
+}
+
+export function toUpdatePlantDto(form: PlantFormState): Record<string, unknown> {
+  const dto = toCreatePlantDto(form);
+  const variants = form.variants.map((formVariant, index) => {
+    const variant = { ...(dto.variants as Record<string, unknown>[])[index] };
+    delete variant.inventoryCount;
+    delete variant.trackInventory;
+    delete variant.lowStockThreshold;
+    if (isServerUuid(formVariant.id)) {
+      variant.id = formVariant.id;
+    }
+    return variant;
+  });
+
+  return {
+    ...dto,
+    variants,
+  };
+}
+
+function findLocaleTranslation<T extends { locale: string }>(
+  items: T[] | undefined,
+  locale: string,
+): T | undefined {
+  return items?.find((item) => item.locale === locale);
+}
+
+export function fromPlantDetailToForm(plant: import("~/lib/api/types/seller.types").PlantDetail): PlantFormState {
+  const enTranslation = findLocaleTranslation(plant.translations, "en");
+  const bnTranslation = findLocaleTranslation(plant.translations, "bn");
+  const details = plant.plantDetails;
+  const detailsEn = findLocaleTranslation(details?.translations, "en");
+  const detailsBn = findLocaleTranslation(details?.translations, "bn");
+  const careBn = findLocaleTranslation(plant.careInstructions?.translations, "bn");
+
+  const emptySection = (): CareGuideSection => ({ ...emptyCareGuideSection });
+
+  return {
+    thumbnail: plant.thumbnail
+      ? { id: plant.thumbnail.id, url: plant.thumbnail.url }
+      : { id: null, url: null },
+    status: plant.status,
+    slug: plant.slug,
+    translations: {
+      en: {
+        name: enTranslation?.name ?? "",
+        shortDescription: enTranslation?.shortDescription ?? "",
+        description: enTranslation?.description ?? "",
+      },
+      bn: {
+        name: bnTranslation?.name ?? "",
+        shortDescription: bnTranslation?.shortDescription ?? "",
+        description: bnTranslation?.description ?? "",
+      },
+    },
+    plantDetails: {
+      categoryId: details?.categoryId ?? "",
+      tagIds: details?.tags?.map((tag) => tag.id) ?? [],
+      scientificName: details?.scientificName ?? "",
+      lightRequirement: details?.lightRequirement ?? "",
+      wateringFrequency: details?.wateringFrequency ?? "",
+      humidityLevel: details?.humidityLevel ?? "",
+      temperatureRange: details?.temperatureRange ?? "",
+      careDifficulty: details?.careDifficulty ?? "",
+      growthRate: details?.growthRate ?? "",
+      matureHeight: details?.matureHeight ?? "",
+      matureSpread: details?.matureSpread ?? "",
+      translations: {
+        en: {
+          commonNames: detailsEn?.commonNames ?? details?.commonNames ?? "",
+          origin: detailsEn?.origin ?? details?.origin ?? "",
+          soilType: detailsEn?.soilType ?? details?.soilType ?? "",
+          toxicityInfo: detailsEn?.toxicityInfo ?? details?.toxicityInfo ?? "",
+        },
+        bn: {
+          commonNames: detailsBn?.commonNames ?? "",
+          origin: detailsBn?.origin ?? "",
+          soilType: detailsBn?.soilType ?? "",
+          toxicityInfo: detailsBn?.toxicityInfo ?? "",
+        },
+      },
+    },
+    variants: plant.variants.map((variant) => {
+      const enTitle = findLocaleTranslation(variant.translations, "en")?.title ?? "";
+      const bnTitle = findLocaleTranslation(variant.translations, "bn")?.title ?? "";
+      const attrs = variant.plantAttributes;
+
+      return {
+        id: variant.id,
+        sku: variant.sku ?? "",
+        price: parseFloat(variant.price) || "",
+        inventoryCount: variant.inventoryCount,
+        trackInventory: variant.trackInventory,
+        lowStockThreshold: variant.lowStockThreshold,
+        isBase: variant.isBase,
+        isActive: variant.isActive,
+        mediaIds: variant.media.map((media) => media.mediaId),
+        mediaUrls: variant.media.map((media) => media.url),
+        growthStage: attrs?.growthStage ?? "JUVENILE",
+        plantForm: attrs?.plantForm ?? "UPRIGHT",
+        variegation: attrs?.variegation ?? "NONE",
+        leafDensity: attrs?.leafDensity ?? "MODERATE",
+        stemCount: attrs?.stemCount ?? 1,
+        currentHeight: attrs?.currentHeight ?? "",
+        currentSpread: attrs?.currentSpread ?? "",
+        propagationType: attrs?.propagationType ?? "CUTTING",
+        containerType: attrs?.containerType ?? "NURSERY_POT",
+        containerSize: attrs?.containerSize ?? "",
+        bundleType: attrs?.bundleType ?? "",
+        translations: {
+          en: { title: enTitle },
+          bn: { title: bnTitle },
+        },
+      };
+    }),
+    careGuide: {
+      en: {
+        lightInstructions: plant.careInstructions?.lightInstructions ?? "",
+        wateringInstructions: plant.careInstructions?.wateringInstructions ?? "",
+        humidityInstructions: plant.careInstructions?.humidityInstructions ?? "",
+        fertilizerSchedule: plant.careInstructions?.fertilizerSchedule ?? "",
+        repottingFrequency: plant.careInstructions?.repottingFrequency ?? "",
+        pruningNotes: plant.careInstructions?.pruningNotes ?? "",
+        commonProblems: plant.careInstructions?.commonProblems ?? "",
+        seasonalCare: plant.careInstructions?.seasonalCare ?? "",
+      },
+      bn: {
+        lightInstructions: careBn?.lightInstructions ?? "",
+        wateringInstructions: careBn?.wateringInstructions ?? "",
+        humidityInstructions: careBn?.humidityInstructions ?? "",
+        fertilizerSchedule: careBn?.fertilizerSchedule ?? "",
+        repottingFrequency: careBn?.repottingFrequency ?? "",
+        pruningNotes: careBn?.pruningNotes ?? "",
+        commonProblems: careBn?.commonProblems ?? "",
+        seasonalCare: careBn?.seasonalCare ?? "",
+      },
+    },
+  };
+}

@@ -22,6 +22,7 @@ export interface Tag {
  */
 export const getTags = query(
   async () => {
+    "use server";
     return fetcher<TagGroup[]>("/api/v1/tags");
   },
   "public-tags"

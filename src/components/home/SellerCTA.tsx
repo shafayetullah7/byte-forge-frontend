@@ -1,6 +1,7 @@
 import { A } from "@solidjs/router";
 import { ShopIcon, TrendingUpIcon, CheckIcon } from "~/components/icons";
 import { LinkButton } from "~/components/ui";
+import { config } from "~/lib/config";
 import { useI18n } from "~/i18n";
 
 const sellerBenefits = [
@@ -41,7 +42,7 @@ export function SellerCTA() {
             </div>
 
             <div class="flex flex-col sm:flex-row gap-4">
-              <LinkButton href="/auth/register" variant="primary" size="lg">
+              <LinkButton href={config.auth.registerUrl} variant="primary" size="lg">
                 <ShopIcon class="w-5 h-5 mr-2" />
                 {t("landing.sellerCTA.startSelling")}
               </LinkButton>

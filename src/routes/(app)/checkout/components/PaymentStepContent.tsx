@@ -141,6 +141,12 @@ const PaymentStepContent: Component<PaymentStepContentProps> = (props) => {
         </Show>
       </div>
 
+      <div class="text-sm">
+        <A href="/help/cod" class="text-forest-600 dark:text-forest-400 hover:underline">
+          {t("checkout.payment.codPolicyLink")}
+        </A>
+      </div>
+
       <Show when={props.onOrderNotesChange}>
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

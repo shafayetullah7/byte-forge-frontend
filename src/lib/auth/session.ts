@@ -62,26 +62,28 @@ export const getSession = query(async () => {
  * Logout Action
  *
  * Server-side logout that invalidates the session on the backend
- * and clears the session cache. Handles edge cases:
- * - Already logged out (401) — silently succeeds
- * - Network/server errors — still clears local session state
+ * and clears the session cache. Returns success only when the session
+ * is no longer active after revalidation.
  */
 export const logoutAction = action(async (): Promise<{ success: boolean }> => {
   "use server";
   try {
     await authApi.logout();
   } catch (error: any) {
-    // Already logged out (401) or session expired — treat as success
-    if (error?.statusCode === 401) {
-      return { success: true };
+    if (error?.statusCode !== 401) {
+      console.error("[Auth] Logout API error:", error);
     }
-    // Network/server error — still proceed with local cleanup
-    console.error("[Auth] Logout API error, proceeding with local cleanup:", error);
-  } finally {
-    const { revalidate } = await import("@solidjs/router");
-    await revalidate("user-session");
   }
-  return { success: true };
+
+  const { revalidate } = await import("@solidjs/router");
+  await revalidate("user-session");
+
+  try {
+    await authApi.checkAuth();
+    return { success: false };
+  } catch {
+    return { success: true };
+  }
 }, "logout-action");
 
 /**

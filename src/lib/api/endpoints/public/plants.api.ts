@@ -14,6 +14,7 @@ import type {
  */
 export const getPublicPlants = query(
   async (filter?: PublicPlantFilter) => {
+    "use server";
     const params: Record<string, string | number | boolean | undefined> = {};
 
     if (filter) {
@@ -50,6 +51,7 @@ export const getPublicPlants = query(
  */
 export const getPublicPlantBySlug = query(
   async (slug: string) => {
+    "use server";
     return fetcher<PublicPlantDetail>(`/api/v1/plants/${slug}`);
   },
   "public-plant-by-slug"

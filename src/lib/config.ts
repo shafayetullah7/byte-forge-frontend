@@ -19,6 +19,9 @@ export const config = {
   },
   isDev: import.meta.env.DEV,
   isServer: typeof window === "undefined",
+  /** Phase C shop features (campaigns, articles, follow) — disabled for Phase 1 launch */
+  shopPhaseCEnabled: false,
+  siteUrl: (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/$/, "") || "",
 } as const;
 
 console.log("config: ", config);

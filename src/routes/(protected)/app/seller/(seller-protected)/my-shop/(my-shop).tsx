@@ -13,6 +13,7 @@ import { useI18n } from "~/i18n";
 import { toaster } from "~/components/ui/Toast";
 import { getShop, getShopStatus, refetchShop, refetchShopStatus } from "~/lib/context/shop-context";
 import { sellerShopApi, type UpdateAddressDto, type UpdateContactDto, type UpdateShopInfoDto, type VerificationStatusType } from "~/lib/api/endpoints/seller/shop-detail.api";
+import { invalidatePublicShop, invalidatePublicShops } from "~/lib/api/endpoints/public/shops.api";
 import { ShopIcon, PlusIcon, BoltIcon, PackageIcon, EyeIcon, CheckCircleIcon } from "~/components/icons";
 
 /**
@@ -296,6 +297,12 @@ export default function MyShopPage() {
   createEffect(() => {
     if (shopInfoSubmission.result?.success === true && !shopInfoSubmission.pending) {
       toaster.success(t("seller.shop.myShop.shopInfo.saveSuccess"));
+      const shop = shopData();
+      if (shop?.slug) {
+        invalidatePublicShop(shop.slug);
+        invalidatePublicShops();
+      }
+      refetchShop();
       setShouldCloseInfoModal(true);
     }
   });

@@ -1,10 +1,11 @@
-import { useNavigate, action, useSubmission, useAction, redirect } from "@solidjs/router";
-import { createSignal, createEffect, onMount, onCleanup, Show } from "solid-js";
+import { useNavigate, useLocation, action, useSubmission, useAction } from "@solidjs/router";
+import { createSignal, createEffect } from "solid-js";
 import { createForm } from "@modular-forms/solid";
 import { Button, Input } from "~/components/ui";
 import { verifySchema, type VerifyFormData } from "~/schemas/verify.schema";
-import { authApi, ApiError } from "~/lib/api";
+import { authApi } from "~/lib/api";
 import { useSession, logoutAction } from "~/lib/auth";
+import { useOtpCountdown } from "~/lib/auth/use-otp-countdown";
 import { toaster } from "~/components/ui/Toast";
 import { useI18n } from "~/i18n";
 
@@ -29,62 +30,38 @@ const verifyEmailAction = action(async (data: VerifyFormData) => {
 
 export default function VerifyAccount() {
   const navigate = useNavigate();
+  const location = useLocation();
   const user = useSession();
   const { t } = useI18n();
 
   const sendVerificationTrigger = useAction(sendVerificationAction);
   const verifyEmailTrigger = useAction(verifyEmailAction);
+  const logout = useAction(logoutAction);
 
   const sendSubmission = useSubmission(sendVerificationAction);
   const verifySubmission = useSubmission(verifyEmailAction);
+  const logoutSubmission = useSubmission(logoutAction);
 
   const [resendStatus, setResendStatus] = createSignal<string | null>(null);
   const [errorMessage, setErrorMessage] = createSignal<string | null>(null);
 
-  // Timer State
-  const [expiresAt, setExpiresAt] = createSignal<Date | null>(null);
-  const [timeLeft, setTimeLeft] = createSignal<string>("");
-  const [canResend, setCanResend] = createSignal(false);
-  const [cooldown, setCooldown] = createSignal(0);
+  const initialExpiresAt = (() => {
+    const state = location.state as { verificationExpiresAt?: string } | undefined;
+    return state?.verificationExpiresAt ? new Date(state.verificationExpiresAt) : null;
+  })();
+
+  const [expiresAt, setExpiresAt] = createSignal<Date | null>(initialExpiresAt);
+  const [sentOnce, setSentOnce] = createSignal(false);
+
+  const { timeLeft, isExpired } = useOtpCountdown(
+    expiresAt,
+    () => t("auth.verifyAccount.expired"),
+  );
 
   // Auto-redirect if verified
   createEffect(() => {
     if (user()?.emailVerified) {
       navigate("/", { replace: true });
-    }
-  });
-
-  // Countdown Logic
-  const updateTimer = () => {
-    const expiry = expiresAt();
-    if (!expiry) return;
-
-    const now = new Date();
-    const diff = expiry.getTime() - now.getTime();
-
-    if (diff <= 0) {
-      setTimeLeft(t("auth.verifyAccount.expired"));
-      setCanResend(true);
-      return;
-    }
-
-    const minutes = Math.floor(diff / 60000);
-    const seconds = Math.floor((diff % 60000) / 1000);
-    setTimeLeft(`${minutes}:${seconds.toString().padStart(2, "0")}`);
-  };
-
-  createEffect(() => {
-    if (cooldown() > 0) {
-      const timer = setInterval(() => setCooldown((c) => c - 1), 1000);
-      onCleanup(() => clearInterval(timer));
-    }
-  });
-
-  createEffect(() => {
-    if (expiresAt()) {
-      const timer = setInterval(updateTimer, 1000);
-      onCleanup(() => clearInterval(timer));
-      updateTimer(); // Initial call
     }
   });
 
@@ -94,9 +71,10 @@ export default function VerifyAccount() {
       const response = sendSubmission.result;
       if (response.expiresAt) {
         setExpiresAt(new Date(response.expiresAt));
-        setCooldown(60);
-        setResendStatus("sent");
-        setTimeout(() => setResendStatus(null), 5000);
+        if (response.sent !== false) {
+          setResendStatus("sent");
+          setTimeout(() => setResendStatus(null), 5000);
+        }
       }
     }
   });
@@ -104,12 +82,10 @@ export default function VerifyAccount() {
   // Handle Send Verification Error
   createEffect(() => {
     if (sendSubmission.error) {
-      console.log("Resend verification error caught:", sendSubmission.error);
       const error = sendSubmission.error;
       const errorData = (error as any).response;
 
       if (errorData && errorData.statusCode === 409) {
-        // Already verified
         navigate("/", { replace: true });
         return;
       }
@@ -122,7 +98,6 @@ export default function VerifyAccount() {
   // Handle Verify Email Error
   createEffect(() => {
     if (verifySubmission.error) {
-      console.log("Verify email error caught:", verifySubmission.error);
       const error = verifySubmission.error;
       const errorData = (error as any).response;
 
@@ -148,9 +123,17 @@ export default function VerifyAccount() {
     }
   });
 
-  onMount(() => {
-    // Auto-trigger on mount
-    if (user() && !user()?.emailVerified && !sendSubmission.pending) {
+  // Fallback: direct visit / refresh without expiresAt from login
+  createEffect(() => {
+    const currentUser = user();
+    if (
+      currentUser &&
+      !currentUser.emailVerified &&
+      !expiresAt() &&
+      !sentOnce() &&
+      !sendSubmission.pending
+    ) {
+      setSentOnce(true);
       sendVerificationTrigger();
     }
   });
@@ -177,9 +160,20 @@ export default function VerifyAccount() {
   };
 
   const handleResend = () => {
-    if (cooldown() > 0) return;
+    if (!isExpired() && timeLeft()) return;
     setErrorMessage(null);
     sendVerificationTrigger();
+  };
+
+  const handleLogout = () => {
+    setErrorMessage(null);
+    logout().then((result) => {
+      if (result?.success) {
+        navigate("/login", { replace: true });
+      } else {
+        toaster.error(t("auth.verifyAccount.errorLogout"));
+      }
+    });
   };
 
   return (
@@ -218,7 +212,7 @@ export default function VerifyAccount() {
                 maxlength={6}
                 value={field.value || ""}
                 required
-                disabled={verifySubmission.pending}
+                disabled={verifySubmission.pending || logoutSubmission.pending}
                 autocomplete="one-time-code"
               />
               {field.error && (
@@ -235,7 +229,7 @@ export default function VerifyAccount() {
           variant="primary"
           class="w-full"
           type="submit"
-          disabled={verifySubmission.pending}
+          disabled={verifySubmission.pending || logoutSubmission.pending}
         >
           {verifySubmission.pending ? t("auth.verifyAccount.submitting") : t("auth.verifyAccount.submit")}
         </Button>
@@ -248,26 +242,39 @@ export default function VerifyAccount() {
           <button
             type="button"
             onClick={handleResend}
-            disabled={verifySubmission.pending || sendSubmission.pending || cooldown() > 0}
+            disabled={
+              verifySubmission.pending ||
+              sendSubmission.pending ||
+              logoutSubmission.pending ||
+              (!isExpired() && !!timeLeft())
+            }
             class="text-forest-600 dark:text-sage-400 hover:text-forest-700 dark:hover:text-sage-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
           >
             {sendSubmission.pending
               ? t("auth.verifyAccount.resending")
-              : cooldown() > 0
-                ? `${t("auth.verifyAccount.resendAvailable")} ${cooldown()}s`
-                : t("auth.verifyAccount.resend")}
+              : t("auth.verifyAccount.resend")}
           </button>
         </div>
 
         <div class="text-center pt-4 border-t border-gray-100 dark:border-gray-800">
           <button
             type="button"
-            onClick={() => {
-              logoutAction().then(() => navigate("/login", { replace: true }));
-            }}
-            class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+            onClick={handleLogout}
+            disabled={logoutSubmission.pending}
+            class="text-sm cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
           >
-            {t("auth.verifyAccount.notYou")}
+            {logoutSubmission.pending ? (
+              t("common.loading")
+            ) : (
+              <>
+                <span class="text-gray-600 dark:text-gray-400">
+                  {t("auth.verifyAccount.notYou")}{" "}
+                </span>
+                <span class="font-medium text-terracotta-600 dark:text-terracotta-400 group-hover:text-terracotta-700 dark:group-hover:text-terracotta-300">
+                  {t("auth.verifyAccount.logout")}
+                </span>
+              </>
+            )}
           </button>
         </div>
       </Form>

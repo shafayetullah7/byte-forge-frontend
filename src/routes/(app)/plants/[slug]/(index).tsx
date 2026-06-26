@@ -1,5 +1,7 @@
 import { For, Show, createSignal, Suspense, ErrorBoundary, createMemo, createEffect } from "solid-js";
-import { A, createAsync, useParams, action, useAction, useSubmission } from "@solidjs/router";
+import { A, createAsync, useParams, action, useAction, useSubmission, type RouteDefinition } from "@solidjs/router";
+import { Title, Meta, Link } from "@solidjs/meta";
+import { HttpStatusCode } from "@solidjs/start";
 import { useI18n } from "~/i18n";
 import type { PublicPlantVariant } from "~/lib/api/types/public/plants.types";
 import {
@@ -21,15 +23,15 @@ import {
   ExclamationCircleIcon,
   ClockIcon,
   GlobeAltIcon,
-  ShoppingBagIcon,
-  EyeIcon,
 } from "~/components/icons";
 import { Button } from "~/components/ui";
 import { toaster } from "~/components/ui/Toast";
 import { formatPrice, getDifficultyLabel, getDifficultyColor, lightLabel, wateringLabel } from "../constants";
-import { getPublicPlantBySlug } from "~/lib/api/endpoints/public/plants.api";
 import { getPublicPlantReviews } from "~/lib/api/endpoints/public/reviews.api";
+import { getPlantBySlug } from "~/lib/public-plants/public-plant.service";
 import { cartApi, invalidateAllCart } from "~/lib/api/endpoints/buyer/cart.api";
+import HreflangLinks from "~/components/seo/HreflangLinks";
+import { absoluteUrl, formatPageTitle } from "~/lib/seo/meta";
 import {
   ImageGallery,
   CareBadge,
@@ -38,17 +40,12 @@ import {
   CareInstructionCard,
   DetailRow,
   Breadcrumb,
-  PlantGridSection,
   ReviewsSection,
-  FrequentlyBoughtTogether,
 } from "./components";
-import {
-  MOCK_SIMILAR_PLANTS,
-  MOCK_YOU_MIGHT_LIKE,
-  MOCK_MORE_FROM_SHOP,
-  MOCK_BUNDLE_ITEMS,
-  MOCK_RECENTLY_VIEWED,
-} from "./mock-data";
+
+export const route = {
+  preload: ({ params }) => getPlantBySlug(params.slug as string),
+} satisfies RouteDefinition;
 
 const addToCartAction = action(async (data: { variantId: string; quantity: number }) => {
   "use server";
@@ -67,7 +64,7 @@ const addToCartAction = action(async (data: { variantId: string; quantity: numbe
 export default function PlantDetailPage() {
   const { t } = useI18n();
   const params = useParams<{ slug: string }>();
-  const plant = createAsync(() => getPublicPlantBySlug(params.slug));
+  const plant = createAsync(() => getPlantBySlug(params.slug));
   const reviewData = createAsync(() => getPublicPlantReviews(params.slug));
   const [selectedVariant, setSelectedVariant] = createSignal<string | undefined>(undefined);
   const [quantity, setQuantity] = createSignal(1);
@@ -153,6 +150,87 @@ export default function PlantDetailPage() {
 
   const plantPrice = createMemo(() => selectedVariantData()?.price ?? plant()?.price ?? "0");
 
+  const pageTitle = createMemo(() => {
+    const p = plant();
+    if (!p) return formatPageTitle(t("public.plants.detail.pageTitle"));
+    return formatPageTitle(p.seo?.metaTitle || p.name);
+  });
+
+  const pageDescription = createMemo(() => {
+    const p = plant();
+    if (!p) return t("public.plants.detail.metaDescription");
+    return p.seo?.metaDescription || p.shortDescription || p.description || t("public.plants.detail.metaDescription");
+  });
+
+  const primaryImage = createMemo(() => {
+    const p = plant();
+    if (!p) return undefined;
+    return displayMedia()[0]?.url || p.thumbnail?.url || undefined;
+  });
+
+  const productJsonLd = createMemo(() => {
+    const p = plant();
+    if (!p) return null;
+
+    const schema: Record<string, unknown> = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: p.name,
+      description: pageDescription(),
+      image: primaryImage(),
+      offers: {
+        "@type": "Offer",
+        price: plantPrice(),
+        priceCurrency: "BDT",
+        availability: p.inStock
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+        url: absoluteUrl(`/plants/${p.slug}`),
+      },
+    };
+
+    const summary = reviewData()?.summary;
+    if (summary && summary.total > 0) {
+      schema.aggregateRating = {
+        "@type": "AggregateRating",
+        ratingValue: summary.average,
+        reviewCount: summary.total,
+      };
+    }
+
+    return JSON.stringify(schema);
+  });
+
+  const breadcrumbJsonLd = createMemo(() => {
+    const p = plant();
+    if (!p) return null;
+
+    return JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: t("common.home"),
+          item: absoluteUrl("/"),
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: t("common.plants"),
+          item: absoluteUrl("/plants"),
+        },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: p.name,
+          item: absoluteUrl(`/plants/${p.slug}`),
+        },
+      ],
+    });
+  });
+
   return (
     <ErrorBoundary
       fallback={(error) => (
@@ -188,6 +266,23 @@ export default function PlantDetailPage() {
         <Show when={plant()}>
           {(plant) => (
             <div class="min-h-screen bg-cream-50 dark:bg-forest-900">
+              <Title>{pageTitle()}</Title>
+              <Meta name="description" content={pageDescription()} />
+              <Meta property="og:title" content={pageTitle()} />
+              <Meta property="og:description" content={pageDescription()} />
+              <Meta property="og:type" content="product" />
+              <Show when={primaryImage()}>
+                <Meta property="og:image" content={primaryImage()!} />
+              </Show>
+              <Link rel="canonical" href={absoluteUrl(`/plants/${plant().slug}`)} />
+              <HreflangLinks path={`/plants/${plant().slug}`} />
+              <Show when={productJsonLd()}>
+                <script type="application/ld+json">{productJsonLd()}</script>
+              </Show>
+              <Show when={breadcrumbJsonLd()}>
+                <script type="application/ld+json">{breadcrumbJsonLd()}</script>
+              </Show>
+
               <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <Breadcrumb plantName={plant().name} />
 
@@ -502,11 +597,6 @@ export default function PlantDetailPage() {
                   </div>
                 </div>
 
-                <FrequentlyBoughtTogether
-                  plantPrice={plantPrice()}
-                  bundleItems={MOCK_BUNDLE_ITEMS}
-                />
-
                 <ReviewsSection
                   summary={reviewData()?.summary}
                   reviews={
@@ -515,52 +605,35 @@ export default function PlantDetailPage() {
                       author: review.customerName,
                       rating: review.rating,
                       date: review.createdAt,
-                      title: review.title ?? "Verified purchase review",
+                      title: review.title ?? t("public.plants.detail.verifiedPurchaseReview"),
                       content: review.comment ?? "",
                       verified: review.isVerifiedPurchase,
                     })) ?? []
                   }
                 />
 
-                <PlantGridSection
-                  icon={LeafIcon}
-                  title="Similar Plants"
-                  subtitle="Plants with similar care requirements"
-                  action={{ label: "Browse All", href: "/plants" }}
-                  plants={MOCK_SIMILAR_PLANTS}
-                />
-
-                <PlantGridSection
-                  icon={SparklesIcon}
-                  title="You Might Also Like"
-                  subtitle="Handpicked recommendations for you"
-                  action={{ label: "Explore More", href: "/plants" }}
-                  plants={MOCK_YOU_MIGHT_LIKE}
-                />
-
-                <PlantGridSection
-                  icon={ShoppingBagIcon}
-                  title={`More from ${plant().shop?.name || "this Shop"}`}
-                  subtitle="Explore more plants from the same seller"
-                  action={
-                    (() => {
-                      const shop = plant().shop;
-                      return shop ? { label: "Visit Shop", href: `/shops/${shop.slug}` } : undefined;
-                    })()
-                  }
-                  plants={MOCK_MORE_FROM_SHOP}
-                />
-
-                <PlantGridSection
-                  icon={EyeIcon}
-                  title="Recently Viewed"
-                  subtitle="Plants you've been looking at"
-                  plants={MOCK_RECENTLY_VIEWED}
-                />
-
               </div>
             </div>
           )}
+        </Show>
+
+        <Show when={plant() !== undefined && !plant()}>
+          <HttpStatusCode code={404} />
+          <Title>{formatPageTitle(t("public.plants.detail.notFoundTitle"))}</Title>
+          <Meta name="robots" content="noindex, nofollow" />
+          <div class="min-h-screen bg-cream-50 dark:bg-forest-900 flex items-center justify-center px-4">
+            <div class="text-center">
+              <h1 class="text-2xl font-bold text-forest-800 dark:text-cream-50">
+                {t("public.plants.detail.notFoundTitle")}
+              </h1>
+              <p class="text-gray-500 dark:text-gray-400 mt-2">
+                {t("public.plants.detail.notFoundDescription")}
+              </p>
+              <A href="/plants" class="inline-block mt-4 text-forest-600 hover:underline">
+                {t("common.plants")}
+              </A>
+            </div>
+          </div>
         </Show>
       </Suspense>
     </ErrorBoundary>

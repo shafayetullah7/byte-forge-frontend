@@ -5,8 +5,13 @@ import { toaster } from "~/components/ui/Toast";
 export interface UseImageUploadOptions {
   maxSizeMB?: number;
   allowedTypes?: string[];
+  /** When false, replaced uploads do not call mediaApi.delete on the previous id. */
+  deleteReplacedMedia?: boolean;
+  /** When false, deleteMedia only clears local state (no API delete). */
+  deleteFromServer?: boolean;
   onSuccess?: (mediaId: string, mediaUrl: string) => void;
   onError?: (error: Error) => void;
+  onClear?: () => void;
 }
 
 export interface UseImageUploadReturn {
@@ -17,27 +22,21 @@ export interface UseImageUploadReturn {
   upload: (file: File) => Promise<void>;
   deleteMedia: () => Promise<void>;
   clear: () => void;
+  seed: (mediaId: string, url: string) => void;
 }
 
 /**
  * Hook for handling image uploads with validation and preview
- * 
- * @example
- * ```tsx
- * const { isUploading, preview, upload, deleteMedia } = useImageUpload({
- *   maxSizeMB: 3,
- *   onSuccess: (mediaId, url) => {
- *     setFormData({ ...formData(), logoId: mediaId });
- *   }
- * });
- * ```
  */
 export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUploadReturn {
   const {
     maxSizeMB = 3,
     allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"],
+    deleteReplacedMedia = true,
+    deleteFromServer = true,
     onSuccess,
     onError,
+    onClear,
   } = options;
 
   const [isUploading, setIsUploading] = createSignal(false);
@@ -45,8 +44,12 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
   const [preview, setPreview] = createSignal<string | null>(null);
   const [mediaId, setMediaId] = createSignal<string | null>(null);
 
+  const seed = (id: string, url: string) => {
+    setMediaId(id);
+    setPreview(url);
+  };
+
   const upload = async (file: File) => {
-    // Validate file size
     const maxSizeBytes = maxSizeMB * 1024 * 1024;
     if (file.size > maxSizeBytes) {
       const error = new Error(`File size must be less than ${maxSizeMB}MB`);
@@ -55,7 +58,6 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
       return;
     }
 
-    // Validate file type
     if (!allowedTypes.includes(file.type)) {
       const error = new Error(
         `Only ${allowedTypes.map((t) => t.split("/")[1].toUpperCase()).join(", ")} images are allowed`
@@ -69,10 +71,7 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
     const oldMediaId = mediaId();
 
     try {
-      // Direct API call - 401 handled by API client
       const response = await mediaApi.upload(file);
-
-      // Backend returns media directly in response now (unwrapped)
       const uploadedMediaId = response.id;
       const mediaUrl = response.url;
 
@@ -81,12 +80,11 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
       toaster.success("Image uploaded successfully");
       onSuccess?.(uploadedMediaId, mediaUrl);
 
-      // Delete previous media in background
-      if (oldMediaId) {
+      if (deleteReplacedMedia && oldMediaId) {
         mediaApi.delete(oldMediaId).catch(() => {});
       }
-    } catch (error: any) {
-      const err = error instanceof Error ? error : new Error(error.message || "Failed to upload image");
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error((error as { message?: string }).message || "Failed to upload image");
       toaster.error(err.message);
       onError?.(err);
     } finally {
@@ -101,16 +99,15 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
     setIsDeleting(true);
 
     try {
-      // Direct API call - 401 handled by API client
-      await mediaApi.delete(currentMediaId);
+      if (deleteFromServer) {
+        await mediaApi.delete(currentMediaId);
+      }
 
-      // Clear state after successful deletion
       setMediaId(null);
       setPreview(null);
-      // Silent delete - no success toast
-    } catch (error: any) {
-      // Only show error if deletion fails
-      const err = error instanceof Error ? error : new Error(error.message || "Failed to delete image");
+      onClear?.();
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error((error as { message?: string }).message || "Failed to delete image");
       toaster.error(err.message);
       onError?.(err);
     } finally {
@@ -121,6 +118,7 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
   const clear = () => {
     setPreview(null);
     setMediaId(null);
+    onClear?.();
   };
 
   return {
@@ -131,5 +129,6 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
     upload,
     deleteMedia,
     clear,
+    seed,
   };
 }

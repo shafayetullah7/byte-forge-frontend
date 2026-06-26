@@ -3,6 +3,9 @@ import { A, useParams, useLocation, createAsync, type RouteSectionProps, type Ro
 import { ChevronLeftIcon, ChevronRightIcon, ExclamationCircleIcon } from "~/components/icons";
 import { getPlantById } from "~/lib/api/endpoints/seller/plants.api";
 import { useI18n } from "~/i18n";
+import Badge from "~/components/ui/Badge";
+import { getStatusVariant, getStatusLabel } from "./[plantId]/helpers";
+import type { ProductStatus } from "~/lib/api/types/seller.types";
 
 export const route = {
   preload: ({ params }) => getPlantById(params.plantId as string),
@@ -94,6 +97,11 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
                           {plantData().translations?.find(t => t.locale === "en")?.name
                             ?? plantData().translations?.[0]?.name ?? ""}
                         </h1>
+                        <div class="mt-2">
+                          <Badge variant={getStatusVariant(plantData().status as ProductStatus)}>
+                            {getStatusLabel(plantData().status as ProductStatus)}
+                          </Badge>
+                        </div>
                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                           {plantData().plantDetails?.scientificName ?? ""}
                         </p>
@@ -104,7 +112,7 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
                           href={`/app/seller/products/${plantData().id}`}
                           class="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-lg border border-forest-200 dark:border-forest-700 text-forest-700 dark:text-forest-300 hover:bg-forest-50 dark:hover:bg-forest-900/30 text-xs font-medium transition-colors"
                         >
-                          {t("seller.products.plantDetail.viewProductDetails")}
+                          {t("seller.products.plantDetail.ordersAndReviews")}
                         </A>
                       </div>
                     </div>
