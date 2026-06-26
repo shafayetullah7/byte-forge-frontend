@@ -36,9 +36,11 @@ export default function VerifyAccount() {
 
   const sendVerificationTrigger = useAction(sendVerificationAction);
   const verifyEmailTrigger = useAction(verifyEmailAction);
+  const logout = useAction(logoutAction);
 
   const sendSubmission = useSubmission(sendVerificationAction);
   const verifySubmission = useSubmission(verifyEmailAction);
+  const logoutSubmission = useSubmission(logoutAction);
 
   const [resendStatus, setResendStatus] = createSignal<string | null>(null);
   const [errorMessage, setErrorMessage] = createSignal<string | null>(null);
@@ -163,6 +165,17 @@ export default function VerifyAccount() {
     sendVerificationTrigger();
   };
 
+  const handleLogout = () => {
+    setErrorMessage(null);
+    logout().then((result) => {
+      if (result?.success) {
+        navigate("/login", { replace: true });
+      } else {
+        toaster.error(t("auth.verifyAccount.errorLogout"));
+      }
+    });
+  };
+
   return (
     <div class="w-full sm:min-w-[400px] max-w-md mx-auto">
       <Form onSubmit={handleSubmit} class="space-y-6">
@@ -199,7 +212,7 @@ export default function VerifyAccount() {
                 maxlength={6}
                 value={field.value || ""}
                 required
-                disabled={verifySubmission.pending}
+                disabled={verifySubmission.pending || logoutSubmission.pending}
                 autocomplete="one-time-code"
               />
               {field.error && (
@@ -216,7 +229,7 @@ export default function VerifyAccount() {
           variant="primary"
           class="w-full"
           type="submit"
-          disabled={verifySubmission.pending}
+          disabled={verifySubmission.pending || logoutSubmission.pending}
         >
           {verifySubmission.pending ? t("auth.verifyAccount.submitting") : t("auth.verifyAccount.submit")}
         </Button>
@@ -232,6 +245,7 @@ export default function VerifyAccount() {
             disabled={
               verifySubmission.pending ||
               sendSubmission.pending ||
+              logoutSubmission.pending ||
               (!isExpired() && !!timeLeft())
             }
             class="text-forest-600 dark:text-sage-400 hover:text-forest-700 dark:hover:text-sage-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
@@ -245,12 +259,22 @@ export default function VerifyAccount() {
         <div class="text-center pt-4 border-t border-gray-100 dark:border-gray-800">
           <button
             type="button"
-            onClick={() => {
-              logoutAction().then(() => navigate("/login", { replace: true }));
-            }}
-            class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+            onClick={handleLogout}
+            disabled={logoutSubmission.pending}
+            class="text-sm cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
           >
-            {t("auth.verifyAccount.notYou")}
+            {logoutSubmission.pending ? (
+              t("common.loading")
+            ) : (
+              <>
+                <span class="text-gray-600 dark:text-gray-400">
+                  {t("auth.verifyAccount.notYou")}{" "}
+                </span>
+                <span class="font-medium text-terracotta-600 dark:text-terracotta-400 group-hover:text-terracotta-700 dark:group-hover:text-terracotta-300">
+                  {t("auth.verifyAccount.logout")}
+                </span>
+              </>
+            )}
           </button>
         </div>
       </Form>
