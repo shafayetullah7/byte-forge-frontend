@@ -17,6 +17,7 @@ import type {
  */
 export const getCart = query(
   async (): Promise<Cart | null> => {
+    "use server";
     return fetcher<Cart | null>("/api/v1/user/buyer/cart");
   },
   "buyer-cart"
@@ -27,6 +28,7 @@ export const getCart = query(
  */
 export const getCartCount = query(
   async (): Promise<{ itemsCount: number; totalQuantity: number }> => {
+    "use server";
     return fetcher<{ itemsCount: number; totalQuantity: number }>("/api/v1/user/buyer/cart/count");
   },
   "buyer-cart-count"
@@ -98,6 +100,7 @@ export const clearCart = async (): Promise<void> => {
  */
 export const validateCart = query(
   async (): Promise<CartValidationResult> => {
+    "use server";
     return fetcher<CartValidationResult>("/api/v1/user/buyer/cart/validate", {
       method: "POST",
     });

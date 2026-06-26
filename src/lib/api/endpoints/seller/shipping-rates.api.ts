@@ -12,6 +12,7 @@ import type {
  */
 export const getShippingRates = query(
   async (): Promise<ShippingRateWithDistrict[]> => {
+    "use server";
     return fetcher<ShippingRateWithDistrict[]>(
       "/api/v1/user/seller/shipping-rates/my-shop"
     );

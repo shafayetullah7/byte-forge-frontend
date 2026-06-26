@@ -206,6 +206,7 @@ export const sellerShopApi = {
    * Get shop verification status
    */
   getVerificationStatus: query(async (): Promise<ShopVerificationStatus | null> => {
+    "use server";
     try {
       return await fetcher<ShopVerificationStatus>(
         '/api/v1/user/seller/shops/my-shop/verification'

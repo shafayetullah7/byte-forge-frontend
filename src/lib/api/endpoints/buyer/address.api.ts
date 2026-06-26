@@ -19,6 +19,7 @@ const BASE_PATH = "/api/v1/user/buyer/addresses";
  */
 export const getAddresses = query(
   async (params?: ListAddressesParams): Promise<Address[]> => {
+    "use server";
     const queryParams: Record<string, string | number | boolean | undefined> = {};
     if (params) {
       if (params.page !== undefined) queryParams.page = params.page;
@@ -39,6 +40,7 @@ export const getAddresses = query(
  */
 export const getAddressById = query(
   async (id: string): Promise<Address> => {
+    "use server";
     return fetcher<Address>(`${BASE_PATH}/${id}`);
   },
   "buyer-address-by-id"

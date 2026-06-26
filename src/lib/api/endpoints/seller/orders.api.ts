@@ -15,6 +15,7 @@ const BASE_PATH = "/api/v1/user/seller/orders";
 
 export const getSellerOrders = query(
   async (params?: SellerOrderFilterParams): Promise<SellerOrderListResponse> => {
+    "use server";
     const queryParams: Record<string, string | number | undefined> = {};
     if (params) {
       if (params.page !== undefined) queryParams.page = params.page;
@@ -38,6 +39,7 @@ export const getSellerOrders = query(
 
 export const getSellerOrderStats = query(
   async (): Promise<SellerOrderStats> => {
+    "use server";
     return fetcher<SellerOrderStats>(`${BASE_PATH}/stats`);
   },
   "seller-orders-stats"
@@ -45,6 +47,7 @@ export const getSellerOrderStats = query(
 
 export const getSellerOrder = query(
   async (orderId: string): Promise<SellerOrderDetail | null> => {
+    "use server";
     try {
       return await fetcher<SellerOrderDetail>(`${BASE_PATH}/${orderId}`);
     } catch (error) {

@@ -9,6 +9,7 @@ const BASE_PATH = "/api/v1/user/buyer/reviews";
 
 export const getReviewEligibility = query(
   async (orderItemId: string) => {
+    "use server";
     return fetcher<BuyerReviewEligibility>(
       `${BASE_PATH}/eligibility/${orderItemId}`
     );

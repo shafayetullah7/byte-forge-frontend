@@ -15,6 +15,7 @@ import type {
  */
 export const getPlants = query(
   async (filter?: PlantFilter) => {
+    "use server";
     const params: Record<string, string | number | boolean | undefined> = {};
 
     if (filter) {
@@ -43,6 +44,7 @@ export const getPlants = query(
  */
 export const getPlantById = query(
   async (id: string) => {
+    "use server";
     return fetcher<PlantDetail>(`/api/v1/user/seller/plants/${id}`);
   },
   "seller-plant-detail"

@@ -14,6 +14,7 @@ export interface SellerReviewFilter {
 
 export const getSellerProductReviews = query(
   async (productId: string, filter?: SellerReviewFilter) => {
+    "use server";
     const params: Record<string, string | number | boolean | undefined> = {};
     if (filter) {
       if (filter.page !== undefined) params.page = filter.page;

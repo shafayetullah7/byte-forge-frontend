@@ -15,6 +15,7 @@ import type {
  */
 export const getProducts = query(
   async (filter?: ProductFilter) => {
+    "use server";
     const params: Record<string, string | number | boolean | undefined> = {};
 
     if (filter) {
@@ -40,6 +41,7 @@ export const getProducts = query(
  */
 export const getProductById = query(
   async (id: string) => {
+    "use server";
     return fetcher<ProductDetail>(`/api/v1/user/seller/products/${id}`);
   },
   "seller-product-detail"
@@ -50,6 +52,7 @@ export const getProductById = query(
  */
 export const getProductSummary = query(
   async (id: string) => {
+    "use server";
     const response = await fetcher<ProductSummary>(`/api/v1/user/seller/products/${id}/summary`);
     console.log("[ProductSummary API Response]", response);
     return response;
@@ -62,6 +65,7 @@ export const getProductSummary = query(
  */
 export const getProductOverview = query(
   async (id: string) => {
+    "use server";
     return fetcher<ProductOverview>(`/api/v1/user/seller/products/${id}/overview`);
   },
   "seller-product-overview"

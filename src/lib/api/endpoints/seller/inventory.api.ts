@@ -15,6 +15,7 @@ import type {
  */
 export const getProductInventory = query(
   async (productId: string) => {
+    "use server";
     return fetcher<InventoryDetail>(
       `/api/v1/user/seller/products/${productId}/inventory`
     );
@@ -27,6 +28,7 @@ export const getProductInventory = query(
  */
 export const getStockMovements = query(
   async (productId: string, filter?: InventoryMovementFilter) => {
+    "use server";
     const params: Record<string, string | number | undefined> = {};
     if (filter) {
       if (filter.page !== undefined) params.page = filter.page;

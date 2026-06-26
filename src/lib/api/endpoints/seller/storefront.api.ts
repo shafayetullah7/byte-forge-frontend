@@ -13,6 +13,7 @@ type SuccessEnvelope<T> = {
 };
 
 export const getSellerStorefront = query(async () => {
+  "use server";
   return fetcher<SuccessEnvelope<SellerStorefrontData>>(
     "/api/v1/user/seller/storefront",
     { unwrapData: false },

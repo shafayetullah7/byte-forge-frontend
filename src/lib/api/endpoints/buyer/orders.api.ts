@@ -14,6 +14,7 @@ const BASE_PATH = "/api/v1/user/buyer/orders";
  */
 export const getOrders = query(
   async (params?: OrderFilterParams): Promise<OrderListResponse> => {
+    "use server";
     const queryParams: Record<string, string | number | boolean | undefined> = {};
     if (params) {
       if (params.page !== undefined) queryParams.page = params.page;
@@ -37,6 +38,7 @@ export const getOrders = query(
  */
 export const getOrdersStats = query(
   async (): Promise<OrderStats> => {
+    "use server";
     return fetcher<OrderStats>(`${BASE_PATH}/stats`);
   },
   "buyer-orders-stats"
@@ -47,6 +49,7 @@ export const getOrdersStats = query(
  */
 export const getOrderGroup = query(
   async (groupId: string): Promise<OrderGroupDetailResponse> => {
+    "use server";
     return fetcher<OrderGroupDetailResponse>(`${BASE_PATH}/${groupId}`, {
       unwrapData: false,
     });

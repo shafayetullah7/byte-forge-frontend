@@ -20,6 +20,7 @@ export interface PlaceOrderRequest {
  */
 export const calculatePriceBreakdown = query(
   async (request: CalculatePriceBreakdownRequest): Promise<PriceBreakdownResponse> => {
+    "use server";
     return fetcher<PriceBreakdownResponse>(
       "/api/v1/user/buyer/checkout/price-breakdown",
       {
