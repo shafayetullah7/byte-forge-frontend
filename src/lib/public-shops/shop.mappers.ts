@@ -112,9 +112,9 @@ export function mapApiReviewSummary(
   summary: ApiPublicShopReviewSummary,
 ): PublicShopReviewSummary {
   return {
-    average: summary.average,
-    total: summary.total,
-    distribution: summary.distribution,
+    average: summary.average ?? 0,
+    total: summary.total ?? 0,
+    distribution: summary.distribution ?? [],
   };
 }
 

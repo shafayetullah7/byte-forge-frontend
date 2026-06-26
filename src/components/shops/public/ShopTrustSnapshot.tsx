@@ -23,9 +23,9 @@ export const ShopTrustSnapshot: Component<{
   return (
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
       <KpiCard label={l().products} value={m().totalProducts} />
-      <KpiCard label={l().orders} value={m().completedOrders.toLocaleString()} />
-      <KpiCard label={l().rating} value={m().averageRating.toFixed(1)} suffix="/ 5" />
-      <KpiCard label={l().reviews} value={m().reviewCount.toLocaleString()} />
+      <KpiCard label={l().orders} value={(m().completedOrders ?? 0).toLocaleString()} />
+      <KpiCard label={l().rating} value={(m().averageRating ?? 0).toFixed(1)} suffix="/ 5" />
+      <KpiCard label={l().reviews} value={(m().reviewCount ?? 0).toLocaleString()} />
       <KpiCard label={l().shopAge} value={yearsActive()} suffix={l().years} />
     </div>
   );

@@ -22,7 +22,7 @@ export const ShopReviewsPreview: Component<{
       <div class="rounded-2xl border border-cream-200 dark:border-forest-700 bg-white dark:bg-forest-800 p-6">
         <div class="flex items-center gap-6 mb-6">
           <div class="text-center">
-            <p class="text-4xl font-bold text-forest-800 dark:text-cream-50">{props.summary.average.toFixed(1)}</p>
+            <p class="text-4xl font-bold text-forest-800 dark:text-cream-50">{(props.summary.average ?? 0).toFixed(1)}</p>
             <p class="text-sm text-gray-500">{props.summary.total} {props.labels.reviews}</p>
           </div>
           <div class="flex-1 space-y-1.5">

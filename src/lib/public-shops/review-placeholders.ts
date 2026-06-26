@@ -3,11 +3,22 @@ import type {
   PublicShopReviewSummary,
 } from "~/lib/types/public/shops.types";
 
-const EMPTY_SUMMARY: PublicShopReviewSummary = {
-  averageRating: 0,
-  total: 0,
-  distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
-};
+function emptyDistribution() {
+  return [5, 4, 3, 2, 1].map((rating) => ({
+    rating,
+    count: 0,
+    percentage: 0,
+  }));
+}
+
+function normalizeSummary(summary: PublicShopReviewSummary): PublicShopReviewSummary {
+  return {
+    average: summary.average ?? 0,
+    total: summary.total ?? 0,
+    distribution:
+      summary.distribution?.length > 0 ? summary.distribution : emptyDistribution(),
+  };
+}
 
 /**
  * Returns API review data only — no mock fill for empty shops.
@@ -17,9 +28,8 @@ export function mergeReviewsWithPlaceholders(
   summary: PublicShopReviewSummary,
   reviews: PublicShopReview[],
 ): { summary: PublicShopReviewSummary; reviews: PublicShopReview[] } {
-  if (summary.total > 0 || reviews.length > 0) {
-    return { summary, reviews };
-  }
-
-  return { summary: EMPTY_SUMMARY, reviews: [] };
+  return {
+    summary: normalizeSummary(summary),
+    reviews,
+  };
 }

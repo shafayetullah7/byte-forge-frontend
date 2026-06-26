@@ -69,7 +69,7 @@ export const ShopReputationSection: Component<{
         <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase mb-3">{props.labels.satisfaction}</h3>
         <div class="flex items-center gap-4 mb-4">
           <span class="text-4xl font-bold text-forest-800 dark:text-cream-50">
-            {props.summary.average.toFixed(1)}
+            {(props.summary.average ?? 0).toFixed(1)}
           </span>
           <span class="text-sm text-gray-500">{props.summary.total} {props.labels.reviews}</span>
         </div>

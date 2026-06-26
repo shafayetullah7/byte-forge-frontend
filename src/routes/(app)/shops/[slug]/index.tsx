@@ -1,4 +1,4 @@
-import { Show } from "solid-js";
+import { Show, createMemo } from "solid-js";
 import { createAsync, useParams } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import { getShopBySlug, getShopReviews } from "~/lib/public-shops/public-shop.service";
@@ -32,16 +32,22 @@ export default function ShopOverviewPage() {
     orders: t("public.shops.detail.orders"),
   });
 
+  const reviewSummary = createMemo(() => {
+    const summary = reviews()?.summary;
+    if (!summary || summary.total <= 0) return undefined;
+    return summary;
+  });
+
   return (
     <Show when={shop()}>
       {(shopData) => (
         <div class="space-y-10">
           <ShopAboutSection shop={shopData()} labels={aboutLabels()} t={t} />
-          <Show when={reviews()?.summary}>
+          <Show when={reviewSummary()} keyed>
             {(summary) => (
               <ShopReputationSection
                 shop={shopData()}
-                summary={summary()}
+                summary={summary}
                 labels={aboutLabels()}
                 t={t}
               />

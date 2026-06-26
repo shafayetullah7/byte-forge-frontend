@@ -13,7 +13,6 @@ export function mergeProfileWithPlaceholders(
   profile: PublicShopProfile,
 ): PublicShopProfile {
   const metrics: PublicShopTrustMetrics = {
-    ...profile.metrics,
     followerCount: 0,
     deliverySuccessRate: 0,
     responseRate: 0,
@@ -22,6 +21,12 @@ export function mergeProfileWithPlaceholders(
     campaignParticipants: 0,
     blogCount: 0,
     buyerSatisfactionScore: 0,
+    ...profile.metrics,
+    totalProducts: profile.metrics?.totalProducts ?? 0,
+    completedOrders: profile.metrics?.completedOrders ?? 0,
+    averageRating: profile.metrics?.averageRating ?? 0,
+    reviewCount: profile.metrics?.reviewCount ?? 0,
+    memberSince: profile.metrics?.memberSince ?? profile.createdAt,
   };
 
   const category =
