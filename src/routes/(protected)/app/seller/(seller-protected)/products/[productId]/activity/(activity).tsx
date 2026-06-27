@@ -1,6 +1,6 @@
 import { For, ErrorBoundary } from "solid-js";
 import { ClockIcon } from "~/components/icons";
-import { SectionCard } from "../components/SectionCard";
+import { SectionCard } from "~/routes/(protected)/app/seller/(seller-protected)/products/components/shared/SectionCard";
 import { SectionErrorFallback } from "~/components/seller/SectionErrorFallback";
 import { formatDateTime } from "../helpers";
 import { ACTIVITY_ICON_MAP, MOCK_ACTIVITY } from "../mock-data";

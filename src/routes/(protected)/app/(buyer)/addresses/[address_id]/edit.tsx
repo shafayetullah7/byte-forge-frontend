@@ -12,7 +12,7 @@ import { ApiError } from "~/lib/api/types";
 import { toaster } from "~/components/ui/Toast";
 import { buyerAddressSchema } from "~/schemas/buyer-address.schema";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
-import { AddressSkeleton } from "../__components__";
+import { AddressSkeleton } from "../components";
 
 interface FormState {
     label: string;

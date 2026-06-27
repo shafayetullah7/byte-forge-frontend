@@ -1,4 +1,4 @@
-import { createAsync, A, action, useAction, useSubmission, type RouteDefinition } from "@solidjs/router";
+import { createAsync, A, useAction, useSubmission, type RouteDefinition } from "@solidjs/router";
 import { Suspense, createMemo, createEffect, createSignal, Show } from "solid-js";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 import ShopHeader from "~/components/seller/ShopHeader";
@@ -11,108 +11,15 @@ import ShopBrandingModal from "~/components/seller/ShopBrandingModal";
 import ShopInfoEditModal from "~/components/seller/ShopInfoEditModal";
 import { useI18n } from "~/i18n";
 import { toaster } from "~/components/ui/Toast";
-import { getShop, getShopStatus, refetchShop, refetchShopStatus } from "~/lib/context/shop-context";
-import { sellerShopApi, type UpdateAddressDto, type UpdateContactDto, type UpdateShopInfoDto, type VerificationStatusType } from "~/lib/api/endpoints/seller/shop-detail.api";
-import { invalidatePublicShop, invalidatePublicShops } from "~/lib/api/endpoints/public/shops.api";
+import { getShop, getShopStatus } from "~/lib/context/shop-context";
+import { type UpdateAddressDto, type UpdateContactDto, type UpdateShopInfoDto } from "~/lib/api/endpoints/seller/shop-detail.api";
 import { ShopIcon, PlusIcon, BoltIcon, PackageIcon, EyeIcon, CheckCircleIcon } from "~/components/icons";
-
-/**
- * Update Address Action
- * Handles server-side address update with proper error handling
- */
-const updateAddressAction = action(async (data: UpdateAddressDto) => {
-  "use server";
-  try {
-    await sellerShopApi.updateAddress(data);
-    return { success: true };
-  } catch (error) {
-    const apiError = error as any;
-    return {
-      success: false,
-      error: {
-        message: apiError.message || "Failed to update address",
-        statusCode: apiError.statusCode,
-        validationErrors: apiError.response?.validationErrors || (apiError as any).validationErrors,
-      },
-    };
-  }
-}, "update-address-action");
-
-/**
- * Update Contact Action
- * Handles server-side contact update with proper error handling
- */
-const updateContactAction = action(async (data: UpdateContactDto) => {
-  "use server";
-  try {
-    await sellerShopApi.updateContact(data);
-    return { success: true };
-  } catch (error) {
-    const apiError = error as any;
-    return {
-      success: false,
-      error: {
-        message: apiError.message || "Failed to update contact",
-        statusCode: apiError.statusCode,
-        validationErrors: apiError.response?.validationErrors || (apiError as any).validationErrors,
-      },
-    };
-  }
-}, "update-contact-action");
-
-/**
- * Update Branding Action
- * Handles server-side branding update with proper error handling
- */
-const updateBrandingAction = action(async (data: { logoId?: string; bannerId?: string }) => {
-  "use server";
-  try {
-    const currentShop = await getShop();
-    const enTrans = currentShop?.translations?.find(t => t.locale === "en");
-    const bnTrans = currentShop?.translations?.find(t => t.locale === "bn");
-    
-    await sellerShopApi.updateShopInfo({
-      branding: data.logoId || data.bannerId ? { logoId: data.logoId, bannerId: data.bannerId } : undefined,
-      translations: {
-        en: { name: enTrans?.name || "", description: enTrans?.description || "", businessHours: enTrans?.businessHours || "" },
-        bn: { name: bnTrans?.name || "", description: bnTrans?.description || "", businessHours: bnTrans?.businessHours || "" },
-      },
-    });
-    return { success: true };
-  } catch (error) {
-    const apiError = error as any;
-    return {
-      success: false,
-      error: {
-        message: apiError.message || "Failed to update branding",
-        statusCode: apiError.statusCode,
-        validationErrors: apiError.response?.validationErrors || (apiError as any).validationErrors,
-      },
-    };
-  }
-}, "update-branding-action");
-
-/**
- * Update Shop Info Action
- * Handles server-side shop info update with proper error handling
- */
-const updateShopInfoAction = action(async (data: UpdateShopInfoDto) => {
-  "use server";
-  try {
-    await sellerShopApi.updateShopInfo(data);
-    return { success: true };
-  } catch (error) {
-    const apiError = error as any;
-    return {
-      success: false,
-      error: {
-        message: apiError.message || "Failed to update shop info",
-        statusCode: apiError.statusCode,
-        validationErrors: apiError.response?.validationErrors || (apiError as any).validationErrors,
-      },
-    };
-  }
-}, "update-shop-info-action");
+import {
+  updateAddressAction,
+  updateBrandingAction,
+  updateContactAction,
+  updateShopInfoAction,
+} from "./shop.actions";
 
 export const route = {
   preload: () => getShop(),
@@ -297,12 +204,6 @@ export default function MyShopPage() {
   createEffect(() => {
     if (shopInfoSubmission.result?.success === true && !shopInfoSubmission.pending) {
       toaster.success(t("seller.shop.myShop.shopInfo.saveSuccess"));
-      const shop = shopData();
-      if (shop?.slug) {
-        invalidatePublicShop(shop.slug);
-        invalidatePublicShops();
-      }
-      refetchShop();
       setShouldCloseInfoModal(true);
     }
   });

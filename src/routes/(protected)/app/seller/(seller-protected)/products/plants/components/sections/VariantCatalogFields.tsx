@@ -1,8 +1,9 @@
 import { createEffect, Show, createSignal, createMemo, Index, For } from "solid-js";
+import { useAction } from "@solidjs/router";
 import { PlusIcon, TrashIcon, ClipboardDocumentIcon } from "~/components/icons";
 import { Select, type SelectOption } from "~/components/ui/Select";
 import Input from "~/components/ui/Input";
-import { mediaApi } from "~/lib/api";
+import { uploadMediaAction } from "~/lib/media/media.actions";
 import { toaster } from "~/components/ui/Toast";
 
 function CheckboxField(props: {
@@ -74,6 +75,7 @@ function VariantImageUpload(props: {
   t: (key: string) => string;
 }) {
   const [isUploading, setIsUploading] = createSignal(false);
+  const uploadTrigger = useAction(uploadMediaAction);
 
   const handleUpload = async (file: File) => {
     if (file.size > 5 * 1024 * 1024) {
@@ -82,11 +84,16 @@ function VariantImageUpload(props: {
     }
     setIsUploading(true);
     try {
-      const response = await mediaApi.upload(file);
+      const formData = new FormData();
+      formData.append("file", file);
+      const result = await uploadTrigger(formData);
+      if (!result || result.success === false) {
+        throw new Error(result?.error?.message ?? props.t("seller.products.newPlant.imageUploadFailed"));
+      }
       props.setVariants(v => v.map((item, i) => i === props.variantIndex ? {
         ...item,
-        mediaIds: [...item.mediaIds, response.id],
-        mediaUrls: [...item.mediaUrls, response.url]
+        mediaIds: [...item.mediaIds, result.data.id],
+        mediaUrls: [...item.mediaUrls, result.data.url]
       } : item));
       toaster.success(props.t("seller.products.newPlant.imageUploaded"));
     } catch (err: any) {

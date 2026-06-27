@@ -6,9 +6,14 @@ import {
   ErrorBoundary,
   Suspense,
 } from "solid-js";
-import { createAsync, A } from "@solidjs/router";
+import { createAsync, A, useAction } from "@solidjs/router";
 import { useI18n } from "~/i18n";
-import { getCart, invalidateAllCart, updateCartItem, removeCartItem } from "~/lib/api/endpoints/buyer/cart.api";
+import { toaster } from "~/components/ui/Toast";
+import { getCart } from "~/lib/api/endpoints/buyer/cart.api";
+import {
+  removeCartItemAction,
+  updateCartItemAction,
+} from "~/lib/cart/cart.actions";
 import type { CartItem } from "~/lib/api/types/cart.types";
 import { formatPrice } from "../plants/constants";
 import { getStockStatusLabel } from "./cart.helpers";
@@ -37,6 +42,8 @@ function LoadingFallback() {
 export default function CartPage() {
   const { t } = useI18n();
   const cart = createAsync(() => getCart());
+  const updateCartTrigger = useAction(updateCartItemAction);
+  const removeCartTrigger = useAction(removeCartItemAction);
   const items = createMemo(() => cart()?.items ?? []);
   const [selectedIds, setSelectedIds] = createSignal<Set<string>>(new Set());
   const [updatingId, setUpdatingId] = createSignal<string | null>(null);
@@ -63,14 +70,26 @@ export default function CartPage() {
 
   const updateQuantity = async (id: string, qty: number) => {
     setUpdatingId(id);
-    try { await updateCartItem(id, { quantity: qty }); }
-    finally { setUpdatingId(null); invalidateAllCart(); }
+    try {
+      const result = await updateCartTrigger({ itemId: id, quantity: qty });
+      if (result?.success === false) {
+        toaster.error(result.error?.message ?? t("common.error"));
+      }
+    } finally {
+      setUpdatingId(null);
+    }
   };
 
   const removeItem = async (id: string) => {
     setRemovingId(id);
-    try { await removeCartItem(id); }
-    finally { setRemovingId(null); invalidateAllCart(); }
+    try {
+      const result = await removeCartTrigger({ itemId: id });
+      if (result?.success === false) {
+        toaster.error(result.error?.message ?? t("common.error"));
+      }
+    } finally {
+      setRemovingId(null);
+    }
   };
 
   return (

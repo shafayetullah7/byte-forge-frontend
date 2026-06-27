@@ -21,9 +21,9 @@ import {
   SparklesIcon,
   SpinnerIcon,
 } from "~/components/icons";
-import { StatCard } from "./__components__/StatCard";
-import { DivisionGroup } from "./__components__/DivisionGroup";
-import { CurrencyInput } from "./__components__/CurrencyInput";
+import { StatCard } from "./components/StatCard";
+import { DivisionGroup } from "./components/DivisionGroup";
+import { CurrencyInput } from "./components/CurrencyInput";
 
 const updateShippingRatesAction = action(
   async (input: { rates: Array<{ districtId: string; cost: string; costPerKg?: string }>; successMessage?: string }) => {

@@ -1,15 +1,16 @@
-import { useNavigate } from "@solidjs/router";
+import { useNavigate, createAsync, useAction } from "@solidjs/router";
 import { createSignal } from "solid-js";
 import Button from "~/components/ui/Button";
 import Card from "~/components/ui/Card";
 import { Modal } from "~/components/ui/Modal";
-import { sellerShopApi } from "~/lib/api/endpoints/seller/shop-detail.api";
-import { createAsync } from "@solidjs/router";
+import { getShop } from "~/lib/context/shop-context";
+import { deleteShopAction } from "./shop.actions";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 
 export default function DeleteShopPage() {
   const navigate = useNavigate();
-  const shopData = createAsync(() => sellerShopApi.getMyShop());
+  const shopData = createAsync(() => getShop());
+  const deleteShopTrigger = useAction(deleteShopAction);
   const [isDeleting, setIsDeleting] = createSignal(false);
   const [showConfirm, setShowConfirm] = createSignal(false);
   const [confirmText, setConfirmText] = createSignal("");
@@ -23,15 +24,12 @@ export default function DeleteShopPage() {
 
     setIsDeleting(true);
     try {
-      // Check for pending orders (placeholder - orders module not implemented)
-      // const orders = await checkPendingOrders();
-      // if (orders.length > 0) {
-      //   setHasPendingOrders(true);
-      //   return;
-      // }
-
-      await sellerShopApi.delete();
-      navigate("/seller");
+      const result = await deleteShopTrigger();
+      if (result?.success === true) {
+        navigate("/seller");
+      } else {
+        alert(result?.error?.message ?? "Failed to delete shop. Please try again.");
+      }
     } catch (error) {
       console.error("Failed to delete shop:", error);
       alert("Failed to delete shop. Please try again.");

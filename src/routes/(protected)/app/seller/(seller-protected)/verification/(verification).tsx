@@ -1,7 +1,7 @@
 import { createSignal, Show, Suspense, createEffect, onMount } from 'solid-js';
 import { createAsync, useNavigate, action, useSubmission, useAction, revalidate } from '@solidjs/router';
-import { VerificationStatusCard } from './__components__/VerificationStatusCard';
-import { VerificationForm, type VerificationFormData } from './__components__/VerificationForm';
+import { VerificationStatusCard } from './components/VerificationStatusCard';
+import { VerificationForm, type VerificationFormData } from './components/VerificationForm';
 import { sellerShopApi } from '~/lib/api/endpoints/seller/shop-detail.api';
 import { getShop } from '~/lib/context/shop-context';
 import { toaster } from '~/components/ui/Toast';
@@ -14,9 +14,7 @@ import { BoltIcon } from '~/components/icons';
  */
 const submitVerificationAction = action(async (data: VerificationFormData) => {
     "use server";
-    console.log('[ACTION] Received verification data:', JSON.stringify(data, null, 2));
     try {
-        // Convert null to undefined for API compatibility
         const dto: {
             tradeLicenseNumber?: string;
             tinNumber?: string;
@@ -30,15 +28,10 @@ const submitVerificationAction = action(async (data: VerificationFormData) => {
             tinDocumentId: data.tinDocumentId ?? undefined,
             utilityBillDocumentId: data.utilityBillDocumentId ?? undefined,
         };
-        console.log('[ACTION] Calling updateVerification API with:', JSON.stringify(dto, null, 2));
         await sellerShopApi.updateVerification(dto);
-        console.log('[ACTION] Verification submitted successfully');
-        // Invalidate verification cache to trigger automatic refetch
         revalidate("seller-shop-verification");
         return { success: true };
     } catch (error: any) {
-        console.error('[ACTION] Verification failed:', error.message);
-        // Return error as result instead of throwing to prevent h3 from setting invalid headers
         return {
             success: false,
             error: {

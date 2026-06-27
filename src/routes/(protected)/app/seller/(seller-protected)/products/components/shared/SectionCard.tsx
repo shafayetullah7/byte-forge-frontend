@@ -1,8 +1,10 @@
+import type { JSX } from "solid-js";
+
 export function SectionCard(props: {
   title: string;
-  icon?: any;
-  action?: any;
-  children: any;
+  icon?: JSX.Element;
+  action?: JSX.Element;
+  children: JSX.Element;
 }) {
   return (
     <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm">

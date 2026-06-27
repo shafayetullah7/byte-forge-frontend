@@ -1,0 +1,51 @@
+# Route Folder Structure
+
+Colocate route-private code under the route segment. Use `~/lib/` when **two or more route trees** import the same module.
+
+## Route segment layout
+
+```
+{route-segment}/
+  (page).tsx              # composition + wiring only
+  actions.ts              # or {domain}.actions.ts when multiple action groups
+  useFeature.ts           # single hook at segment root (checkout pattern)
+  hooks/                  # multiple route-private hooks
+  components/             # route-private UI (not __components__)
+  utils/                  # route-private pure helpers
+```
+
+## Server actions
+
+- **Colocated** in the route folder when only that segment (or its children) uses them.
+  - Single group: `actions.ts` (e.g. `checkout/actions.ts`, `orders/[orderId]/actions.ts`)
+  - Multiple groups in one folder: `{domain}.actions.ts` (e.g. `my-shop/shop.actions.ts`, `my-shop/storefront.actions.ts`)
+- **`~/lib/{domain}/*.actions.ts`** when shared across routes (e.g. `lib/cart/cart.actions.ts`, `lib/media/media.actions.ts`, `lib/plants/plant-lifecycle.actions.ts`).
+- Do not define inline `action()` in route `.tsx` files when a colocated `*.actions.ts` exists for that segment.
+- Keep stable action IDs when moving actions; extend shared result types (e.g. `validationErrors`) rather than dropping error fields.
+
+## Hooks
+
+- Route-only hooks: `hooks/useX.ts` (or `useX.ts` at segment root if there is only one).
+- Shared hooks: `~/lib/hooks/` or `~/lib/{domain}/useX.ts` when used by 2+ route trees.
+
+## Components
+
+- Use `components/` for route-private UI. Do **not** add new `__components__/` folders.
+- Cross-route seller product UI: `products/components/shared/` (`DetailRow`, `SectionCard`, `EditableSectionCard`).
+- App-wide UI stays in `~/components/`.
+- Public buyer plant pages (`routes/(app)/plants/`) keep their own component tree; do not force-merge with seller product components.
+
+## Utils
+
+- Route-private helpers live in `utils/` (not `helpers.ts` at segment root).
+- Re-export from `utils/index.ts` when a segment has multiple util modules.
+- Cross-cutting helpers: `~/lib/utils/` or `~/lib/{domain}/`.
+
+## Examples
+
+| Concern | Location |
+|---------|----------|
+| Shop dashboard mutations | `my-shop/shop.actions.ts` |
+| Plant overview data hook | `plants/[plantId]/hooks/usePlantOverviewData.ts` |
+| Plant section save (shared) | `~/lib/plants/usePlantSectionEdit.ts` |
+| Seller product section card | `products/components/shared/SectionCard.tsx` |

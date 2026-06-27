@@ -1,10 +1,11 @@
 import { createSignal, createMemo, createEffect } from "solid-js";
-import { useNavigate, createAsync } from "@solidjs/router";
+import { useNavigate, createAsync, useAction } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import { useSession } from "~/lib/auth";
 import { getCart } from "~/lib/api/endpoints/buyer/cart.api";
 import { getAddresses } from "~/lib/api/endpoints/buyer/address.api";
-import { calculatePriceBreakdown, placeOrder } from "~/lib/api/endpoints/buyer/checkout.api";
+import { calculatePriceBreakdown } from "~/lib/api/endpoints/buyer/checkout.api";
+import { placeOrderAction } from "./actions";
 import { getActivePaymentMethods } from "~/lib/api/endpoints/public/payment-methods.api";
 import type { Address } from "~/lib/api/types/address.types";
 import type {
@@ -21,6 +22,7 @@ export function useCheckout() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const session = useSession();
+  const placeOrderTrigger = useAction(placeOrderAction);
 
   createEffect(() => {
     const user = session();
@@ -124,16 +126,21 @@ export function useCheckout() {
 
     setIsPlacingOrder(true);
     try {
-      const result = await placeOrder({
+      const result = await placeOrderTrigger({
         addressId,
         itemIds: items.map((item) => item.id),
         paymentMethod,
         notes: orderNotes().trim() || undefined,
       });
 
-      const firstOrderNumber = result.orderGroup.orderNumbers[0] ?? "";
+      if (!result || result.success === false) {
+        toaster.error(result?.error?.message ?? "Failed to place order");
+        return;
+      }
+
+      const firstOrderNumber = result.data.orderGroup.orderNumbers[0] ?? "";
       navigate(
-        `/checkout/confirmation?order=${firstOrderNumber}&method=${paymentMethod}&groupId=${result.orderGroup.orderGroupId}`
+        `/checkout/confirmation?order=${firstOrderNumber}&method=${paymentMethod}&groupId=${result.data.orderGroup.orderGroupId}`
       );
       toaster.success(t("checkout.orderPlaced"));
     } catch (error) {

@@ -19,7 +19,7 @@ import {
     AddressEmptyState,
     AddressSkeleton,
     type AddressTab,
-} from "./__components__";
+} from "./components";
 
 interface FilterState {
     tab: AddressTab;
@@ -47,6 +47,24 @@ const deleteAddressAction = action(async (input: DeleteAddressActionData) => {
     }
 }, "delete-address-action");
 
+const setDefaultAddressAction = action(async (input: { id: string }) => {
+    "use server";
+    try {
+        await setDefaultAddress(input.id);
+        invalidateAddresses();
+        return { success: true };
+    } catch (error) {
+        const apiError = error as ApiError;
+        return {
+            success: false,
+            error: {
+                statusCode: apiError.statusCode,
+                message: apiError.response?.message ?? apiError.message,
+            },
+        };
+    }
+}, "set-default-address-action");
+
 const AddressesPage: Component = () => {
     const { t } = useI18n();
     const [filters, setFilters] = createStore<FilterState>({
@@ -64,6 +82,8 @@ const AddressesPage: Component = () => {
 
     const deleteAddressTrigger = useAction(deleteAddressAction);
     const deleteSubmission = useSubmission(deleteAddressAction);
+    const setDefaultTrigger = useAction(setDefaultAddressAction);
+    const setDefaultSubmission = useSubmission(setDefaultAddressAction);
 
     createEffect(() => {
         const result = deleteSubmission.result;
@@ -76,13 +96,19 @@ const AddressesPage: Component = () => {
         }
     });
 
-    const handleSetDefault = async (id: string) => {
-        try {
-            await setDefaultAddress(id);
+    createEffect(() => {
+        const result = setDefaultSubmission.result;
+        if (!result) return;
+
+        if (result.success === true) {
             toaster.success("Default address updated");
-        } catch (error) {
-            toaster.error("Failed to set default address");
+        } else if (result.success === false && result.error) {
+            toaster.error(result.error.message || "Failed to set default address");
         }
+    });
+
+    const handleSetDefault = (id: string) => {
+        setDefaultTrigger({ id });
     };
 
     return (

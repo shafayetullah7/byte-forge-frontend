@@ -122,6 +122,14 @@ Do NOT call `fetcher` directly from client components for SSR-critical or SEO-se
 
 ## Revalidation & Mutations
 
+**Reads:** `query()` + `"use server"` + `createAsync` (BFF — browser calls SolidStart RPC only).
+
+**Writes:** `action()` + `"use server"` at route or lib boundaries (e.g. `cart.actions.ts`, `checkout/actions.ts`). The action calls plain `fetcher` helpers in `src/lib/api/endpoints/**` and then `revalidate()` / `invalidate*()`. Do **not** wrap API exports in `action()` — keep API layer as plain async functions.
+
+Wire client components with `useAction` + `useSubmission` (or await the trigger for imperative flows). Return `{ success, error? }` envelopes for toast-friendly error handling.
+
+**File uploads:** Build `FormData` on the client and pass it to the action (do not pass raw `File` in JSON). See `src/lib/media/media.actions.ts` and `useImageUpload`.
+
 After a mutation (create, update, delete), revalidate the relevant cached query:
 
 ```tsx
@@ -130,7 +138,6 @@ import { revalidate, action } from "@solidjs/router";
 const deleteProduct = action(async (id: string) => {
   "use server";
   await fetch(`/api/products/${id}`, { method: "DELETE" });
-  // Revalidate the "products" cache so the list updates
   throw revalidate("products");
 });
 ```
@@ -168,3 +175,4 @@ Need async data in a component?
 4. **❌ Wrapping every component in `<Suspense>`** — Only wrap components that actually suspend (use `createAsync`).
 5. **❌ Forgetting `preload` on routes** — Without `preload`, data fetching starts only after the route component renders, causing waterfalls.
 6. **❌ Calling `query()` functions without `createAsync`** — Calling a `query()` function directly returns a raw promise. Always consume it through `createAsync` to get reactivity and Suspense integration.
+7. **❌ Calling `fetcher` directly from client components for mutations** — Use `action()` + `"use server"` + `useAction` so writes go through the BFF.

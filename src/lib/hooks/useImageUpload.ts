@@ -1,10 +1,12 @@
 import { createSignal } from "solid-js";
-import { mediaApi } from "~/lib/api";
+import { useAction } from "@solidjs/router";
 import { toaster } from "~/components/ui/Toast";
+import { deleteMediaAction, uploadMediaAction } from "~/lib/media/media.actions";
 
 export interface UseImageUploadOptions {
   maxSizeMB?: number;
   allowedTypes?: string[];
+  folder?: string;
   /** When false, replaced uploads do not call mediaApi.delete on the previous id. */
   deleteReplacedMedia?: boolean;
   /** When false, deleteMedia only clears local state (no API delete). */
@@ -32,12 +34,16 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
   const {
     maxSizeMB = 3,
     allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"],
+    folder,
     deleteReplacedMedia = true,
     deleteFromServer = true,
     onSuccess,
     onError,
     onClear,
   } = options;
+
+  const uploadTrigger = useAction(uploadMediaAction);
+  const deleteTrigger = useAction(deleteMediaAction);
 
   const [isUploading, setIsUploading] = createSignal(false);
   const [isDeleting, setIsDeleting] = createSignal(false);
@@ -71,9 +77,19 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
     const oldMediaId = mediaId();
 
     try {
-      const response = await mediaApi.upload(file);
-      const uploadedMediaId = response.id;
-      const mediaUrl = response.url;
+      const formData = new FormData();
+      formData.append("file", file);
+      if (folder) {
+        formData.append("folder", folder);
+      }
+
+      const result = await uploadTrigger(formData);
+      if (!result || result.success === false) {
+        throw new Error(result?.error?.message ?? "Failed to upload image");
+      }
+
+      const uploadedMediaId = result.data.id;
+      const mediaUrl = result.data.url;
 
       setMediaId(uploadedMediaId);
       setPreview(mediaUrl);
@@ -81,7 +97,7 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
       onSuccess?.(uploadedMediaId, mediaUrl);
 
       if (deleteReplacedMedia && oldMediaId) {
-        mediaApi.delete(oldMediaId).catch(() => {});
+        deleteTrigger({ id: oldMediaId }).catch(() => {});
       }
     } catch (error: unknown) {
       const err = error instanceof Error ? error : new Error((error as { message?: string }).message || "Failed to upload image");
@@ -100,7 +116,10 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
 
     try {
       if (deleteFromServer) {
-        await mediaApi.delete(currentMediaId);
+        const result = await deleteTrigger({ id: currentMediaId });
+        if (!result || result.success === false) {
+          throw new Error(result?.error?.message ?? "Failed to delete image");
+        }
       }
 
       setMediaId(null);

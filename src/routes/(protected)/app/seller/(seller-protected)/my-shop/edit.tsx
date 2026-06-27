@@ -1,15 +1,21 @@
-import { createAsync, useNavigate } from "@solidjs/router";
+import { createAsync, useNavigate, useAction } from "@solidjs/router";
 import { createSignal } from "solid-js";
 import Button from "~/components/ui/Button";
 import Input from "~/components/ui/Input";
 import Card from "~/components/ui/Card";
 import { Modal } from "~/components/ui/Modal";
-import { sellerShopApi } from "~/lib/api/endpoints/seller/shop-detail.api";
+import { getShop } from "~/lib/context/shop-context";
+import {
+  submitShopForReviewAction,
+  updateShopInfoAction,
+} from "./shop.actions";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 
 export default function EditShopPage() {
   const navigate = useNavigate();
-  const shopData = createAsync(() => sellerShopApi.getMyShop());
+  const shopData = createAsync(() => getShop());
+  const updateShopTrigger = useAction(updateShopInfoAction);
+  const submitForReviewTrigger = useAction(submitShopForReviewAction);
   const [isSubmitting, setIsSubmitting] = createSignal(false);
   const [showConfirmModal, setShowConfirmModal] = createSignal(false);
   const [isMajorChange, setIsMajorChange] = createSignal(false);
@@ -61,13 +67,15 @@ export default function EditShopPage() {
         },
       };
 
-      if (isMajorChange()) {
-        await sellerShopApi.submitForReview(dto);
-      } else {
-        await sellerShopApi.updateShopInfo(dto);
-      }
+      const result = isMajorChange()
+        ? await submitForReviewTrigger(dto)
+        : await updateShopTrigger(dto);
 
-      navigate("/seller/my-shop");
+      if (result?.success === true) {
+        navigate("/seller/my-shop");
+      } else {
+        console.error("Failed to update shop:", result?.error?.message);
+      }
     } catch (error) {
       console.error("Failed to update shop:", error);
     } finally {

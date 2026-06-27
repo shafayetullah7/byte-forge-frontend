@@ -1,19 +1,18 @@
-import { createAsync, A, type RouteDefinition } from "@solidjs/router";
+import { createAsync, A, type RouteDefinition, useAction } from "@solidjs/router";
 import { createSignal, Show, For, Suspense } from "solid-js";
 import { useI18n } from "~/i18n";
 import { toaster } from "~/components/ui/Toast";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
-import { EditableSectionCard } from "~/routes/(protected)/app/seller/(seller-protected)/products/plants/[plantId]/components/EditableSectionCard";
+import { EditableSectionCard } from "~/routes/(protected)/app/seller/(seller-protected)/products/components/shared/EditableSectionCard";
 import Input from "~/components/ui/Input";
 import Textarea from "~/components/ui/Textarea";
-import {
-  getSellerStorefront,
-  updateStorefrontProfile,
-  replaceWhyChooseUs,
-  replaceValuePoints,
-} from "~/lib/api/endpoints/seller/storefront.api";
-import { invalidatePublicShop, invalidatePublicShops } from "~/lib/api/endpoints/public/shops.api";
+import { getSellerStorefront } from "~/lib/api/endpoints/seller/storefront.api";
 import { getShop } from "~/lib/context/shop-context";
+import {
+  replaceValuePointsAction,
+  replaceWhyChooseUsAction,
+  updateStorefrontProfileAction,
+} from "./storefront.actions";
 import {
   PairedListEditor,
   fromPairedRows,
@@ -32,6 +31,9 @@ export default function StorefrontPage() {
   const { t, locale } = useI18n();
   const storefrontQuery = createAsync(() => getSellerStorefront(), { deferStream: true });
   const shopQuery = createAsync(() => getShop(), { deferStream: true });
+  const updateProfileTrigger = useAction(updateStorefrontProfileAction);
+  const replaceWhyTrigger = useAction(replaceWhyChooseUsAction);
+  const replaceValuesTrigger = useAction(replaceValuePointsAction);
 
   const [editingSection, setEditingSection] = createSignal<SectionId>(null);
   const [isSaving, setIsSaving] = createSignal(false);
@@ -62,25 +64,18 @@ export default function StorefrontPage() {
     setProfileDraft(null);
   };
 
-  const invalidatePublicCaches = async () => {
-    const shop = await getShop();
-    if (shop?.slug) {
-      invalidatePublicShop(shop.slug);
-      invalidatePublicShops();
-    }
-  };
-
   const saveProfile = async () => {
     const draft = profileDraft();
     if (!draft) return;
     setIsSaving(true);
     try {
-      await updateStorefrontProfile({ translations: draft });
-      await invalidatePublicCaches();
-      toaster.success(t("seller.shop.storefront.profileSaved"));
-      cancelEdit();
-    } catch {
-      toaster.error(t("seller.shop.storefront.saveFailed"));
+      const result = await updateProfileTrigger({ translations: draft });
+      if (result?.success === true) {
+        toaster.success(t("seller.shop.storefront.profileSaved"));
+        cancelEdit();
+      } else {
+        toaster.error(result?.error?.message ?? t("seller.shop.storefront.saveFailed"));
+      }
     } finally {
       setIsSaving(false);
     }
@@ -89,12 +84,13 @@ export default function StorefrontPage() {
   const saveWhyChooseUs = async () => {
     setIsSaving(true);
     try {
-      await replaceWhyChooseUs(fromPairedRows(whyDraft()));
-      await invalidatePublicCaches();
-      toaster.success(t("seller.shop.storefront.whyChooseUsSaved"));
-      cancelEdit();
-    } catch {
-      toaster.error(t("seller.shop.storefront.saveFailed"));
+      const result = await replaceWhyTrigger(fromPairedRows(whyDraft()));
+      if (result?.success === true) {
+        toaster.success(t("seller.shop.storefront.whyChooseUsSaved"));
+        cancelEdit();
+      } else {
+        toaster.error(result?.error?.message ?? t("seller.shop.storefront.saveFailed"));
+      }
     } finally {
       setIsSaving(false);
     }
@@ -103,12 +99,13 @@ export default function StorefrontPage() {
   const saveValuePoints = async () => {
     setIsSaving(true);
     try {
-      await replaceValuePoints(fromPairedRows(valuesDraft()));
-      await invalidatePublicCaches();
-      toaster.success(t("seller.shop.storefront.valuesSaved"));
-      cancelEdit();
-    } catch {
-      toaster.error(t("seller.shop.storefront.saveFailed"));
+      const result = await replaceValuesTrigger(fromPairedRows(valuesDraft()));
+      if (result?.success === true) {
+        toaster.success(t("seller.shop.storefront.valuesSaved"));
+        cancelEdit();
+      } else {
+        toaster.error(result?.error?.message ?? t("seller.shop.storefront.saveFailed"));
+      }
     } finally {
       setIsSaving(false);
     }

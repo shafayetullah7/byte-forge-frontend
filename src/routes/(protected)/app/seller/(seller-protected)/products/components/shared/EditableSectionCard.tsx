@@ -1,4 +1,4 @@
-import { Show } from "solid-js";
+import { Show, type JSX } from "solid-js";
 import { PencilIcon } from "~/components/icons";
 import Button from "~/components/ui/Button";
 import { useI18n } from "~/i18n";
@@ -6,15 +6,15 @@ import { SectionCard } from "./SectionCard";
 
 export function EditableSectionCard(props: {
   title: string;
-  icon?: any;
-  headerAction?: any;
+  icon?: JSX.Element;
+  headerAction?: JSX.Element;
   isEditing: boolean;
   isSaving?: boolean;
   canEdit?: boolean;
   onEdit: () => void;
   onCancel: () => void;
   onSave: () => void;
-  children: any;
+  children: JSX.Element;
 }) {
   const { t } = useI18n();
   const canEdit = () => props.canEdit !== false;

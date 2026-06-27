@@ -8,6 +8,7 @@ import { cloneForm as clonePlantForm } from "~/lib/plants/plant-section-edit";
 import { invalidateInventory } from "~/lib/api/endpoints/seller/inventory.api";
 import Badge from "~/components/ui/Badge";
 import Button from "~/components/ui/Button";
+import { ConfirmDialog } from "~/components/ui/ConfirmDialog";
 import { PlusIcon, PackageIcon, ImageIcon, TrashIcon } from "~/components/icons";
 import {
   formatPrice,
@@ -17,9 +18,9 @@ import {
   getLeafDensityLabel,
   getPropagationLabel,
   getContainerTypeLabel,
-} from "../helpers";
-import { DetailRow } from "../components/DetailRow";
-import { EditableSectionCard } from "../components/EditableSectionCard";
+} from "../utils";
+import { DetailRow } from "~/routes/(protected)/app/seller/(seller-protected)/products/components/shared/DetailRow";
+import { EditableSectionCard } from "~/routes/(protected)/app/seller/(seller-protected)/products/components/shared/EditableSectionCard";
 import { PlantSectionFieldEditor } from "../../components/PlantSectionFieldEditor";
 import { useI18n } from "~/i18n";
 import type { PlantSectionId } from "~/lib/plants/plant-section-edit";
@@ -28,6 +29,7 @@ export default function VariantsRoute() {
   const { t } = useI18n();
   const params = useParams();
   const [addingVariant, setAddingVariant] = createSignal(false);
+  const [variantToRemove, setVariantToRemove] = createSignal<string | null>(null);
 
   const plant = createAsync(
     () => getPlantById(params.plantId as string),
@@ -53,7 +55,6 @@ export default function VariantsRoute() {
   const handleRemoveVariant = async (variantId: string) => {
     const data = plant();
     if (!data) return;
-    if (!confirm(t("seller.products.plantVariants.confirmRemove"))) return;
 
     const form = clonePlantForm(fromPlantDetailToForm(data));
     if (form.variants.length <= 1) return;
@@ -68,6 +69,7 @@ export default function VariantsRoute() {
     if (ok) {
       invalidateInventory(params.plantId as string);
       sectionEdit.cancelEdit();
+      setVariantToRemove(null);
     }
   };
 
@@ -256,7 +258,7 @@ export default function VariantsRoute() {
                               <div class="mt-4 pt-4 border-t border-cream-100 dark:border-forest-700/50">
                                 <button
                                   type="button"
-                                  onClick={() => handleRemoveVariant(variant.id)}
+                                  onClick={() => setVariantToRemove(variant.id)}
                                   class="inline-flex items-center gap-1.5 text-sm text-terracotta-600 dark:text-terracotta-400 hover:underline"
                                 >
                                   <TrashIcon class="w-3.5 h-3.5" />
@@ -283,6 +285,22 @@ export default function VariantsRoute() {
           </div>
         )}
       </Show>
+
+      <ConfirmDialog
+        isOpen={variantToRemove() !== null}
+        onClose={() => setVariantToRemove(null)}
+        onConfirm={() => {
+          const id = variantToRemove();
+          if (id) void handleRemoveVariant(id);
+        }}
+        title={t("seller.products.plantVariants.confirmRemoveTitle")}
+        description={t("seller.products.plantVariants.confirmRemove")}
+        confirmLabel={t("seller.products.plantVariants.removeVariant")}
+        cancelLabel={t("common.cancel")}
+        variant="danger"
+        loading={sectionEdit.isSaving()}
+        closeOnConfirm={false}
+      />
     </ErrorBoundary>
   );
 }

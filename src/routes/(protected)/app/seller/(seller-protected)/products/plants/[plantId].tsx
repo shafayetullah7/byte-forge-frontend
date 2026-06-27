@@ -4,7 +4,8 @@ import { ChevronLeftIcon, ChevronRightIcon, ExclamationCircleIcon } from "~/comp
 import { getPlantById } from "~/lib/api/endpoints/seller/plants.api";
 import { useI18n } from "~/i18n";
 import Badge from "~/components/ui/Badge";
-import { getStatusVariant, getStatusLabel } from "./[plantId]/helpers";
+import { getStatusVariant, getStatusLabel } from "./[plantId]/utils";
+import { translationFor } from "./[plantId]/utils/plant-translations";
 import type { ProductStatus } from "~/lib/api/types/seller.types";
 
 export const route = {
@@ -79,7 +80,7 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
                     </A>
                     <ChevronRightIcon class="w-4 h-4" />
                     <span class="text-forest-800 dark:text-cream-50 font-medium truncate">
-                      {plantData().translations?.find(t => t.locale === "en")?.name
+                      {translationFor(plantData().translations, "en")?.name
                         ?? plantData().translations?.[0]?.name ?? ""}
                     </span>
                   </nav>
@@ -94,7 +95,7 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
                       </A>
                       <div>
                         <h1 class="text-2xl md:text-3xl font-bold text-forest-800 dark:text-cream-50">
-                          {plantData().translations?.find(t => t.locale === "en")?.name
+                          {translationFor(plantData().translations, "en")?.name
                             ?? plantData().translations?.[0]?.name ?? ""}
                         </h1>
                         <div class="mt-2">

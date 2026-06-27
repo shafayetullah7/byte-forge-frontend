@@ -1,6 +1,7 @@
 import { createSignal, Show } from 'solid-js';
+import { useAction } from '@solidjs/router';
 import { FileUpload } from '~/components/ui/FileUpload';
-import { mediaApi } from '~/lib/api';
+import { deleteMediaAction, uploadMediaAction } from '~/lib/media/media.actions';
 import { toaster } from '~/components/ui/Toast';
 import { useI18n } from '~/i18n';
 
@@ -20,6 +21,8 @@ export interface DocumentUploaderProps {
 
 export function DocumentUploader(props: DocumentUploaderProps) {
     const { t } = useI18n();
+    const uploadTrigger = useAction(uploadMediaAction);
+    const deleteTrigger = useAction(deleteMediaAction);
     const [previewUrl, setPreviewUrl] = createSignal<string | null>(props.previewUrl ?? null);
     const [fileName, setFileName] = createSignal<string | null>(null);
     const [fileType, setFileType] = createSignal<string | null>(null);
@@ -38,14 +41,19 @@ export function DocumentUploader(props: DocumentUploaderProps) {
         setIsUploading(true);
 
         try {
-            const response = await mediaApi.upload(file);
+            const formData = new FormData();
+            formData.append("file", file);
+            const result = await uploadTrigger(formData);
+            if (!result || result.success === false) {
+                throw new Error(result?.error?.message ?? 'Failed to upload document');
+            }
 
-            setPreviewUrl(response.url);
+            setPreviewUrl(result.data.url);
             setFileName(file.name);
             setFileType(file.type);
             setFileSize(file.size);
 
-            props.onMediaChange(response.id);
+            props.onMediaChange(result.data.id);
             toaster.success('File uploaded successfully');
         } catch (error: any) {
             const err = error instanceof Error ? error : new Error(error.message || 'Failed to upload document');
@@ -77,7 +85,10 @@ export function DocumentUploader(props: DocumentUploaderProps) {
             if (props.onFileDelete) {
                 await props.onFileDelete(currentMediaId);
             } else {
-                await mediaApi.delete(currentMediaId);
+                const result = await deleteTrigger({ id: currentMediaId });
+                if (!result || result.success === false) {
+                    throw new Error(result?.error?.message ?? 'Failed to delete document');
+                }
             }
 
             setPreviewUrl(null);
