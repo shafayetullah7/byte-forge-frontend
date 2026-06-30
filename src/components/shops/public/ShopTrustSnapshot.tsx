@@ -1,3 +1,4 @@
+import { Show } from "solid-js";
 import type { Component } from "solid-js";
 import type { PublicShopTrustMetrics } from "~/lib/types/public/shops.types";
 import { KpiCard } from "./KpiCard";
@@ -6,6 +7,7 @@ import { KpiCard } from "./KpiCard";
 export const ShopTrustSnapshot: Component<{
   metrics: PublicShopTrustMetrics;
   labels: Record<string, string>;
+  showFollowers?: boolean;
 }> = (props) => {
   const m = () => props.metrics;
   const l = () => props.labels;
@@ -21,11 +23,14 @@ export const ShopTrustSnapshot: Component<{
   };
 
   return (
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
       <KpiCard label={l().products} value={m().totalProducts} />
       <KpiCard label={l().orders} value={(m().completedOrders ?? 0).toLocaleString()} />
       <KpiCard label={l().rating} value={(m().averageRating ?? 0).toFixed(1)} suffix="/ 5" />
       <KpiCard label={l().reviews} value={(m().reviewCount ?? 0).toLocaleString()} />
+      <Show when={props.showFollowers}>
+        <KpiCard label={l().followers} value={(m().followerCount ?? 0).toLocaleString()} />
+      </Show>
       <KpiCard label={l().shopAge} value={yearsActive()} suffix={l().years} />
     </div>
   );

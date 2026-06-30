@@ -5,6 +5,8 @@ import {
   useSearchParams,
   useNavigate,
   createAsync,
+  useAction,
+  useSubmission,
   type RouteSectionProps,
   type RouteDefinition,
 } from "@solidjs/router";
@@ -18,6 +20,8 @@ import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 import { config } from "~/lib/config";
 import HreflangLinks from "~/components/seo/HreflangLinks";
 import { absoluteUrl, formatPageTitle } from "~/lib/seo/meta";
+import { toggleShopFollowAction } from "~/lib/api/endpoints/buyer/shop-follow.actions";
+import { toaster } from "~/components/ui/Toast";
 
 const TAB_TO_SECTION: Record<string, PublicShopDetailSection> = {
   overview: "",
@@ -41,6 +45,37 @@ export default function ShopDetailLayout(props: RouteSectionProps) {
 
   const shop = createAsync(() => getShopBySlug(slug()), { deferStream: true });
 
+  const followTrigger = useAction(toggleShopFollowAction);
+  const followSubmission = useSubmission(toggleShopFollowAction);
+
+  createEffect(() => {
+    const result = followSubmission.result;
+    if (!result) return;
+    if (result.success) {
+      toaster.success(
+        result.following ? t("public.shops.detail.followSuccess") : t("public.shops.detail.unfollowSuccess"),
+      );
+    } else if (result.error?.message) {
+      toaster.error(result.error.message);
+    }
+  });
+
+  const handleFollow = () => {
+    const current = shop();
+    if (!current || !config.followEnabled) return;
+    followTrigger({ slug: slug(), follow: !current.isFollowedByViewer });
+  };
+
+  const handleShare = async () => {
+    const url = absoluteUrl(`/shops/${slug()}`);
+    if (typeof navigator !== "undefined" && navigator.share) {
+      await navigator.share({ title: shop()?.name, url });
+    } else if (typeof navigator !== "undefined") {
+      await navigator.clipboard.writeText(url);
+      toaster.success(t("public.shops.detail.linkCopied"));
+    }
+  };
+
   createEffect(() => {
     const tab = searchParams.tab;
     if (!tab || typeof tab !== "string") return;
@@ -50,18 +85,17 @@ export default function ShopDetailLayout(props: RouteSectionProps) {
     navigate(target, { replace: true });
   });
 
-  const sections = () => {
-    const base = [
+  const sections = (): Array<{ path: PublicShopDetailSection; label: string }> => {
+    const base: Array<{ path: PublicShopDetailSection; label: string }> = [
       { path: "" as const, label: t("public.shops.detail.tabs.overview") },
       { path: "products" as const, label: t("public.shops.detail.tabs.products") },
       { path: "reviews" as const, label: t("public.shops.detail.tabs.reviews") },
     ];
-    if (config.shopPhaseCEnabled) {
-      return [
-        ...base,
-        { path: "campaigns" as const, label: t("public.shops.detail.tabs.campaigns") },
-        { path: "articles" as const, label: t("public.shops.detail.tabs.articles") },
-      ];
+    if (config.campaignsEnabled) {
+      base.push({ path: "campaigns" as const, label: t("public.shops.detail.tabs.campaigns") });
+    }
+    if (config.articlesEnabled) {
+      base.push({ path: "articles" as const, label: t("public.shops.detail.tabs.articles") });
     }
     return base;
   };
@@ -72,6 +106,7 @@ export default function ShopDetailLayout(props: RouteSectionProps) {
     follow: t("public.shops.detail.follow"),
     share: t("public.shops.detail.share"),
     followSoon: t("public.shops.detail.followSoon"),
+    following: t("public.shops.detail.following"),
     memberSince: t("public.shops.detail.memberSince"),
     products: t("public.shops.detail.productsKpi"),
     orders: t("public.shops.detail.ordersKpi"),
@@ -128,7 +163,15 @@ export default function ShopDetailLayout(props: RouteSectionProps) {
                 </A>
               </div>
 
-              <ShopHero shop={shopData()} labels={heroLabels()} />
+              <ShopHero
+                shop={shopData()}
+                labels={heroLabels()}
+                followEnabled={config.followEnabled}
+                isFollowing={shopData().isFollowedByViewer ?? false}
+                isFollowPending={followSubmission.pending}
+                onFollow={handleFollow}
+                onShare={handleShare}
+              />
               <ShopDetailNav slug={slug()} sections={sections()} />
 
               <div class="max-w-7xl mx-auto px-4 py-8">

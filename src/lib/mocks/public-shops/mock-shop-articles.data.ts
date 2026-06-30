@@ -3,7 +3,7 @@ import type { PublicShopArticle } from "~/lib/types/public/shops.types";
 const img = (id: string) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=800&q=80`;
 
-const ARTICLE_TEMPLATES: Omit<PublicShopArticle, "id">[] = [
+const ARTICLE_TEMPLATES: Omit<PublicShopArticle, "id" | "slug">[] = [
   {
     title: "5 Low-Light Plants Perfect for Bangladesh Apartments",
     excerpt: "Discover hardy indoor plants that thrive without direct sunlight in urban flats.",
@@ -96,6 +96,7 @@ SHOP_SLUGS.forEach((slug, i) => {
   MOCK_SHOP_ARTICLES[slug] = ARTICLE_TEMPLATES.slice(0, count).map((a, j) => ({
     ...a,
     id: `${slug}-article-${j + 1}`,
+    slug: `${slug}-article-${j + 1}`,
     viewCount: a.viewCount + i * 300,
   }));
 });

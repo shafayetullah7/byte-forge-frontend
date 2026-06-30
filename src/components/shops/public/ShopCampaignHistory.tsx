@@ -1,4 +1,5 @@
 import { For, Show } from "solid-js";
+import { A } from "@solidjs/router";
 import type { Component } from "solid-js";
 import type {
   PublicShopCampaign,
@@ -13,6 +14,7 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 export const ShopCampaignHistory: Component<{
+  shopSlug: string;
   campaigns: PublicShopCampaign[];
   highlights: PublicShopCampaignHighlights;
   labels: Record<string, string>;
@@ -40,6 +42,7 @@ export const ShopCampaignHistory: Component<{
       <For each={props.campaigns}>
         {(campaign) => (
           <article class="rounded-2xl border border-cream-200 dark:border-forest-700 bg-white dark:bg-forest-800 overflow-hidden">
+            <A href={`/shops/${props.shopSlug}/campaigns/${campaign.slug}`} class="block">
             <div class="h-32 overflow-hidden">
               <img src={campaign.bannerUrl} alt="" class="w-full h-full object-cover" loading="lazy" />
             </div>
@@ -65,6 +68,7 @@ export const ShopCampaignHistory: Component<{
                 <div><dt>{props.labels.bookmarks}</dt><dd class="font-semibold">{campaign.bookmarks}</dd></div>
               </dl>
             </div>
+            </A>
           </article>
         )}
       </For>

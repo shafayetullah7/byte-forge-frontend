@@ -1,8 +1,10 @@
 import { For, Show } from "solid-js";
+import { A } from "@solidjs/router";
 import type { Component } from "solid-js";
 import type { PublicShopArticle } from "~/lib/types/public/shops.types";
 
 export const ShopEducationalContent: Component<{
+  shopSlug: string;
   articles: PublicShopArticle[];
   labels: Record<string, string>;
 }> = (props) => {
@@ -33,7 +35,13 @@ export const ShopEducationalContent: Component<{
           <h3 class="text-lg font-bold text-forest-800 dark:text-cream-50 mb-3">{props.labels.editorsPick}</h3>
           <div class="grid md:grid-cols-2 gap-4">
             <For each={editorsPicks()}>
-              {(article) => <ShopArticleCard article={article} readLabel={props.labels.readTime} />}
+              {(article) => (
+                <ShopArticleCard
+                  shopSlug={props.shopSlug}
+                  article={article}
+                  readLabel={props.labels.readTime}
+                />
+              )}
             </For>
           </div>
         </div>
@@ -44,7 +52,13 @@ export const ShopEducationalContent: Component<{
           <h3 class="text-lg font-bold text-forest-800 dark:text-cream-50 mb-3">{props.labels.popular}</h3>
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <For each={popular()}>
-              {(article) => <ShopArticleCard article={article} readLabel={props.labels.readTime} />}
+              {(article) => (
+                <ShopArticleCard
+                  shopSlug={props.shopSlug}
+                  article={article}
+                  readLabel={props.labels.readTime}
+                />
+              )}
             </For>
           </div>
         </div>
@@ -54,7 +68,13 @@ export const ShopEducationalContent: Component<{
         <h3 class="text-lg font-bold text-forest-800 dark:text-cream-50 mb-3">{props.labels.allArticles}</h3>
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <For each={props.articles}>
-            {(article) => <ShopArticleCard article={article} readLabel={props.labels.readTime} />}
+            {(article) => (
+              <ShopArticleCard
+                shopSlug={props.shopSlug}
+                article={article}
+                readLabel={props.labels.readTime}
+              />
+            )}
           </For>
         </div>
       </div>
@@ -62,8 +82,15 @@ export const ShopEducationalContent: Component<{
   );
 };
 
-const ShopArticleCard: Component<{ article: PublicShopArticle; readLabel: string }> = (props) => (
-  <article class="rounded-xl border border-cream-200 dark:border-forest-700 bg-white dark:bg-forest-800 overflow-hidden hover:shadow-md transition-shadow">
+const ShopArticleCard: Component<{
+  shopSlug: string;
+  article: PublicShopArticle;
+  readLabel: string;
+}> = (props) => (
+  <A
+    href={`/shops/${props.shopSlug}/articles/${props.article.slug}`}
+    class="block rounded-xl border border-cream-200 dark:border-forest-700 bg-white dark:bg-forest-800 overflow-hidden hover:shadow-md transition-shadow"
+  >
     <div class="aspect-[16/9] overflow-hidden">
       <img src={props.article.coverUrl} alt="" class="w-full h-full object-cover" loading="lazy" />
     </div>
@@ -76,5 +103,5 @@ const ShopArticleCard: Component<{ article: PublicShopArticle; readLabel: string
         <span>{props.article.viewCount.toLocaleString()} views</span>
       </div>
     </div>
-  </article>
+  </A>
 );

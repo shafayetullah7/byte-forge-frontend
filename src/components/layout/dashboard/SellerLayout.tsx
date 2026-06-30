@@ -9,6 +9,8 @@ import {
     ClockIcon,
     BoltIcon,
     MapPinIcon,
+    ClipboardDocumentIcon,
+    DocumentTextIcon,
 } from "~/components/icons";
 import { useI18n } from "~/i18n";
 
@@ -94,6 +96,16 @@ export const SellerLayout: ParentComponent = (props) => {
                 href: "/app/seller/orders",
                 icon: ClipboardListIcon,
                 label: t("seller.orders.title"),
+            },
+            {
+                href: "/app/seller/campaigns",
+                icon: ClipboardDocumentIcon,
+                label: t("seller.sidebar.campaigns"),
+            },
+            {
+                href: "/app/seller/articles",
+                icon: DocumentTextIcon,
+                label: t("seller.sidebar.articles"),
             },
         ],
     }));

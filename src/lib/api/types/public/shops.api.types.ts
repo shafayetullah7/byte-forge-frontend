@@ -13,6 +13,7 @@ export interface ApiShopMetrics {
   completedOrders: number;
   averageRating: number;
   reviewCount: number;
+  followerCount?: number;
 }
 
 export interface ApiPublicShopListItem {
@@ -43,6 +44,59 @@ export interface ApiPublicShopProfile extends ApiPublicShopListItem {
   whyChooseUs: string[];
   values: string[];
   categoriesServed: string[];
+  followerCount?: number;
+  isFollowedByViewer?: boolean;
+}
+
+export interface ApiPublicShopCampaign {
+  id: string;
+  slug?: string;
+  title: string;
+  type: string;
+  bannerUrl: string;
+  startDate: string;
+  endDate: string;
+  discountPercent: number | null;
+  description: string;
+  status: string;
+  participants: number;
+  views: number;
+  productsIncluded: number;
+  ordersGenerated: number;
+  savingsProvided: number;
+  likes: number;
+  bookmarks: number;
+  products?: Array<{
+    id: string;
+    slug: string;
+    name: string;
+    thumbnailUrl: string;
+    price: number;
+  }>;
+}
+
+export interface ApiPublicShopCampaignHighlights {
+  campaignsLast12Months: number;
+  totalSavingsBdt: number;
+  totalParticipants: number;
+  mostSuccessfulReach: number;
+}
+
+export interface ApiPublicShopArticle {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  body?: string;
+  coverUrl: string;
+  publishedAt: string;
+  readMinutes: number;
+  category: string;
+  viewCount: number;
+  likeCount: number;
+  shareCount: number;
+  isEditorsPick: boolean;
+  isPopular: boolean;
 }
 
 export interface ApiPublicShopProduct {

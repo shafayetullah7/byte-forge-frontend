@@ -27,7 +27,7 @@ function defaultMetrics(
     completedOrders: partial.completedOrders ?? 0,
     averageRating: partial.averageRating ?? 0,
     reviewCount: partial.reviewCount ?? 0,
-    followerCount: 0,
+    followerCount: partial.followerCount ?? 0,
     deliverySuccessRate: 0,
     responseRate: 0,
     cancellationRate: 0,
@@ -74,6 +74,7 @@ export function mapApiListItem(item: ApiPublicShopListItem): PublicShopListItem 
 export function mapApiProfile(item: ApiPublicShopProfile): PublicShopProfile {
   const base = mapApiListItem(item);
   const categories = item.categoriesServed ?? [];
+  const followerCount = item.followerCount ?? item.metrics?.followerCount ?? 0;
   return {
     ...base,
     category: categories[0] ?? base.category,
@@ -84,6 +85,8 @@ export function mapApiProfile(item: ApiPublicShopProfile): PublicShopProfile {
     whyChooseUs: item.whyChooseUs ?? [],
     values: item.values ?? [],
     badges: [],
+    metrics: { ...base.metrics, followerCount },
+    isFollowedByViewer: item.isFollowedByViewer ?? false,
   };
 }
 

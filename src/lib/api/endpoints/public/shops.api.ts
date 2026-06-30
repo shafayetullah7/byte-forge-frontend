@@ -7,6 +7,9 @@ import type {
   ApiPublicShopProfile,
   ApiPublicShopReview,
   ApiPublicShopReviewSummary,
+  ApiPublicShopCampaign,
+  ApiPublicShopCampaignHighlights,
+  ApiPublicShopArticle,
   ApiSuccessEnvelope,
   PublicShopListFilter,
   PublicShopProductsFilter,
@@ -91,7 +94,65 @@ export const invalidatePublicShop = (slug: string) => {
   revalidate(getPublicShopBySlug.keyFor(slug));
   revalidate(getPublicShopProducts.keyFor(slug));
   revalidate(getPublicShopReviews.keyFor(slug));
+  revalidate(listShopCampaigns.keyFor(slug));
+  revalidate(getShopCampaignHighlights.keyFor(slug));
+  revalidate(listShopArticles.keyFor(slug));
 };
+
+export const listShopCampaigns = query(
+  async (slug: string) => {
+    "use server";
+    return fetcher<ApiSuccessEnvelope<ApiPublicShopCampaign[]>>(
+      `/api/v1/shops/${slug}/campaigns`,
+      { unwrapData: false },
+    );
+  },
+  "public-shop-campaigns",
+);
+
+export const getShopCampaignHighlights = query(
+  async (slug: string) => {
+    "use server";
+    return fetcher<ApiSuccessEnvelope<ApiPublicShopCampaignHighlights>>(
+      `/api/v1/shops/${slug}/campaigns/highlights`,
+      { unwrapData: false },
+    );
+  },
+  "public-shop-campaign-highlights",
+);
+
+export const getCampaignDetail = query(
+  async (slug: string, campaignSlug: string) => {
+    "use server";
+    return fetcher<ApiSuccessEnvelope<ApiPublicShopCampaign>>(
+      `/api/v1/shops/${slug}/campaigns/${campaignSlug}`,
+      { unwrapData: false },
+    );
+  },
+  "public-shop-campaign-detail",
+);
+
+export const listShopArticles = query(
+  async (slug: string) => {
+    "use server";
+    return fetcher<ApiSuccessEnvelope<ApiPublicShopArticle[]>>(
+      `/api/v1/shops/${slug}/articles`,
+      { unwrapData: false },
+    );
+  },
+  "public-shop-articles",
+);
+
+export const getArticleDetail = query(
+  async (slug: string, articleSlug: string) => {
+    "use server";
+    return fetcher<ApiSuccessEnvelope<ApiPublicShopArticle>>(
+      `/api/v1/shops/${slug}/articles/${articleSlug}`,
+      { unwrapData: false },
+    );
+  },
+  "public-shop-article-detail",
+);
 
 export const getPublicShippingRate = query(
   async (shopId: string, districtId: string) => {

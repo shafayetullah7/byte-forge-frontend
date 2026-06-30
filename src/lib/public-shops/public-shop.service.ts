@@ -2,9 +2,6 @@ import { query } from "@solidjs/router";
 import {
   MOCK_SHOP_LIST,
   MOCK_COMMUNITY_METRICS,
-  MOCK_SHOP_CAMPAIGNS,
-  getMockCampaignHighlights,
-  MOCK_SHOP_ARTICLES,
   MOCK_SHOP_STATISTICS,
 } from "~/lib/mocks/public-shops";
 import {
@@ -12,6 +9,9 @@ import {
   getPublicShopBySlug,
   getPublicShopProducts,
   getPublicShopReviews,
+  listShopCampaigns,
+  getShopCampaignHighlights as fetchShopCampaignHighlights,
+  listShopArticles,
 } from "~/lib/api/endpoints/public/shops.api";
 import {
   mapApiListItem,
@@ -24,6 +24,11 @@ import {
   mergeProfileWithPlaceholders,
   unwrapSuccess,
 } from "~/lib/public-shops/shop.mappers";
+import {
+  mapApiArticle,
+  mapApiCampaign,
+  mapApiCampaignHighlights,
+} from "~/lib/public-shops/content.mappers";
 import { mergeReviewsWithPlaceholders } from "~/lib/public-shops/review-placeholders";
 import { ApiError } from "~/lib/api/types";
 import type {
@@ -134,22 +139,32 @@ export const getShopReviews = query(
   "public-shop-reviews-mapped",
 );
 
-export async function getShopCampaigns(slug: string): Promise<PublicShopCampaign[]> {
-  await maybeDelay();
-  return MOCK_SHOP_CAMPAIGNS[slug] ?? [];
-}
+export const getShopCampaigns = query(
+  async (slug: string): Promise<PublicShopCampaign[]> => {
+    "use server";
+    const envelope = await listShopCampaigns(slug);
+    return unwrapSuccess(envelope).map(mapApiCampaign);
+  },
+  "public-shop-campaigns-mapped",
+);
 
-export async function getShopCampaignHighlights(
-  slug: string,
-): Promise<PublicShopCampaignHighlights> {
-  await maybeDelay();
-  return getMockCampaignHighlights(slug);
-}
+export const getShopCampaignHighlights = query(
+  async (slug: string): Promise<PublicShopCampaignHighlights> => {
+    "use server";
+    const envelope = await fetchShopCampaignHighlights(slug);
+    return mapApiCampaignHighlights(unwrapSuccess(envelope));
+  },
+  "public-shop-campaign-highlights-mapped",
+);
 
-export async function getShopArticles(slug: string): Promise<PublicShopArticle[]> {
-  await maybeDelay();
-  return MOCK_SHOP_ARTICLES[slug] ?? [];
-}
+export const getShopArticles = query(
+  async (slug: string): Promise<PublicShopArticle[]> => {
+    "use server";
+    const envelope = await listShopArticles(slug);
+    return unwrapSuccess(envelope).map(mapApiArticle);
+  },
+  "public-shop-articles-mapped",
+);
 
 export async function getShopStatistics(slug: string): Promise<PublicShopStatistics | null> {
   await maybeDelay();

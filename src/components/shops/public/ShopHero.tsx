@@ -8,6 +8,9 @@ import Button from "~/components/ui/Button";
 export const ShopHero: Component<{
   shop: PublicShopProfile;
   labels: Record<string, string>;
+  followEnabled?: boolean;
+  isFollowing?: boolean;
+  isFollowPending?: boolean;
   onFollow?: () => void;
   onShare?: () => void;
 }> = (props) => {
@@ -54,18 +57,33 @@ export const ShopHero: Component<{
               <span>{props.shop.city}, {props.shop.division}</span>
               <span aria-hidden="true">·</span>
               <span>{props.labels.memberSince} {memberYear()}</span>
+              <Show when={props.followEnabled && props.shop.metrics.followerCount > 0}>
+                <span aria-hidden="true">·</span>
+                <span>
+                  {props.shop.metrics.followerCount.toLocaleString()} {props.labels.followers}
+                </span>
+              </Show>
             </div>
           </div>
 
           <div class="flex gap-2 shrink-0">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => props.onFollow?.()}
-              title={props.labels.followSoon}
+            <Show
+              when={props.followEnabled}
+              fallback={
+                <Button variant="secondary" size="sm" disabled title={props.labels.followSoon}>
+                  {props.labels.follow}
+                </Button>
+              }
             >
-              {props.labels.follow}
-            </Button>
+              <Button
+                variant={props.isFollowing ? "outline" : "secondary"}
+                size="sm"
+                disabled={props.isFollowPending}
+                onClick={() => props.onFollow?.()}
+              >
+                {props.isFollowing ? props.labels.following : props.labels.follow}
+              </Button>
+            </Show>
             <Button
               variant="outline"
               size="sm"
@@ -77,7 +95,11 @@ export const ShopHero: Component<{
         </div>
 
         <div class="mt-6">
-          <ShopTrustSnapshot metrics={props.shop.metrics} labels={props.labels} />
+          <ShopTrustSnapshot
+            metrics={props.shop.metrics}
+            labels={props.labels}
+            showFollowers={props.followEnabled}
+          />
         </div>
       </div>
     </section>

@@ -41,5 +41,6 @@ export function mergeProfileWithPlaceholders(
     badges: profile.badges,
     featuredProductPreviews: profile.featuredProductPreviews,
     engagementScore: 0,
+    isFollowedByViewer: profile.isFollowedByViewer,
   };
 }

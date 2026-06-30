@@ -101,6 +101,7 @@ export interface PublicShopProfile extends PublicShopListItem {
   whyChooseUs: string[];
   values: string[];
   badges: PublicShopBadge[];
+  isFollowedByViewer?: boolean;
 }
 
 export interface PublicShopCommunityMetrics {
@@ -153,6 +154,7 @@ export interface PublicShopReviewSummary {
 
 export interface PublicShopCampaign {
   id: string;
+  slug: string;
   title: string;
   type: PublicCampaignType;
   bannerUrl: string;
@@ -179,6 +181,7 @@ export interface PublicShopCampaignHighlights {
 
 export interface PublicShopArticle {
   id: string;
+  slug: string;
   title: string;
   excerpt: string;
   coverUrl: string;

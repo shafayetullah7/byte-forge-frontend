@@ -32,6 +32,7 @@ import { getPlantBySlug } from "~/lib/public-plants/public-plant.service";
 import { cartApi, invalidateAllCart } from "~/lib/api/endpoints/buyer/cart.api";
 import HreflangLinks from "~/components/seo/HreflangLinks";
 import { absoluteUrl, formatPageTitle } from "~/lib/seo/meta";
+import { addToWishlistAction } from "~/lib/api/endpoints/buyer/wishlist.actions";
 import {
   ImageGallery,
   CareBadge,
@@ -71,6 +72,22 @@ export default function PlantDetailPage() {
 
   const addToCartTrigger = useAction(addToCartAction);
   const addToCartSubmission = useSubmission(addToCartAction);
+  const addToWishlistTrigger = useAction(addToWishlistAction);
+  const wishlistSubmission = useSubmission(addToWishlistAction);
+
+  createEffect(() => {
+    if (wishlistSubmission.result?.success === true) {
+      toaster.success(t("buyer.favorites.added"));
+    } else if (wishlistSubmission.result?.success === false) {
+      toaster.error(wishlistSubmission.result.error?.message ?? t("common.error"));
+    }
+  });
+
+  const handleWishlist = () => {
+    const variant = selectedVariantData();
+    if (!variant?.id) return;
+    addToWishlistTrigger({ variantId: variant.id });
+  };
 
   createEffect(() => {
     if (addToCartSubmission.result?.success === true) {
@@ -323,7 +340,13 @@ export default function PlantDetailPage() {
                           <button class="p-2.5 rounded-xl border border-cream-200 dark:border-forest-700 hover:bg-cream-50 dark:hover:bg-forest-800 transition-colors" aria-label="Share">
                             <ShareIcon class="w-5 h-5 text-gray-500 dark:text-gray-400" />
                           </button>
-                          <button class="p-2.5 rounded-xl border border-cream-200 dark:border-forest-700 hover:bg-cream-50 dark:hover:bg-forest-800 transition-colors" aria-label="Add to wishlist">
+                          <button
+                            type="button"
+                            class="p-2.5 rounded-xl border border-cream-200 dark:border-forest-700 hover:bg-cream-50 dark:hover:bg-forest-800 transition-colors disabled:opacity-50"
+                            aria-label={t("buyer.favorites.addToWishlist")}
+                            disabled={wishlistSubmission.pending || !selectedVariantData()?.id}
+                            onClick={handleWishlist}
+                          >
                             <HeartIcon class="w-5 h-5 text-gray-500 dark:text-gray-400" />
                           </button>
                         </div>

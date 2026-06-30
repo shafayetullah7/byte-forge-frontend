@@ -19,9 +19,17 @@ export const config = {
   },
   isDev: import.meta.env.DEV,
   isServer: typeof window === "undefined",
-  /** Phase C shop features (campaigns, articles, follow) — disabled for Phase 1 launch */
-  shopPhaseCEnabled: false,
+  /** Phase C — campaigns tab & public campaign pages */
+  campaignsEnabled: true,
+  /** Phase C — articles tab & public article pages */
+  articlesEnabled: true,
+  /** Phase C — shop follow button & follower KPI */
+  followEnabled: true,
+  /** Computed: all Phase C buyer-facing shop features enabled */
+  get shopPhaseCEnabled(): boolean {
+    return this.campaignsEnabled && this.articlesEnabled && this.followEnabled;
+  },
   siteUrl: (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/$/, "") || "",
-} as const;
+};
 
 export type AppConfig = typeof config;

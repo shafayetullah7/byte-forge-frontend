@@ -6,7 +6,7 @@ import type {
 const img = (id: string) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=800&q=80`;
 
-const CAMPAIGN_TEMPLATES: Omit<PublicShopCampaign, "id">[] = [
+const CAMPAIGN_TEMPLATES: Omit<PublicShopCampaign, "id" | "slug">[] = [
   {
     title: "Monsoon Green Sale",
     type: "SEASONAL",
@@ -114,6 +114,7 @@ SHOP_SLUGS.forEach((slug, i) => {
   MOCK_SHOP_CAMPAIGNS[slug] = CAMPAIGN_TEMPLATES.slice(0, count).map((c, j) => ({
     ...c,
     id: `${slug}-campaign-${j + 1}`,
+    slug: `${slug}-campaign-${j + 1}`,
     participants: c.participants + i * 200,
     savingsProvided: c.savingsProvided + i * 15000,
   }));
