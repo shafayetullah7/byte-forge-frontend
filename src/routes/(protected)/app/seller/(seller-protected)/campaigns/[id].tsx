@@ -8,7 +8,7 @@ import Card from "~/components/ui/Card";
 import { Select } from "~/components/ui/Select";
 import { ImageUpload } from "~/components/ui/ImageUpload";
 import { toaster } from "~/components/ui/Toast";
-import { FieldGroup } from "~/components/seller/forms/FieldGroup";
+import { FieldGroup } from "~/components/ui/FieldGroup";
 import { BilingualSectionIntro } from "~/components/seller/forms/BilingualSectionIntro";
 import { BilingualLocaleColumn } from "~/components/seller/forms/BilingualLocaleColumn";
 import { ContentModerationBanner } from "~/components/seller/forms/ContentModerationBanner";
@@ -240,7 +240,7 @@ export default function SellerCampaignEditorPage() {
           >
             <FieldGroup
               label={t("seller.campaigns.fields.title")}
-              required
+              requirement="required"
               hint={t("seller.campaigns.fields.titleHint")}
               error={errors()["en.title"]}
             >
@@ -253,6 +253,7 @@ export default function SellerCampaignEditorPage() {
             </FieldGroup>
             <FieldGroup
               label={t("seller.campaigns.fields.description")}
+              requirement="optional"
               hint={t("seller.campaigns.fields.descriptionHint")}
             >
               <Textarea
@@ -272,7 +273,7 @@ export default function SellerCampaignEditorPage() {
           >
             <FieldGroup
               label={t("seller.campaigns.fields.title")}
-              required
+              requirement="requiredForReview"
               hint={t("seller.campaigns.fields.titleHint")}
               error={errors()["bn.title"]}
             >
@@ -286,6 +287,7 @@ export default function SellerCampaignEditorPage() {
             </FieldGroup>
             <FieldGroup
               label={t("seller.campaigns.fields.description")}
+              requirement="optional"
               hint={t("seller.campaigns.fields.descriptionHint")}
             >
               <Textarea
@@ -305,7 +307,7 @@ export default function SellerCampaignEditorPage() {
         description={t("seller.campaigns.sections.settings.description")}
       >
         <div class="space-y-6">
-          <FieldGroup label={t("seller.campaigns.fields.type")} required hint={typeHint()}>
+          <FieldGroup label={t("seller.campaigns.fields.type")} requirement="required" hint={typeHint()}>
             <Select
               options={typeOptions()}
               value={type()}
@@ -316,6 +318,7 @@ export default function SellerCampaignEditorPage() {
           <Show when={type() === "DISCOUNT"}>
             <FieldGroup
               label={t("seller.campaigns.fields.discount")}
+              requirement="optional"
               hint={t("seller.campaigns.fields.discountHint")}
             >
               <Input
@@ -331,7 +334,7 @@ export default function SellerCampaignEditorPage() {
           <div class="grid sm:grid-cols-2 gap-4">
             <FieldGroup
               label={t("seller.campaigns.fields.startDate")}
-              required
+              requirement="required"
               hint={t("seller.campaigns.fields.startDateHint")}
               error={errors().startDate}
             >
@@ -344,7 +347,7 @@ export default function SellerCampaignEditorPage() {
             </FieldGroup>
             <FieldGroup
               label={t("seller.campaigns.fields.endDate")}
-              required
+              requirement="required"
               hint={t("seller.campaigns.fields.endDateHint")}
               error={errors().endDate}
             >
@@ -357,7 +360,11 @@ export default function SellerCampaignEditorPage() {
             </FieldGroup>
           </div>
 
-          <FieldGroup label={t("seller.campaigns.fields.banner")} hint={t("seller.campaigns.fields.bannerHint")}>
+          <FieldGroup
+            label={t("seller.campaigns.fields.banner")}
+            requirement="optional"
+            hint={t("seller.campaigns.fields.bannerHint")}
+          >
             <ImageUpload
               preview={bannerUpload.preview()}
               isUploading={bannerUpload.isUploading()}

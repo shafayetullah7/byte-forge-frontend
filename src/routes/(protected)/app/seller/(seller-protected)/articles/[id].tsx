@@ -7,7 +7,7 @@ import Button from "~/components/ui/Button";
 import Card from "~/components/ui/Card";
 import { ImageUpload } from "~/components/ui/ImageUpload";
 import { toaster } from "~/components/ui/Toast";
-import { FieldGroup } from "~/components/seller/forms/FieldGroup";
+import { FieldGroup } from "~/components/ui/FieldGroup";
 import { BilingualSectionIntro } from "~/components/seller/forms/BilingualSectionIntro";
 import { BilingualLocaleColumn } from "~/components/seller/forms/BilingualLocaleColumn";
 import { ContentModerationBanner } from "~/components/seller/forms/ContentModerationBanner";
@@ -164,7 +164,7 @@ export default function SellerArticleEditorPage() {
       <>
         <FieldGroup
           label={t("seller.articles.fields.title")}
-          required
+          requirement={locale === "en" ? "required" : "requiredForReview"}
           hint={t("seller.articles.fields.titleHint")}
           error={errors()[`${locale}.title`]}
         >
@@ -182,6 +182,7 @@ export default function SellerArticleEditorPage() {
         </FieldGroup>
         <FieldGroup
           label={t("seller.articles.fields.excerpt")}
+          requirement="requiredForReview"
           hint={t("seller.articles.fields.excerptHint")}
           error={errors()[`${locale}.excerpt`]}
         >
@@ -200,6 +201,7 @@ export default function SellerArticleEditorPage() {
         </FieldGroup>
         <FieldGroup
           label={t("seller.articles.fields.body")}
+          requirement="requiredForReview"
           hint={t("seller.articles.fields.bodyHint")}
           error={errors()[`${locale}.body`]}
         >
@@ -276,6 +278,7 @@ export default function SellerArticleEditorPage() {
           <div class="grid sm:grid-cols-2 gap-4">
             <FieldGroup
               label={t("seller.articles.fields.category")}
+              requirement="optional"
               hint={t("seller.articles.fields.categoryHint")}
             >
               <Input
@@ -285,6 +288,7 @@ export default function SellerArticleEditorPage() {
             </FieldGroup>
             <FieldGroup
               label={t("seller.articles.fields.readMinutes")}
+              requirement="optional"
               hint={t("seller.articles.fields.readMinutesHint")}
             >
               <Input
@@ -297,7 +301,11 @@ export default function SellerArticleEditorPage() {
             </FieldGroup>
           </div>
 
-          <FieldGroup label={t("seller.articles.fields.cover")} hint={t("seller.articles.fields.coverHint")}>
+          <FieldGroup
+            label={t("seller.articles.fields.cover")}
+            requirement="optional"
+            hint={t("seller.articles.fields.coverHint")}
+          >
             <ImageUpload
               preview={coverUpload.preview()}
               isUploading={coverUpload.isUploading()}

@@ -11,6 +11,7 @@ export { Select } from "./Select";
 export { AdvancedSelect } from "./AdvancedSelect";
 export { FilterSelect } from "./FilterSelect";
 export { TagMultiSelect } from "./TagMultiSelect";
+export { FieldGroup } from "./FieldGroup";
 
 export type { ButtonProps } from "./Button";
 export type { BadgeProps } from "./Badge";
@@ -24,3 +25,4 @@ export type { SelectProps, SelectOption } from "./Select";
 export type { AdvancedSelectProps, AdvancedSelectOption } from "./AdvancedSelect";
 export type { FilterSelectProps, FilterOption } from "./FilterSelect";
 export type { TagMultiSelectProps, TagGroupOption } from "./TagMultiSelect";
+export type { FieldRequirement } from "./FieldGroup";

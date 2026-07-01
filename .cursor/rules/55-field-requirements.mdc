@@ -1,0 +1,51 @@
+# Field Requirement Conventions
+
+Use `FieldGroup` from `~/components/ui/FieldGroup` for labeled form fields with hints and validation.
+
+## Requirement tiers
+
+Set exactly one `requirement` prop per field. Do not embed `*`, `(Optional)`, or `(Required for review)` in label strings.
+
+| `requirement` | Label marker | Blocks Save draft | Blocks Submit for review |
+|---------------|--------------|-------------------|--------------------------|
+| `required` | red `*` | yes | yes |
+| `optional` | gray `(Optional)` via `common.optional` | no | no |
+| `requiredForReview` | gray `(Required for review)` via `common.requiredForReview` | no | yes |
+
+Default when `requirement` is omitted: treat as `required` (fail-safe).
+
+## Hints vs labels
+
+- **Label + `requirement`**: what the field is called and whether it is required.
+- **`hint`**: what the field is for, where it appears, format/range — never repeat optional/required wording.
+- **`error`**: validation message from `validation.*` i18n keys; shown instead of hint when present.
+
+## Draft + review forms
+
+Forms with **Save draft** and **Submit for review** (campaigns, articles, future moderated CMS):
+
+- Validate `required` on Save.
+- Validate `required` + `requiredForReview` on Submit.
+- Show `submitRequirements` copy once near action buttons.
+
+Example mapping:
+
+- Campaign EN title → `required`; BN title → `requiredForReview`.
+- Article EN title → `required`; BN title, excerpt, body → `requiredForReview`.
+
+## Bilingual columns
+
+- Use side-by-side columns (`lg:grid-cols-2`), not EN/BN tabs for primary content.
+- Column headers identify locale; per-field `requirement` defines rules.
+- Optional locale column badge (e.g. plant BN column) only when the entire column is optional for save.
+
+## Section copy
+
+- Page description, card title/description, and bilingual intro explain purpose and moderation — not per-field rules.
+
+## i18n
+
+- `common.optional`, `common.requiredForReview` in both `en.ts` and `bn.ts`.
+- Field hints under `seller.*.fields.*Hint` without optional/required language.
+
+See also: [form-field-conventions.md](../docs/form-field-conventions.md).

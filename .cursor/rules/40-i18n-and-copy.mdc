@@ -4,3 +4,4 @@
 - For dynamic strings, follow existing function-key pattern where applicable.
 - Add/update keys in both locales in the same change.
 - Do not leave placeholder or untranslated strings in production routes/components.
+- Form field obligation markers use `common.optional` and `common.requiredForReview`; hints describe purpose only (see `55-field-requirements.mdc` and `docs/form-field-conventions.md`).
