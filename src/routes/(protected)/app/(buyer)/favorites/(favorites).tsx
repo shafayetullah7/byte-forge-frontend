@@ -1,11 +1,13 @@
-import { Component, For, Show } from "solid-js";
+import { Component, For, Show, createEffect } from "solid-js";
 import { Title } from "@solidjs/meta";
-import { A, createAsync, type RouteDefinition } from "@solidjs/router";
-import { HeartIcon } from "~/components/icons";
+import { A, createAsync, useAction, useSubmission, type RouteDefinition } from "@solidjs/router";
+import { HeartIcon, TrashIcon } from "~/components/icons";
 import { useI18n } from "~/i18n";
 import { formatPageTitle } from "~/lib/seo/meta";
 import { getWishlist } from "~/lib/api/endpoints/buyer/wishlist.api";
+import { removeFromWishlistAction } from "~/lib/api/endpoints/buyer/wishlist.actions";
 import { formatPrice } from "~/routes/(app)/plants/constants";
+import { toaster } from "~/components/ui/Toast";
 
 export const route = {
   preload: () => getWishlist(),
@@ -15,6 +17,21 @@ const Favorites: Component = () => {
   const { t } = useI18n();
   const wishlist = createAsync(() => getWishlist(), { deferStream: true });
   const items = () => wishlist()?.data ?? [];
+
+  const removeTrigger = useAction(removeFromWishlistAction);
+  const removeSubmission = useSubmission(removeFromWishlistAction);
+
+  createEffect(() => {
+    if (removeSubmission.result?.success === true) {
+      toaster.success(t("buyer.favorites.removed"));
+    } else if (removeSubmission.result?.success === false) {
+      toaster.error(removeSubmission.result.error?.message ?? t("common.error"));
+    }
+  });
+
+  const handleRemove = (variantId: string) => {
+    removeTrigger({ variantId });
+  };
 
   return (
     <>
@@ -90,6 +107,19 @@ const Favorites: Component = () => {
                         )}
                       </Show>
                     </div>
+                    <Show when={item.variant}>
+                      {(variant) => (
+                        <button
+                          type="button"
+                          class="shrink-0 p-2 rounded-lg text-gray-500 hover:text-terracotta-600 hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors disabled:opacity-50"
+                          aria-label={t("buyer.favorites.remove")}
+                          disabled={removeSubmission.pending}
+                          onClick={() => handleRemove(variant().id)}
+                        >
+                          <TrashIcon class="w-5 h-5" />
+                        </button>
+                      )}
+                    </Show>
                   </article>
                 )}
               </For>

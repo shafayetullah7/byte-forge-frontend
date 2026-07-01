@@ -51,6 +51,7 @@ export default function ShopCampaignsPage() {
     status_active: t("public.shops.detail.statusActive"),
     status_upcoming: t("public.shops.detail.statusUpcoming"),
     status_completed: t("public.shops.detail.statusCompleted"),
+    productsIncluded: t("public.shops.detail.productsIncluded"),
   });
 
   return (

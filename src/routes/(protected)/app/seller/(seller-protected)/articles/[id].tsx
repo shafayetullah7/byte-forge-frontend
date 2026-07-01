@@ -1,11 +1,12 @@
 import { createSignal, Show, createEffect, createMemo } from "solid-js";
-import { useNavigate, useParams, createAsync, useAction, useSubmission, type RouteDefinition } from "@solidjs/router";
+import { A, useNavigate, useParams, createAsync, useAction, useSubmission, type RouteDefinition } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import Input from "~/components/ui/Input";
 import Textarea from "~/components/ui/Textarea";
 import Button from "~/components/ui/Button";
 import Card from "~/components/ui/Card";
 import { ImageUpload } from "~/components/ui/ImageUpload";
+import { ConfirmDialog } from "~/components/ui/ConfirmDialog";
 import { toaster } from "~/components/ui/Toast";
 import { FieldGroup } from "~/components/ui/FieldGroup";
 import { BilingualSectionIntro } from "~/components/seller/forms/BilingualSectionIntro";
@@ -13,15 +14,22 @@ import { BilingualLocaleColumn } from "~/components/seller/forms/BilingualLocale
 import { ContentModerationBanner } from "~/components/seller/forms/ContentModerationBanner";
 import { getSellerArticle } from "~/lib/api/endpoints/seller/articles.api";
 import {
+  archiveArticleAction,
   createArticleAction,
+  deleteArticleAction,
   submitArticleAction,
   updateArticleAction,
 } from "~/lib/api/endpoints/seller/articles.actions";
 import type { SellerArticleTranslations } from "~/lib/api/types/seller/articles.types";
 import { useImageUpload } from "~/lib/hooks/useImageUpload";
+import { getShop } from "~/lib/context/shop-context";
 import {
   articleLocaleComplete,
   isArticleSubmitReady,
+  isContentArchivable,
+  isContentDeletable,
+  isContentEditable,
+  isContentSubmittable,
   validateArticleDraft,
   validateArticleSubmit,
   type ValidationMessages,
@@ -47,11 +55,14 @@ export default function SellerArticleEditorPage() {
     { deferStream: true },
   );
 
+  const shopQuery = createAsync(() => getShop(), { deferStream: true });
+
   const [category, setCategory] = createSignal("");
   const [readMinutes, setReadMinutes] = createSignal("5");
   const [translations, setTranslations] = createSignal<SellerArticleTranslations>(emptyTranslations());
   const [errors, setErrors] = createSignal<Record<string, string>>({});
   const [coverImageId, setCoverImageId] = createSignal<string | null>(null);
+  const [pendingAction, setPendingAction] = createSignal<"archive" | "delete" | null>(null);
 
   const coverUpload = useImageUpload({
     folder: "articles",
@@ -74,10 +85,27 @@ export default function SellerArticleEditorPage() {
   const createTrigger = useAction(createArticleAction);
   const updateTrigger = useAction(updateArticleAction);
   const submitTrigger = useAction(submitArticleAction);
+  const archiveTrigger = useAction(archiveArticleAction);
+  const deleteTrigger = useAction(deleteArticleAction);
   const createSubmission = useSubmission(createArticleAction);
   const updateSubmission = useSubmission(updateArticleAction);
   const submitSubmission = useSubmission(submitArticleAction);
+  const archiveSubmission = useSubmission(archiveArticleAction);
+  const deleteSubmission = useSubmission(deleteArticleAction);
   const saveSubmission = () => (isNew() ? createSubmission : updateSubmission);
+
+  const moderationStatus = () => articleQuery()?.data?.moderationStatus;
+  const editable = () => isNew() || (moderationStatus() ? isContentEditable(moderationStatus()!) : false);
+  const canSubmit = () => moderationStatus() && isContentSubmittable(moderationStatus()!);
+  const canArchive = () => moderationStatus() && isContentArchivable(moderationStatus()!);
+  const canDelete = () => moderationStatus() && isContentDeletable(moderationStatus()!);
+  const fieldsDisabled = () => !editable();
+  const storefrontUrl = () => {
+    const shop = shopQuery();
+    const data = articleQuery()?.data;
+    if (!shop?.slug || !data?.slug || data.moderationStatus !== "APPROVED") return null;
+    return `/shops/${shop.slug}/articles/${data.slug}`;
+  };
 
   const validationMessages = (): ValidationMessages => ({
     enTitleRequired: t("seller.articles.validation.enTitleRequired"),
@@ -145,6 +173,22 @@ export default function SellerArticleEditorPage() {
     else toaster.error(result?.error?.message ?? t("common.error"));
   };
 
+  const handleLifecycleConfirm = async () => {
+    const action = pendingAction();
+    if (!action || isNew()) return;
+    const result =
+      action === "archive"
+        ? await archiveTrigger(params.id)
+        : await deleteTrigger(params.id);
+    if (result?.success) {
+      toaster.success(action === "archive" ? t("seller.articles.archived") : t("seller.articles.deleted"));
+      setPendingAction(null);
+      if (action === "delete") navigate("/app/seller/articles");
+    } else {
+      toaster.error(result?.error?.message ?? t("common.error"));
+    }
+  };
+
   const submitReady = createMemo(() => isArticleSubmitReady(formState()));
 
   const moderationLabels = () => ({
@@ -154,6 +198,9 @@ export default function SellerArticleEditorPage() {
     rejected: t("seller.articles.moderation.rejected"),
     archived: t("seller.articles.moderation.archived"),
     draftHint: t("seller.articles.moderation.draftHint"),
+    pendingHint: t("seller.articles.moderation.pendingHint"),
+    approvedHint: t("seller.articles.moderation.approvedHint"),
+    archivedHint: t("seller.articles.moderation.archivedHint"),
     rejectedHint: t("seller.articles.moderation.rejectedHint"),
   });
 
@@ -178,6 +225,7 @@ export default function SellerArticleEditorPage() {
             onInput={(e) => updateTranslation(locale, "title", e.currentTarget.value)}
             error={errors()[`${locale}.title`]}
             dir={isBn ? "auto" : undefined}
+            disabled={fieldsDisabled()}
           />
         </FieldGroup>
         <FieldGroup
@@ -197,6 +245,7 @@ export default function SellerArticleEditorPage() {
             rows={2}
             error={errors()[`${locale}.excerpt`]}
             dir={isBn ? "auto" : undefined}
+            disabled={fieldsDisabled()}
           />
         </FieldGroup>
         <FieldGroup
@@ -216,6 +265,7 @@ export default function SellerArticleEditorPage() {
             rows={8}
             error={errors()[`${locale}.body`]}
             dir={isBn ? "auto" : undefined}
+            disabled={fieldsDisabled()}
           />
         </FieldGroup>
       </>
@@ -284,6 +334,7 @@ export default function SellerArticleEditorPage() {
               <Input
                 value={category()}
                 onInput={(e) => setCategory(e.currentTarget.value)}
+                disabled={fieldsDisabled()}
               />
             </FieldGroup>
             <FieldGroup
@@ -297,6 +348,7 @@ export default function SellerArticleEditorPage() {
                 max={999}
                 value={readMinutes()}
                 onInput={(e) => setReadMinutes(e.currentTarget.value)}
+                disabled={fieldsDisabled()}
               />
             </FieldGroup>
           </div>
@@ -313,22 +365,25 @@ export default function SellerArticleEditorPage() {
               onFileSelect={coverUpload.upload}
               onDelete={coverUpload.deleteMedia}
               label={t("seller.articles.fields.cover")}
+              disabled={fieldsDisabled()}
             />
           </FieldGroup>
         </div>
       </Card>
 
       <div class="space-y-3">
-        <Show when={!isNew()}>
+        <Show when={canSubmit()}>
           <p class="text-sm text-gray-500 dark:text-gray-400">
             {t("seller.articles.submitRequirements")}
           </p>
         </Show>
         <div class="flex flex-wrap gap-3">
-          <Button onClick={handleSave} disabled={saveSubmission().pending}>
-            {t("seller.articles.save")}
-          </Button>
-          <Show when={!isNew()}>
+          <Show when={editable()}>
+            <Button onClick={handleSave} disabled={saveSubmission().pending}>
+              {t("seller.articles.save")}
+            </Button>
+          </Show>
+          <Show when={canSubmit()}>
             <Button
               variant="outline"
               onClick={handleSubmit}
@@ -337,8 +392,61 @@ export default function SellerArticleEditorPage() {
               {t("seller.articles.submit")}
             </Button>
           </Show>
+          <Show when={storefrontUrl()}>
+            {(url) => (
+              <A href={url()}>
+                <Button variant="outline" type="button">
+                  {t("seller.articles.viewOnStorefront")}
+                </Button>
+              </A>
+            )}
+          </Show>
+          <Show when={canArchive()}>
+            <Button
+              variant="outline"
+              onClick={() => setPendingAction("archive")}
+              disabled={archiveSubmission.pending}
+            >
+              {t("seller.articles.archive")}
+            </Button>
+          </Show>
+          <Show when={canDelete()}>
+            <Button
+              variant="destructive"
+              onClick={() => setPendingAction("delete")}
+              disabled={deleteSubmission.pending}
+            >
+              {t("seller.articles.delete")}
+            </Button>
+          </Show>
         </div>
       </div>
+
+      <Show when={pendingAction()}>
+        {(action) => (
+          <ConfirmDialog
+            isOpen={true}
+            onClose={() => setPendingAction(null)}
+            onConfirm={handleLifecycleConfirm}
+            closeOnConfirm={false}
+            title={
+              action() === "archive"
+                ? t("seller.articles.confirmArchiveTitle")
+                : t("seller.articles.confirmDeleteTitle")
+            }
+            description={
+              action() === "archive"
+                ? t("seller.articles.confirmArchiveDescription")
+                : t("seller.articles.confirmDeleteDescription")
+            }
+            confirmLabel={
+              action() === "archive" ? t("seller.articles.archive") : t("seller.articles.delete")
+            }
+            variant="danger"
+            loading={archiveSubmission.pending || deleteSubmission.pending}
+          />
+        )}
+      </Show>
     </div>
   );
 }

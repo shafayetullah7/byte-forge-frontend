@@ -35,6 +35,13 @@ export function mapApiCampaign(item: ApiPublicShopCampaign): PublicShopCampaign 
     savingsProvided: item.savingsProvided,
     likes: item.likes,
     bookmarks: item.bookmarks,
+    products: item.products?.map((p) => ({
+      id: p.id,
+      slug: p.slug,
+      name: p.name,
+      thumbnailUrl: p.thumbnailUrl,
+      price: p.price,
+    })),
   };
 }
 
@@ -55,6 +62,7 @@ export function mapApiArticle(item: ApiPublicShopArticle): PublicShopArticle {
     slug: item.slug,
     title: item.title,
     excerpt: item.excerpt,
+    body: item.body,
     coverUrl: item.coverUrl,
     publishedAt: item.publishedAt,
     readMinutes: item.readMinutes,

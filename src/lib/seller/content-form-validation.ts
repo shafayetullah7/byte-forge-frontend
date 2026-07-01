@@ -110,3 +110,20 @@ export function isArticleSubmitReady(form: ArticleFormState): boolean {
     articleLocaleComplete("bn", form.translations, true)
   );
 }
+
+/** Mirrors backend assertEditableStatus — DRAFT and REJECTED only. */
+export function isContentEditable(status: string): boolean {
+  return status === "DRAFT" || status === "REJECTED";
+}
+
+export function isContentSubmittable(status: string): boolean {
+  return isContentEditable(status);
+}
+
+export function isContentArchivable(status: string): boolean {
+  return status !== "ARCHIVED";
+}
+
+export function isContentDeletable(status: string): boolean {
+  return status !== "APPROVED";
+}

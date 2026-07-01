@@ -1,5 +1,5 @@
 import { For, Show, createSignal, Suspense, ErrorBoundary, createMemo, createEffect } from "solid-js";
-import { A, createAsync, useParams, action, useAction, useSubmission, type RouteDefinition } from "@solidjs/router";
+import { A, createAsync, useParams, action, useAction, useSubmission, useNavigate, type RouteDefinition } from "@solidjs/router";
 import { Title, Meta, Link } from "@solidjs/meta";
 import { HttpStatusCode } from "@solidjs/start";
 import { useI18n } from "~/i18n";
@@ -33,6 +33,7 @@ import { cartApi, invalidateAllCart } from "~/lib/api/endpoints/buyer/cart.api";
 import HreflangLinks from "~/components/seo/HreflangLinks";
 import { absoluteUrl, formatPageTitle } from "~/lib/seo/meta";
 import { addToWishlistAction } from "~/lib/api/endpoints/buyer/wishlist.actions";
+import { useSession } from "~/lib/auth/session";
 import {
   ImageGallery,
   CareBadge,
@@ -65,6 +66,8 @@ const addToCartAction = action(async (data: { variantId: string; quantity: numbe
 export default function PlantDetailPage() {
   const { t } = useI18n();
   const params = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  const session = useSession();
   const plant = createAsync(() => getPlantBySlug(params.slug));
   const reviewData = createAsync(() => getPublicPlantReviews(params.slug));
   const [selectedVariant, setSelectedVariant] = createSignal<string | undefined>(undefined);
@@ -86,6 +89,11 @@ export default function PlantDetailPage() {
   const handleWishlist = () => {
     const variant = selectedVariantData();
     if (!variant?.id) return;
+    if (!session()) {
+      const returnTo = encodeURIComponent(`/plants/${params.slug}`);
+      navigate(`/login?returnTo=${returnTo}`);
+      return;
+    }
     addToWishlistTrigger({ variantId: variant.id });
   };
 

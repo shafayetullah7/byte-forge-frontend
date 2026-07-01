@@ -22,6 +22,7 @@ import HreflangLinks from "~/components/seo/HreflangLinks";
 import { absoluteUrl, formatPageTitle } from "~/lib/seo/meta";
 import { toggleShopFollowAction } from "~/lib/api/endpoints/buyer/shop-follow.actions";
 import { toaster } from "~/components/ui/Toast";
+import { useSession } from "~/lib/auth/session";
 
 const TAB_TO_SECTION: Record<string, PublicShopDetailSection> = {
   overview: "",
@@ -44,6 +45,7 @@ export default function ShopDetailLayout(props: RouteSectionProps) {
   const slug = () => params.slug;
 
   const shop = createAsync(() => getShopBySlug(slug()), { deferStream: true });
+  const session = useSession();
 
   const followTrigger = useAction(toggleShopFollowAction);
   const followSubmission = useSubmission(toggleShopFollowAction);
@@ -63,6 +65,11 @@ export default function ShopDetailLayout(props: RouteSectionProps) {
   const handleFollow = () => {
     const current = shop();
     if (!current || !config.followEnabled) return;
+    if (!session()) {
+      const returnTo = encodeURIComponent(`/shops/${slug()}`);
+      navigate(`/login?returnTo=${returnTo}`);
+      return;
+    }
     followTrigger({ slug: slug(), follow: !current.isFollowedByViewer });
   };
 

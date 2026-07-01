@@ -392,6 +392,8 @@ export const dict = {
       subtitle: "Plants you've saved for later",
       empty: "Your wishlist is empty. Browse plants and tap the heart to save them here.",
       added: "Added to wishlist",
+      removed: "Removed from wishlist",
+      remove: "Remove from wishlist",
       addToWishlist: "Add to wishlist",
       browsePlants: "Browse plants",
     },
@@ -937,6 +939,19 @@ export const dict = {
       saved: "Campaign saved",
       submit: "Submit for review",
       submitted: "Campaign submitted",
+      archive: "Archive",
+      delete: "Delete",
+      archived: "Campaign archived",
+      deleted: "Campaign deleted",
+      viewOnStorefront: "View on storefront",
+      confirmArchiveTitle: "Archive this campaign?",
+      confirmArchiveDescription:
+        "Archived campaigns are hidden from your storefront. You can create a new campaign later if needed.",
+      confirmDeleteTitle: "Delete this campaign?",
+      confirmDeleteDescription:
+        "This permanently removes the campaign. This cannot be undone.",
+      filterAll: "All statuses",
+      filterStatus: "Status",
       submitRequirements: "Both English and Bengali titles are required to submit for review.",
       pageDescription:
         "Shop campaigns are promotions shown on your public storefront. Customers browsing in English or Bengali will see the matching version.",
@@ -970,6 +985,9 @@ export const dict = {
         rejected: "Rejected",
         archived: "Archived",
         draftHint: "Only you can see drafts until an admin approves them.",
+        pendingHint: "This campaign is under review. You cannot edit it until an admin approves or rejects it.",
+        approvedHint: "This campaign is live on your storefront. Contact support if you need changes.",
+        archivedHint: "This campaign is archived and no longer visible to buyers.",
         rejectedHint: "This campaign was rejected. Update the content below and submit again.",
       },
       validation: {
@@ -1030,6 +1048,19 @@ export const dict = {
       saved: "Article saved",
       submit: "Submit for review",
       submitted: "Article submitted",
+      archive: "Archive",
+      delete: "Delete",
+      archived: "Article archived",
+      deleted: "Article deleted",
+      viewOnStorefront: "View on storefront",
+      confirmArchiveTitle: "Archive this article?",
+      confirmArchiveDescription:
+        "Archived articles are hidden from your storefront. You can create a new article later if needed.",
+      confirmDeleteTitle: "Delete this article?",
+      confirmDeleteDescription:
+        "This permanently removes the article. This cannot be undone.",
+      filterAll: "All statuses",
+      filterStatus: "Status",
       submitRequirements:
           "Title, excerpt, and body are required in both English and Bengali to submit for review.",
       pageDescription:
@@ -1063,6 +1094,9 @@ export const dict = {
         rejected: "Rejected",
         archived: "Archived",
         draftHint: "Only you can see drafts until an admin approves them.",
+        pendingHint: "This article is under review. You cannot edit it until an admin approves or rejects it.",
+        approvedHint: "This article is live on your storefront. Contact support if you need changes.",
+        archivedHint: "This article is archived and no longer visible to buyers.",
         rejectedHint: "This article was rejected. Update the content below and submit again.",
       },
       validation: {
@@ -2488,6 +2522,8 @@ export const dict = {
         linkCopied: "Shop link copied",
         backToCampaigns: "Back to campaigns",
         backToArticles: "Back to articles",
+        linkedProducts: "Products in this campaign",
+        productsIncluded: "products included",
         campaignNotFound: "Campaign not found",
         articleNotFound: "Article not found",
         statusActive: "Active",

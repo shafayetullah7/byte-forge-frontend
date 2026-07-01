@@ -13,10 +13,10 @@ const BASE_PATH = "/api/v1/user/seller/campaigns";
 type SuccessEnvelope<T> = { success: boolean; message: string; data: T };
 
 export const getSellerCampaigns = query(
-  async (params?: { page?: number; limit?: number }) => {
+  async (params?: { page?: number; limit?: number; moderationStatus?: string }) => {
     "use server";
     return fetcher<SellerCampaignListResponse>(BASE_PATH, {
-      params: params as Record<string, number | undefined>,
+      params: params as Record<string, string | number | undefined>,
       unwrapData: false,
     });
   },

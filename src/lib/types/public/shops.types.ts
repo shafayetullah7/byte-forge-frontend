@@ -170,6 +170,15 @@ export interface PublicShopCampaign {
   savingsProvided: number;
   likes: number;
   bookmarks: number;
+  products?: PublicShopCampaignProduct[];
+}
+
+export interface PublicShopCampaignProduct {
+  id: string;
+  slug: string;
+  name: string;
+  thumbnailUrl: string;
+  price: number;
 }
 
 export interface PublicShopCampaignHighlights {
@@ -184,6 +193,7 @@ export interface PublicShopArticle {
   slug: string;
   title: string;
   excerpt: string;
+  body?: string;
   coverUrl: string;
   publishedAt: string;
   readMinutes: number;

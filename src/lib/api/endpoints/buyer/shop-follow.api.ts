@@ -1,6 +1,7 @@
 import { query, revalidate } from "@solidjs/router";
 import { fetcher } from "../../api-client";
 import { getPublicShopBySlug } from "../public/shops.api";
+import { invalidatePublicShopProfile } from "~/lib/public-shops/public-shop.service";
 import type { ApiSuccessEnvelope } from "../../types/public/shops.api.types";
 
 export interface FollowedShopItem {
@@ -59,4 +60,5 @@ export async function unfollowShop(slug: string): Promise<UnfollowShopResult> {
 export const invalidateShopFollow = (slug: string) => {
   revalidate(listFollowingShops.keyFor());
   revalidate(getPublicShopBySlug.keyFor(slug));
+  invalidatePublicShopProfile(slug);
 };

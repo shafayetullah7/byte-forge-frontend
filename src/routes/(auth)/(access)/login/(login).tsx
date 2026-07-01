@@ -1,4 +1,4 @@
-import { A, useNavigate, action, useSubmission, useAction } from "@solidjs/router";
+import { A, useNavigate, useSearchParams, action, useSubmission, useAction } from "@solidjs/router";
 import { createSignal, createEffect } from "solid-js";
 import { revalidate } from "@solidjs/router";
 import { createForm } from "@modular-forms/solid";
@@ -50,6 +50,7 @@ const loginAction = action(async (data: LoginFormData) => {
 
 export default function Login() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { t } = useI18n();
   const loginTrigger = useAction(loginAction);
   const submission = useSubmission(loginAction);
@@ -95,7 +96,12 @@ export default function Login() {
           state: { verificationExpiresAt: result.verificationExpiresAt },
         });
       } else {
-        navigate(result.target || "/", { replace: true });
+        const returnTo = searchParams.returnTo;
+        const target =
+          typeof returnTo === "string" && returnTo.startsWith("/") && !returnTo.startsWith("//")
+            ? returnTo
+            : result.target || "/";
+        navigate(target, { replace: true });
       }
     }
   });

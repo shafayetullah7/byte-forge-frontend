@@ -1,4 +1,4 @@
-import { query } from "@solidjs/router";
+import { query, revalidate } from "@solidjs/router";
 import {
   MOCK_SHOP_LIST,
   MOCK_COMMUNITY_METRICS,
@@ -100,6 +100,10 @@ export const getShopBySlug = query(
   },
   "public-shop-profile",
 );
+
+export const invalidatePublicShopProfile = (slug: string) => {
+  revalidate(getShopBySlug.keyFor(slug));
+};
 
 export const getShopProducts = query(
   async (

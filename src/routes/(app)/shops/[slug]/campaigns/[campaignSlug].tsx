@@ -1,5 +1,5 @@
-import { Show } from "solid-js";
-import { A, createAsync, useParams, type RouteDefinition } from "@solidjs/router";
+import { For, Show } from "solid-js";
+import { A, createAsync, Navigate, useParams, type RouteDefinition } from "@solidjs/router";
 import { Meta, Title } from "@solidjs/meta";
 import { HttpStatusCode } from "@solidjs/start";
 import { useI18n } from "~/i18n";
@@ -9,6 +9,7 @@ import { mapApiCampaign } from "~/lib/public-shops/content.mappers";
 import { unwrapSuccess } from "~/lib/public-shops/shop.mappers";
 import { formatPageTitle } from "~/lib/seo/meta";
 import { ApiError } from "~/lib/api/types";
+import { formatPrice } from "~/routes/(app)/plants/constants";
 
 export const route = {
   preload: ({ params }) =>
@@ -18,6 +19,15 @@ export const route = {
 export default function ShopCampaignDetailPage() {
   const params = useParams<{ slug: string; campaignSlug: string }>();
   const { t } = useI18n();
+
+  if (!config.campaignsEnabled) {
+    return (
+      <>
+        <Meta name="robots" content="noindex, nofollow" />
+        <Navigate href={`/shops/${params.slug}`} />
+      </>
+    );
+  }
 
   const campaignQuery = createAsync(async () => {
     try {
@@ -77,11 +87,43 @@ export default function ShopCampaignDetailPage() {
               <p class="text-gray-600 dark:text-gray-300 whitespace-pre-line">
                 {campaign().description}
               </p>
-              <Show when={config.campaignsEnabled}>
-                <p class="text-sm text-gray-500">
-                  {new Date(campaign().startDate).toLocaleDateString()} –{" "}
-                  {new Date(campaign().endDate).toLocaleDateString()}
-                </p>
+              <p class="text-sm text-gray-500">
+                {new Date(campaign().startDate).toLocaleDateString()} –{" "}
+                {new Date(campaign().endDate).toLocaleDateString()}
+              </p>
+
+              <Show when={(campaign().products?.length ?? 0) > 0}>
+                <div>
+                  <h2 class="text-lg font-semibold text-forest-800 dark:text-cream-50 mb-3">
+                    {t("public.shops.detail.linkedProducts")}
+                  </h2>
+                  <div class="grid sm:grid-cols-2 gap-4">
+                    <For each={campaign().products}>
+                      {(product) => (
+                        <A
+                          href={`/plants/${product.slug}`}
+                          class="flex gap-3 p-3 rounded-xl border border-cream-200 dark:border-forest-700 bg-white dark:bg-forest-800 hover:border-forest-300 dark:hover:border-forest-600 transition-colors"
+                        >
+                          <Show when={product.thumbnailUrl}>
+                            <img
+                              src={product.thumbnailUrl}
+                              alt=""
+                              class="w-16 h-16 rounded-lg object-cover shrink-0"
+                            />
+                          </Show>
+                          <div class="min-w-0">
+                            <p class="font-medium text-forest-800 dark:text-cream-50 truncate">
+                              {product.name}
+                            </p>
+                            <p class="text-sm font-semibold text-terracotta-600 mt-1">
+                              {formatPrice(product.price)}
+                            </p>
+                          </div>
+                        </A>
+                      )}
+                    </For>
+                  </div>
+                </div>
               </Show>
             </article>
           </>

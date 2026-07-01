@@ -1,5 +1,5 @@
 import { createSignal, Show, createEffect, createMemo } from "solid-js";
-import { useNavigate, useParams, createAsync, useAction, useSubmission, type RouteDefinition } from "@solidjs/router";
+import { A, useNavigate, useParams, createAsync, useAction, useSubmission, type RouteDefinition } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import Input from "~/components/ui/Input";
 import Textarea from "~/components/ui/Textarea";
@@ -7,6 +7,7 @@ import Button from "~/components/ui/Button";
 import Card from "~/components/ui/Card";
 import { Select } from "~/components/ui/Select";
 import { ImageUpload } from "~/components/ui/ImageUpload";
+import { ConfirmDialog } from "~/components/ui/ConfirmDialog";
 import { toaster } from "~/components/ui/Toast";
 import { FieldGroup } from "~/components/ui/FieldGroup";
 import { BilingualSectionIntro } from "~/components/seller/forms/BilingualSectionIntro";
@@ -16,15 +17,22 @@ import { CampaignProductPicker } from "~/components/seller/forms/CampaignProduct
 import { getSellerCampaign } from "~/lib/api/endpoints/seller/campaigns.api";
 import { getProducts } from "~/lib/api/endpoints/seller/products.api";
 import {
+  archiveCampaignAction,
   createCampaignAction,
+  deleteCampaignAction,
   submitCampaignAction,
   updateCampaignAction,
 } from "~/lib/api/endpoints/seller/campaigns.actions";
 import type { SellerCampaignTranslations } from "~/lib/api/types/seller/campaigns.types";
 import { useImageUpload } from "~/lib/hooks/useImageUpload";
+import { getShop } from "~/lib/context/shop-context";
 import {
   campaignLocaleComplete,
   isCampaignSubmitReady,
+  isContentArchivable,
+  isContentDeletable,
+  isContentEditable,
+  isContentSubmittable,
   validateCampaignDraft,
   validateCampaignSubmit,
   type ValidationMessages,
@@ -71,6 +79,9 @@ export default function SellerCampaignEditorPage() {
   const [translations, setTranslations] = createSignal<SellerCampaignTranslations>(emptyTranslations());
   const [errors, setErrors] = createSignal<Record<string, string>>({});
   const [bannerId, setBannerId] = createSignal<string | null>(null);
+  const [pendingAction, setPendingAction] = createSignal<"archive" | "delete" | null>(null);
+
+  const shopQuery = createAsync(() => getShop(), { deferStream: true });
 
   const bannerUpload = useImageUpload({
     folder: "campaigns",
@@ -96,10 +107,27 @@ export default function SellerCampaignEditorPage() {
   const createTrigger = useAction(createCampaignAction);
   const updateTrigger = useAction(updateCampaignAction);
   const submitTrigger = useAction(submitCampaignAction);
+  const archiveTrigger = useAction(archiveCampaignAction);
+  const deleteTrigger = useAction(deleteCampaignAction);
   const createSubmission = useSubmission(createCampaignAction);
   const updateSubmission = useSubmission(updateCampaignAction);
   const submitSubmission = useSubmission(submitCampaignAction);
+  const archiveSubmission = useSubmission(archiveCampaignAction);
+  const deleteSubmission = useSubmission(deleteCampaignAction);
   const saveSubmission = () => (isNew() ? createSubmission : updateSubmission);
+
+  const moderationStatus = () => campaignQuery()?.data?.moderationStatus;
+  const editable = () => isNew() || (moderationStatus() ? isContentEditable(moderationStatus()!) : false);
+  const canSubmit = () => moderationStatus() && isContentSubmittable(moderationStatus()!);
+  const canArchive = () => moderationStatus() && isContentArchivable(moderationStatus()!);
+  const canDelete = () => moderationStatus() && isContentDeletable(moderationStatus()!);
+  const fieldsDisabled = () => !editable();
+  const storefrontUrl = () => {
+    const shop = shopQuery();
+    const data = campaignQuery()?.data;
+    if (!shop?.slug || !data?.slug || data.moderationStatus !== "APPROVED") return null;
+    return `/shops/${shop.slug}/campaigns/${data.slug}`;
+  };
 
   const validationMessages = (): ValidationMessages => ({
     enTitleRequired: t("seller.campaigns.validation.enTitleRequired"),
@@ -192,6 +220,22 @@ export default function SellerCampaignEditorPage() {
     else toaster.error(result?.error?.message ?? t("common.error"));
   };
 
+  const handleLifecycleConfirm = async () => {
+    const action = pendingAction();
+    if (!action || isNew()) return;
+    const result =
+      action === "archive"
+        ? await archiveTrigger(params.id)
+        : await deleteTrigger(params.id);
+    if (result?.success) {
+      toaster.success(action === "archive" ? t("seller.campaigns.archived") : t("seller.campaigns.deleted"));
+      setPendingAction(null);
+      if (action === "delete") navigate("/app/seller/campaigns");
+    } else {
+      toaster.error(result?.error?.message ?? t("common.error"));
+    }
+  };
+
   const submitReady = createMemo(() => isCampaignSubmitReady(formState()));
 
   const moderationLabels = () => ({
@@ -201,6 +245,9 @@ export default function SellerCampaignEditorPage() {
     rejected: t("seller.campaigns.moderation.rejected"),
     archived: t("seller.campaigns.moderation.archived"),
     draftHint: t("seller.campaigns.moderation.draftHint"),
+    pendingHint: t("seller.campaigns.moderation.pendingHint"),
+    approvedHint: t("seller.campaigns.moderation.approvedHint"),
+    archivedHint: t("seller.campaigns.moderation.archivedHint"),
     rejectedHint: t("seller.campaigns.moderation.rejectedHint"),
   });
 
@@ -249,6 +296,7 @@ export default function SellerCampaignEditorPage() {
                 placeholder={t("seller.campaigns.fields.titlePlaceholder")}
                 onInput={(e) => updateTranslation("en", "title", e.currentTarget.value)}
                 error={errors()["en.title"]}
+                disabled={fieldsDisabled()}
               />
             </FieldGroup>
             <FieldGroup
@@ -261,6 +309,7 @@ export default function SellerCampaignEditorPage() {
                 placeholder={t("seller.campaigns.fields.descriptionPlaceholder")}
                 onInput={(e) => updateTranslation("en", "description", e.currentTarget.value)}
                 rows={4}
+                disabled={fieldsDisabled()}
               />
             </FieldGroup>
           </BilingualLocaleColumn>
@@ -283,6 +332,7 @@ export default function SellerCampaignEditorPage() {
                 onInput={(e) => updateTranslation("bn", "title", e.currentTarget.value)}
                 error={errors()["bn.title"]}
                 dir="auto"
+                disabled={fieldsDisabled()}
               />
             </FieldGroup>
             <FieldGroup
@@ -296,6 +346,7 @@ export default function SellerCampaignEditorPage() {
                 onInput={(e) => updateTranslation("bn", "description", e.currentTarget.value)}
                 rows={4}
                 dir="auto"
+                disabled={fieldsDisabled()}
               />
             </FieldGroup>
           </BilingualLocaleColumn>
@@ -312,6 +363,7 @@ export default function SellerCampaignEditorPage() {
               options={typeOptions()}
               value={type()}
               onChange={(e) => setType(e.currentTarget.value)}
+              disabled={fieldsDisabled()}
             />
           </FieldGroup>
 
@@ -327,6 +379,7 @@ export default function SellerCampaignEditorPage() {
                 max={100}
                 value={discountPercent()}
                 onInput={(e) => setDiscountPercent(e.currentTarget.value)}
+                disabled={fieldsDisabled()}
               />
             </FieldGroup>
           </Show>
@@ -343,6 +396,7 @@ export default function SellerCampaignEditorPage() {
                 value={startDate()}
                 onInput={(e) => setStartDate(e.currentTarget.value)}
                 error={errors().startDate}
+                disabled={fieldsDisabled()}
               />
             </FieldGroup>
             <FieldGroup
@@ -356,6 +410,7 @@ export default function SellerCampaignEditorPage() {
                 value={endDate()}
                 onInput={(e) => setEndDate(e.currentTarget.value)}
                 error={errors().endDate}
+                disabled={fieldsDisabled()}
               />
             </FieldGroup>
           </div>
@@ -372,6 +427,7 @@ export default function SellerCampaignEditorPage() {
               onFileSelect={bannerUpload.upload}
               onDelete={bannerUpload.deleteMedia}
               label={t("seller.campaigns.fields.banner")}
+              disabled={fieldsDisabled()}
             />
           </FieldGroup>
 
@@ -382,22 +438,25 @@ export default function SellerCampaignEditorPage() {
               onChange={setProductIds}
               label={t("seller.campaigns.fields.products.label")}
               hint={t("seller.campaigns.fields.productsHint")}
+              disabled={fieldsDisabled()}
             />
           </Show>
         </div>
       </Card>
 
       <div class="space-y-3">
-        <Show when={!isNew()}>
+        <Show when={canSubmit()}>
           <p class="text-sm text-gray-500 dark:text-gray-400">
             {t("seller.campaigns.submitRequirements")}
           </p>
         </Show>
         <div class="flex flex-wrap gap-3">
-          <Button onClick={handleSave} disabled={saveSubmission().pending}>
-            {t("seller.campaigns.save")}
-          </Button>
-          <Show when={!isNew()}>
+          <Show when={editable()}>
+            <Button onClick={handleSave} disabled={saveSubmission().pending}>
+              {t("seller.campaigns.save")}
+            </Button>
+          </Show>
+          <Show when={canSubmit()}>
             <Button
               variant="outline"
               onClick={handleSubmit}
@@ -406,8 +465,61 @@ export default function SellerCampaignEditorPage() {
               {t("seller.campaigns.submit")}
             </Button>
           </Show>
+          <Show when={storefrontUrl()}>
+            {(url) => (
+              <A href={url()}>
+                <Button variant="outline" type="button">
+                  {t("seller.campaigns.viewOnStorefront")}
+                </Button>
+              </A>
+            )}
+          </Show>
+          <Show when={canArchive()}>
+            <Button
+              variant="outline"
+              onClick={() => setPendingAction("archive")}
+              disabled={archiveSubmission.pending}
+            >
+              {t("seller.campaigns.archive")}
+            </Button>
+          </Show>
+          <Show when={canDelete()}>
+            <Button
+              variant="destructive"
+              onClick={() => setPendingAction("delete")}
+              disabled={deleteSubmission.pending}
+            >
+              {t("seller.campaigns.delete")}
+            </Button>
+          </Show>
         </div>
       </div>
+
+      <Show when={pendingAction()}>
+        {(action) => (
+          <ConfirmDialog
+            isOpen={true}
+            onClose={() => setPendingAction(null)}
+            onConfirm={handleLifecycleConfirm}
+            closeOnConfirm={false}
+            title={
+              action() === "archive"
+                ? t("seller.campaigns.confirmArchiveTitle")
+                : t("seller.campaigns.confirmDeleteTitle")
+            }
+            description={
+              action() === "archive"
+                ? t("seller.campaigns.confirmArchiveDescription")
+                : t("seller.campaigns.confirmDeleteDescription")
+            }
+            confirmLabel={
+              action() === "archive" ? t("seller.campaigns.archive") : t("seller.campaigns.delete")
+            }
+            variant="danger"
+            loading={archiveSubmission.pending || deleteSubmission.pending}
+          />
+        )}
+      </Show>
     </div>
   );
 }

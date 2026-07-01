@@ -18,6 +18,9 @@ export function ContentModerationBanner(props: {
     rejected: string;
     archived: string;
     draftHint: string;
+    pendingHint?: string;
+    approvedHint?: string;
+    archivedHint?: string;
     rejectedHint: string;
   };
 }) {
@@ -42,6 +45,15 @@ export function ContentModerationBanner(props: {
         </span>
         <Show when={props.moderationStatus === "DRAFT"}>
           <p class="text-sm text-gray-500 dark:text-gray-400">{props.moderationLabels.draftHint}</p>
+        </Show>
+        <Show when={props.moderationStatus === "PENDING" && props.moderationLabels.pendingHint}>
+          <p class="text-sm text-amber-700 dark:text-amber-300">{props.moderationLabels.pendingHint}</p>
+        </Show>
+        <Show when={props.moderationStatus === "APPROVED" && props.moderationLabels.approvedHint}>
+          <p class="text-sm text-forest-700 dark:text-forest-300">{props.moderationLabels.approvedHint}</p>
+        </Show>
+        <Show when={props.moderationStatus === "ARCHIVED" && props.moderationLabels.archivedHint}>
+          <p class="text-sm text-gray-500 dark:text-gray-400">{props.moderationLabels.archivedHint}</p>
         </Show>
       </div>
       <Show when={props.moderationStatus === "REJECTED" && props.rejectedReason}>

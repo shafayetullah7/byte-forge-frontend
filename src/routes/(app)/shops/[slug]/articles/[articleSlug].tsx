@@ -1,8 +1,9 @@
 import { Show } from "solid-js";
-import { A, createAsync, useParams, type RouteDefinition } from "@solidjs/router";
+import { A, createAsync, Navigate, useParams, type RouteDefinition } from "@solidjs/router";
 import { Meta, Title } from "@solidjs/meta";
 import { HttpStatusCode } from "@solidjs/start";
 import { useI18n } from "~/i18n";
+import { config } from "~/lib/config";
 import { getArticleDetail } from "~/lib/api/endpoints/public/shops.api";
 import { mapApiArticle } from "~/lib/public-shops/content.mappers";
 import { unwrapSuccess } from "~/lib/public-shops/shop.mappers";
@@ -17,6 +18,15 @@ export const route = {
 export default function ShopArticleDetailPage() {
   const params = useParams<{ slug: string; articleSlug: string }>();
   const { t } = useI18n();
+
+  if (!config.articlesEnabled) {
+    return (
+      <>
+        <Meta name="robots" content="noindex, nofollow" />
+        <Navigate href={`/shops/${params.slug}`} />
+      </>
+    );
+  }
 
   const articleQuery = createAsync(async () => {
     try {
@@ -70,6 +80,13 @@ export default function ShopArticleDetailPage() {
                 </p>
               </div>
               <p class="text-lg text-gray-600 dark:text-gray-300">{article().excerpt}</p>
+              <Show when={article().body}>
+                <div class="prose prose-forest dark:prose-invert max-w-none">
+                  <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">
+                    {article().body}
+                  </p>
+                </div>
+              </Show>
             </article>
           </>
         )}

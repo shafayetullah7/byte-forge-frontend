@@ -9,6 +9,7 @@ export function CampaignProductPicker(props: {
   label: string;
   hint?: string;
   maxItems?: number;
+  disabled?: boolean;
 }) {
   const { t } = useI18n();
   const [search, setSearch] = createSignal("");
@@ -25,6 +26,7 @@ export function CampaignProductPicker(props: {
   });
 
   const toggle = (id: string) => {
+    if (props.disabled) return;
     const current = props.selectedIds;
     if (current.includes(id)) {
       props.onChange(current.filter((x) => x !== id));
@@ -43,6 +45,7 @@ export function CampaignProductPicker(props: {
       <input
         type="search"
         value={search()}
+        disabled={props.disabled}
         onInput={(e) => setSearch(e.currentTarget.value)}
         placeholder={t("seller.campaigns.fields.products.searchPlaceholder")}
         class="w-full px-3 py-2 rounded-lg border-2 border-cream-200 dark:border-forest-700 bg-white dark:bg-forest-900/30 text-sm"
@@ -66,7 +69,8 @@ export function CampaignProductPicker(props: {
             {(product) => {
               const checked = () => props.selectedIds.includes(product.id);
               const disabled = () =>
-                !checked() && props.selectedIds.length >= maxItems();
+                props.disabled ||
+                (!checked() && props.selectedIds.length >= maxItems());
               return (
                 <label
                   class={`flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-cream-50 dark:hover:bg-forest-800/50 ${
