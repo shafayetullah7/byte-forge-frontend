@@ -1,7 +1,7 @@
 import { createSignal, createMemo, createEffect } from "solid-js";
-import { useNavigate, createAsync, useAction } from "@solidjs/router";
+import { useNavigate, createAsync, useAction, useLocation } from "@solidjs/router";
 import { useI18n } from "~/i18n";
-import { useSession } from "~/lib/auth";
+import { useSession, buildLoginHrefFromLocation } from "~/lib/auth";
 import { getCart } from "~/lib/api/endpoints/buyer/cart.api";
 import { getAddresses } from "~/lib/api/endpoints/buyer/address.api";
 import { calculatePriceBreakdown } from "~/lib/api/endpoints/buyer/checkout.api";
@@ -21,6 +21,7 @@ export type CheckoutStep = "address" | "review" | "payment";
 export function useCheckout() {
   const { t } = useI18n();
   const navigate = useNavigate();
+  const location = useLocation();
   const session = useSession();
   const placeOrderTrigger = useAction(placeOrderAction);
 
@@ -28,7 +29,7 @@ export function useCheckout() {
     const user = session();
     if (user === undefined) return;
     if (user === null) {
-      navigate("/login", { replace: true });
+      navigate(buildLoginHrefFromLocation(location.pathname, location.search), { replace: true });
     }
   });
 

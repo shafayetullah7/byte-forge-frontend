@@ -1,6 +1,6 @@
 import { RouteSectionProps, A, useLocation, useNavigate } from "@solidjs/router";
 import { createMemo, createEffect } from "solid-js";
-import { useSession } from "~/lib/auth";
+import { useSession, safeReturnTo } from "~/lib/auth";
 import { useI18n } from "~/i18n";
 
 export default function AuthLayout(props: RouteSectionProps) {
@@ -16,9 +16,8 @@ export default function AuthLayout(props: RouteSectionProps) {
     if (currentUser) {
       // User IS logged in
       if (currentUser.emailVerified) {
-        // 1. Verified User: should NOT be in auth layout at all (login, register, verify-account, etc.)
-        // Redirect to home or dashboard
-        navigate("/", { replace: true });
+        const returnTo = location.query.returnTo;
+        navigate(safeReturnTo(returnTo), { replace: true });
       } else {
         // 2. Unverified User: should ONLY be on /verify-account
         if (path !== "/verify-account") {

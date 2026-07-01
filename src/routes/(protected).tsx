@@ -1,7 +1,7 @@
-import { useNavigate } from "@solidjs/router";
+import { useNavigate, useLocation } from "@solidjs/router";
 import { Show, createEffect, ParentComponent, ErrorBoundary } from "solid-js";
 import { Meta } from "@solidjs/meta";
-import { useSession } from "~/lib/auth";
+import { useSession, buildLoginHrefFromLocation } from "~/lib/auth";
 import { requireVerifiedEmail } from "~/lib/auth/guards";
 import { ApiError } from "~/lib/api";
 
@@ -15,6 +15,9 @@ export const route = {
 const ProtectedLayout: ParentComponent = (props) => {
     const user = useSession();
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const loginHref = () => buildLoginHrefFromLocation(location.pathname, location.search);
 
     // Client-side backup guard (for client-side navigation)
     createEffect(() => {
@@ -25,7 +28,7 @@ const ProtectedLayout: ParentComponent = (props) => {
 
         // If userData is explicitly null, user is not logged in → Redirect to login
         if (userData === null) {
-            navigate("/login", { replace: true });
+            navigate(loginHref(), { replace: true });
             return;
         }
 
@@ -53,7 +56,7 @@ const ProtectedLayout: ParentComponent = (props) => {
 
                 // Handle auth errors that somehow got through
                 if (error instanceof ApiError && error.statusCode === 401) {
-                    navigate("/login", { replace: true });
+                    navigate(loginHref(), { replace: true });
                     return null;
                 }
 

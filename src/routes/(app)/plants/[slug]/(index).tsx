@@ -33,7 +33,7 @@ import { cartApi, invalidateAllCart } from "~/lib/api/endpoints/buyer/cart.api";
 import HreflangLinks from "~/components/seo/HreflangLinks";
 import { absoluteUrl, formatPageTitle } from "~/lib/seo/meta";
 import { addToWishlistAction } from "~/lib/api/endpoints/buyer/wishlist.actions";
-import { useSession } from "~/lib/auth/session";
+import { useSession, buildLoginHref } from "~/lib/auth";
 import {
   ImageGallery,
   CareBadge,
@@ -90,8 +90,7 @@ export default function PlantDetailPage() {
     const variant = selectedVariantData();
     if (!variant?.id) return;
     if (!session()) {
-      const returnTo = encodeURIComponent(`/plants/${params.slug}`);
-      navigate(`/login?returnTo=${returnTo}`);
+      navigate(buildLoginHref(`/plants/${params.slug}`));
       return;
     }
     addToWishlistTrigger({ variantId: variant.id });

@@ -1,5 +1,5 @@
-import { A, useNavigate, action, useSubmission, useAction, redirect } from "@solidjs/router";
-import { createSignal, createEffect } from "solid-js";
+import { A, useNavigate, action, useSubmission, useAction, useSearchParams } from "@solidjs/router";
+import { createSignal, createEffect, createMemo } from "solid-js";
 import { createForm, setError } from "@modular-forms/solid";
 import { Button, Input } from "~/components/ui";
 import { EyeIcon, EyeSlashIcon } from "~/components/icons";
@@ -11,6 +11,7 @@ import { authApi, ApiError } from "~/lib/api";
 import { PasswordCriteria } from "~/components/auth/PasswordCriteria";
 import { toaster } from "~/components/ui/Toast";
 import { useI18n } from "~/i18n";
+import { buildLoginHref } from "~/lib/auth";
 
 interface ValidationErrors {
   field: string;
@@ -36,9 +37,11 @@ const registerAction = action(async (data: RegisterFormData) => {
 
 export default function Register() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { t } = useI18n();
   const registerTrigger = useAction(registerAction);
   const submission = useSubmission(registerAction);
+  const loginHref = createMemo(() => buildLoginHref(searchParams.returnTo));
   const [showPassword, setShowPassword] = createSignal(false);
   const [showConfirmPassword, setShowConfirmPassword] = createSignal(false);
   const [errorMessage, setErrorMessage] = createSignal<string | null>(null);
@@ -125,7 +128,7 @@ export default function Register() {
   createEffect(() => {
     if (submission.result?.success) {
       toaster.success(t("auth.register.success"));
-      navigate("/login");
+      navigate(loginHref());
     }
   });
 
@@ -358,7 +361,7 @@ export default function Register() {
         <p class="text-center text-sm text-gray-600 dark:text-gray-400">
           {t("auth.register.hasAccount")}{" "}
           <A
-            href="/login"
+            href={loginHref()}
             class="text-terracotta-600 dark:text-terracotta-400 hover:text-terracotta-700 dark:hover:text-terracotta-300 font-bold transition-colors underline-offset-4 hover:underline"
           >
             {t("auth.register.signIn")}

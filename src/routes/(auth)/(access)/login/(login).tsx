@@ -1,5 +1,5 @@
 import { A, useNavigate, useSearchParams, action, useSubmission, useAction } from "@solidjs/router";
-import { createSignal, createEffect } from "solid-js";
+import { createSignal, createEffect, createMemo } from "solid-js";
 import { revalidate } from "@solidjs/router";
 import { createForm } from "@modular-forms/solid";
 import { Button, Input } from "~/components/ui";
@@ -8,6 +8,7 @@ import { loginSchema, type LoginFormData } from "~/schemas/login.schema";
 import { authApi, ApiError } from "~/lib/api";
 import { toaster } from "~/components/ui/Toast";
 import { useI18n } from "~/i18n";
+import { safeReturnTo, appendReturnToQuery } from "~/lib/auth";
 import { ThemeToggle } from "~/components/layout/ThemeToggle";
 import { LanguageSwitcher } from "~/components/layout/LanguageSwitcher";
 
@@ -55,6 +56,9 @@ export default function Login() {
   const loginTrigger = useAction(loginAction);
   const submission = useSubmission(loginAction);
   const [showPassword, setShowPassword] = createSignal(false);
+  const registerHref = createMemo(() =>
+    appendReturnToQuery("/register", searchParams.returnTo),
+  );
 
   const [loginForm, { Form, Field }] = createForm<LoginFormData>({
     validate: (values) => {
@@ -96,18 +100,13 @@ export default function Login() {
           state: { verificationExpiresAt: result.verificationExpiresAt },
         });
       } else {
-        const returnTo = searchParams.returnTo;
-        const target =
-          typeof returnTo === "string" && returnTo.startsWith("/") && !returnTo.startsWith("//")
-            ? returnTo
-            : result.target || "/";
+        const target = safeReturnTo(searchParams.returnTo, result.target || "/");
         navigate(target, { replace: true });
       }
     }
   });
 
   const handleSubmit = (values: LoginFormData) => {
-    console.log("Submitting login form...");
     loginTrigger(values);
   };
 
@@ -218,7 +217,7 @@ export default function Login() {
         <p class="text-center text-sm text-gray-600 dark:text-gray-400 pt-2">
           {t("auth.login.noAccount")}{" "}
           <A
-            href="/register"
+            href={registerHref()}
             class="text-terracotta-600 dark:text-terracotta-400 hover:text-terracotta-700 dark:hover:text-terracotta-300 font-bold transition-colors underline-offset-4 hover:underline"
           >
             {t("auth.login.createAccount")}
