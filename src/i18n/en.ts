@@ -936,18 +936,87 @@ export const dict = {
       saved: "Campaign saved",
       submit: "Submit for review",
       submitted: "Campaign submitted",
+      submitRequirements: "Both English and Bengali titles are required to submit for review.",
+      pageDescription:
+        "Shop campaigns are promotions shown on your public storefront. Customers browsing in English or Bengali will see the matching version.",
+      emptyList: "No campaigns yet. Create your first promotion to attract more buyers.",
       table: {
         title: "Title",
         status: "Status",
         dates: "Schedule",
       },
+      sections: {
+        customerContent: {
+          title: "What customers will see",
+          description:
+            "Write how this campaign appears to shoppers. Fill out both languages so buyers can read it in their preferred language.",
+        },
+        settings: {
+          title: "Campaign settings",
+          description:
+            "Schedule, offer type, and linked products apply to the whole campaign — they are not translated per language.",
+        },
+      },
+      bilingual: {
+        introTitle: "Reach customers in both languages",
+        introDescription:
+          "Byte Forge shows your shop in English and Bengali. Complete both columns before submitting for review.",
+      },
+      moderation: {
+        draft: "Draft",
+        pending: "Pending review",
+        approved: "Approved",
+        rejected: "Rejected",
+        archived: "Archived",
+        draftHint: "Only you can see drafts until an admin approves them.",
+        rejectedHint: "This campaign was rejected. Update the content below and submit again.",
+      },
+      validation: {
+        enTitleRequired: "English title is required",
+        bnTitleRequired: "Bengali title is required for submission",
+        startDateRequired: "Start date is required",
+        endDateRequired: "End date is required",
+        endAfterStart: "End date must be after start date",
+      },
       fields: {
         title: "Title",
         description: "Description",
-        type: "Type",
+        type: "Campaign type",
         discount: "Discount %",
         startDate: "Start date",
         endDate: "End date",
+        banner: "Banner image",
+        productsLabel: "Linked products",
+        titleHint: "Headline shown on campaign cards and the campaign detail page.",
+        descriptionHint: "Optional longer pitch — explain the offer and who it is for.",
+        typeHint: "Choose how this promotion is categorized on your shop.",
+        discountHint: "Percentage off for discount campaigns (0–100).",
+        startDateHint: "When this campaign becomes visible on your storefront.",
+        endDateHint: "When this campaign stops showing to customers.",
+        bannerHint: "Optional hero image on the campaign detail page.",
+        productsHint: "Optionally link up to 50 active products featured in this campaign.",
+        titlePlaceholder: "e.g. Monsoon Plant Sale",
+        titlePlaceholderBn: "যেমন: বর্ষা গাছ বিক্রয়",
+        descriptionPlaceholder: "Describe the offer, eligibility, and timing.",
+        descriptionPlaceholderBn: "অফার, যোগ্যতা ও সময়সূচি বর্ণনা করুন।",
+        products: {
+          label: "Linked products",
+          searchPlaceholder: "Search products…",
+          selectedCount: "{n} product(s) selected",
+          empty: "No active products found.",
+        },
+      },
+      types: {
+        DISCOUNT: "Discount",
+        BUNDLE: "Bundle",
+        FLASH_SALE: "Flash sale",
+        SEASONAL: "Seasonal",
+        FREE_SHIPPING: "Free shipping",
+        DISCOUNT_DESC: "Percentage or fixed discount on selected products.",
+        BUNDLE_DESC: "Buy multiple items together at a special price.",
+        FLASH_SALE_DESC: "Short, urgent promotion with a tight deadline.",
+        SEASONAL_DESC: "Tied to a season or holiday (e.g. monsoon, Eid).",
+        FREE_SHIPPING_DESC: "Free delivery offer for qualifying orders.",
       },
     },
     articles: {
@@ -960,10 +1029,48 @@ export const dict = {
       saved: "Article saved",
       submit: "Submit for review",
       submitted: "Article submitted",
+      submitRequirements:
+          "Title, excerpt, and body are required in both English and Bengali to submit for review.",
+      pageDescription:
+        "Shop articles are educational posts on your storefront — care tips, seasonal advice, and stories that build trust with buyers.",
+      emptyList: "No articles yet. Share your first care tip or shop story with customers.",
       table: {
         title: "Title",
         category: "Category",
         status: "Status",
+      },
+      sections: {
+        customerContent: {
+          title: "Article content",
+          description:
+            "Write the full article in both languages. Buyers see the version that matches their language preference.",
+        },
+        settings: {
+          title: "Article settings",
+          description: "Category, read time, and cover image are shared across both language versions.",
+        },
+      },
+      bilingual: {
+        introTitle: "Reach customers in both languages",
+        introDescription:
+          "Complete English and Bengali columns before submitting. All three fields (title, excerpt, body) are required in both languages for review.",
+      },
+      moderation: {
+        draft: "Draft",
+        pending: "Pending review",
+        approved: "Approved",
+        rejected: "Rejected",
+        archived: "Archived",
+        draftHint: "Only you can see drafts until an admin approves them.",
+        rejectedHint: "This article was rejected. Update the content below and submit again.",
+      },
+      validation: {
+        enTitleRequired: "English title is required",
+        bnTitleRequired: "Bengali title is required for submission",
+        enExcerptRequired: "English excerpt is required for submission",
+        bnExcerptRequired: "Bengali excerpt is required for submission",
+        enBodyRequired: "English body is required for submission",
+        bnBodyRequired: "Bengali body is required for submission",
       },
       fields: {
         title: "Title",
@@ -971,6 +1078,19 @@ export const dict = {
         body: "Body",
         category: "Category",
         readMinutes: "Read time (minutes)",
+        cover: "Cover image",
+        titleHint: "Article headline shown on list cards and the detail page.",
+        excerptHint: "Short preview text shown in the articles list.",
+        bodyHint: "Main article content — use plain text paragraphs.",
+        categoryHint: 'Grouping label on your shop articles tab (e.g. "Care tips", "Seasonal").',
+        readMinutesHint: "Estimated minutes to read — shown to buyers on the article page.",
+        coverHint: "Optional image shown on article list and detail pages.",
+        titlePlaceholder: "e.g. How to care for indoor plants in monsoon",
+        titlePlaceholderBn: "যেমন: বর্ষায় ইনডোর গাছের যত্ন",
+        excerptPlaceholder: "One or two sentences summarizing the article.",
+        excerptPlaceholderBn: "নিবন্ধের এক-দুই বাক্যে সংক্ষিপ্ত সারাংশ।",
+        bodyPlaceholder: "Write the full article here…",
+        bodyPlaceholderBn: "সম্পূর্ণ নিবন্ধ এখানে লিখুন…",
       },
     },
     products: {
