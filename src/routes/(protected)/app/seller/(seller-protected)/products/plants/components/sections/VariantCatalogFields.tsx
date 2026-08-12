@@ -350,7 +350,9 @@ export function VariantCatalogFields(props: {
                     <span class="font-medium text-forest-700 dark:text-forest-300">
                       ${typeof variant().price === 'number' ? (variant().price as number).toFixed(2) : (variant().price || '—')}
                     </span>
-                    <span>📦 {variant().inventoryCount || '∞'}</span>
+                    <span>📦 {variant().trackInventory
+                      ? (typeof variant().inventoryCount === "number" ? variant().inventoryCount : "0")
+                      : props.t("seller.products.newPlant.stockUntrackedSummary")}</span>
                     <span>📸 {variant().mediaIds.length}</span>
                     <span>🌱 {variant().growthStage || '—'}</span>
                   </div>
@@ -416,20 +418,33 @@ export function VariantCatalogFields(props: {
                     error={props.errors[`variants.${i}.price`]}
                     min={0}
                   />
-                  <Input
-                    type="number"
-                    id={`variant-${i}-inventory`}
-                    label={props.t("seller.products.newPlant.inventoryCountLabel")}
-                    placeholder={props.t("seller.products.newPlant.inventoryCountPlaceholder")}
-                    value={variant().inventoryCount}
-                    onInput={(e) => {
-                      const v = e.currentTarget.value;
-                      props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, inventoryCount: v === "" ? "" : parseFloat(v) } : item));
-                    }}
-                    min={0}
-                    disabled={props.stockFieldsDisabled}
-                  />
+                  <Show when={variant().trackInventory || props.stockFieldsDisabled}>
+                    <Input
+                      type="number"
+                      id={`variant-${i}-inventory`}
+                      label={props.stockFieldsDisabled
+                        ? props.t("seller.products.newPlant.inventoryCountLabel")
+                        : props.t("seller.products.newPlant.initialStockLabel")}
+                      placeholder={props.stockFieldsDisabled
+                        ? props.t("seller.products.newPlant.inventoryCountPlaceholder")
+                        : props.t("seller.products.newPlant.initialStockPlaceholder")}
+                      value={variant().inventoryCount}
+                      onInput={(e) => {
+                        const v = e.currentTarget.value;
+                        props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, inventoryCount: v === "" ? "" : parseInt(v, 10) } : item));
+                      }}
+                      min={0}
+                      step={1}
+                      disabled={props.stockFieldsDisabled}
+                    />
+                  </Show>
                 </div>
+
+                <Show when={!props.stockFieldsDisabled && variant().trackInventory}>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 -mt-1">
+                    {props.t("seller.products.newPlant.initialStockHint")}
+                  </p>
+                </Show>
 
                 <Show when={props.stockFieldsDisabled && props.inventoryLinkHref}>
                   <p class="text-sm text-gray-600 dark:text-gray-400">
@@ -477,7 +492,11 @@ export function VariantCatalogFields(props: {
                     label={props.t("seller.products.newPlant.trackInventoryLabel")}
                     checked={variant().trackInventory}
                     disabled={props.stockFieldsDisabled}
-                    onChange={(v) => props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, trackInventory: v } : item))}
+                    onChange={(v) => props.setVariants(vr => vr.map((item, idx) => idx === i ? {
+                      ...item,
+                      trackInventory: v,
+                      ...(v ? {} : { inventoryCount: "", lowStockThreshold: "" }),
+                    } : item))}
                   />
                   <label for={`variant-${i}-base`} class="flex items-center gap-2.5 cursor-pointer group">
                     <div class="relative">
@@ -522,7 +541,7 @@ export function VariantCatalogFields(props: {
                     value={variant().lowStockThreshold}
                     onInput={(e) => {
                       const v = e.currentTarget.value;
-                      props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, lowStockThreshold: v === "" ? "" : parseFloat(v) } : item));
+                      props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, lowStockThreshold: v === "" ? "" : parseInt(v, 10) } : item));
                     }}
                     min={0}
                   />

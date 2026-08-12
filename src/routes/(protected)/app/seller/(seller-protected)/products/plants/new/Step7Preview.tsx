@@ -317,8 +317,11 @@ export function Step7Preview(props: {
                   <PreviewRow label={props.t("seller.products.newPlant.skuLabel")} value={variant.sku} />
                 </Show>
                 <PreviewRow label={props.t("seller.products.newPlant.priceLabel")} value={`৳${typeof variant.price === "number" ? (variant.price as number).toFixed(2) : "0.00"}`} />
-                <Show when={typeof variant.inventoryCount === "number" && variant.inventoryCount >= 0}>
-                  <PreviewRow label={props.t("seller.products.newPlant.inventoryCountLabel")} value={String(variant.inventoryCount)} />
+                <Show when={variant.trackInventory && typeof variant.inventoryCount === "number" && variant.inventoryCount >= 0}>
+                  <PreviewRow label={props.t("seller.products.newPlant.initialStockLabel")} value={String(variant.inventoryCount)} />
+                </Show>
+                <Show when={!variant.trackInventory}>
+                  <PreviewRow label={props.t("seller.products.newPlant.trackInventoryLabel")} value={props.t("seller.products.newPlant.stockUntrackedSummary")} />
                 </Show>
                 <Show when={variant.growthStage}>
                   <PreviewRow label={props.t("seller.products.newPlant.growthStageLabel")} value={variant.growthStage} />

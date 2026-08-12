@@ -220,14 +220,25 @@ export function toCreatePlantDto(form: PlantFormState): Record<string, unknown> 
   }
 
   const variants = form.variants.map((v) => {
+    const trackInventory = v.trackInventory;
     const variant: Record<string, unknown> = {
       sku: clean(v.sku),
       price: typeof v.price === "number" ? v.price : 0,
-      inventoryCount: typeof v.inventoryCount === "number" ? v.inventoryCount : 0,
-      trackInventory: v.trackInventory,
-      lowStockThreshold: typeof v.lowStockThreshold === "number" ? v.lowStockThreshold : 5,
+      inventoryCount:
+        trackInventory && typeof v.inventoryCount === "number"
+          ? Math.max(0, Math.floor(v.inventoryCount))
+          : 0,
+      trackInventory,
+      lowStockThreshold:
+        trackInventory && typeof v.lowStockThreshold === "number"
+          ? Math.max(0, Math.floor(v.lowStockThreshold))
+          : 5,
       isBase: v.isBase,
       isActive: v.isActive,
+      translations: {
+        en: { title: v.translations.en.title.trim() },
+        bn: { title: v.translations.bn.title.trim() },
+      },
     };
 
     if (variantHasAttributes(v)) {
@@ -248,13 +259,6 @@ export function toCreatePlantDto(form: PlantFormState): Record<string, unknown> 
 
     if (v.mediaIds.length > 0) {
       variant.mediaIds = v.mediaIds;
-    }
-
-    if (v.translations.en.title.trim() || v.translations.bn.title.trim()) {
-      variant.translations = {
-        en: { title: v.translations.en.title.trim() },
-        bn: { title: v.translations.bn.title.trim() },
-      };
     }
 
     return variant;
