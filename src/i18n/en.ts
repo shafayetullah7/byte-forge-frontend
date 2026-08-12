@@ -1627,6 +1627,24 @@ export const dict = {
         step6Title: "Care Guide",
         step7Title: "Preview & Submit",
         fieldsNeedAttention: "fields need attention",
+        aiDraft: {
+          cardTitle: "Generate listing content with AI",
+          cardSubtitle: "English + Bengali — from a photo, name, or scientific name",
+          generateButton: "Generate listing draft",
+          generating: "Generating draft…",
+          disclaimer:
+            "AI-generated content — verify care and toxicity before publishing",
+          success: "Draft applied — review each step before publishing",
+          hint: "Add a photo, plant name, or scientific name to enable",
+          disabled: "AI draft is not available right now",
+          rateLimited: "Daily AI limit reached — try again tomorrow",
+          rejected:
+            "Could not validate AI output — try again or fill the form manually",
+          failed: "Generation failed — please try again",
+          photoIdentifyDisclaimer:
+            "Photo-only: AI will try to identify the plant. Double-check the name, care, and toxicity before publishing.",
+          imageError: "Could not use this image for AI — try another photo",
+        },
         // Thumbnail
         thumbnailLabel: "Plant Thumbnail",
         thumbnailDesc: "Main image shown in listings (JPEG, PNG, WEBP, or GIF — max 5MB)",

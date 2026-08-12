@@ -8,6 +8,11 @@ import type {
   PlantDetail,
   PlantStatus,
 } from "../../types/seller.types";
+import type {
+  PlantAiDraftRequest,
+  PlantAiDraftResponse,
+  PlantAiDraftStatus,
+} from "../../types/plant-ai.types";
 
 /**
  * Get all plants (paginated, with filtering)
@@ -49,6 +54,34 @@ export const getPlantById = query(
   },
   "seller-plant-detail"
 );
+
+/**
+ * Whether plant AI draft generation is enabled (for wizard UI gating).
+ */
+export const getPlantAiDraftStatus = query(
+  async () => {
+    "use server";
+    return fetcher<PlantAiDraftStatus>(
+      "/api/v1/user/seller/plants/ai-draft/status",
+    );
+  },
+  "plant-ai-draft-status",
+);
+
+/**
+ * Generate a bilingual plant listing draft (does not persist).
+ */
+export const generatePlantDraft = async (
+  data: PlantAiDraftRequest,
+): Promise<PlantAiDraftResponse> => {
+  return fetcher<PlantAiDraftResponse>(
+    "/api/v1/user/seller/plants/ai-draft",
+    {
+      method: "POST",
+      body: JSON.stringify(data),
+    },
+  );
+};
 
 /**
  * Invalidate/revalidate a specific plant's cached data
@@ -106,6 +139,8 @@ export const deletePlant = async (id: string): Promise<void> => {
 export const plantsApi = {
   getAll: getPlants,
   getById: getPlantById,
+  getAiDraftStatus: getPlantAiDraftStatus,
+  generateDraft: generatePlantDraft,
   create: createPlant,
   update: updatePlant,
   updateStatus: updatePlantStatus,

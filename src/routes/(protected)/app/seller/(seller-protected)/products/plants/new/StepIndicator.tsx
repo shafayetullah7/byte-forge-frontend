@@ -7,6 +7,7 @@ export interface StepInfo {
   hasWarning: boolean;
   isCurrent: boolean;
   isPreview: boolean;
+  aiFilled?: boolean;
 }
 
 export function StepIndicator(props: {
@@ -46,6 +47,11 @@ export function StepIndicator(props: {
               ) : (
                 step.number
               )}
+              <Show when={step.aiFilled}>
+                <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded bg-purple-600 px-1 text-[9px] font-bold uppercase tracking-wide text-white shadow-sm">
+                  AI
+                </span>
+              </Show>
             </button>
 
             {/* Connector Line */}

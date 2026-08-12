@@ -9,7 +9,15 @@ import Button from "~/components/ui/Button";
 import { type SelectOption } from "~/components/ui/Select";
 import { useImageUpload } from "~/lib/hooks/useImageUpload";
 import { toaster } from "~/components/ui/Toast";
-import { createPlant, invalidatePlants } from "~/lib/api/endpoints/seller/plants.api";
+import { createPlant, generatePlantDraft, getPlantAiDraftStatus, invalidatePlants } from "~/lib/api/endpoints/seller/plants.api";
+import { ApiError } from "~/lib/api";
+import {
+  hasPlantAiDraftSignals,
+  isPhotoOnlyPlantAiRequest,
+  mergePlantAiDraftIntoForm,
+  toPlantAiDraftRequest,
+} from "~/lib/plants/merge-plant-ai-draft";
+import { PlantAiDraftCard } from "./PlantAiDraftCard";
 import { SunIcon, ChevronLeftIcon, SpinnerIcon } from "~/components/icons";
 import { StepIndicator } from "../new/StepIndicator";
 import { Step1Identity } from "../new/Step1Identity";
@@ -77,7 +85,7 @@ const savePlantAction = action(async (data: SavePlantActionData) => {
 }, "save-plant-action");
 
 export function PlantWizardPage() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -86,6 +94,16 @@ export function PlantWizardPage() {
 
   // ---- Tags ----
   const tags = createAsync(() => getTags());
+
+  const plantAiStatus = createAsync(async () => {
+    try {
+      return await getPlantAiDraftStatus();
+    } catch {
+      return { enabled: false };
+    }
+  });
+
+  const plantAiEnabled = createMemo(() => plantAiStatus()?.enabled === true);
 
   // ---- Translated Select Options ----
   const lightOptions = createMemo<SelectOption[]>(() => [
@@ -191,6 +209,9 @@ export function PlantWizardPage() {
   const isSubmitting = () => plantSubmission.pending;
 
   const [form, setForm] = createStore<PlantFormState>(createEmptyForm());
+  const [isGeneratingAiDraft, setIsGeneratingAiDraft] = createSignal(false);
+  const [aiDraftApplied, setAiDraftApplied] = createSignal(false);
+  const [aiVariantFilled, setAiVariantFilled] = createSignal(false);
 
   // Thumbnail upload — hook handles upload logic, state syncs to form via callbacks
   const thumbnailUpload = useImageUpload({
@@ -209,6 +230,73 @@ export function PlantWizardPage() {
   const hasThumbnail = createMemo(
     () => !!(thumbnailUpload.preview() || form.thumbnail.id),
   );
+
+  const canGenerateAiDraft = createMemo(() =>
+    hasPlantAiDraftSignals(
+      toPlantAiDraftRequest(form, { localeHint: locale() }),
+    ),
+  );
+
+  const isPhotoOnlyAiDraft = createMemo(() =>
+    isPhotoOnlyPlantAiRequest(
+      toPlantAiDraftRequest(form, { localeHint: locale() }),
+    ),
+  );
+
+  const resolvePlantAiErrorMessage = (error: unknown): string => {
+    if (!(error instanceof ApiError)) {
+      return t("seller.products.newPlant.aiDraft.failed");
+    }
+
+    switch (error.statusCode) {
+      case 503:
+        return t("seller.products.newPlant.aiDraft.disabled");
+      case 429:
+        return t("seller.products.newPlant.aiDraft.rateLimited");
+      case 422:
+        return t("seller.products.newPlant.aiDraft.rejected");
+      case 400:
+        return error.message || t("seller.products.newPlant.aiDraft.imageError");
+      case 502:
+        return t("seller.products.newPlant.aiDraft.failed");
+      default:
+        return error.message || t("seller.products.newPlant.aiDraft.failed");
+    }
+  };
+
+  const handleGenerateAiDraft = async () => {
+    if (!canGenerateAiDraft() || isGeneratingAiDraft()) return;
+
+    setIsGeneratingAiDraft(true);
+    try {
+      const request = toPlantAiDraftRequest(form, { localeHint: locale() });
+      const draft = await generatePlantDraft(request);
+      const merged = mergePlantAiDraftIntoForm(form, draft);
+
+      setForm("translations", merged.translations);
+      setForm("plantDetails", merged.plantDetails);
+      setForm("careGuide", merged.careGuide);
+      setForm("variants", merged.variants);
+      if (isSlugManual()) {
+        setForm("slug", merged.slug);
+      }
+
+      if (request.thumbnailMediaId) {
+        setForm("thumbnail", {
+          id: form.thumbnail.id ?? request.thumbnailMediaId,
+          url: form.thumbnail.url ?? thumbnailUpload.preview(),
+        });
+      }
+
+      setAiVariantFilled(Boolean(draft.defaultVariant));
+      setAiDraftApplied(true);
+      toaster.success(t("seller.products.newPlant.aiDraft.success"));
+    } catch (error) {
+      toaster.error(resolvePlantAiErrorMessage(error));
+    } finally {
+      setIsGeneratingAiDraft(false);
+    }
+  };
 
   onMount(() => {
     const stepParam = searchParams.step;
@@ -331,6 +419,9 @@ export function PlantWizardPage() {
       const isPast = stepNum < currentStep();
       const isPreview = stepNum === 7;
       const hasNoWarnings = !warning.hasWarning;
+      const aiFilledSteps = new Set(
+        aiVariantFilled() ? [2, 3, 4, 5, 6] : [2, 3, 5, 6],
+      );
       return {
         number: stepNum,
         title: stepTitles()[i],
@@ -338,6 +429,7 @@ export function PlantWizardPage() {
         hasWarning: !isPast && warning.hasWarning,
         isCurrent,
         isPreview,
+        aiFilled: aiDraftApplied() && aiFilledSteps.has(stepNum),
       };
     })
   );
@@ -611,6 +703,17 @@ export function PlantWizardPage() {
               <div class="p-6">
                 {/* Step 1: Identity, Names & Descriptions */}
                 <Show when={currentStep() === 1}>
+                  <Show when={plantAiEnabled()}>
+                    <div class="mb-6">
+                      <PlantAiDraftCard
+                        canGenerate={canGenerateAiDraft()}
+                        isGenerating={isGeneratingAiDraft()}
+                        photoOnly={isPhotoOnlyAiDraft()}
+                        onGenerate={handleGenerateAiDraft}
+                        t={t}
+                      />
+                    </div>
+                  </Show>
                   <Step1Identity
                     thumbnailUpload={thumbnailUpload}
                     thumbnailPreview={effectiveThumbnailPreview}
