@@ -57,7 +57,7 @@ export function CareRequirementsSection(props: {
                 titleEn={t("seller.products.plantOverview.light")}
                 titleBn={t("seller.products.plantOverview.lightBn")}
                 badge={{
-                  text: getLightLabel(light() as LightRequirement),
+                  text: getLightLabel(light() as LightRequirement, t),
                   ...getLightColor(light() as LightRequirement),
                 }}
                 description={t("seller.products.plantOverview.lightDescription")}
@@ -71,7 +71,7 @@ export function CareRequirementsSection(props: {
                 titleEn={t("seller.products.plantOverview.watering")}
                 titleBn={t("seller.products.plantOverview.wateringBn")}
                 badge={{
-                  text: getWateringLabel(watering() as WateringFrequency),
+                  text: getWateringLabel(watering() as WateringFrequency, t),
                   ...getWateringColor(watering() as WateringFrequency),
                 }}
                 description={t("seller.products.plantOverview.wateringDescription")}
@@ -85,7 +85,7 @@ export function CareRequirementsSection(props: {
                 titleEn={t("seller.products.plantOverview.humidity")}
                 titleBn={t("seller.products.plantOverview.humidityBn")}
                 badge={{
-                  text: getHumidityLabel(humidity() as HumidityLevel),
+                  text: getHumidityLabel(humidity() as HumidityLevel, t),
                   ...getHumidityColor(humidity() as HumidityLevel),
                 }}
                 description={t("seller.products.plantOverview.humidityDescription")}
@@ -114,7 +114,7 @@ export function CareRequirementsSection(props: {
                 titleEn={t("seller.products.plantOverview.careDifficulty")}
                 titleBn={t("seller.products.plantOverview.careDifficultyBn")}
                 badge={{
-                  text: getDifficultyLabel(difficulty() as CareDifficulty),
+                  text: getDifficultyLabel(difficulty() as CareDifficulty, t),
                   ...getDifficultyColor(difficulty() as CareDifficulty),
                 }}
                 description={t("seller.products.plantOverview.careDifficultyDescription")}
@@ -128,7 +128,7 @@ export function CareRequirementsSection(props: {
                 titleEn={t("seller.products.plantOverview.growthRate")}
                 titleBn={t("seller.products.plantOverview.growthRateBn")}
                 badge={{
-                  text: getGrowthRateLabel(growth() as GrowthRate),
+                  text: getGrowthRateLabel(growth() as GrowthRate, t),
                   bg: "bg-sage-100 dark:bg-sage-900/40",
                   textColor: "text-sage-700 dark:text-sage-300",
                 }}

@@ -9,19 +9,9 @@ export type CareInstructionContent = Record<CareInstructionKey, string | null>;
 
 function careContent(
   ci: NonNullable<PlantDetail["careInstructions"]>,
-  locale: string,
+  locale: "en" | "bn",
 ): CareInstructionContent {
-  const tr = translationFor(ci.translations, locale);
-  return {
-    lightInstructions: tr?.lightInstructions ?? ci.lightInstructions,
-    wateringInstructions: tr?.wateringInstructions ?? ci.wateringInstructions,
-    humidityInstructions: tr?.humidityInstructions ?? ci.humidityInstructions,
-    fertilizerSchedule: tr?.fertilizerSchedule ?? ci.fertilizerSchedule,
-    repottingFrequency: tr?.repottingFrequency ?? ci.repottingFrequency,
-    pruningNotes: tr?.pruningNotes ?? ci.pruningNotes,
-    commonProblems: tr?.commonProblems ?? ci.commonProblems,
-    seasonalCare: tr?.seasonalCare ?? ci.seasonalCare,
-  };
+  return ci.translations[locale];
 }
 
 export function usePlantOverviewData(plant: Accessor<PlantDetail | undefined>) {
@@ -40,15 +30,11 @@ export function usePlantOverviewData(plant: Accessor<PlantDetail | undefined>) {
     }));
   });
 
-  const enTranslation = createMemo(() => translationFor(plant()?.translations, "en"));
-  const bnTranslation = createMemo(() => translationFor(plant()?.translations, "bn"));
+  const enTranslation = createMemo(() => plant()?.translations.en);
+  const bnTranslation = createMemo(() => plant()?.translations.bn);
 
-  const plantDetailsEn = createMemo(() =>
-    translationFor(plant()?.plantDetails?.translations, "en"),
-  );
-  const plantDetailsBn = createMemo(() =>
-    translationFor(plant()?.plantDetails?.translations, "bn"),
-  );
+  const plantDetailsEn = createMemo(() => plant()?.plantDetails?.translations.en);
+  const plantDetailsBn = createMemo(() => plant()?.plantDetails?.translations.bn);
 
   const categoryEn = createMemo(() =>
     translationFor(plant()?.plantDetails?.category?.translations, "en")?.name ?? "—",

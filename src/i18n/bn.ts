@@ -1170,6 +1170,9 @@ export const dict = {
         typePots: "কুঁজ",
         typeSeeds: "বীজ",
         typeFertilizers: "সার",
+        category: "ক্যাটাগরি",
+        tags: "ট্যাগ",
+        button: "ফিল্টার",
       },
       // Products page - Sort
       sort: {
@@ -1181,6 +1184,9 @@ export const dict = {
         inventory: "ইনভেন্টরি",
         asc: "আরোহী",
         desc: "অবরোহী",
+        orderAscending: "↑ আরোহী",
+        orderDescending: "↓ অবরোহী",
+        orderLabel: (asc: boolean) => (asc ? "ক্রম: ↑ আরোহী" : "ক্রম: ↓ অবরোহী"),
         resetToDefault: "ডিফলতে রিসেট করুন",
       },
       // Products page - Active Filters
@@ -1191,13 +1197,18 @@ export const dict = {
         search: (query: string) => `অনুসন্ধান: "${query}"`,
         status: (status: string) => `অবস্থা: ${status}`,
         type: (type: string) => `ধরন: ${type}`,
+        category: (name: string) => `ক্যাটাগরি: ${name}`,
       },
       // Products page - Results
       resultsCount: (showing: number, total: number) => `${showing} থেকে ${total} পণ্য দেখানো হচ্ছে`,
+      plantsResultsCount: (showing: number, total: number) => `${showing} থেকে ${total} গাছ দেখানো হচ্ছে`,
       // Products page - Empty/Loading states
       loading: "পণ্য লোড হচ্ছে...",
       loadingDescription: "আপনার পণ্য আনতে অনুগ্রহ করে অপেক্ষা করুন।",
+      loadingPlants: "গাছ লোড হচ্ছে...",
+      loadingPlantsDescription: "আপনার গাছ আনতে অনুগ্রহ করে অপেক্ষা করুন।",
       noProductsFound: "কোনো পণ্য পাওয়া যায়নি",
+      noPlantsFound: "কোনো গাছ পাওয়া যায়নি",
       noProductsAdjustFilters: "আপনার ফিল্টার বা অনুসন্ধান প্রশ্ন পরিবর্তন করে দেখুন",
       noProductsStart: "আপনার প্রথম পণ্য যোগ করে শুরু করুন",
       clearFilters: "ফিল্টার মুছুন",
@@ -1205,6 +1216,8 @@ export const dict = {
       tableHeaders: {
         product: "পণ্য",
         type: "ধরন",
+        category: "ক্যাটাগরি",
+        tags: "ট্যাগ",
         price: "মূল্য",
         inventory: "ইনভেন্টরি",
         status: "অবস্থা",
@@ -1219,6 +1232,7 @@ export const dict = {
       // Products page - Mobile card labels
       mobileLabels: {
         type: "ধরন",
+        category: "ক্যাটাগরি",
         price: "মূল্য",
         inventory: "ইনভেন্টরি",
       },
@@ -1541,6 +1555,7 @@ export const dict = {
         careProfile: "যত্ন প্রোফাইল",
         difficulty: "জটিলতা",
         // Variant preview
+        variants: "ভেরিয়েন্ট",
         viewAll: "সব দেখুন",
         price: "মূল্য",
         stock: "স্টক",
@@ -1583,6 +1598,10 @@ export const dict = {
         confirmRemove: "এই ভেরিয়েন্ট সরাবেন? অর্ডার ইতিহাস থাকলে এটি পূর্বাবস্থায় ফেরানো যাবে না।",
         confirmRemoveTitle: "ভেরিয়েন্ট সরাবেন?",
         noVariants: "এই গাছের জন্য কোনো ভেরিয়েন্ট নেই।",
+        inactive: "নিষ্ক্রিয়",
+        inStockShort: "স্টকে আছে",
+        lowStockShort: "কম",
+        images: (count: number) => `ছবি (${count})`,
       },
       managePlantProducts: "আপনার গাছপালা পণ্য পরিচালনা করুন",
       managePotProducts: "আপনার কুঁজ পণ্য পরিচালনা করুন",
@@ -1693,7 +1712,7 @@ export const dict = {
         wateringFrequencyPlaceholder: "পানি দেওয়ার হার নির্বাচন করুন",
         wateringRequired: "পানি দেওয়ার হার প্রয়োজন",
         humidityLevelLabel: "আর্দ্রতার মাত্রা",
-        humidityLevelPlaceholder: "আর্দ্রতার পছন্দ নির্বাচন করুন",
+        humidityLevelPlaceholder: "আর্দ্রতার মাত্রা নির্বাচন করুন",
         humidityRequired: "আর্দ্রতার মাত্রা প্রয়োজন",
         careDifficultyLabel: "যত্নের স্তর",
         careDifficultyPlaceholder: "জটিলতার মাত্রা নির্বাচন করুন",
@@ -1726,8 +1745,8 @@ export const dict = {
         soilTypePlaceholder: "যেমন, পারলাইট সহ ভালোভাবে নিষ্কাশিত পটিং মিক্স",
         soilTypeBnPlaceholder: "যেমন, পারলাইট সহ ভালোভাবে নিষ্কাশিত পটিং মিক্স",
         toxicityInfoLabel: "পোষ্য ও শিশু নিরাপত্তা (বিষাক্ততা)",
-        toxicityInfoPlaceholder: "যেমন, খেলে বিড়াল ও কুকুরের জন্য বিষাক্ত",
-        toxicityInfoBnPlaceholder: "যেমন, খেলে বিড়াল ও কুকুরের জন্য বিষাক্ত",
+        toxicityInfoPlaceholder: "যেমন, খেয়ে ফেললে বিড়াল ও কুকুরের জন্য বিষাক্ত",
+        toxicityInfoBnPlaceholder: "যেমন, খেয়ে ফেললে বিড়াল ও কুকুরের জন্য বিষাক্ত",
         toxicityInfoHint: "পোষ্য প্রাণী বা শিশু থাকা গ্রাহকদের জন্য গুরুত্বপূর্ণ নিরাপত্তা তথ্য",
         // Variants
         variants: "ভেরিয়েন্ট ও মূল্য",

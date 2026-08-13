@@ -24,8 +24,102 @@ import {
   type PropagationType,
   type ContainerType,
 } from "~/lib/api/types/seller.types";
+import type { Translator } from "~/i18n";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+const STATUS_KEYS: Record<ProductStatus, string> = {
+  [PRODUCT_STATUS.ACTIVE]: "seller.products.statusLabels.active",
+  [PRODUCT_STATUS.DRAFT]: "seller.products.statusLabels.draft",
+  [PRODUCT_STATUS.ARCHIVED]: "seller.products.statusLabels.archived",
+};
+
+const LIGHT_KEYS: Record<LightRequirement, string> = {
+  [LIGHT_REQUIREMENT.LOW]: "seller.products.newPlant.lightLow",
+  [LIGHT_REQUIREMENT.MEDIUM]: "seller.products.newPlant.lightMedium",
+  [LIGHT_REQUIREMENT.BRIGHT_INDIRECT]: "seller.products.newPlant.lightBrightIndirect",
+  [LIGHT_REQUIREMENT.DIRECT]: "seller.products.newPlant.lightDirect",
+};
+
+const WATERING_KEYS: Record<WateringFrequency, string> = {
+  [WATERING_FREQUENCY.DAILY]: "seller.products.newPlant.wateringDaily",
+  [WATERING_FREQUENCY.WEEKLY]: "seller.products.newPlant.wateringWeekly",
+  [WATERING_FREQUENCY.BI_WEEKLY]: "seller.products.newPlant.wateringBiWeekly",
+  [WATERING_FREQUENCY.MONTHLY]: "seller.products.newPlant.wateringMonthly",
+};
+
+const HUMIDITY_KEYS: Record<HumidityLevel, string> = {
+  [HUMIDITY_LEVEL.LOW]: "seller.products.newPlant.humidityLow",
+  [HUMIDITY_LEVEL.MEDIUM]: "seller.products.newPlant.humidityMedium",
+  [HUMIDITY_LEVEL.HIGH]: "seller.products.newPlant.humidityHigh",
+};
+
+const DIFFICULTY_KEYS: Record<CareDifficulty, string> = {
+  [CARE_DIFFICULTY.BEGINNER]: "seller.products.newPlant.careBeginner",
+  [CARE_DIFFICULTY.INTERMEDIATE]: "seller.products.newPlant.careIntermediate",
+  [CARE_DIFFICULTY.EXPERT]: "seller.products.newPlant.careExpert",
+};
+
+const GROWTH_RATE_KEYS: Record<GrowthRate, string> = {
+  [GROWTH_RATE.SLOW]: "seller.products.newPlant.growthSlow",
+  [GROWTH_RATE.MODERATE]: "seller.products.newPlant.growthModerate",
+  [GROWTH_RATE.FAST]: "seller.products.newPlant.growthFast",
+};
+
+const GROWTH_STAGE_KEYS: Record<GrowthStage, string> = {
+  [GROWTH_STAGE.SEEDLING]: "seller.products.newPlant.stageSeedling",
+  [GROWTH_STAGE.JUVENILE]: "seller.products.newPlant.stageJuvenile",
+  [GROWTH_STAGE.MATURE]: "seller.products.newPlant.stageMature",
+  [GROWTH_STAGE.CUTTING]: "seller.products.newPlant.stageCutting",
+};
+
+const PLANT_FORM_KEYS: Record<PlantForm, string> = {
+  [PLANT_FORM.UPRIGHT]: "seller.products.newPlant.formUpright",
+  [PLANT_FORM.TRAILING]: "seller.products.newPlant.formTrailing",
+  [PLANT_FORM.BUSHY]: "seller.products.newPlant.formBushy",
+  [PLANT_FORM.CLIMBING]: "seller.products.newPlant.formClimbing",
+  [PLANT_FORM.ROSETTE]: "seller.products.newPlant.formRosette",
+};
+
+const VARIEGATION_KEYS: Record<Variegation, string> = {
+  [VARIEGATION.NONE]: "seller.products.newPlant.varNone",
+  [VARIEGATION.VARIEGATED]: "seller.products.newPlant.varVariegated",
+  [VARIEGATION.SEMI_VARIEGATED]: "seller.products.newPlant.varSemiVariegated",
+  [VARIEGATION.ALBO]: "seller.products.newPlant.varAlbo",
+  [VARIEGATION.AUREO]: "seller.products.newPlant.varAureo",
+};
+
+const LEAF_DENSITY_KEYS: Record<LeafDensity, string> = {
+  [LEAF_DENSITY.SPARSE]: "seller.products.newPlant.densitySparse",
+  [LEAF_DENSITY.MODERATE]: "seller.products.newPlant.densityModerate",
+  [LEAF_DENSITY.DENSE]: "seller.products.newPlant.densityDense",
+};
+
+const PROPAGATION_KEYS: Record<PropagationType, string> = {
+  [PROPAGATION_TYPE.CUTTING]: "seller.products.newPlant.propCutting",
+  [PROPAGATION_TYPE.SEED]: "seller.products.newPlant.propSeed",
+  [PROPAGATION_TYPE.TISSUE_CULTURE]: "seller.products.newPlant.propTissueCulture",
+  [PROPAGATION_TYPE.AIR_LAYER]: "seller.products.newPlant.propAirLayer",
+  [PROPAGATION_TYPE.DIVISION]: "seller.products.newPlant.propDivision",
+};
+
+const CONTAINER_TYPE_KEYS: Record<ContainerType, string> = {
+  [CONTAINER_TYPE.NURSERY_POT]: "seller.products.newPlant.contNurseryPot",
+  [CONTAINER_TYPE.DECORATIVE_POT]: "seller.products.newPlant.contDecorativePot",
+  [CONTAINER_TYPE.HANGING_BASKET]: "seller.products.newPlant.contHangingBasket",
+  [CONTAINER_TYPE.TERRARIUM]: "seller.products.newPlant.contTerrarium",
+  [CONTAINER_TYPE.GROW_BAG]: "seller.products.newPlant.contGrowBag",
+};
+
+function enumLabel<T extends string>(
+  value: T,
+  keys: Record<T, string>,
+  fallbacks: Record<T, string>,
+  t?: Translator,
+): string {
+  if (t) return t(keys[value]);
+  return fallbacks[value];
+}
 
 export function getStatusVariant(status: ProductStatus): "forest" | "sage" | "cream" | "terracotta" | "default" {
   switch (status) {
@@ -36,18 +130,17 @@ export function getStatusVariant(status: ProductStatus): "forest" | "sage" | "cr
   }
 }
 
-export function getStatusLabel(status: ProductStatus): string {
-  const labels: Record<ProductStatus, string> = {
+export function getStatusLabel(status: ProductStatus, t?: Translator): string {
+  return enumLabel(status, STATUS_KEYS, {
     [PRODUCT_STATUS.ACTIVE]: "Active",
     [PRODUCT_STATUS.DRAFT]: "Draft",
     [PRODUCT_STATUS.ARCHIVED]: "Archived",
-  };
-  return labels[status];
+  }, t);
 }
 
-export function getInventoryStatus(count: number, t?: (key: string, ...args: any[]) => string): { label: string; variant: "forest" | "cream" | "terracotta" } {
+export function getInventoryStatus(count: number, t?: Translator): { label: string; variant: "forest" | "cream" | "terracotta" } {
   if (count === 0) return { label: t ? t("seller.products.inventory.outOfStock") : "Out of Stock", variant: "terracotta" };
-  if (count <= 5) return { label: t ? t("seller.products.inventoryDetail.inventoryStatus.lowStock", count) : "Low Stock", variant: "cream" };
+  if (count <= 5) return { label: t ? t("seller.products.inventory.left", count) : "Low Stock", variant: "cream" };
   return { label: t ? t("seller.products.inventory.inStock", count) : `${count} in stock`, variant: "forest" };
 }
 
@@ -88,14 +181,13 @@ export function getOrderStatusVariant(status: string): "forest" | "sage" | "crea
   }
 }
 
-export function getLightLabel(value: LightRequirement): string {
-  const labels: Record<LightRequirement, string> = {
+export function getLightLabel(value: LightRequirement, t?: Translator): string {
+  return enumLabel(value, LIGHT_KEYS, {
     [LIGHT_REQUIREMENT.LOW]: "Low Light",
     [LIGHT_REQUIREMENT.MEDIUM]: "Medium Light",
     [LIGHT_REQUIREMENT.BRIGHT_INDIRECT]: "Bright Indirect",
     [LIGHT_REQUIREMENT.DIRECT]: "Direct Sunlight",
-  };
-  return labels[value];
+  }, t);
 }
 
 export function getLightColor(value: LightRequirement): { bg: string; textColor: string } {
@@ -108,14 +200,13 @@ export function getLightColor(value: LightRequirement): { bg: string; textColor:
   return colors[value];
 }
 
-export function getWateringLabel(value: WateringFrequency): string {
-  const labels: Record<WateringFrequency, string> = {
+export function getWateringLabel(value: WateringFrequency, t?: Translator): string {
+  return enumLabel(value, WATERING_KEYS, {
     [WATERING_FREQUENCY.DAILY]: "Daily",
     [WATERING_FREQUENCY.WEEKLY]: "Weekly",
     [WATERING_FREQUENCY.BI_WEEKLY]: "Bi-weekly",
     [WATERING_FREQUENCY.MONTHLY]: "Monthly",
-  };
-  return labels[value];
+  }, t);
 }
 
 export function getWateringColor(value: WateringFrequency): { bg: string; textColor: string } {
@@ -128,13 +219,12 @@ export function getWateringColor(value: WateringFrequency): { bg: string; textCo
   return colors[value];
 }
 
-export function getHumidityLabel(value: HumidityLevel): string {
-  const labels: Record<HumidityLevel, string> = {
+export function getHumidityLabel(value: HumidityLevel, t?: Translator): string {
+  return enumLabel(value, HUMIDITY_KEYS, {
     [HUMIDITY_LEVEL.LOW]: "Low (30-40%)",
     [HUMIDITY_LEVEL.MEDIUM]: "Medium (40-60%)",
     [HUMIDITY_LEVEL.HIGH]: "High (60%+)",
-  };
-  return labels[value];
+  }, t);
 }
 
 export function getHumidityColor(value: HumidityLevel): { bg: string; textColor: string } {
@@ -146,13 +236,12 @@ export function getHumidityColor(value: HumidityLevel): { bg: string; textColor:
   return colors[value];
 }
 
-export function getDifficultyLabel(value: CareDifficulty): string {
-  const labels: Record<CareDifficulty, string> = {
+export function getDifficultyLabel(value: CareDifficulty, t?: Translator): string {
+  return enumLabel(value, DIFFICULTY_KEYS, {
     [CARE_DIFFICULTY.BEGINNER]: "Beginner",
     [CARE_DIFFICULTY.INTERMEDIATE]: "Intermediate",
     [CARE_DIFFICULTY.EXPERT]: "Expert",
-  };
-  return labels[value];
+  }, t);
 }
 
 export function getDifficultyColor(value: CareDifficulty): { bg: string; textColor: string } {
@@ -164,74 +253,67 @@ export function getDifficultyColor(value: CareDifficulty): { bg: string; textCol
   return colors[value];
 }
 
-export function getGrowthRateLabel(value: GrowthRate): string {
-  const labels: Record<GrowthRate, string> = {
+export function getGrowthRateLabel(value: GrowthRate, t?: Translator): string {
+  return enumLabel(value, GROWTH_RATE_KEYS, {
     [GROWTH_RATE.SLOW]: "Slow",
     [GROWTH_RATE.MODERATE]: "Moderate",
     [GROWTH_RATE.FAST]: "Fast",
-  };
-  return labels[value];
+  }, t);
 }
 
-export function getGrowthStageLabel(value: GrowthStage): string {
-  const labels: Record<GrowthStage, string> = {
+export function getGrowthStageLabel(value: GrowthStage, t?: Translator): string {
+  return enumLabel(value, GROWTH_STAGE_KEYS, {
     [GROWTH_STAGE.SEEDLING]: "Seedling",
     [GROWTH_STAGE.JUVENILE]: "Juvenile",
     [GROWTH_STAGE.MATURE]: "Mature",
     [GROWTH_STAGE.CUTTING]: "Cutting",
-  };
-  return labels[value];
+  }, t);
 }
 
-export function getPlantFormLabel(value: PlantForm): string {
-  const labels: Record<PlantForm, string> = {
+export function getPlantFormLabel(value: PlantForm, t?: Translator): string {
+  return enumLabel(value, PLANT_FORM_KEYS, {
     [PLANT_FORM.UPRIGHT]: "Upright",
     [PLANT_FORM.TRAILING]: "Trailing",
     [PLANT_FORM.BUSHY]: "Bushy",
     [PLANT_FORM.CLIMBING]: "Climbing",
     [PLANT_FORM.ROSETTE]: "Rosette",
-  };
-  return labels[value];
+  }, t);
 }
 
-export function getVariegationLabel(value: Variegation): string {
-  const labels: Record<Variegation, string> = {
+export function getVariegationLabel(value: Variegation, t?: Translator): string {
+  return enumLabel(value, VARIEGATION_KEYS, {
     [VARIEGATION.NONE]: "None",
     [VARIEGATION.VARIEGATED]: "Variegated",
     [VARIEGATION.SEMI_VARIEGATED]: "Semi-Variegated",
     [VARIEGATION.ALBO]: "Albo (White)",
     [VARIEGATION.AUREO]: "Aureo (Yellow)",
-  };
-  return labels[value];
+  }, t);
 }
 
-export function getLeafDensityLabel(value: LeafDensity): string {
-  const labels: Record<LeafDensity, string> = {
+export function getLeafDensityLabel(value: LeafDensity, t?: Translator): string {
+  return enumLabel(value, LEAF_DENSITY_KEYS, {
     [LEAF_DENSITY.SPARSE]: "Sparse",
     [LEAF_DENSITY.MODERATE]: "Moderate",
     [LEAF_DENSITY.DENSE]: "Dense",
-  };
-  return labels[value];
+  }, t);
 }
 
-export function getPropagationLabel(value: PropagationType): string {
-  const labels: Record<PropagationType, string> = {
+export function getPropagationLabel(value: PropagationType, t?: Translator): string {
+  return enumLabel(value, PROPAGATION_KEYS, {
     [PROPAGATION_TYPE.CUTTING]: "Cutting",
     [PROPAGATION_TYPE.SEED]: "Seed",
     [PROPAGATION_TYPE.TISSUE_CULTURE]: "Tissue Culture",
     [PROPAGATION_TYPE.AIR_LAYER]: "Air Layer",
     [PROPAGATION_TYPE.DIVISION]: "Division",
-  };
-  return labels[value];
+  }, t);
 }
 
-export function getContainerTypeLabel(value: ContainerType): string {
-  const labels: Record<ContainerType, string> = {
+export function getContainerTypeLabel(value: ContainerType, t?: Translator): string {
+  return enumLabel(value, CONTAINER_TYPE_KEYS, {
     [CONTAINER_TYPE.NURSERY_POT]: "Nursery Pot",
     [CONTAINER_TYPE.DECORATIVE_POT]: "Decorative Pot",
     [CONTAINER_TYPE.HANGING_BASKET]: "Hanging Basket",
     [CONTAINER_TYPE.TERRARIUM]: "Terrarium",
     [CONTAINER_TYPE.GROW_BAG]: "Grow Bag",
-  };
-  return labels[value];
+  }, t);
 }

@@ -38,17 +38,17 @@ export function CareProfileSidebar(props: {
     >
       <DetailRow
         label={t("seller.products.plantOverview.light")}
-        value={pd().lightRequirement ? getLightLabel(pd().lightRequirement as LightRequirement) : "—"}
+        value={pd().lightRequirement ? getLightLabel(pd().lightRequirement as LightRequirement, t) : "—"}
         icon={() => <SunIcon class="w-4 h-4" />}
       />
       <DetailRow
         label={t("seller.products.plantOverview.watering")}
-        value={pd().wateringFrequency ? getWateringLabel(pd().wateringFrequency as WateringFrequency) : "—"}
+        value={pd().wateringFrequency ? getWateringLabel(pd().wateringFrequency as WateringFrequency, t) : "—"}
         icon={() => <DropletIcon class="w-4 h-4" />}
       />
       <DetailRow
         label={t("seller.products.plantOverview.humidity")}
-        value={pd().humidityLevel ? getHumidityLabel(pd().humidityLevel as HumidityLevel) : "—"}
+        value={pd().humidityLevel ? getHumidityLabel(pd().humidityLevel as HumidityLevel, t) : "—"}
         icon={() => <MoonIcon class="w-4 h-4" />}
       />
       <DetailRow
@@ -58,12 +58,12 @@ export function CareProfileSidebar(props: {
       />
       <DetailRow
         label={t("seller.products.plantOverview.difficulty")}
-        value={pd().careDifficulty ? getDifficultyLabel(pd().careDifficulty as CareDifficulty) : "—"}
+        value={pd().careDifficulty ? getDifficultyLabel(pd().careDifficulty as CareDifficulty, t) : "—"}
         icon={() => <TrendingUpIcon class="w-4 h-4" />}
       />
       <DetailRow
         label={t("seller.products.plantOverview.growthRate")}
-        value={pd().growthRate ? getGrowthRateLabel(pd().growthRate as GrowthRate) : "—"}
+        value={pd().growthRate ? getGrowthRateLabel(pd().growthRate as GrowthRate, t) : "—"}
         icon={() => <TrendingUpIcon class="w-4 h-4" />}
       />
       <DetailRow

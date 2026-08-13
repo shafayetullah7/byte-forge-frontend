@@ -845,6 +845,29 @@ export interface UpdateVerificationRequest {
   utilityBillDocumentId?: string;
 }
 
+export type LocalePair<T> = {
+  en: T;
+  bn: T;
+};
+
+export type PlantDetailsLocalizedText = {
+  commonNames: string | null;
+  origin: string | null;
+  soilType: string | null;
+  toxicityInfo: string | null;
+};
+
+export type CareInstructionsLocalizedText = {
+  lightInstructions: string | null;
+  wateringInstructions: string | null;
+  humidityInstructions: string | null;
+  fertilizerSchedule: string | null;
+  repottingFrequency: string | null;
+  pruningNotes: string | null;
+  commonProblems: string | null;
+  seasonalCare: string | null;
+};
+
 /**
  * Plant detail response (matches backend PlantDetailResult)
  * Full plant data with translations, plant details, care instructions, and variants
@@ -854,8 +877,7 @@ export interface PlantDetail {
   slug: string;
   status: ProductStatus;
   thumbnail: { id: string; url: string } | null;
-  translations: Array<{
-    locale: string;
+  translations: LocalePair<{
     name: string;
     description: string | null;
     shortDescription: string | null;
@@ -864,18 +886,14 @@ export interface PlantDetail {
     id: string;
     categoryId: string | null;
     scientificName: string | null;
-    commonNames: string | null;
-    origin: string | null;
     lightRequirement: string | null;
     wateringFrequency: string | null;
     humidityLevel: string | null;
     temperatureRange: string | null;
-    soilType: string | null;
     careDifficulty: string | null;
     growthRate: string | null;
     matureHeight: string | null;
     matureSpread: string | null;
-    toxicityInfo: string | null;
     category: {
       id: string;
       slug: string;
@@ -886,35 +904,11 @@ export interface PlantDetail {
       slug: string;
       translations: Array<{ locale: string; name: string }>;
     }>;
-    translations: Array<{
-      locale: string;
-      commonNames: string | null;
-      origin: string | null;
-      soilType: string | null;
-      toxicityInfo: string | null;
-    }>;
+    translations: LocalePair<PlantDetailsLocalizedText>;
   } | null;
   careInstructions: {
     id: string;
-    lightInstructions: string | null;
-    wateringInstructions: string | null;
-    humidityInstructions: string | null;
-    fertilizerSchedule: string | null;
-    repottingFrequency: string | null;
-    pruningNotes: string | null;
-    commonProblems: string | null;
-    seasonalCare: string | null;
-    translations: Array<{
-      locale: string;
-      lightInstructions: string | null;
-      wateringInstructions: string | null;
-      humidityInstructions: string | null;
-      fertilizerSchedule: string | null;
-      repottingFrequency: string | null;
-      pruningNotes: string | null;
-      commonProblems: string | null;
-      seasonalCare: string | null;
-    }>;
+    translations: LocalePair<CareInstructionsLocalizedText>;
   } | null;
   variants: Array<{
     id: string;
@@ -940,10 +934,7 @@ export interface PlantDetail {
       containerSize: string | null;
       bundleType: string | null;
     } | null;
-    translations: Array<{
-      locale: string;
-      title: string;
-    }>;
+    translations: LocalePair<{ title: string }>;
     media: Array<{
       id: string;
       mediaId: string;

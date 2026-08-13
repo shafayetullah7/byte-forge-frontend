@@ -11,54 +11,15 @@ import Badge from "~/components/ui/Badge";
 import { FilterSelect } from "~/components/ui/FilterSelect";
 import { TagMultiSelect, type TagGroupOption } from "~/components/ui/TagMultiSelect";
 import { CategorySearchSelect, type CategoryOption } from "~/components/seller/CategorySearchSelect";
-
-// ========================
-// Constants
-// ========================
-
-const SORT_OPTIONS = [
-  { value: "createdAt", label: "Date Created" },
-  { value: "updatedAt", label: "Date Updated" },
-  { value: "name", label: "Name" },
-  { value: "price", label: "Price" },
-  { value: "inventory", label: "Inventory" },
-];
-
-// ========================
-// Helpers
-// ========================
-
-function getStatusVariant(status: string): "forest" | "sage" | "cream" | "terracotta" | "default" {
-  switch (status) {
-    case "ACTIVE": return "forest";
-    case "DRAFT": return "cream";
-    case "ARCHIVED": return "terracotta";
-    default: return "default";
-  }
-}
-
-function formatPrice(price: string | number | null | undefined): string {
-  if (!price) return "—";
-  const num = typeof price === "string" ? parseFloat(price) : price;
-  return `৳${num.toLocaleString("en-BD", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
-function formatDateTime(dateStr: string): string {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-function getInventoryStatus(count: number): { label: string; variant: "forest" | "cream" | "terracotta" } {
-  if (count === 0) return { label: "Out of Stock", variant: "terracotta" };
-  if (count <= 5) return { label: "Low Stock", variant: "cream" };
-  return { label: `${count} in stock`, variant: "forest" };
-}
+import {
+  SORT_OPTIONS,
+  getPageNumbers,
+  getInventoryLabel,
+  getStatusVariant,
+  formatPrice,
+  formatDateTime,
+} from "../components/utils";
+import { getStatusLabel } from "./[plantId]/utils";
 
 // ========================
 // Filter Chip
@@ -78,17 +39,8 @@ function FilterChip(props: { label: string; onRemove: () => void }) {
   );
 }
 
-function getPageNumbers(current: number, total: number): (number | "...")[] {
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
-  const pages: (number | "...")[] = [];
-  pages.push(1);
-  const start = Math.max(2, current - 1);
-  const end = Math.min(total - 1, current + 1);
-  if (start > 2) pages.push("...");
-  for (let i = start; i <= end; i++) pages.push(i);
-  if (end < total - 1) pages.push("...");
-  pages.push(total);
-  return pages;
+function statusFilterLabel(status: PlantStatus, t: (key: string) => string): string {
+  return getStatusLabel(status, t);
 }
 
 // ========================
@@ -265,7 +217,15 @@ export default function PlantsPage() {
 
   const sortLabel = createMemo(() => {
     const option = SORT_OPTIONS.find((o) => o.value === sortBy());
-    return option ? `${option.label} (${sortOrder() === "asc" ? "↑" : "↓"})` : "";
+    return option
+      ? `${t(option.labelKey)} (${sortOrder() === "asc" ? t("seller.products.sort.asc") : t("seller.products.sort.desc")})`
+      : "";
+  });
+
+  const statusFilterLabelText = createMemo(() => {
+    const status = statusFilter();
+    if (!status) return "";
+    return statusFilterLabel(status as PlantStatus, t);
   });
 
   return (
@@ -321,7 +281,7 @@ export default function PlantsPage() {
             <div class="bg-white dark:bg-forest-800 rounded-xl p-5 sm:p-6 border border-cream-200 dark:border-forest-700 shadow-sm">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">{t("buyer.profile.status.active")}</p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">{t("seller.products.stats.active")}</p>
                   <p class="text-2xl font-bold text-forest-600 dark:text-forest-400 mt-1">{stats().active}</p>
                 </div>
                 <div class="w-10 h-10 rounded-lg bg-forest-100 dark:bg-forest-900/40 flex items-center justify-center">
@@ -332,7 +292,7 @@ export default function PlantsPage() {
             <div class="bg-white dark:bg-forest-800 rounded-xl p-5 sm:p-6 border border-cream-200 dark:border-forest-700 shadow-sm">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">{t("seller.shop.myShop.status.draft.label")}</p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">{t("seller.products.stats.draft")}</p>
                   <p class="text-2xl font-bold text-cream-600 dark:text-cream-400 mt-1">{stats().draft}</p>
                 </div>
                 <div class="w-10 h-10 rounded-lg bg-cream-100 dark:bg-cream-900/40 flex items-center justify-center">
@@ -343,7 +303,7 @@ export default function PlantsPage() {
             <div class="bg-white dark:bg-forest-800 rounded-xl p-5 sm:p-6 border border-cream-200 dark:border-forest-700 shadow-sm">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">{t("common.archived")}</p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">{t("seller.products.stats.archived")}</p>
                   <p class="text-2xl font-bold text-terracotta-600 dark:text-terracotta-400 mt-1">{stats().archived}</p>
                 </div>
                 <div class="w-10 h-10 rounded-lg bg-terracotta-100 dark:bg-terracotta-900/40 flex items-center justify-center">
@@ -363,7 +323,7 @@ export default function PlantsPage() {
             <div class="flex-1 relative">
               <input
                 type="text"
-                placeholder="Search by name or slug..."
+                placeholder={t("seller.products.searchPlaceholder")}
                 value={searchQuery()}
                 onInput={(e) => handleFilterChange(setSearchQuery, e.currentTarget.value)}
                 class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-cream-200 dark:border-forest-700 focus:border-forest-500 dark:focus:border-forest-400 bg-white dark:bg-forest-800 text-forest-800 dark:text-cream-50 placeholder-gray-400 dark:placeholder-gray-500 transition-standard focus-ring-flat"
@@ -374,10 +334,10 @@ export default function PlantsPage() {
             {/* Quick Status Filter */}
             <FilterSelect
               options={[
-                { value: "", label: "All Status" },
-                { value: PRODUCT_STATUS.ACTIVE, label: "Active", dotColor: "bg-forest-500" },
-                { value: PRODUCT_STATUS.DRAFT, label: "Draft", dotColor: "bg-cream-500" },
-                { value: PRODUCT_STATUS.ARCHIVED, label: "Archived", dotColor: "bg-terracotta-500" },
+                { value: "", label: t("seller.products.filters.allStatus") },
+                { value: PRODUCT_STATUS.ACTIVE, label: t("seller.products.filters.statusActive"), dotColor: "bg-forest-500" },
+                { value: PRODUCT_STATUS.DRAFT, label: t("seller.products.filters.statusDraft"), dotColor: "bg-cream-500" },
+                { value: PRODUCT_STATUS.ARCHIVED, label: t("seller.products.filters.statusArchived"), dotColor: "bg-terracotta-500" },
               ]}
               value={statusFilter()}
               onChange={(val) => handleFilterChange(setStatusFilter, val)}
@@ -397,7 +357,7 @@ export default function PlantsPage() {
               <Show when={showSortPanel()}>
                 <div class="absolute right-0 mt-2 w-64 bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-lg z-50 overflow-hidden">
                   <div class="p-3 border-b border-cream-200 dark:border-forest-700">
-                    <p class="text-sm font-semibold text-forest-800 dark:text-cream-100">Sort By</p>
+                    <p class="text-sm font-semibold text-forest-800 dark:text-cream-100">{t("seller.products.sort.sortBy")}</p>
                   </div>
                   <div class="p-2">
                     <For each={SORT_OPTIONS}>
@@ -428,11 +388,11 @@ export default function PlantsPage() {
                           >
                             <span class="flex items-center gap-2">
                               {optionIcon}
-                              <span>{option.label}</span>
+                              <span>{t(option.labelKey)}</span>
                             </span>
                             {sortBy() === option.value && (
                               <span class="text-xs">
-                                {sortOrder() === "asc" ? "↑ Asc" : "↓ Desc"}
+                                {sortOrder() === "asc" ? t("seller.products.sort.asc") : t("seller.products.sort.desc")}
                               </span>
                             )}
                           </button>
@@ -449,7 +409,7 @@ export default function PlantsPage() {
                       }}
                       class="w-full text-center text-xs text-terracotta-600 dark:text-terracotta-400 hover:underline font-medium"
                     >
-                      Reset to default
+                      {t("seller.products.sort.resetToDefault")}
                     </button>
                   </div>
                 </div>
@@ -462,7 +422,7 @@ export default function PlantsPage() {
               class="lg:hidden inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-cream-200 dark:border-forest-700 text-gray-700 dark:text-gray-300 hover:border-forest-500 dark:hover:border-forest-400 transition-standard"
             >
               <FilterIcon class="w-5 h-5" />
-              Filters
+              {t("seller.products.filters.button")}
               <Show when={hasActiveFilters()}>
                 <span class="w-5 h-5 rounded-full bg-forest-500 text-white text-xs flex items-center justify-center font-bold">
                   {activeFilterCount()}
@@ -478,7 +438,7 @@ export default function PlantsPage() {
                 {/* Category Filter */}
                 <div>
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Category
+                    {t("seller.products.filters.category")}
                   </label>
                   <CategorySearchSelect
                     value={categoryFilter()}
@@ -490,7 +450,7 @@ export default function PlantsPage() {
                 {/* Tag Multi-Select */}
                 <div data-tag-dropdown>
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Tags
+                    {t("seller.products.filters.tags")}
                   </label>
                   <TagMultiSelect
                     selectedTags={selectedTagIds()}
@@ -502,7 +462,7 @@ export default function PlantsPage() {
                 {/* Sort (Mobile) */}
                 <div class="lg:hidden">
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Sort By
+                    {t("seller.products.sort.sortBy")}
                   </label>
                   <div class="space-y-2">
                     <select
@@ -513,15 +473,17 @@ export default function PlantsPage() {
                       }}
                       class="w-full px-4 py-2.5 rounded-lg border border-cream-200 dark:border-forest-700 focus:border-forest-500 dark:focus:border-forest-400 bg-white dark:bg-forest-800 text-forest-800 dark:text-cream-50 transition-standard focus-ring-flat"
                     >
-                      {SORT_OPTIONS.map((opt) => (
-                        <option value={opt.value}>{opt.label}</option>
-                      ))}
+                      <For each={SORT_OPTIONS}>
+                        {(opt) => (
+                          <option value={opt.value}>{t(opt.labelKey)}</option>
+                        )}
+                      </For>
                     </select>
                     <button
                       onClick={() => setSortOrder(sortOrder() === "asc" ? "desc" : "asc")}
                       class="w-full px-4 py-2.5 rounded-lg border border-cream-200 dark:border-forest-700 bg-white dark:bg-forest-800 text-forest-800 dark:text-cream-50 text-sm font-medium transition-standard"
                     >
-                      Order: {sortOrder() === "asc" ? "↑ Ascending" : "↓ Descending"}
+                      {t("seller.products.sort.orderLabel", sortOrder() === "asc")}
                     </button>
                   </div>
                 </div>
@@ -534,7 +496,7 @@ export default function PlantsPage() {
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Category
+                  {t("seller.products.filters.category")}
                 </label>
                 <CategorySearchSelect
                   value={categoryFilter()}
@@ -544,7 +506,7 @@ export default function PlantsPage() {
               </div>
               <div data-tag-dropdown>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Tags
+                  {t("seller.products.filters.tags")}
                 </label>
                 <TagMultiSelect
                   selectedTags={selectedTagIds()}
@@ -561,31 +523,34 @@ export default function PlantsPage() {
               <div class="flex items-center justify-between mb-2">
                 <p class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
                   <FilterIcon class="w-4 h-4 text-gray-400" />
-                  Active Filters ({activeFilterCount()})
+                  {t("seller.products.activeFilters")} ({activeFilterCount()})
                 </p>
                 <button
                   onClick={clearFilters}
                   class="text-sm text-terracotta-600 dark:text-terracotta-400 hover:underline font-medium"
                 >
-                  Clear all
+                  {t("seller.products.clearAll")}
                 </button>
               </div>
               <div class="flex flex-wrap gap-2">
                 <Show when={searchQuery()}>
                   <FilterChip
-                    label={`Search: "${searchQuery()}"`}
+                    label={t("seller.products.filterLabels.search", searchQuery())}
                     onRemove={() => handleFilterChange(setSearchQuery, "")}
                   />
                 </Show>
                 <Show when={statusFilter()}>
                   <FilterChip
-                    label={`Status: ${statusFilter() === PRODUCT_STATUS.ACTIVE ? "Active" : statusFilter() === PRODUCT_STATUS.DRAFT ? "Draft" : "Archived"}`}
+                    label={t("seller.products.filterLabels.status", statusFilterLabelText())}
                     onRemove={() => handleFilterChange(setStatusFilter, "")}
                   />
                 </Show>
                 <Show when={categoryFilter()}>
                   <FilterChip
-                    label={`Category: ${flatCategories().find((c) => c.id === categoryFilter())?.name}`}
+                    label={t(
+                      "seller.products.filterLabels.category",
+                      flatCategories().find((c) => c.id === categoryFilter())?.name ?? "",
+                    )}
                     onRemove={() => handleFilterChange(setCategoryFilter, "")}
                   />
                 </Show>
@@ -606,8 +571,7 @@ export default function PlantsPage() {
       {/* Results Count */}
       <div class="flex items-center justify-between mb-4">
         <p class="text-sm text-gray-500 dark:text-gray-400">
-          Showing <span class="font-semibold text-forest-800 dark:text-cream-50">{products().length}</span> of{" "}
-          <span class="font-semibold text-forest-800 dark:text-cream-50">{totalItems()}</span> products
+          {t("seller.products.plantsResultsCount", products().length, totalItems())}
         </p>
         <Show when={hasActiveFilters()}>
           <button
@@ -615,7 +579,7 @@ export default function PlantsPage() {
             class="inline-flex items-center gap-1.5 text-sm text-terracotta-600 dark:text-terracotta-400 hover:underline font-medium"
           >
             <XIcon class="w-4 h-4" />
-            Clear all filters
+            {t("seller.products.clearAllFilters")}
           </button>
         </Show>
       </div>
@@ -627,9 +591,9 @@ export default function PlantsPage() {
           <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 py-12 px-4 text-center shadow-sm">
             <PackageIcon class="w-10 h-10 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
             <h3 class="text-lg font-semibold text-forest-800 dark:text-cream-50 mb-2">
-              Loading products...
+              {t("seller.products.loadingPlants")}
             </h3>
-            <p class="text-gray-500 dark:text-gray-400">Please wait while we fetch your plants.</p>
+            <p class="text-gray-500 dark:text-gray-400">{t("seller.products.loadingPlantsDescription")}</p>
           </div>
         }
       >
@@ -640,11 +604,11 @@ export default function PlantsPage() {
               <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 py-12 px-4 text-center shadow-sm">
                 <PackageIcon class="w-10 h-10 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
                 <h3 class="text-lg font-semibold text-forest-800 dark:text-cream-50 mb-2">
-                  No products found
+                  {t("seller.products.noPlantsFound")}
                 </h3>
                 <p class="text-gray-500 dark:text-gray-400 mb-6">
                   {hasActiveFilters()
-                    ? "Try adjusting your filters or search query"
+                    ? t("seller.products.noProductsAdjustFilters")
                     : t("seller.products.startSellingPlants")}
                 </p>
                 <Show
@@ -654,7 +618,7 @@ export default function PlantsPage() {
                       onClick={clearFilters}
                       class="inline-flex items-center gap-2 px-5 py-2.5 bg-forest-600 hover:bg-forest-700 text-white rounded-lg font-semibold shadow-sm hover:shadow-md transition-colors"
                     >
-                      Clear Filters
+                      {t("seller.products.clearFilters")}
                     </button>
                   }
                 >
@@ -677,38 +641,38 @@ export default function PlantsPage() {
                     <th class="text-left px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
                       <div class="flex items-center gap-2">
                         <PackageIcon class="w-4 h-4 text-gray-400" />
-                        Product
+                        {t("seller.products.tableHeaders.product")}
                       </div>
                     </th>
                     <th class="text-left px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
                       <div class="flex items-center gap-2">
                         <FolderIcon class="w-4 h-4 text-gray-400" />
-                        Category
+                        {t("seller.products.tableHeaders.category")}
                       </div>
                     </th>
                     <th class="text-left px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
                       <div class="flex items-center gap-2">
                         <TagIcon class="w-4 h-4 text-gray-400" />
-                        Tags
+                        {t("seller.products.tableHeaders.tags")}
                       </div>
                     </th>
                     <th class="text-left px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
                       <div class="flex items-center gap-2">
                         <DollarSignIcon class="w-4 h-4 text-gray-400" />
-                        Price
+                        {t("seller.products.tableHeaders.price")}
                       </div>
                     </th>
                     <th class="text-left px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
                       <div class="flex items-center gap-2">
                         <CubeIcon class="w-4 h-4 text-gray-400" />
-                        Inventory
+                        {t("seller.products.tableHeaders.inventory")}
                       </div>
                     </th>
-                    <th class="text-left px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Status</th>
+                    <th class="text-left px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">{t("seller.products.tableHeaders.status")}</th>
                     <th class="text-left px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
                       <div class="flex items-center gap-2">
                         <ClockIcon class="w-4 h-4 text-gray-400" />
-                        Updated
+                        {t("seller.products.tableHeaders.updated")}
                       </div>
                     </th>
                   </tr>
@@ -716,7 +680,7 @@ export default function PlantsPage() {
                 <tbody>
                   <For each={products()}>
                     {(product) => {
-                      const inventory = getInventoryStatus(product.inventoryCount);
+                      const inventory = getInventoryLabel(product.inventoryCount, t);
                       return (
                         <tr
                           class="border-b border-cream-100 dark:border-forest-700/50 hover:bg-cream-50 dark:hover:bg-forest-900/30 transition-colors cursor-pointer"
@@ -770,7 +734,7 @@ export default function PlantsPage() {
                           </td>
                           <td class="px-4 py-3">
                             <Badge variant={getStatusVariant(product.status)}>
-                              {product.status === PRODUCT_STATUS.ACTIVE ? "Active" : product.status === PRODUCT_STATUS.DRAFT ? "Draft" : "Archived"}
+                              {getStatusLabel(product.status as PlantStatus, t)}
                             </Badge>
                           </td>
                           <td class="px-4 py-3">
@@ -790,7 +754,7 @@ export default function PlantsPage() {
             <div class="lg:hidden space-y-4">
               <For each={products()}>
                 {(product) => {
-                  const inventory = getInventoryStatus(product.inventoryCount);
+                  const inventory = getInventoryLabel(product.inventoryCount, t);
                   return (
                     <div
                       class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm p-5 hover:bg-cream-50 dark:hover:bg-forest-900/30 transition-colors cursor-pointer"
@@ -803,7 +767,7 @@ export default function PlantsPage() {
                               {product.name}
                             </h3>
                             <Badge variant={getStatusVariant(product.status)} class="flex-shrink-0">
-                              {product.status === PRODUCT_STATUS.ACTIVE ? "Active" : product.status === PRODUCT_STATUS.DRAFT ? "Draft" : "Archived"}
+                              {getStatusLabel(product.status as PlantStatus, t)}
                             </Badge>
                           </div>
                           <p class="text-sm text-gray-500 dark:text-gray-400 truncate">
@@ -816,7 +780,7 @@ export default function PlantsPage() {
                         <div class="flex items-center gap-2">
                           <FolderIcon class="w-4 h-4 text-gray-400 flex-shrink-0" />
                           <div>
-                            <p class="text-gray-500 dark:text-gray-400">Category</p>
+                            <p class="text-gray-500 dark:text-gray-400">{t("seller.products.mobileLabels.category")}</p>
                             <p class="font-medium text-forest-800 dark:text-cream-50">
                               {product.category?.name || "—"}
                             </p>
@@ -825,7 +789,7 @@ export default function PlantsPage() {
                         <div class="flex items-center gap-2">
                           <DollarSignIcon class="w-4 h-4 text-gray-400 flex-shrink-0" />
                           <div>
-                            <p class="text-gray-500 dark:text-gray-400">Price</p>
+                            <p class="text-gray-500 dark:text-gray-400">{t("seller.products.mobileLabels.price")}</p>
                             <p class="font-semibold text-forest-800 dark:text-cream-50">
                               {formatPrice(product.price)}
                             </p>
@@ -834,7 +798,7 @@ export default function PlantsPage() {
                         <div class="flex items-center gap-2">
                           <CubeIcon class="w-4 h-4 text-gray-400 flex-shrink-0" />
                           <div>
-                            <p class="text-gray-500 dark:text-gray-400">Inventory</p>
+                            <p class="text-gray-500 dark:text-gray-400">{t("seller.products.mobileLabels.inventory")}</p>
                             <Badge variant={inventory.variant} class="mt-0.5">
                               {inventory.label}
                             </Badge>
@@ -843,7 +807,7 @@ export default function PlantsPage() {
                         <div class="flex items-center gap-2">
                           <ClockIcon class="w-4 h-4 text-gray-400 flex-shrink-0" />
                           <div>
-                            <p class="text-gray-500 dark:text-gray-400">Updated</p>
+                            <p class="text-gray-500 dark:text-gray-400">{t("seller.products.updated")}</p>
                             <p class="font-medium text-forest-800 dark:text-cream-50">
                               {formatDateTime(product.updatedAt)}
                             </p>
@@ -871,9 +835,12 @@ export default function PlantsPage() {
             <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm px-6 py-4 mt-6">
               <div class="flex items-center justify-between">
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                  Showing {(currentPage() - 1) * ITEMS_PER_PAGE + 1} to{" "}
-                  {Math.min(currentPage() * ITEMS_PER_PAGE, totalItems())} of{" "}
-                  {totalItems()} results
+                  {t(
+                    "seller.products.pagination.showing",
+                    (currentPage() - 1) * ITEMS_PER_PAGE + 1,
+                    Math.min(currentPage() * ITEMS_PER_PAGE, totalItems()),
+                    totalItems(),
+                  )}
                 </p>
                 <Show when={totalPages() > 1}>
                   <div class="flex items-center gap-2">
@@ -923,7 +890,7 @@ export default function PlantsPage() {
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" />
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
-                <span class="text-sm font-medium">Updating...</span>
+                <span class="text-sm font-medium">{t("seller.products.updating")}</span>
               </div>
             </div>
           </Show>

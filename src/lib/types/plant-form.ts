@@ -362,20 +362,9 @@ export function toUpdatePlantDto(form: PlantFormState): Record<string, unknown> 
   };
 }
 
-function findLocaleTranslation<T extends { locale: string }>(
-  items: T[] | undefined,
-  locale: string,
-): T | undefined {
-  return items?.find((item) => item.locale === locale);
-}
-
 export function fromPlantDetailToForm(plant: import("~/lib/api/types/seller.types").PlantDetail): PlantFormState {
-  const enTranslation = findLocaleTranslation(plant.translations, "en");
-  const bnTranslation = findLocaleTranslation(plant.translations, "bn");
   const details = plant.plantDetails;
-  const detailsEn = findLocaleTranslation(details?.translations, "en");
-  const detailsBn = findLocaleTranslation(details?.translations, "bn");
-  const careBn = findLocaleTranslation(plant.careInstructions?.translations, "bn");
+  const care = plant.careInstructions;
 
   const emptySection = (): CareGuideSection => ({ ...emptyCareGuideSection });
 
@@ -387,14 +376,14 @@ export function fromPlantDetailToForm(plant: import("~/lib/api/types/seller.type
     slug: plant.slug,
     translations: {
       en: {
-        name: enTranslation?.name ?? "",
-        shortDescription: enTranslation?.shortDescription ?? "",
-        description: enTranslation?.description ?? "",
+        name: plant.translations.en.name ?? "",
+        shortDescription: plant.translations.en.shortDescription ?? "",
+        description: plant.translations.en.description ?? "",
       },
       bn: {
-        name: bnTranslation?.name ?? "",
-        shortDescription: bnTranslation?.shortDescription ?? "",
-        description: bnTranslation?.description ?? "",
+        name: plant.translations.bn.name ?? "",
+        shortDescription: plant.translations.bn.shortDescription ?? "",
+        description: plant.translations.bn.description ?? "",
       },
     },
     plantDetails: {
@@ -411,22 +400,20 @@ export function fromPlantDetailToForm(plant: import("~/lib/api/types/seller.type
       matureSpread: details?.matureSpread ?? "",
       translations: {
         en: {
-          commonNames: detailsEn?.commonNames ?? details?.commonNames ?? "",
-          origin: detailsEn?.origin ?? details?.origin ?? "",
-          soilType: detailsEn?.soilType ?? details?.soilType ?? "",
-          toxicityInfo: detailsEn?.toxicityInfo ?? details?.toxicityInfo ?? "",
+          commonNames: details?.translations.en.commonNames ?? "",
+          origin: details?.translations.en.origin ?? "",
+          soilType: details?.translations.en.soilType ?? "",
+          toxicityInfo: details?.translations.en.toxicityInfo ?? "",
         },
         bn: {
-          commonNames: detailsBn?.commonNames ?? "",
-          origin: detailsBn?.origin ?? "",
-          soilType: detailsBn?.soilType ?? "",
-          toxicityInfo: detailsBn?.toxicityInfo ?? "",
+          commonNames: details?.translations.bn.commonNames ?? "",
+          origin: details?.translations.bn.origin ?? "",
+          soilType: details?.translations.bn.soilType ?? "",
+          toxicityInfo: details?.translations.bn.toxicityInfo ?? "",
         },
       },
     },
     variants: plant.variants.map((variant) => {
-      const enTitle = findLocaleTranslation(variant.translations, "en")?.title ?? "";
-      const bnTitle = findLocaleTranslation(variant.translations, "bn")?.title ?? "";
       const attrs = variant.plantAttributes;
 
       return {
@@ -452,31 +439,31 @@ export function fromPlantDetailToForm(plant: import("~/lib/api/types/seller.type
         containerSize: attrs?.containerSize ?? "",
         bundleType: attrs?.bundleType ?? "",
         translations: {
-          en: { title: enTitle },
-          bn: { title: bnTitle },
+          en: { title: variant.translations.en.title ?? "" },
+          bn: { title: variant.translations.bn.title ?? "" },
         },
       };
     }),
     careGuide: {
       en: {
-        lightInstructions: plant.careInstructions?.lightInstructions ?? "",
-        wateringInstructions: plant.careInstructions?.wateringInstructions ?? "",
-        humidityInstructions: plant.careInstructions?.humidityInstructions ?? "",
-        fertilizerSchedule: plant.careInstructions?.fertilizerSchedule ?? "",
-        repottingFrequency: plant.careInstructions?.repottingFrequency ?? "",
-        pruningNotes: plant.careInstructions?.pruningNotes ?? "",
-        commonProblems: plant.careInstructions?.commonProblems ?? "",
-        seasonalCare: plant.careInstructions?.seasonalCare ?? "",
+        lightInstructions: care?.translations.en.lightInstructions ?? "",
+        wateringInstructions: care?.translations.en.wateringInstructions ?? "",
+        humidityInstructions: care?.translations.en.humidityInstructions ?? "",
+        fertilizerSchedule: care?.translations.en.fertilizerSchedule ?? "",
+        repottingFrequency: care?.translations.en.repottingFrequency ?? "",
+        pruningNotes: care?.translations.en.pruningNotes ?? "",
+        commonProblems: care?.translations.en.commonProblems ?? "",
+        seasonalCare: care?.translations.en.seasonalCare ?? "",
       },
       bn: {
-        lightInstructions: careBn?.lightInstructions ?? "",
-        wateringInstructions: careBn?.wateringInstructions ?? "",
-        humidityInstructions: careBn?.humidityInstructions ?? "",
-        fertilizerSchedule: careBn?.fertilizerSchedule ?? "",
-        repottingFrequency: careBn?.repottingFrequency ?? "",
-        pruningNotes: careBn?.pruningNotes ?? "",
-        commonProblems: careBn?.commonProblems ?? "",
-        seasonalCare: careBn?.seasonalCare ?? "",
+        lightInstructions: care?.translations.bn.lightInstructions ?? "",
+        wateringInstructions: care?.translations.bn.wateringInstructions ?? "",
+        humidityInstructions: care?.translations.bn.humidityInstructions ?? "",
+        fertilizerSchedule: care?.translations.bn.fertilizerSchedule ?? "",
+        repottingFrequency: care?.translations.bn.repottingFrequency ?? "",
+        pruningNotes: care?.translations.bn.pruningNotes ?? "",
+        commonProblems: care?.translations.bn.commonProblems ?? "",
+        seasonalCare: care?.translations.bn.seasonalCare ?? "",
       },
     },
   };

@@ -1168,6 +1168,9 @@ export const dict = {
         typePots: "Pots",
         typeSeeds: "Seeds",
         typeFertilizers: "Fertilizers",
+        category: "Category",
+        tags: "Tags",
+        button: "Filters",
       },
       // Products page - Sort
       sort: {
@@ -1179,6 +1182,9 @@ export const dict = {
         inventory: "Inventory",
         asc: "Asc",
         desc: "Desc",
+        orderAscending: "↑ Ascending",
+        orderDescending: "↓ Descending",
+        orderLabel: (asc: boolean) => (asc ? "Order: ↑ Ascending" : "Order: ↓ Descending"),
         resetToDefault: "Reset to default",
       },
       // Products page - Active Filters
@@ -1189,13 +1195,18 @@ export const dict = {
         search: (query: string) => `Search: "${query}"`,
         status: (status: string) => `Status: ${status}`,
         type: (type: string) => `Type: ${type}`,
+        category: (name: string) => `Category: ${name}`,
       },
       // Products page - Results
       resultsCount: (showing: number, total: number) => `Showing ${showing} of ${total} products`,
+      plantsResultsCount: (showing: number, total: number) => `Showing ${showing} of ${total} plants`,
       // Products page - Empty/Loading states
       loading: "Loading products...",
       loadingDescription: "Please wait while we fetch your products.",
+      loadingPlants: "Loading plants...",
+      loadingPlantsDescription: "Please wait while we fetch your plants.",
       noProductsFound: "No products found",
+      noPlantsFound: "No plants found",
       noProductsAdjustFilters: "Try adjusting your filters or search query",
       noProductsStart: "Start by adding your first product",
       clearFilters: "Clear Filters",
@@ -1203,6 +1214,8 @@ export const dict = {
       tableHeaders: {
         product: "Product",
         type: "Type",
+        category: "Category",
+        tags: "Tags",
         price: "Price",
         inventory: "Inventory",
         status: "Status",
@@ -1217,6 +1230,7 @@ export const dict = {
       // Products page - Mobile card labels
       mobileLabels: {
         type: "Type",
+        category: "Category",
         price: "Price",
         inventory: "Inventory",
       },
@@ -1539,6 +1553,7 @@ export const dict = {
         careProfile: "Care Profile",
         difficulty: "Difficulty",
         // Variant preview
+        variants: "Variants",
         viewAll: "View All",
         price: "Price",
         stock: "Stock",
@@ -1581,6 +1596,10 @@ export const dict = {
         confirmRemove: "Remove this variant? This cannot be undone if the variant has order history.",
         confirmRemoveTitle: "Remove variant?",
         noVariants: "No variants found for this plant.",
+        inactive: "Inactive",
+        inStockShort: "In Stock",
+        lowStockShort: "Low",
+        images: (count: number) => `Images (${count})`,
       },
       managePotProducts: "Manage your pot products",
       manageSeedProducts: "Manage your seed products",
@@ -1723,7 +1742,7 @@ export const dict = {
         soilTypeBnPlaceholder: "যেমন, পারলাইট সহ ভালোভাবে নিষ্কাশিত পটিং মিক্স",
         toxicityInfoLabel: "Pet & Child Safety (Toxicity)",
         toxicityInfoPlaceholder: "e.g., Toxic to cats and dogs if ingested",
-        toxicityInfoBnPlaceholder: "যেমন, খেলে বিড়াল ও কুকুরের জন্য বিষাক্ত",
+        toxicityInfoBnPlaceholder: "যেমন, খেয়ে ফেললে বিড়াল ও কুকুরের জন্য বিষাক্ত",
         toxicityInfoHint: "Important safety information for customers with pets or children",
         // Variants
         variants: "Variants & Pricing",

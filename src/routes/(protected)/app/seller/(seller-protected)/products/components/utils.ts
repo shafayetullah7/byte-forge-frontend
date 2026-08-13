@@ -97,13 +97,15 @@ export function getTypeLabel(type: string): string {
   return type.charAt(0).toUpperCase() + type.slice(1);
 }
 
+import type { Translator } from "~/i18n";
+
 export function getInventoryLabel(
   count: number,
-  t: (key: string, params?: Record<string, any>) => string
+  t: Translator
 ): { label: string; variant: "forest" | "cream" | "terracotta" } {
   if (count === 0) return { label: t("seller.products.inventory.outOfStock"), variant: "terracotta" };
-  if (count <= 10) return { label: t("seller.products.inventory.left", { count }), variant: "cream" };
-  return { label: t("seller.products.inventory.inStock", { count }), variant: "forest" };
+  if (count <= 10) return { label: t("seller.products.inventory.left", count), variant: "cream" };
+  return { label: t("seller.products.inventory.inStock", count), variant: "forest" };
 }
 
 export function getPageNumbers(current: number, total: number): (number | "...")[] {

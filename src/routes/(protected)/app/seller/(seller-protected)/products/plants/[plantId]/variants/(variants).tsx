@@ -139,15 +139,16 @@ export default function VariantsRoute() {
                   return (
                     <EditableSectionCard
                       title={
-                        variant.translations?.find(tr => tr.locale === "en")?.title
-                          ?? variant.translations?.[0]?.title ?? `Variant ${variant.id}`
+                        variant.translations.en.title
+                          || variant.translations.bn.title
+                          || `Variant ${variant.id}`
                       }
                       icon={<PackageIcon class="w-4 h-4 text-gray-400" />}
                       headerAction={
                         <div class="flex items-center gap-2">
-                          {variant.isBase && <Badge variant="forest" class="text-xs">Base</Badge>}
+                          {variant.isBase && <Badge variant="forest" class="text-xs">{t("seller.products.newPlant.baseBadge")}</Badge>}
                           <Badge variant={variant.isActive ? "forest" : "cream"} class="text-xs">
-                            {variant.isActive ? "Active" : "Inactive"}
+                            {variant.isActive ? t("seller.products.newPlant.isActiveLabel") : t("seller.products.plantVariants.inactive")}
                           </Badge>
                         </div>
                       }
@@ -169,8 +170,8 @@ export default function VariantsRoute() {
                           <>
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                               <div>
-                                <DetailRow label="SKU" value={variant.sku || "—"} />
-                                <DetailRow label="Price" value={formatPrice(variant.price)} />
+                                <DetailRow label={t("seller.products.newPlant.skuLabel")} value={variant.sku || "—"} />
+                                <DetailRow label={t("seller.products.tableHeaders.price")} value={formatPrice(variant.price)} />
                               </div>
                               <div>
                                 <DetailRow
@@ -182,7 +183,11 @@ export default function VariantsRoute() {
                                         variant={variant.inventoryCount === 0 ? "terracotta" : variant.inventoryCount <= (variant.lowStockThreshold || 3) ? "cream" : "forest"}
                                         class="text-xs"
                                       >
-                                        {variant.inventoryCount === 0 ? "Out of Stock" : variant.inventoryCount <= (variant.lowStockThreshold || 3) ? "Low" : "In Stock"}
+                                        {variant.inventoryCount === 0
+                                          ? t("seller.products.inventory.outOfStock")
+                                          : variant.inventoryCount <= (variant.lowStockThreshold || 3)
+                                            ? t("seller.products.plantVariants.lowStockShort")
+                                            : t("seller.products.plantVariants.inStockShort")}
                                       </Badge>
                                     </div>
                                   }
@@ -198,10 +203,10 @@ export default function VariantsRoute() {
                                 <Show when={variant.plantAttributes}>
                                   {(attrs) => (
                                     <>
-                                      <DetailRow label="Growth Stage" value={getGrowthStageLabel(attrs().growthStage as any)} />
-                                      <DetailRow label="Plant Form" value={getPlantFormLabel(attrs().plantForm as any)} />
-                                      <DetailRow label="Variegation" value={getVariegationLabel(attrs().variegation as any)} />
-                                      <DetailRow label="Leaf Density" value={getLeafDensityLabel(attrs().leafDensity as any)} />
+                                      <DetailRow label={t("seller.products.newPlant.growthStageLabel")} value={getGrowthStageLabel(attrs().growthStage as any, t)} />
+                                      <DetailRow label={t("seller.products.newPlant.plantFormLabel")} value={getPlantFormLabel(attrs().plantForm as any, t)} />
+                                      <DetailRow label={t("seller.products.newPlant.variegationLabel")} value={getVariegationLabel(attrs().variegation as any, t)} />
+                                      <DetailRow label={t("seller.products.newPlant.leafDensityLabel")} value={getLeafDensityLabel(attrs().leafDensity as any, t)} />
                                     </>
                                   )}
                                 </Show>
@@ -210,11 +215,11 @@ export default function VariantsRoute() {
                                 <Show when={variant.plantAttributes}>
                                   {(attrs) => (
                                     <>
-                                      <DetailRow label="Stem Count" value={attrs().stemCount} />
-                                      <DetailRow label="Current Height" value={attrs().currentHeight || "—"} />
-                                      <DetailRow label="Current Spread" value={attrs().currentSpread || "—"} />
-                                      <DetailRow label="Propagation" value={getPropagationLabel(attrs().propagationType as any)} />
-                                      <DetailRow label="Container" value={`${getContainerTypeLabel(attrs().containerType as any)} (${attrs().containerSize || "—"})`} />
+                                      <DetailRow label={t("seller.products.newPlant.stemCountLabel")} value={attrs().stemCount} />
+                                      <DetailRow label={t("seller.products.newPlant.currentHeightLabel")} value={attrs().currentHeight || "—"} />
+                                      <DetailRow label={t("seller.products.newPlant.currentSpreadLabel")} value={attrs().currentSpread || "—"} />
+                                      <DetailRow label={t("seller.products.newPlant.propagationTypeLabel")} value={getPropagationLabel(attrs().propagationType as any, t)} />
+                                      <DetailRow label={t("seller.products.newPlant.containerTypeLabel")} value={`${getContainerTypeLabel(attrs().containerType as any, t)} (${attrs().containerSize || "—"})`} />
                                     </>
                                   )}
                                 </Show>
@@ -228,7 +233,7 @@ export default function VariantsRoute() {
                                   <>
                                     <div class="flex items-center gap-2 mb-3">
                                       <ImageIcon class="w-4 h-4 text-gray-400" />
-                                      <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Images ({mediaCount})</p>
+                                      <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{t("seller.products.plantVariants.images", mediaCount)}</p>
                                     </div>
                                     {mediaCount > 0 ? (
                                       <div class="flex gap-3">

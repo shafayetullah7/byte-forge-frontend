@@ -6,8 +6,8 @@ export function formatPrice(price: string | number | null | undefined): string {
 
 export function getInventoryLabel(count: number, t: (key: string, params?: Record<string, any>) => string): string {
   if (count === 0) return t("public.plants.inventory.outOfStock");
-  if (count <= 5) return t("public.plants.inventory.onlyLeft", { count });
-  if (count <= 20) return t("public.plants.inventory.inStock", { count });
+  if (count <= 5) return t("public.plants.inventory.onlyLeft", count);
+  if (count <= 20) return t("public.plants.inventory.inStock", count);
   return t("public.plants.inventory.inStockShort");
 }
 

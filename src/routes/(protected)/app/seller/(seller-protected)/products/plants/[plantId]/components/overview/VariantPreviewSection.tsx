@@ -10,7 +10,6 @@ import {
   getPlantFormLabel,
   getVariegationLabel,
 } from "../../utils";
-import { translationFor } from "../../utils/plant-translations";
 import { SectionCard } from "~/routes/(protected)/app/seller/(seller-protected)/products/components/shared/SectionCard";
 
 export function VariantPreviewSection(props: { plant: PlantDetail }) {
@@ -34,14 +33,11 @@ export function VariantPreviewSection(props: { plant: PlantDetail }) {
         <div class="space-y-3">
           <For each={variants().slice(0, 2)}>
             {(variant) => {
-              const inv = getInventoryStatus(
-                variant.inventoryCount,
-                t as (key: string, ...args: unknown[]) => string,
-              );
+              const inv = getInventoryStatus(variant.inventoryCount, t);
               const titleEn =
-                translationFor(variant.translations, "en")?.title
-                ?? t("seller.products.plantOverview.variant", variant.id);
-              const titleBn = translationFor(variant.translations, "bn")?.title;
+                variant.translations.en.title
+                || t("seller.products.plantOverview.variant", variant.id);
+              const titleBn = variant.translations.bn.title;
               const attrs = variant.plantAttributes;
 
               return (
@@ -72,13 +68,13 @@ export function VariantPreviewSection(props: { plant: PlantDetail }) {
                     {(a) => (
                       <div class="flex flex-wrap gap-1.5 pt-2 border-t border-cream-200 dark:border-forest-700">
                         <span class="text-xs px-2 py-0.5 bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 rounded-full">
-                          {getGrowthStageLabel(a().growthStage as GrowthStage)}
+                          {getGrowthStageLabel(a().growthStage as GrowthStage, t)}
                         </span>
                         <span class="text-xs px-2 py-0.5 bg-cream-50 dark:bg-cream-900/30 text-cream-700 dark:text-cream-300 rounded-full">
-                          {getPlantFormLabel(a().plantForm as PlantForm)}
+                          {getPlantFormLabel(a().plantForm as PlantForm, t)}
                         </span>
                         <span class="text-xs px-2 py-0.5 bg-terracotta-50 dark:bg-terracotta-900/30 text-terracotta-700 dark:text-terracotta-300 rounded-full">
-                          {getVariegationLabel(a().variegation as Variegation)}
+                          {getVariegationLabel(a().variegation as Variegation, t)}
                         </span>
                         <Show when={variant.media.length > 0}>
                           <span class="text-xs px-2 py-0.5 bg-sage-50 dark:bg-sage-900/30 text-sage-700 dark:text-sage-300 rounded-full flex items-center gap-1">

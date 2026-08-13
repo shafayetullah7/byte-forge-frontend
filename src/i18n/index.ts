@@ -7,18 +7,22 @@ export type Locale = "en" | "bn";
 export type RawDictionary = typeof en.dict;
 export type Dictionary = Flatten<RawDictionary>;
 
-export const dictionaries = {
-  en: en.dict,
-  bn: bn.dict,
-};
+/** Values passed as positional args to dictionary template functions. */
+export type TranslatorArg = string | number | boolean | Record<string, string | number | boolean>;
+export type Translator = (key: string, ...args: TranslatorArg[]) => string;
 
 // Interface for what our context provides
 export interface I18nContextInterface {
-  t: (key: string, ...args: any[]) => string;
+  t: Translator;
   locale: Accessor<Locale>;
   setLocale: (newLocale: Locale) => void;
   toggleLocale: () => void;
 }
+
+export const dictionaries = {
+  en: en.dict,
+  bn: bn.dict,
+};
 
 const CONTEXT_ID = "byteforge_i18n_context";
 

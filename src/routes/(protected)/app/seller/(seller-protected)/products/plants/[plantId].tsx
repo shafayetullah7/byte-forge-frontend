@@ -1,11 +1,10 @@
 import { ErrorBoundary, Suspense, Show, For, createMemo } from "solid-js";
 import { A, useParams, useLocation, createAsync, type RouteSectionProps, type RouteDefinition } from "@solidjs/router";
-import { ChevronLeftIcon, ChevronRightIcon, ExclamationCircleIcon } from "~/components/icons";
+import { ChevronLeftIcon, ChevronRightIcon, ExclamationCircleIcon, ArrowTopRightOnSquareIcon } from "~/components/icons";
 import { getPlantById } from "~/lib/api/endpoints/seller/plants.api";
 import { useI18n } from "~/i18n";
 import Badge from "~/components/ui/Badge";
 import { getStatusVariant, getStatusLabel } from "./[plantId]/utils";
-import { translationFor } from "./[plantId]/utils/plant-translations";
 import type { ProductStatus } from "~/lib/api/types/seller.types";
 
 export const route = {
@@ -69,8 +68,8 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
           <Show when={plant()}>
             {(plantData) => (
               <>
-                <div class="mb-6">
-                  <nav class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
+                <div class="mb-4">
+                  <nav class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-3">
                     <A href="/app/seller" class="hover:text-forest-600 dark:hover:text-forest-400 transition-colors">
                       {t("seller.products.plantDetail.breadcrumb.dashboard")}
                     </A>
@@ -80,44 +79,49 @@ export default function PlantDetailLayout(props: RouteSectionProps) {
                     </A>
                     <ChevronRightIcon class="w-4 h-4" />
                     <span class="text-forest-800 dark:text-cream-50 font-medium truncate">
-                      {translationFor(plantData().translations, "en")?.name
-                        ?? plantData().translations?.[0]?.name ?? ""}
+                      {plantData().translations.en.name || plantData().translations.bn.name}
                     </span>
                   </nav>
 
-                  <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-                    <div class="flex items-start gap-4">
+                  <div class="flex items-start gap-3">
                       <A
                         href="/app/seller/products/plants"
-                        class="p-2 rounded-lg hover:bg-cream-100 dark:hover:bg-forest-700 transition-colors flex-shrink-0 mt-1"
+                        class="p-2 rounded-lg hover:bg-cream-100 dark:hover:bg-forest-700 transition-colors flex-shrink-0"
                       >
                         <ChevronLeftIcon class="w-5 h-5 text-gray-600 dark:text-gray-400" />
                       </A>
-                      <div>
-                        <h1 class="text-2xl md:text-3xl font-bold text-forest-800 dark:text-cream-50">
-                          {translationFor(plantData().translations, "en")?.name
-                            ?? plantData().translations?.[0]?.name ?? ""}
-                        </h1>
-                        <div class="mt-2">
+                      <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-3 flex-wrap">
+                          <h1 class="text-2xl md:text-3xl font-bold text-forest-800 dark:text-cream-50">
+                            {plantData().translations.en.name || plantData().translations.bn.name}
+                          </h1>
                           <Badge variant={getStatusVariant(plantData().status as ProductStatus)}>
-                            {getStatusLabel(plantData().status as ProductStatus)}
+                            {getStatusLabel(plantData().status as ProductStatus, t)}
                           </Badge>
+                          <A
+                            href={`/app/seller/products/${plantData().id}`}
+                            class="inline-flex items-center gap-1 text-xs text-forest-600 dark:text-forest-400 hover:text-forest-700 dark:hover:text-forest-300 hover:underline transition-colors"
+                          >
+                            <ArrowTopRightOnSquareIcon class="w-3.5 h-3.5" />
+                            {t("seller.products.plantDetail.ordersAndReviews")}
+                          </A>
                         </div>
                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                          {plantData().plantDetails?.scientificName ?? ""}
+                          {plantData().plantDetails?.scientificName && (
+                            <span>{plantData().plantDetails!.scientificName}</span>
+                          )}
+                          {plantData().plantDetails?.scientificName && plantData().slug && (
+                            <span class="text-gray-400 dark:text-gray-500"> · </span>
+                          )}
+                          {plantData().slug && (
+                            <span class="text-gray-400 dark:text-gray-500">
+                              {t("seller.products.plantDetail.slug")}:{" "}
+                              <span class="font-mono text-xs text-gray-500 dark:text-gray-400">{plantData().slug}</span>
+                            </span>
+                          )}
                         </p>
-                        <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                          {t("seller.products.plantDetail.slug")}: <span class="font-mono text-xs">{plantData().slug}</span>
-                        </p>
-                        <A
-                          href={`/app/seller/products/${plantData().id}`}
-                          class="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-lg border border-forest-200 dark:border-forest-700 text-forest-700 dark:text-forest-300 hover:bg-forest-50 dark:hover:bg-forest-900/30 text-xs font-medium transition-colors"
-                        >
-                          {t("seller.products.plantDetail.ordersAndReviews")}
-                        </A>
                       </div>
                     </div>
-                  </div>
                 </div>
 
                 <div class="mb-6">
