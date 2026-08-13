@@ -1,5 +1,6 @@
 import { createAsync, type RouteDefinition } from "@solidjs/router";
 import { Show } from "solid-js";
+import { SubscriptionDashboardBanner } from "~/components/seller/SubscriptionDashboardBanner";
 import { useI18n } from "~/i18n";
 import { getSellerAnalyticsOverview } from "~/lib/api/endpoints/seller/analytics.api";
 import { formatPrice } from "~/routes/(app)/plants/constants";
@@ -14,6 +15,8 @@ export default function SellerDashboard() {
 
   return (
     <div class="p-6">
+      <SubscriptionDashboardBanner />
+
       <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">
         {t("common.dashboard")}
       </h1>

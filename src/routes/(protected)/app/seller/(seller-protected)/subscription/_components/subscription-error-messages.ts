@@ -1,4 +1,7 @@
 import type { Translator } from "~/i18n";
+import type { SubscriptionMutationError } from "~/lib/api/endpoints/seller/subscription.actions";
+
+export type SubscriptionErrorSource = "coupon" | "checkout" | "portal";
 
 const ERROR_MESSAGE_KEYS: Record<string, string> = {
   "Subscription coupon not found": "seller.subscription.errors.couponNotFound",
@@ -23,26 +26,64 @@ const ERROR_MESSAGE_KEYS: Record<string, string> = {
     "seller.subscription.errors.portalStripeRequired",
 };
 
+function normalizeError(
+  error?: SubscriptionMutationError | string | null,
+): SubscriptionMutationError | undefined {
+  if (error == null) return undefined;
+  if (typeof error === "string") {
+    return error ? { message: error } : undefined;
+  }
+  return error;
+}
+
 export function translateSubscriptionError(
   t: Translator,
-  message?: string | null,
+  error?: SubscriptionMutationError | string | null,
+  source?: SubscriptionErrorSource,
 ): string {
-  if (!message) {
+  const normalized = normalizeError(error);
+  const message = normalized?.message;
+  const code = normalized?.code;
+
+  if (!message && !code) {
     return t("common.error");
   }
 
-  if (message.startsWith("Subscription is already active until")) {
+  if (message?.startsWith("Subscription is already active until")) {
     return t("seller.subscription.coupon.alreadyActive");
   }
 
-  if (message.includes("not synced to Stripe yet")) {
+  if (message?.includes("not synced to Stripe yet")) {
     return t("seller.subscription.errors.planNotSynced");
   }
 
-  const key = ERROR_MESSAGE_KEYS[message];
-  if (key) {
-    return t(key);
+  if (message) {
+    const key = ERROR_MESSAGE_KEYS[message];
+    if (key) {
+      return t(key);
+    }
   }
 
-  return message;
+  if (source === "coupon") {
+    if (code === "NOT_FOUND") {
+      return t("seller.subscription.errors.couponNotFound");
+    }
+    if (code === "BAD_REQUEST" || code === "VALIDATION_ERROR") {
+      return t("seller.subscription.errors.couponInvalid");
+    }
+  }
+
+  if (source === "checkout" && code === "NOT_FOUND") {
+    return t("seller.subscription.errors.planNotFound");
+  }
+
+  if (source === "checkout" && code === "CONFLICT") {
+    return t("seller.subscription.errors.checkoutConflict");
+  }
+
+  if (source === "portal" && (code === "BAD_REQUEST" || code === "FORBIDDEN")) {
+    return message ?? t("seller.subscription.errors.portalUnavailable");
+  }
+
+  return message ?? t("common.error");
 }

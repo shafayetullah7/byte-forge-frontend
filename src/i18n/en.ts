@@ -2228,7 +2228,7 @@ export const dict = {
         codePlaceholder: "e.g. FOUNDING2026",
         codeRequired: "Enter a coupon code",
         redeem: "Redeem coupon",
-        redeemed: "Coupon applied — your subscription has been extended.",
+        redeemed: "Coupon applied — your shop subscription is now active.",
         alreadyActive:
           "Your subscription is already active. Coupons cannot be stacked while your current period is still running.",
       },
@@ -2236,6 +2236,8 @@ export const dict = {
         title: "Choose a plan",
         subtitle: "Recurring Stripe billing in BDT. Only plans ready for checkout are shown.",
         empty: "No subscription plans are available for checkout right now. Try a coupon or contact support.",
+        expiredHint:
+          "Your previous subscription has expired. Choose a plan below or redeem a coupon to restore full shop access.",
         interval: {
           monthly: "per month",
           yearly: "per year",
@@ -2246,10 +2248,18 @@ export const dict = {
         description: "You will be redirected to Stripe to complete subscription checkout securely.",
         cta: "Subscribe with Stripe",
         selectPlan: "Select a plan to continue",
+        selectedPlan: (name: string) => `Selected: ${name}`,
+        ctaWithPlan: (price: string) => `Subscribe for ${price}`,
+        pending: "Confirming your Stripe payment — this usually takes a few seconds.",
+        pendingTimeout:
+          "Payment is taking longer than expected. Refresh the page in a moment or contact support if your subscription does not activate.",
         success: "Payment received. Your subscription will update shortly after Stripe confirms.",
         cancel: "Checkout was cancelled. You can try again when ready.",
       },
       portal: {
+        title: "Stripe billing",
+        description:
+          "Update your payment method, view invoices, or cancel your subscription in Stripe's customer portal.",
         cta: "Manage Stripe billing",
       },
       invoices: {
@@ -2263,6 +2273,7 @@ export const dict = {
         periodEnd: "Period end",
         receipt: "Receipt",
         viewReceipt: "View PDF",
+        included: "Included",
         page: (current: number, total: number) => `Page ${current} of ${total}`,
         statusValues: {
           paid: "Paid",
@@ -2277,6 +2288,14 @@ export const dict = {
         cta: "View subscription plans",
         dismiss: "Not now",
       },
+      gate: {
+        viewSubscription: "View subscription",
+      },
+      dashboardBanner: {
+        title: "Activate your shop subscription",
+        body: "Your shop is verified but not fully active. Subscribe or redeem a coupon to publish products and fulfill orders.",
+        cta: "Go to subscription",
+      },
       errors: {
         couponNotFound: "Coupon code not found. Check the code and try again.",
         couponAlreadyRedeemed: "This coupon has already been used for your shop.",
@@ -2284,6 +2303,10 @@ export const dict = {
         couponInactive: "This coupon is no longer active.",
         couponNotYetValid: "This coupon is not valid yet.",
         couponExpired: "This coupon has expired.",
+        couponInvalid: "This coupon could not be applied. Check the code and try again.",
+        checkoutConflict:
+          "Checkout could not be started. Complete any pending checkout or resolve your subscription status first.",
+        portalUnavailable: "Billing portal is not available for your current subscription.",
         planNotFound: "Subscription plan not found.",
         planUnavailable: "This plan is not available for new purchases.",
         planNotSynced: "This plan is not ready for checkout yet. Try another plan or contact support.",

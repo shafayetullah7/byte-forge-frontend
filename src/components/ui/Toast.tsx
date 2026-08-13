@@ -1,6 +1,7 @@
 import { createSignal } from "solid-js";
 import { Portal } from "solid-js/web";
 import { For, Show } from "solid-js";
+import { A } from "@solidjs/router";
 
 export type ToastType = "success" | "error" | "info" | "warning";
 
@@ -9,15 +10,21 @@ interface Toast {
   message: string;
   type: ToastType;
   duration?: number;
+  action?: { label: string; href: string };
 }
 
 // Global Store for Toasts
 const [toasts, setToasts] = createSignal<Toast[]>([]);
 
 export const toaster = {
-  add: (message: string, type: ToastType = "info", duration = 3000) => {
+  add: (
+    message: string,
+    type: ToastType = "info",
+    duration = 3000,
+    action?: { label: string; href: string },
+  ) => {
     const id = Math.random().toString(36).substring(2, 9);
-    setToasts((prev) => [...prev, { id, message, type, duration }]);
+    setToasts((prev) => [...prev, { id, message, type, duration, action }]);
 
     if (duration > 0) {
       setTimeout(() => {
@@ -29,6 +36,11 @@ export const toaster = {
     toaster.add(message, "success", duration),
   error: (message: string, duration = 4000) =>
     toaster.add(message, "error", duration),
+  errorWithAction: (
+    message: string,
+    action: { label: string; href: string },
+    duration = 6000,
+  ) => toaster.add(message, "error", duration, action),
   warning: (message: string, duration = 4000) =>
     toaster.add(message, "warning", duration),
   dismiss: (id: string) => {
@@ -85,7 +97,20 @@ export function Toaster() {
                   </svg>
                 </Show>
 
-                <p class="text-sm font-medium flex-1">{toast.message}</p>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium">{toast.message}</p>
+                  <Show when={toast.action}>
+                    {(action) => (
+                      <A
+                        href={action().href}
+                        class="mt-2 inline-block text-sm font-semibold underline underline-offset-2"
+                        onClick={() => toaster.dismiss(toast.id)}
+                      >
+                        {action().label}
+                      </A>
+                    )}
+                  </Show>
+                </div>
 
                 <button
                   onClick={() => toaster.dismiss(toast.id)}

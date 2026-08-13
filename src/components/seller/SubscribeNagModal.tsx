@@ -1,12 +1,15 @@
 import { useLocation, useNavigate } from "@solidjs/router";
-import { createEffect, createMemo, createSignal, on } from "solid-js";
+import { createEffect, createMemo, createSignal } from "solid-js";
 import Button from "~/components/ui/Button";
 import { Modal } from "~/components/ui/Modal";
 import { useI18n } from "~/i18n";
 import type { SellerSubscription } from "~/lib/api/types/seller/subscription.types";
 import { SHOP_STATUS, type ShopStatus } from "~/lib/api/types/seller.types";
-
-const SUBSCRIPTION_PATH = "/app/seller/subscription";
+import { SELLER_SUBSCRIPTION_PATH } from "~/lib/subscription/subscription-gate-ui";
+import {
+  dismissSubscriptionNagForSession,
+  isSubscriptionNagDismissedForSession,
+} from "~/lib/subscription/subscription-nag-dismiss";
 
 export interface SubscribeNagModalProps {
   shopStatus: ShopStatus | null | undefined;
@@ -17,7 +20,6 @@ export function SubscribeNagModal(props: SubscribeNagModalProps) {
   const { t } = useI18n();
   const location = useLocation();
   const navigate = useNavigate();
-  const [suppressedPath, setSuppressedPath] = createSignal<string | null>(null);
   const [isOpen, setIsOpen] = createSignal(false);
 
   const shouldNag = createMemo(() => {
@@ -26,8 +28,8 @@ export function SubscribeNagModal(props: SubscribeNagModalProps) {
     if (!shop || !sub) return false;
     if (shop.status !== SHOP_STATUS.ACTIVE) return false;
     if (sub.active) return false;
-    if (location.pathname.startsWith(SUBSCRIPTION_PATH)) return false;
-    if (suppressedPath() === location.pathname) return false;
+    if (location.pathname.startsWith(SELLER_SUBSCRIPTION_PATH)) return false;
+    if (isSubscriptionNagDismissedForSession()) return false;
     return true;
   });
 
@@ -35,22 +37,13 @@ export function SubscribeNagModal(props: SubscribeNagModalProps) {
     setIsOpen(shouldNag());
   });
 
-  createEffect(
-    on(
-      () => location.pathname,
-      () => {
-        setSuppressedPath(null);
-      },
-    ),
-  );
-
   const handleClose = () => {
-    setSuppressedPath(location.pathname);
+    dismissSubscriptionNagForSession();
     setIsOpen(false);
   };
 
   const handleSubscribe = () => {
-    navigate(SUBSCRIPTION_PATH);
+    navigate(SELLER_SUBSCRIPTION_PATH);
     handleClose();
   };
 

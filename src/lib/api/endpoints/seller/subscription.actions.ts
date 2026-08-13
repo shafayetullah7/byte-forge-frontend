@@ -1,5 +1,6 @@
 import { action } from "@solidjs/router";
 import { ApiError } from "../../types";
+import { readApiErrorCode } from "../../read-api-error-code";
 import type {
   CreateSubscriptionCheckoutPayload,
   RedeemSubscriptionCouponPayload,
@@ -13,15 +14,22 @@ import {
   redeemSellerSubscriptionCoupon,
 } from "./subscription.api";
 
+export type SubscriptionMutationError = {
+  message: string;
+  statusCode?: number;
+  code?: string;
+};
+
 export type SubscriptionMutationResult<T> =
   | { success: true; data: T }
-  | { success: false; error: { message: string; statusCode?: number } };
+  | { success: false; error: SubscriptionMutationError };
 
-function mutationError(error: unknown): { message: string; statusCode?: number } {
+function mutationError(error: unknown): SubscriptionMutationError {
   const apiError = error as ApiError;
   return {
     statusCode: apiError.statusCode,
     message: apiError.response?.message ?? apiError.message,
+    code: readApiErrorCode(apiError.response),
   };
 }
 

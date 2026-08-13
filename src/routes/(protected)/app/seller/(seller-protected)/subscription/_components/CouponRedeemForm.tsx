@@ -4,13 +4,15 @@ import Card from "~/components/ui/Card";
 import Input from "~/components/ui/Input";
 import Button from "~/components/ui/Button";
 import { useI18n } from "~/i18n";
+import { invalidateSellerSubscription } from "~/lib/api/endpoints/seller/subscription.api";
 import { redeemSubscriptionCouponAction } from "~/lib/api/endpoints/seller/subscription.actions";
+import type { SellerSubscription } from "~/lib/api/types/seller/subscription.types";
 import { toaster } from "~/components/ui/Toast";
 import { translateSubscriptionError } from "./subscription-error-messages";
 
 export interface CouponRedeemFormProps {
   disabled?: boolean;
-  onRedeemed?: () => void;
+  onRedeemed?: (subscription: SellerSubscription) => void;
 }
 
 export function CouponRedeemForm(props: CouponRedeemFormProps) {
@@ -37,11 +39,12 @@ export function CouponRedeemForm(props: CouponRedeemFormProps) {
       const result = await redeemAction({ code: trimmed });
       if (result?.success) {
         setCode("");
+        props.onRedeemed?.(result.data);
+        invalidateSellerSubscription();
         toaster.success(t("seller.subscription.coupon.redeemed"));
-        props.onRedeemed?.();
         return;
       }
-      setError(translateSubscriptionError(t, result?.error?.message));
+      setError(translateSubscriptionError(t, result?.error, "coupon"));
     } finally {
       setSubmitting(false);
     }
@@ -62,6 +65,7 @@ export function CouponRedeemForm(props: CouponRedeemFormProps) {
           value={code()}
           disabled={props.disabled || submitting()}
           maxLength={64}
+          autocomplete="off"
           onInput={(event) => {
             setCode(event.currentTarget.value.toUpperCase());
             setError(null);

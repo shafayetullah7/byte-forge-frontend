@@ -3,6 +3,7 @@ import { useAction } from "@solidjs/router";
 import { useNavigate } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import { toaster } from "~/components/ui/Toast";
+import { showSubscriptionGateToast } from "~/lib/subscription/subscription-gate-ui";
 import { PRODUCT_STATUS } from "~/lib/api/types/seller.types";
 import {
   deletePlantAction,
@@ -30,7 +31,10 @@ export function usePlantLifecycleActions() {
         return true;
       }
       if (result?.error?.code === "SUBSCRIPTION_REQUIRED") {
-        toaster.error(t("seller.subscription.errors.publishRequiresSubscription"));
+        showSubscriptionGateToast(
+          t("seller.subscription.errors.publishRequiresSubscription"),
+          t("seller.subscription.gate.viewSubscription"),
+        );
         return false;
       }
       toaster.error(result?.error?.message ?? t("seller.products.plantOverview.publishFailed"));

@@ -35,6 +35,18 @@ export function SubscriptionInvoicesTable() {
 
   const emptyLabel = () => t("common.notAvailable");
 
+  const formatInvoiceAmount = (
+    amount: string,
+    currency: string,
+    provider: string,
+  ) => {
+    const numeric = Number(amount);
+    if (numeric === 0 && provider.toUpperCase() === "COUPON") {
+      return t("seller.subscription.invoices.included");
+    }
+    return formatBdtAmount(amount, currency, locale());
+  };
+
   return (
     <Card
       title={t("seller.subscription.invoices.title")}
@@ -77,7 +89,7 @@ export function SubscriptionInvoicesTable() {
                         )}
                       </td>
                       <td class="px-3 py-3 font-medium text-forest-800 dark:text-cream-50">
-                        {formatBdtAmount(invoice.amountBdt, invoice.currency, locale())}
+                        {formatInvoiceAmount(invoice.amountBdt, invoice.currency, invoice.provider)}
                       </td>
                       <td class="px-3 py-3 text-gray-600 dark:text-gray-300">
                         {providerLabel(invoice.provider)}

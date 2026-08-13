@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import { toaster } from "~/components/ui/Toast";
 import { invalidateSellerSubscription } from "~/lib/api/endpoints/seller/subscription.api";
+import { markStripeCheckoutPending } from "~/lib/subscription/stripe-checkout-pending";
 
 function readCheckoutParam(value: string | string[] | undefined): string | null {
   if (!value) return null;
@@ -21,6 +22,7 @@ export function CheckoutReturnBanner() {
         if (!checkout) return;
 
         if (checkout === "success") {
+          markStripeCheckoutPending();
           invalidateSellerSubscription();
           toaster.success(t("seller.subscription.checkout.success"));
         } else if (checkout === "cancel") {

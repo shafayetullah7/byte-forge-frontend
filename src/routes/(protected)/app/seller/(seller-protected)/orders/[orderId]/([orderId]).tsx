@@ -18,6 +18,7 @@ import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 import { ShipmentTrackingCard } from "~/components/orders";
 import { ConfirmDialog } from "~/components/ui/ConfirmDialog";
 import { toaster } from "~/components/ui/Toast";
+import { showSubscriptionGateToast } from "~/lib/subscription/subscription-gate-ui";
 import { PackageIcon } from "~/components/icons";
 import { useI18n } from "~/i18n";
 import { getSellerOrder } from "~/lib/api/endpoints/seller/orders.api";
@@ -117,7 +118,10 @@ const SellerOrderDetailPage: Component = () => {
       return;
     }
     if (result.error?.code === "SUBSCRIPTION_REQUIRED") {
-      toaster.error(t("seller.subscription.errors.fulfillmentRequired"));
+      showSubscriptionGateToast(
+        t("seller.subscription.errors.fulfillmentRequired"),
+        t("seller.subscription.gate.viewSubscription"),
+      );
       return;
     }
     toaster.error(result.error?.message ?? t("seller.orders.actionFailed"));

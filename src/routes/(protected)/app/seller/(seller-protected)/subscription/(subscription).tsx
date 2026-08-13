@@ -4,12 +4,13 @@ import { BankIcon } from "~/components/icons";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 import { useI18n } from "~/i18n";
 import { getSellerSubscription, getSellerSubscriptionInvoices } from "~/lib/api/endpoints/seller/subscription.api";
+import type { SellerSubscription } from "~/lib/api/types/seller/subscription.types";
 import { SubscriptionStatusCard } from "./_components/SubscriptionStatusCard";
 import { CouponRedeemForm } from "./_components/CouponRedeemForm";
 import { PlanSelector } from "./_components/PlanSelector";
-import { CheckoutActions } from "./_components/CheckoutActions";
-import { BillingPortalButton } from "./_components/BillingPortalButton";
+import { BillingPortalCard } from "./_components/BillingPortalCard";
 import { CheckoutReturnBanner } from "./_components/CheckoutReturnBanner";
+import { StripeCheckoutPendingBanner } from "./_components/StripeCheckoutPendingBanner";
 import { SubscriptionInvoicesTable } from "./_components/SubscriptionInvoicesTable";
 import { getPurchasablePlans } from "./_components/plan-utils";
 
@@ -23,7 +24,11 @@ export const route = {
 
 export default function SellerSubscriptionPage() {
   const { t } = useI18n();
-  const subscription = createAsync(() => getSellerSubscription(), { deferStream: true });
+  const subscriptionQuery = createAsync(() => getSellerSubscription(), { deferStream: true });
+  const [subscriptionOverride, setSubscriptionOverride] = createSignal<SellerSubscription | null>(
+    null,
+  );
+  const subscription = createMemo(() => subscriptionOverride() ?? subscriptionQuery());
   const [selectedPlanId, setSelectedPlanId] = createSignal<string | null>(null);
 
   const purchasablePlans = createMemo(() => {
@@ -79,25 +84,29 @@ export default function SellerSubscriptionPage() {
             </div>
           }
         >
-          <Show when={subscription()} keyed>
+          <Show when={subscription()}>
             {(data) => (
               <div class="space-y-6">
-                <SubscriptionStatusCard subscription={data} />
-                <CouponRedeemForm disabled={data.active} />
+                <StripeCheckoutPendingBanner
+                  isActive={data().active}
+                  onActivated={setSubscriptionOverride}
+                />
+                <SubscriptionStatusCard subscription={data()} />
+                <CouponRedeemForm
+                  disabled={data().active}
+                  onRedeemed={setSubscriptionOverride}
+                />
 
-                <Show when={data.billingProvider === "STRIPE"}>
-                  <BillingPortalButton />
+                <Show when={data().billingProvider === "STRIPE"}>
+                  <BillingPortalCard />
                 </Show>
 
-                <Show when={!data.active}>
+                <Show when={!data().active}>
                   <PlanSelector
                     plans={purchasablePlans()}
                     selectedPlanId={selectedPlanId()}
                     onSelect={setSelectedPlanId}
-                  />
-                  <CheckoutActions
-                    selectedPlanId={selectedPlanId()}
-                    disabled={purchasablePlans().length === 0}
+                    showExpiredHint={data().status === "EXPIRED"}
                   />
                 </Show>
 
