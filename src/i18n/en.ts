@@ -1981,6 +1981,8 @@ export const dict = {
         // Success/Error
         plantCreated: "Plant created successfully!",
         createFailed: "Failed to create plant",
+        preVerificationDraftCapReached:
+          "Unverified shops can save up to 10 draft plants. Complete shop verification or publish existing drafts before adding more.",
         submitDraft: "Save as Draft",
         submitActive: "Create & Activate",
         saving: "Saving...",

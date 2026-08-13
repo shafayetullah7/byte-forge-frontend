@@ -45,7 +45,7 @@ export default function SellerSubscriptionPage() {
   });
 
   return (
-    <div class="p-6 space-y-6 max-w-4xl">
+    <div class="mx-auto max-w-4xl p-6 space-y-6">
       <CheckoutReturnBanner />
 
       <div class="flex items-start gap-4">

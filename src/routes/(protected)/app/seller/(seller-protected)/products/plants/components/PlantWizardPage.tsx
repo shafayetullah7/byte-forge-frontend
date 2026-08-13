@@ -11,6 +11,7 @@ import { useImageUpload } from "~/lib/hooks/useImageUpload";
 import { toaster } from "~/components/ui/Toast";
 import { createPlant, generatePlantDraft, getPlantAiDraftStatus, invalidatePlants } from "~/lib/api/endpoints/seller/plants.api";
 import { ApiError } from "~/lib/api";
+import { readApiErrorCode } from "~/lib/api/read-api-error-code";
 import {
   hasPlantAiDraftSignals,
   isPhotoOnlyPlantAiRequest,
@@ -62,25 +63,21 @@ const savePlantAction = action(async (data: SavePlantActionData) => {
     );
     return { success: true, id: created.id };
   } catch (error: unknown) {
-    const err = error as {
-      message?: string;
-      statusCode?: number;
-      response?: {
-        error?: { validationErrors?: { field: string; message: string }[] };
-        validationErrors?: { field: string; message: string }[];
-      };
-      validationErrors?: { field: string; message: string }[];
-    };
-    const apiResponse = err.response;
+    const apiError = error as ApiError;
+    const apiResponse = apiError.response;
     return {
       success: false,
       error: {
-        message: err.message || "Failed to save plant",
-        statusCode: err.statusCode,
+        message:
+          apiError.response?.message ?? apiError.message ?? "Failed to save plant",
+        statusCode: apiError.statusCode,
+        code: readApiErrorCode(apiResponse),
         validationErrors:
-          apiResponse?.error?.validationErrors ||
-          apiResponse?.validationErrors ||
-          err.validationErrors,
+          apiResponse?.error &&
+          typeof apiResponse.error === "object" &&
+          "validationErrors" in apiResponse.error
+            ? apiResponse.error.validationErrors
+            : apiResponse?.validationErrors,
       },
     };
   }
@@ -331,7 +328,10 @@ export function PlantWizardPage() {
         setValidationErrors(errs);
       } else {
         setValidationErrors([]);
-        const msg = result.error.message || t("seller.products.newPlant.createFailed");
+        const msg =
+          result.error.code === "QUOTA_EXCEEDED"
+            ? t("seller.products.newPlant.preVerificationDraftCapReached")
+            : result.error.message || t("seller.products.newPlant.createFailed");
         toaster.error(msg);
       }
     }
