@@ -43,6 +43,7 @@ import {
   DetailRow,
   Breadcrumb,
   ReviewsSection,
+  ToxicityInfoCard,
 } from "./components";
 
 export const route = {
@@ -600,19 +601,7 @@ export default function PlantDetailPage() {
                     </div>
 
                     <Show when={plant().toxicityInfo}>
-                      <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-6">
-                        <div class="flex items-start gap-3">
-                          <ExclamationCircleIcon class="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-                          <div>
-                            <h3 class="text-sm font-semibold text-red-900 dark:text-red-300 mb-2">
-                              {t("public.plants.detail.toxicityWarning")}
-                            </h3>
-                            <p class="text-xs text-red-700 dark:text-red-400 leading-relaxed">
-                              {plant().toxicityInfo}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
+                      <ToxicityInfoCard toxicityInfo={plant().toxicityInfo!} t={t} />
                     </Show>
 
                     <div class="bg-white dark:bg-forest-800 rounded-2xl border border-cream-200 dark:border-forest-700 p-6">

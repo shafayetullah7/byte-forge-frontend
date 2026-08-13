@@ -1627,6 +1627,9 @@ export const dict = {
         step6Title: "Care Guide",
         step7Title: "Preview & Submit",
         fieldsNeedAttention: "fields need attention",
+        previewWarning: "Review before publishing",
+        previewWarningDesc: "Check names, care details, pricing, and toxicity in both languages. Use the step links above to edit anything.",
+        aiBadge: "AI",
         aiDraft: {
           cardTitle: "Generate listing content with AI",
           cardSubtitle: "English + Bengali — from a photo, name, or scientific name",
@@ -1652,6 +1655,7 @@ export const dict = {
         // Status
         statusLabel: "Status",
         statusHint: "Draft saves without publishing. Active makes it visible to customers.",
+        statusCreateHint: "Choose Save as Draft or Create & Activate on the final step.",
         // Names & Descriptions
         plantNameLabel: "Plant Name",
         plantNameHint: "How this plant appears in listings and search results",
@@ -1662,13 +1666,14 @@ export const dict = {
         shortSummaryPlaceholder: "e.g., A stunning tropical plant with split leaves",
         shortSummaryBnPlaceholder: "যেমন, ফাটা পাতার একটি অসাধারণ ট্রপিক্যাল গাছ",
         detailedDescriptionLabel: "Detailed Description",
-        descriptionHint: "Minimum 50 characters — describe features, growing conditions, and what makes it special",
+        descriptionHint: "Optional — describe features, growing conditions, and what makes it special",
         descriptionPlaceholder: "Describe the plant's appearance, care needs, ideal environment, and any special features...",
         descriptionBnPlaceholder: "গাছের চেহারা, যত্নের প্রয়োজনীয়তা, আদর্শ পরিবেশ, এবং বিশেষ বৈশিষ্ট্য বর্ণনা করুন...",
         // Category & Tags
         categoryLabel: "Category",
         categoryPlaceholder: "Select a category",
         categoryRequired: "Category is required",
+        categoryHint: "Choose the best-matching category so buyers can browse and filter your plant.",
         tagsLabel: "Tags",
         tagsPlaceholder: "Search and select tags",
         tagsHint: "Up to 20 tags to help customers find your plant",
@@ -1725,6 +1730,8 @@ export const dict = {
         variantsDesc: "Different sizes, pots, and pricing options",
         variantTitle: "Plant Variant",
         variantTitleLabel: "Title",
+        variantTitleEnLabel: "Title (English)",
+        variantTitleBnLabel: "Title (Bengali)",
         variantTitlePlaceholder: "e.g., Small (15cm)",
         variantTitlePlaceholderBn: "e.g., Medium (30cm)",
         addVariant: "Add Another Variant",
@@ -1881,6 +1888,8 @@ export const dict = {
         statusArchived: "Archived",
         // Slug
         slugHint: "Auto-generated from plant name. Must be 3+ characters, lowercase letters, numbers, and hyphens only.",
+        slugUrlPrefix: "byteforge.com/plants/",
+        thumbnailAltPreview: "Plant thumbnail preview",
         // Validation
         nameRequired: "Plant name is required",
         nameTooShort: "Plant name must be at least 3 characters",
@@ -1901,6 +1910,8 @@ export const dict = {
         // New UX improvements
         addFirstVariant: "Add Your First Variant",
         variantHelpText: "Variants are different versions of your plant (e.g., juvenile, mature, cutting). Each can have its own price, inventory, and images.",
+        variantEmptyWarning: "At least one variant is required — you can't set a price or create your plant without it.",
+        lowStockBadge: "Low stock",
         imageLimitReached: "Maximum 10 images reached",
         duplicateVariant: "Duplicate variant",
         atLeastOneBase: "At least one base required",
@@ -2440,7 +2451,9 @@ export const dict = {
         temperature: "Temperature",
         soilType: "Soil Type",
         commonNames: "Common Names",
-        toxicityWarning: "⚠️ Toxicity Warning",
+        toxicityWarning: "Toxicity warning",
+        toxicitySafe: "Pet & child safety",
+        toxicityInfo: "Safety information",
         soldBy: "Sold By",
         verifiedShop: "Verified Shop",
         visitShop: "Visit Shop",

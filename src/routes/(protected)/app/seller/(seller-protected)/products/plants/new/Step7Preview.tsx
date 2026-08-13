@@ -1,4 +1,7 @@
 import { Show, For } from "solid-js";
+import type { SelectOption } from "~/components/ui/Select";
+import { labelFromOptions } from "~/lib/utils/select-options";
+import { formatPrice } from "~/routes/(app)/plants/constants";
 import type { VariantStore } from "./Step4Variants";
 import type { CareGuideSection } from "~/lib/types/plant-form";
 
@@ -43,16 +46,17 @@ function PreviewRow(props: { label: string; value?: string | null; children?: an
 }
 
 function BilingualSection(props: {
-  enLabel: string;
+  fieldLabel: string;
   enValue: string;
-  bnLabel: string;
   bnValue: string;
+  englishLabel: string;
+  bengaliLabel: string;
 }) {
   return (
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 py-2 border-b border-cream-100 dark:border-forest-700/50 last:border-b-0">
       <div>
         <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-          🇬🇧 {props.enLabel}
+          🇬🇧 {props.englishLabel} — {props.fieldLabel}
         </dt>
         <dd class="text-sm text-gray-900 dark:text-white">
           {props.enValue || <span class="text-gray-400 dark:text-gray-500 italic">—</span>}
@@ -60,7 +64,7 @@ function BilingualSection(props: {
       </div>
       <div>
         <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-          🇧🇩 {props.bnLabel}
+          🇧🇩 {props.bengaliLabel} — {props.fieldLabel}
         </dt>
         <dd class="text-sm text-gray-900 dark:text-white" dir="auto">
           {props.bnValue || <span class="text-gray-400 dark:text-gray-500 italic">—</span>}
@@ -72,7 +76,6 @@ function BilingualSection(props: {
 
 export function Step7Preview(props: {
   thumbnailPreview: string | null;
-  status: string;
   slug: string;
   enName: string;
   enShortDesc: string;
@@ -104,8 +107,22 @@ export function Step7Preview(props: {
   variants: VariantStore[];
   careGuideEn: CareGuideSection;
   careGuideBn: CareGuideSection;
-  t: (key: string) => string;
+  lightOptions: SelectOption[];
+  wateringOptions: SelectOption[];
+  humidityOptions: SelectOption[];
+  careDifficultyOptions: SelectOption[];
+  growthRateOptions: SelectOption[];
+  growthStageOptions: SelectOption[];
+  plantFormOptions: SelectOption[];
+  variegationOptions: SelectOption[];
+  leafDensityOptions: SelectOption[];
+  propagationTypeOptions: SelectOption[];
+  containerTypeOptions: SelectOption[];
+  t: (key: string, params?: Record<string, unknown>) => string;
 }) {
+  const englishLabel = () => props.t("seller.products.newPlant.englishLabel");
+  const bengaliLabel = () => props.t("seller.products.newPlant.bengaliLabel");
+
   const hasCareGuide = () =>
     props.careGuideEn.lightInstructions ||
     props.careGuideEn.wateringInstructions ||
@@ -123,14 +140,6 @@ export function Step7Preview(props: {
     props.careGuideBn.pruningNotes ||
     props.careGuideBn.commonProblems ||
     props.careGuideBn.seasonalCare;
-
-  const statusBadgeClass = () => {
-    switch (props.status) {
-      case "ACTIVE": return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
-      case "ARCHIVED": return "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400";
-      default: return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400";
-    }
-  };
 
   return (
     <div class="space-y-6">
@@ -157,7 +166,7 @@ export function Step7Preview(props: {
           <div class="w-48 h-48 rounded-xl overflow-hidden border-2 border-cream-200 dark:border-forest-600 shadow-sm">
             <img
               src={props.thumbnailPreview!}
-              alt="Plant thumbnail"
+              alt={props.t("seller.products.newPlant.thumbnailAltPreview")}
               class="w-full h-full object-cover"
             />
           </div>
@@ -167,11 +176,6 @@ export function Step7Preview(props: {
       {/* Product Identity */}
       <PreviewSection title={props.t("seller.products.newPlant.step1Title")}>
         <dl class="divide-y divide-cream-100 dark:divide-forest-700/50">
-          <PreviewRow label={props.t("seller.products.newPlant.statusLabel")}>
-            <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusBadgeClass()}`}>
-              {props.status}
-            </span>
-          </PreviewRow>
           <Show when={props.slug}>
             <PreviewRow label={props.t("seller.products.newPlant.urlSlugLabel")} value={props.slug} />
           </Show>
@@ -181,22 +185,24 @@ export function Step7Preview(props: {
       {/* Names & Descriptions */}
       <PreviewSection title={props.t("seller.products.newPlant.namesAndDescriptionsSection")}>
         <BilingualSection
-          enLabel={props.t("seller.products.newPlant.previewNameLabel")}
+          fieldLabel={props.t("seller.products.newPlant.plantNameLabel")}
+          englishLabel={englishLabel()}
+          bengaliLabel={bengaliLabel()}
           enValue={props.enName}
-          bnLabel="নাম"
           bnValue={props.bnName}
         />
         <BilingualSection
-          enLabel={props.t("seller.products.newPlant.previewShortDescriptionLabel")}
+          fieldLabel={props.t("seller.products.newPlant.shortSummaryLabel")}
+          englishLabel={englishLabel()}
+          bengaliLabel={bengaliLabel()}
           enValue={props.enShortDesc}
-          bnLabel="সংক্ষিপ্ত বিবরণ"
           bnValue={props.bnShortDesc}
         />
         <div class="py-2 border-b border-cream-100 dark:border-forest-700/50 last:border-b-0">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                🇬🇧 {props.t("seller.products.newPlant.previewDescriptionLabel")}
+                🇬🇧 {englishLabel()} — {props.t("seller.products.newPlant.detailedDescriptionLabel")}
               </dt>
               <dd class="text-sm text-gray-900 dark:text-white whitespace-pre-wrap">
                 {props.enDescription || <span class="text-gray-400 dark:text-gray-500 italic">—</span>}
@@ -204,7 +210,7 @@ export function Step7Preview(props: {
             </div>
             <div>
               <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                🇧🇩 বিবরণ
+                🇧🇩 {bengaliLabel()} — {props.t("seller.products.newPlant.detailedDescriptionLabel")}
               </dt>
               <dd class="text-sm text-gray-900 dark:text-white whitespace-pre-wrap" dir="auto">
                 {props.bnDescription || <span class="text-gray-400 dark:text-gray-500 italic">—</span>}
@@ -221,7 +227,7 @@ export function Step7Preview(props: {
           <Show when={props.tags.length > 0}>
             <PreviewRow
               label={props.t("seller.products.newPlant.tagsLabel")}
-              value={props.tags.map(t => t.name).join(", ")}
+              value={props.tags.map((tag) => tag.name).join(", ")}
             />
           </Show>
           <Show when={props.scientificName}>
@@ -233,28 +239,32 @@ export function Step7Preview(props: {
       {/* Localized Details */}
       <PreviewSection title={props.t("seller.products.newPlant.previewLocalizedDetails")}>
         <BilingualSection
-          enLabel={props.t("seller.products.newPlant.previewCommonNamesLabel")}
+          fieldLabel={props.t("seller.products.newPlant.commonNamesLabel")}
+          englishLabel={englishLabel()}
+          bengaliLabel={bengaliLabel()}
           enValue={props.enCommonNames}
-          bnLabel="সাধারণ নাম"
           bnValue={props.bnCommonNames}
         />
         <BilingualSection
-          enLabel={props.t("seller.products.newPlant.previewOriginLabel")}
+          fieldLabel={props.t("seller.products.newPlant.originLabel")}
+          englishLabel={englishLabel()}
+          bengaliLabel={bengaliLabel()}
           enValue={props.enOrigin}
-          bnLabel="উৎপত্তি"
           bnValue={props.bnOrigin}
         />
         <BilingualSection
-          enLabel={props.t("seller.products.newPlant.previewSoilTypeLabel")}
+          fieldLabel={props.t("seller.products.newPlant.soilTypeLabel")}
+          englishLabel={englishLabel()}
+          bengaliLabel={bengaliLabel()}
           enValue={props.enSoilType}
-          bnLabel="মাটির ধরন"
           bnValue={props.bnSoilType}
         />
         <Show when={props.enToxicityInfo || props.bnToxicityInfo}>
           <BilingualSection
-            enLabel={props.t("seller.products.newPlant.previewToxicityInfoLabel")}
+            fieldLabel={props.t("seller.products.newPlant.toxicityInfoLabel")}
+            englishLabel={englishLabel()}
+            bengaliLabel={bengaliLabel()}
             enValue={props.enToxicityInfo}
-            bnLabel="বিষাক্ত তথ্য"
             bnValue={props.bnToxicityInfo}
           />
         </Show>
@@ -263,12 +273,27 @@ export function Step7Preview(props: {
       {/* Care Profile */}
       <PreviewSection title={props.t("seller.products.newPlant.step5Title")}>
         <dl class="divide-y divide-cream-100 dark:divide-forest-700/50">
-          <PreviewRow label={props.t("seller.products.newPlant.lightRequirementLabel")} value={props.lightRequirement} />
-          <PreviewRow label={props.t("seller.products.newPlant.wateringFrequencyLabel")} value={props.wateringFrequency} />
-          <PreviewRow label={props.t("seller.products.newPlant.humidityLevelLabel")} value={props.humidityLevel} />
-          <PreviewRow label={props.t("seller.products.newPlant.careDifficultyLabel")} value={props.careDifficulty} />
+          <PreviewRow
+            label={props.t("seller.products.newPlant.lightRequirementLabel")}
+            value={labelFromOptions(props.lightOptions, props.lightRequirement)}
+          />
+          <PreviewRow
+            label={props.t("seller.products.newPlant.wateringFrequencyLabel")}
+            value={labelFromOptions(props.wateringOptions, props.wateringFrequency)}
+          />
+          <PreviewRow
+            label={props.t("seller.products.newPlant.humidityLevelLabel")}
+            value={labelFromOptions(props.humidityOptions, props.humidityLevel)}
+          />
+          <PreviewRow
+            label={props.t("seller.products.newPlant.careDifficultyLabel")}
+            value={labelFromOptions(props.careDifficultyOptions, props.careDifficulty)}
+          />
           <Show when={props.growthRate}>
-            <PreviewRow label={props.t("seller.products.newPlant.growthRateLabel")} value={props.growthRate} />
+            <PreviewRow
+              label={props.t("seller.products.newPlant.growthRateLabel")}
+              value={labelFromOptions(props.growthRateOptions, props.growthRate)}
+            />
           </Show>
           <Show when={props.temperatureRange}>
             <PreviewRow label={props.t("seller.products.newPlant.temperatureRangeLabel")} value={props.temperatureRange} />
@@ -304,7 +329,11 @@ export function Step7Preview(props: {
                   <For each={variant.mediaUrls}>
                     {(url, imgIdx) => (
                       <div class="w-16 h-16 rounded-lg overflow-hidden border border-cream-200 dark:border-forest-700">
-                        <img src={url} alt={`Variant ${index() + 1} image ${imgIdx() + 1}`} class="w-full h-full object-cover" />
+                        <img
+                          src={url}
+                          alt={props.t("seller.products.newPlant.variantImageAlt", { n: imgIdx() + 1 })}
+                          class="w-full h-full object-cover"
+                        />
                       </div>
                     )}
                   </For>
@@ -316,7 +345,10 @@ export function Step7Preview(props: {
                 <Show when={variant.sku}>
                   <PreviewRow label={props.t("seller.products.newPlant.skuLabel")} value={variant.sku} />
                 </Show>
-                <PreviewRow label={props.t("seller.products.newPlant.priceLabel")} value={`৳${typeof variant.price === "number" ? (variant.price as number).toFixed(2) : "0.00"}`} />
+                <PreviewRow
+                  label={props.t("seller.products.newPlant.priceLabel")}
+                  value={typeof variant.price === "number" ? formatPrice(variant.price) : formatPrice(0)}
+                />
                 <Show when={variant.trackInventory && typeof variant.inventoryCount === "number" && variant.inventoryCount >= 0}>
                   <PreviewRow label={props.t("seller.products.newPlant.initialStockLabel")} value={String(variant.inventoryCount)} />
                 </Show>
@@ -324,16 +356,28 @@ export function Step7Preview(props: {
                   <PreviewRow label={props.t("seller.products.newPlant.trackInventoryLabel")} value={props.t("seller.products.newPlant.stockUntrackedSummary")} />
                 </Show>
                 <Show when={variant.growthStage}>
-                  <PreviewRow label={props.t("seller.products.newPlant.growthStageLabel")} value={variant.growthStage} />
+                  <PreviewRow
+                    label={props.t("seller.products.newPlant.growthStageLabel")}
+                    value={labelFromOptions(props.growthStageOptions, variant.growthStage)}
+                  />
                 </Show>
                 <Show when={variant.plantForm}>
-                  <PreviewRow label={props.t("seller.products.newPlant.plantFormLabel")} value={variant.plantForm} />
+                  <PreviewRow
+                    label={props.t("seller.products.newPlant.plantFormLabel")}
+                    value={labelFromOptions(props.plantFormOptions, variant.plantForm)}
+                  />
                 </Show>
                 <Show when={variant.variegation}>
-                  <PreviewRow label={props.t("seller.products.newPlant.variegationLabel")} value={variant.variegation} />
+                  <PreviewRow
+                    label={props.t("seller.products.newPlant.variegationLabel")}
+                    value={labelFromOptions(props.variegationOptions, variant.variegation)}
+                  />
                 </Show>
                 <Show when={variant.leafDensity}>
-                  <PreviewRow label={props.t("seller.products.newPlant.leafDensityLabel")} value={variant.leafDensity} />
+                  <PreviewRow
+                    label={props.t("seller.products.newPlant.leafDensityLabel")}
+                    value={labelFromOptions(props.leafDensityOptions, variant.leafDensity)}
+                  />
                 </Show>
                 <Show when={typeof variant.stemCount === "number" && (variant.stemCount as number) > 0}>
                   <PreviewRow label={props.t("seller.products.newPlant.stemCountLabel")} value={String(variant.stemCount)} />
@@ -345,10 +389,16 @@ export function Step7Preview(props: {
                   <PreviewRow label={props.t("seller.products.newPlant.currentSpreadLabel")} value={variant.currentSpread} />
                 </Show>
                 <Show when={variant.propagationType}>
-                  <PreviewRow label={props.t("seller.products.newPlant.propagationTypeLabel")} value={variant.propagationType} />
+                  <PreviewRow
+                    label={props.t("seller.products.newPlant.propagationTypeLabel")}
+                    value={labelFromOptions(props.propagationTypeOptions, variant.propagationType)}
+                  />
                 </Show>
                 <Show when={variant.containerType}>
-                  <PreviewRow label={props.t("seller.products.newPlant.containerTypeLabel")} value={variant.containerType} />
+                  <PreviewRow
+                    label={props.t("seller.products.newPlant.containerTypeLabel")}
+                    value={labelFromOptions(props.containerTypeOptions, variant.containerType)}
+                  />
                 </Show>
                 <Show when={variant.containerSize}>
                   <PreviewRow label={props.t("seller.products.newPlant.containerSizeLabel")} value={variant.containerSize} />
@@ -367,7 +417,9 @@ export function Step7Preview(props: {
         <PreviewSection title={props.t("seller.products.newPlant.step6Title")}>
           {/* EN Care Guide */}
           <div class="mb-4">
-            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">🇬🇧 English</p>
+            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+              🇬🇧 {englishLabel()}
+            </p>
             <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
               <Show when={props.careGuideEn.lightInstructions}>
                 <PreviewRow label={props.t("seller.products.newPlant.lightInstructionsLabel")} value={props.careGuideEn.lightInstructions} />
@@ -408,7 +460,9 @@ export function Step7Preview(props: {
             props.careGuideBn.seasonalCare
           }>
             <div class="pt-4 border-t border-cream-200 dark:border-forest-700">
-              <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">🇧🇩 বাংলা</p>
+              <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                🇧🇩 {bengaliLabel()}
+              </p>
               <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
                 <Show when={props.careGuideBn.lightInstructions}>
                   <PreviewRow label={props.t("seller.products.newPlant.lightInstructionsLabel")} value={props.careGuideBn.lightInstructions} />

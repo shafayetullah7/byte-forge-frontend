@@ -77,6 +77,9 @@ export function CategoryTagsFields(props: {
           knownTags={props.knownTags}
           isLoading={props.tags() === undefined}
         />
+        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          {props.t("seller.products.newPlant.tagsHint")}
+        </p>
       </div>
     </div>
   );

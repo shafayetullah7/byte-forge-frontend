@@ -5,6 +5,8 @@ import { Select, type SelectOption } from "~/components/ui/Select";
 import Input from "~/components/ui/Input";
 import { uploadMediaAction } from "~/lib/media/media.actions";
 import { toaster } from "~/components/ui/Toast";
+import { labelFromOptions } from "~/lib/utils/select-options";
+import { formatPrice } from "~/routes/(app)/plants/constants";
 
 function CheckboxField(props: {
   id: string;
@@ -301,7 +303,7 @@ export function VariantCatalogFields(props: {
             {props.t("seller.products.newPlant.variantHelpText") || "Variants are different versions of your plant (e.g., juvenile, mature, cutting). Each can have its own price, inventory, and images."}
           </p>
           <p class="text-xs text-red-600 dark:text-red-400 font-medium mb-6">
-            ⚠️ At least one variant is required — you can't set a price or create your plant without it.
+            {props.t("seller.products.newPlant.variantEmptyWarning")}
           </p>
           <button type="button" onClick={props.addVariant} class="px-6 py-2.5 bg-forest-600 text-white rounded-lg text-sm font-medium hover:bg-forest-700 transition-colors">
             + {props.t("seller.products.newPlant.addVariant")}
@@ -348,13 +350,15 @@ export function VariantCatalogFields(props: {
                   {/* Summary Bar */}
                   <div class="hidden sm:flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                     <span class="font-medium text-forest-700 dark:text-forest-300">
-                      ${typeof variant().price === 'number' ? (variant().price as number).toFixed(2) : (variant().price || '—')}
+                      {typeof variant().price === 'number' ? formatPrice(variant().price as number) : (variant().price || '—')}
                     </span>
                     <span>📦 {variant().trackInventory
                       ? (typeof variant().inventoryCount === "number" ? variant().inventoryCount : "0")
                       : props.t("seller.products.newPlant.stockUntrackedSummary")}</span>
                     <span>📸 {variant().mediaIds.length}</span>
-                    <span>🌱 {variant().growthStage || '—'}</span>
+                    <span>🌱 {variant().growthStage
+                      ? labelFromOptions(props.growthStageOptions, variant().growthStage)
+                      : '—'}</span>
                   </div>
 
                   {/* Completion Progress */}
@@ -373,7 +377,7 @@ export function VariantCatalogFields(props: {
                   {/* Low Stock Warning */}
                   <Show when={variant().trackInventory && typeof variant().inventoryCount === 'number' && typeof variant().lowStockThreshold === 'number' && (variant().inventoryCount as number) <= (variant().lowStockThreshold as number) && (variant().inventoryCount as number) > 0}>
                     <span class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 font-medium">
-                      ⚠️ Low stock
+                      {props.t("seller.products.newPlant.lowStockBadge")}
                     </span>
                   </Show>
 
@@ -459,14 +463,14 @@ export function VariantCatalogFields(props: {
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Input
                     id={`variant-${i}-title-en`}
-                    label={`${props.t("seller.products.newPlant.variantTitleLabel")} (EN)`}
+                    label={props.t("seller.products.newPlant.variantTitleEnLabel")}
                     placeholder={props.t("seller.products.newPlant.variantTitlePlaceholder")}
                     value={variant().translations.en.title}
                     onInput={(e) => props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, translations: { ...item.translations, en: { title: e.currentTarget.value } } } : item))}
                   />
                   <Input
                     id={`variant-${i}-title-bn`}
-                    label={`${props.t("seller.products.newPlant.variantTitleLabel")} (BN)`}
+                    label={props.t("seller.products.newPlant.variantTitleBnLabel")}
                     placeholder={props.t("seller.products.newPlant.variantTitlePlaceholderBn")}
                     value={variant().translations.bn.title}
                     onInput={(e) => props.setVariants(vr => vr.map((item, idx) => idx === i ? { ...item, translations: { ...item.translations, bn: { title: e.currentTarget.value } } } : item))}

@@ -40,6 +40,7 @@ export function IdentityFields(props: {
   hasThumbnail: () => boolean;
   allowThumbnailDelete?: boolean;
   isEditMode?: boolean;
+  hideArchivedStatus?: boolean;
   originalSlug?: string;
   status: string;
   onStatusChange: (v: string) => void;
@@ -120,16 +121,33 @@ export function IdentityFields(props: {
 
         {/* Status + Slug + Scientific Name — 2 cols */}
         <div class="lg:col-span-2 space-y-4">
-          <Select
-            label={props.t("seller.products.newPlant.statusLabel")}
-            options={[
-              { value: "DRAFT", label: props.t("seller.products.newPlant.statusDraft") },
-              { value: "ACTIVE", label: props.t("seller.products.newPlant.statusActive") },
-              { value: "ARCHIVED", label: props.t("seller.products.newPlant.statusArchived") },
-            ]}
-            value={props.status}
-            onChange={(e) => props.onStatusChange(e.currentTarget.value)}
-          />
+          <Show
+            when={!props.hideArchivedStatus}
+            fallback={
+              <div class="rounded-lg border border-cream-200 dark:border-forest-700 bg-cream-50 dark:bg-forest-800/40 px-4 py-3">
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {props.t("seller.products.newPlant.statusLabel")}
+                </p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  {props.t("seller.products.newPlant.statusCreateHint")}
+                </p>
+              </div>
+            }
+          >
+            <Select
+              label={props.t("seller.products.newPlant.statusLabel")}
+              options={[
+                { value: "DRAFT", label: props.t("seller.products.newPlant.statusDraft") },
+                { value: "ACTIVE", label: props.t("seller.products.newPlant.statusActive") },
+                { value: "ARCHIVED", label: props.t("seller.products.newPlant.statusArchived") },
+              ]}
+              value={props.status}
+              onChange={(e) => props.onStatusChange(e.currentTarget.value)}
+            />
+            <p class="-mt-2 text-xs text-gray-500 dark:text-gray-400">
+              {props.t("seller.products.newPlant.statusHint")}
+            </p>
+          </Show>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
@@ -138,7 +156,7 @@ export function IdentityFields(props: {
             </label>
             <div class="flex rounded-lg">
               <span class="inline-flex items-center px-2.5 rounded-l-lg border border-r-0 border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-700 text-forest-700/70 dark:text-gray-400 text-xs">
-                byteforge.com/plants/
+                {props.t("seller.products.newPlant.slugUrlPrefix")}
               </span>
               <input
                 type="text"

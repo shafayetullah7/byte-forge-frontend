@@ -71,7 +71,7 @@ const monsteraDraft: PlantAiDraftResponse = {
     containerType: "NURSERY_POT",
     translations: {
       en: { title: "Juvenile climbing plant in nursery pot" },
-      bn: { title: "নার্সারি পটে কিশোর আরোহী গাছ" },
+      bn: { title: "নার্সারি পটে বর্ধিষ্ণু আরোহী গাছ" },
     },
   },
 };

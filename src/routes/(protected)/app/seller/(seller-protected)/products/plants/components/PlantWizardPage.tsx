@@ -53,6 +53,8 @@ const savePlantAction = action(async (data: SavePlantActionData) => {
   try {
     if (data.saveAsDraft) {
       (data.dto as { status?: string }).status = PRODUCT_STATUS.DRAFT;
+    } else {
+      (data.dto as { status?: string }).status = PRODUCT_STATUS.ACTIVE;
     }
 
     const created = await createPlant(
@@ -250,7 +252,7 @@ export function PlantWizardPage() {
 
     switch (error.statusCode) {
       case 503:
-        return t("seller.products.newPlant.aiDraft.disabled");
+        return error.message || t("seller.products.newPlant.aiDraft.disabled");
       case 429:
         return t("seller.products.newPlant.aiDraft.rateLimited");
       case 422:
@@ -258,7 +260,8 @@ export function PlantWizardPage() {
       case 400:
         return error.message || t("seller.products.newPlant.aiDraft.imageError");
       case 502:
-        return t("seller.products.newPlant.aiDraft.failed");
+      case 504:
+        return error.message || t("seller.products.newPlant.aiDraft.failed");
       default:
         return error.message || t("seller.products.newPlant.aiDraft.failed");
     }
@@ -277,7 +280,7 @@ export function PlantWizardPage() {
       setForm("plantDetails", merged.plantDetails);
       setForm("careGuide", merged.careGuide);
       setForm("variants", merged.variants);
-      if (isSlugManual()) {
+      if (!isSlugManual()) {
         setForm("slug", merged.slug);
       }
 
@@ -464,10 +467,9 @@ export function PlantWizardPage() {
   };
 
   // ---- Full Validation ----
-  const validateAll = (): FormErrors => {
+  const collectValidationErrors = (): FormErrors => {
     const newErrors: FormErrors = {};
 
-    // Step 1: Identity, names, descriptions, scientific name
     if (!form.thumbnail.id) {
       newErrors["thumbnail"] = t("seller.products.newPlant.thumbnailRequired");
     }
@@ -488,10 +490,8 @@ export function PlantWizardPage() {
       else if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(currentSlug)) newErrors["slug"] = t("seller.products.newPlant.slugInvalid");
     }
 
-    // Step 2: Category
     if (!form.plantDetails.categoryId.trim()) newErrors["categoryId"] = t("seller.products.newPlant.categoryRequired");
 
-    // Step 4: Variants
     if (form.variants.length === 0) newErrors["variants"] = t("seller.products.newPlant.atLeastOneVariant");
     let baseCount = 0;
     form.variants.forEach((v, i) => {
@@ -500,12 +500,45 @@ export function PlantWizardPage() {
     });
     if (baseCount !== 1) newErrors["baseVariant"] = t("seller.products.newPlant.exactlyOneBase");
 
-    // Step 5: Care profile
     if (!form.plantDetails.lightRequirement) newErrors["lightRequirement"] = t("seller.products.newPlant.lightRequired");
     if (!form.plantDetails.wateringFrequency) newErrors["wateringFrequency"] = t("seller.products.newPlant.wateringRequired");
     if (!form.plantDetails.humidityLevel) newErrors["humidityLevel"] = t("seller.products.newPlant.humidityRequired");
     if (!form.plantDetails.careDifficulty) newErrors["careDifficulty"] = t("seller.products.newPlant.careDifficultyRequired");
 
+    return newErrors;
+  };
+
+  const validationErrorKeys = createMemo(() => Object.keys(collectValidationErrors()));
+
+  const stepHasValidationErrors = (stepNum: number, keys: string[]): boolean => {
+    const step1Keys = ["thumbnail", "slug", "en.name", "en.shortDescription", "bn.name", "bn.shortDescription"];
+    const step2Keys = ["categoryId"];
+    const step4Keys = ["variants", "baseVariant"];
+    const step5Keys = ["lightRequirement", "wateringFrequency", "humidityLevel", "careDifficulty"];
+
+    switch (stepNum) {
+      case 1:
+        return keys.some((k) => step1Keys.includes(k));
+      case 2:
+        return keys.some((k) => step2Keys.includes(k));
+      case 4:
+        return keys.some((k) => step4Keys.includes(k) || k.startsWith("variants."));
+      case 5:
+        return keys.some((k) => step5Keys.includes(k));
+      default:
+        return false;
+    }
+  };
+
+  createEffect(() => {
+    const keys = validationErrorKeys();
+    for (let i = 1; i <= 6; i++) {
+      setStepWarnings(i, { hasWarning: stepHasValidationErrors(i, keys), missing: [] });
+    }
+  });
+
+  const validateAll = (): FormErrors => {
+    const newErrors = collectValidationErrors();
     setErrors(newErrors);
     return newErrors;
   };
@@ -539,7 +572,10 @@ export function PlantWizardPage() {
       return;
     }
 
-    const dto = toCreatePlantDto(form);
+    const dto = toCreatePlantDto({
+      ...form,
+      slug: effectiveSlug().trim(),
+    });
     savePlantTrigger({
       dto,
       saveAsDraft,
@@ -548,12 +584,7 @@ export function PlantWizardPage() {
 
   // ---- Step Titles for Navigation ----
   const stepTitle = () => stepTitles()[currentStep() - 1];
-  const hasAnyWarnings = () => {
-    for (let i = 1; i < currentStep(); i++) {
-      if (stepWarnings[i].hasWarning) return true;
-    }
-    return false;
-  };
+  const canSubmitActive = createMemo(() => validationErrorKeys().length === 0);
 
   return (
     <ErrorBoundary
@@ -627,7 +658,7 @@ export function PlantWizardPage() {
           </div>
 
           {/* Step Indicator */}
-          <StepIndicator steps={stepInfo()} onStepClick={goToStep} />
+          <StepIndicator steps={stepInfo()} onStepClick={goToStep} aiBadgeLabel={t("seller.products.newPlant.aiBadge")} />
 
           {/* Validation Error Banner */}
           <Show when={validationErrors().length > 0}>
@@ -719,6 +750,7 @@ export function PlantWizardPage() {
                     thumbnailPreview={effectiveThumbnailPreview}
                     hasThumbnail={hasThumbnail}
                     allowThumbnailDelete
+                    hideArchivedStatus
                     status={form.status}
                     onStatusChange={(v) => setForm("status", v as PlantStatus)}
                     slug={effectiveSlug()}
@@ -855,7 +887,6 @@ export function PlantWizardPage() {
                 <Show when={currentStep() === 7}>
                   <Step7Preview
                     thumbnailPreview={effectiveThumbnailPreview()}
-                    status={form.status}
                     slug={effectiveSlug()}
                     enName={form.translations.en.name}
                     enShortDesc={form.translations.en.shortDescription}
@@ -887,6 +918,17 @@ export function PlantWizardPage() {
                     variants={form.variants}
                     careGuideEn={form.careGuide.en}
                     careGuideBn={form.careGuide.bn}
+                    lightOptions={lightOptions()}
+                    wateringOptions={wateringOptions()}
+                    humidityOptions={humidityOptions()}
+                    careDifficultyOptions={careDifficultyOptions()}
+                    growthRateOptions={growthRateOptions()}
+                    growthStageOptions={growthStageOptions()}
+                    plantFormOptions={plantFormOptions()}
+                    variegationOptions={variegationOptions()}
+                    leafDensityOptions={leafDensityOptions()}
+                    propagationTypeOptions={propagationTypeOptions()}
+                    containerTypeOptions={containerTypeOptions()}
                     t={t}
                   />
                 </Show>
@@ -924,12 +966,12 @@ export function PlantWizardPage() {
                       disabled={isSubmitting()}
                       onClick={() => handleSubmit(true)}
                     >
-                      {t("seller.products.newPlant.saveAsDraft") || "Save as draft"}
+                      {t("seller.products.newPlant.submitDraft")}
                     </Button>
                     <Button
                       type="submit"
                       variant="accent"
-                      disabled={isSubmitting() || hasAnyWarnings()}
+                      disabled={isSubmitting() || !canSubmitActive()}
                       loading={isSubmitting()}
                     >
                       {isSubmitting()

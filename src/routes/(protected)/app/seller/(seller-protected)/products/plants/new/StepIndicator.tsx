@@ -13,6 +13,7 @@ export interface StepInfo {
 export function StepIndicator(props: {
   steps: StepInfo[];
   onStepClick: (step: number) => void;
+  aiBadgeLabel: string;
 }) {
   return (
     <nav class="flex items-center gap-0 py-4 px-2">
@@ -49,7 +50,7 @@ export function StepIndicator(props: {
               )}
               <Show when={step.aiFilled}>
                 <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded bg-purple-600 px-1 text-[9px] font-bold uppercase tracking-wide text-white shadow-sm">
-                  AI
+                  {props.aiBadgeLabel}
                 </span>
               </Show>
             </button>
