@@ -331,7 +331,7 @@ export function Step7Preview(props: {
                       <div class="w-16 h-16 rounded-lg overflow-hidden border border-cream-200 dark:border-forest-700">
                         <img
                           src={url}
-                          alt={props.t("seller.products.newPlant.variantImageAlt", { n: imgIdx() + 1 })}
+                          alt={props.t("seller.products.newPlant.variantImageAlt", imgIdx() + 1)}
                           class="w-full h-full object-cover"
                         />
                       </div>

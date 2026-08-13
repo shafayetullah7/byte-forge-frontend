@@ -50,9 +50,10 @@ const ReviewsSection: Component<{
         <SectionHeader
           icon={ChatBubbleLeftRightIcon}
           title={t("public.plants.detail.reviewsTitle")}
-          subtitle={t("public.plants.detail.reviewsCount", {
-            count: props.summary?.total ?? props.reviews.length,
-          })}
+          subtitle={t(
+            "public.plants.detail.reviewsCount",
+            props.summary?.total ?? props.reviews.length,
+          )}
           action={{ label: t("public.plants.detail.reviewAfterPurchase"), href: "/app/orders" }}
         />
 

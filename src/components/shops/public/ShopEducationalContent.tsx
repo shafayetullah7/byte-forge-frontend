@@ -1,6 +1,7 @@
 import { For, Show } from "solid-js";
 import { A } from "@solidjs/router";
 import type { Component } from "solid-js";
+import { useI18n } from "~/i18n";
 import type { PublicShopArticle } from "~/lib/types/public/shops.types";
 
 export const ShopEducationalContent: Component<{
@@ -27,7 +28,6 @@ export const ShopEducationalContent: Component<{
                 <ShopArticleCard
                   shopSlug={props.shopSlug}
                   article={article}
-                  readLabel={props.labels.readTime}
                 />
               )}
             </For>
@@ -44,7 +44,6 @@ export const ShopEducationalContent: Component<{
                 <ShopArticleCard
                   shopSlug={props.shopSlug}
                   article={article}
-                  readLabel={props.labels.readTime}
                 />
               )}
             </For>
@@ -60,7 +59,6 @@ export const ShopEducationalContent: Component<{
               <ShopArticleCard
                 shopSlug={props.shopSlug}
                 article={article}
-                readLabel={props.labels.readTime}
               />
             )}
           </For>
@@ -73,8 +71,10 @@ export const ShopEducationalContent: Component<{
 const ShopArticleCard: Component<{
   shopSlug: string;
   article: PublicShopArticle;
-  readLabel: string;
-}> = (props) => (
+}> = (props) => {
+  const { t } = useI18n();
+
+  return (
   <A
     href={`/shops/${props.shopSlug}/articles/${props.article.slug}`}
     class="block rounded-xl border border-cream-200 dark:border-forest-700 bg-white dark:bg-forest-800 overflow-hidden hover:shadow-md transition-shadow"
@@ -87,8 +87,9 @@ const ShopArticleCard: Component<{
       <h4 class="font-bold text-forest-800 dark:text-cream-50 mt-1 mb-2 line-clamp-2">{props.article.title}</h4>
       <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">{props.article.excerpt}</p>
       <p class="text-xs text-gray-500">
-        {props.readLabel.replace("{n}", String(props.article.readMinutes))}
+        {t("public.shops.detail.readTime", props.article.readMinutes)}
       </p>
     </div>
   </A>
-);
+  );
+};

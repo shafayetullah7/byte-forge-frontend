@@ -137,21 +137,26 @@ export function FilterBar(props: {
             <div class="flex flex-wrap gap-2">
               <Show when={props.searchQuery}>
                 <FilterChip
-                  label={t("seller.products.filterLabels.search", { query: props.searchQuery })}
+                  label={t("seller.products.filterLabels.search", props.searchQuery)}
                   onRemove={() => props.onSearchChange("")}
                 />
               </Show>
               <Show when={props.statusFilter}>
                 <FilterChip
-                  label={t("seller.products.filterLabels.status", {
-                    status: props.statusFilter === "ACTIVE" ? t("seller.products.filters.statusActive") : props.statusFilter === "DRAFT" ? t("seller.products.filters.statusDraft") : t("seller.products.filters.statusArchived"),
-                  })}
+                  label={t(
+                    "seller.products.filterLabels.status",
+                    props.statusFilter === "ACTIVE"
+                      ? t("seller.products.filters.statusActive")
+                      : props.statusFilter === "DRAFT"
+                        ? t("seller.products.filters.statusDraft")
+                        : t("seller.products.filters.statusArchived"),
+                  )}
                   onRemove={() => props.onStatusChange("")}
                 />
               </Show>
               <Show when={props.productTypeFilter}>
                 <FilterChip
-                  label={t("seller.products.filterLabels.type", { type: getTypeLabel(props.productTypeFilter) })}
+                  label={t("seller.products.filterLabels.type", getTypeLabel(props.productTypeFilter))}
                   onRemove={() => props.onProductTypeChange("")}
                 />
               </Show>

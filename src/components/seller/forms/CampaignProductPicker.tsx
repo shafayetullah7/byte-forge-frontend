@@ -51,10 +51,7 @@ export function CampaignProductPicker(props: {
         class="w-full px-3 py-2 rounded-lg border-2 border-cream-200 dark:border-forest-700 bg-white dark:bg-forest-900/30 text-sm"
       />
       <p class="text-xs text-gray-500 dark:text-gray-400">
-        {t("seller.campaigns.fields.products.selectedCount").replace(
-          "{n}",
-          String(props.selectedIds.length),
-        )}
+        {t("seller.campaigns.fields.products.selectedCount", props.selectedIds.length)}
       </p>
       <div class="max-h-48 overflow-y-auto rounded-lg border border-cream-200 dark:border-forest-700 divide-y divide-cream-100 dark:divide-forest-700">
         <Show

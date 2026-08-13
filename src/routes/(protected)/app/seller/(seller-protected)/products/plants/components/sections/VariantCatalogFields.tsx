@@ -117,7 +117,7 @@ function VariantImageUpload(props: {
     <div>
       <div class="flex items-center justify-between mb-2">
         <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
-          {props.t("seller.products.newPlant.variantImagesLabel").replace("{count}", String(props.mediaIds.length))}
+          {props.t("seller.products.newPlant.variantImagesLabel", props.mediaIds.length)}
         </p>
         <Show when={props.mediaIds.length >= 10}>
           <span class="text-xs text-amber-600 dark:text-amber-400">
@@ -130,7 +130,7 @@ function VariantImageUpload(props: {
           <For each={props.mediaUrls}>
             {(url, idx) => (
               <div class="relative w-20 h-20 rounded-lg overflow-hidden border-2 border-cream-200 dark:border-forest-700 group">
-                <img src={url} alt={props.t("seller.products.newPlant.variantImageAlt").replace("{n}", String(idx() + 1))} class="w-full h-full object-cover" />
+                <img src={url} alt={props.t("seller.products.newPlant.variantImageAlt", idx() + 1)} class="w-full h-full object-cover" />
                 <button
                   type="button"
                   onClick={() => handleDelete(idx())}

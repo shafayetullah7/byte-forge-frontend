@@ -16,11 +16,12 @@ export function Pagination(props: {
     <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 shadow-sm px-6 py-4 mt-6">
       <div class="flex items-center justify-between">
         <p class="text-sm text-gray-500 dark:text-gray-400">
-          {t("seller.products.pagination.showing", {
-            start: (props.currentPage - 1) * props.itemsPerPage + 1,
-            end: Math.min(props.currentPage * props.itemsPerPage, props.totalItems),
-            total: props.totalItems,
-          })}
+          {t(
+            "seller.products.pagination.showing",
+            (props.currentPage - 1) * props.itemsPerPage + 1,
+            Math.min(props.currentPage * props.itemsPerPage, props.totalItems),
+            props.totalItems,
+          )}
         </p>
         <Show when={props.totalPages > 1}>
           <div class="flex items-center gap-2">

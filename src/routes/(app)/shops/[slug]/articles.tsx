@@ -32,7 +32,6 @@ export default function ShopArticlesPage() {
     editorsPick: t("public.shops.detail.editorsPick"),
     popular: t("public.shops.detail.popular"),
     allArticles: t("public.shops.detail.allArticles"),
-    readTime: t("public.shops.detail.readTime"),
   });
 
   return (

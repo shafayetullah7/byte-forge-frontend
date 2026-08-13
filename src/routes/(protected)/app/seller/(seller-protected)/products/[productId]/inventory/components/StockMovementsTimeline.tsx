@@ -232,7 +232,7 @@ export default function StockMovementsTimeline(props: StockMovementsTimelineProp
         <Show when={props.totalPages > 1}>
           <div class="flex items-center justify-between pt-4 border-t border-cream-200 dark:border-forest-700">
             <p class="text-xs text-gray-500 dark:text-gray-400">
-              {props.t("seller.products.inventoryDetail.pageOf", { page: props.currentPage, total: props.totalPages })}
+              {props.t("seller.products.inventoryDetail.pageOf", props.currentPage, props.totalPages)}
             </p>
             <div class="flex items-center gap-1">
               <button

@@ -262,7 +262,7 @@ export default function ProductsPage() {
 
         <div class="flex items-center justify-between mb-4">
           <p class="text-sm text-gray-500 dark:text-gray-400">
-            {t("seller.products.resultsCount", { showing: products().length, total: totalItems() })}
+            {t("seller.products.resultsCount", products().length, totalItems())}
           </p>
           <Show when={hasActiveFilters()}>
             <button

@@ -76,7 +76,7 @@ export default function ShopArticleDetailPage() {
                   {article().title}
                 </h1>
                 <p class="text-sm text-gray-500 mt-2">
-                  {t("public.shops.detail.readTime").replace("{n}", String(article().readMinutes))}
+                  {t("public.shops.detail.readTime", article().readMinutes)}
                 </p>
               </div>
               <p class="text-lg text-gray-600 dark:text-gray-300">{article().excerpt}</p>
