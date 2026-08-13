@@ -392,7 +392,12 @@ export const dict = {
     favorites: {
       title: "পছন্দের তালিকা",
       subtitle: "পরে দেখার জন্য সংরক্ষিত গাছ",
+      itemCount: (count: number) =>
+        count === 1 ? "১টি গাছ সংরক্ষিত" : `${count}টি গাছ সংরক্ষিত`,
       empty: "আপনার উইশলিস্ট খালি। গাছ ব্রাউজ করুন এবং হার্ট আইকনে ট্যাপ করে সংরক্ষণ করুন।",
+      emptyTitle: "এখনও কোনো গাছ সংরক্ষিত নেই",
+      emptyDescription:
+        "যে গাছটি পছন্দ করবেন, তার পেজে হার্ট আইকনে ট্যাপ করুন। সংরক্ষিত গাছ এখানে দেখা যাবে — পরে সহজে COD অর্ডার করতে পারবেন।",
       added: "উইশলিস্টে যোগ হয়েছে",
       removed: "উইশলিস্ট থেকে সরানো হয়েছে",
       remove: "উইশলিস্ট থেকে সরান",
@@ -2462,8 +2467,8 @@ export const dict = {
       },
       inventory: {
         outOfStock: "মজুদে নেই",
-        onlyLeft: "শুধু {{ count }} বাকি",
-        inStock: "{{ count }} মজুদে আছে",
+        onlyLeft: (count: number) => `শুধু ${count} টি বাকি`,
+        inStock: (count: number) => `${count} মজুদে আছে`,
         inStockShort: "মজুদে আছে",
       },
       sortOptions: {
@@ -2490,7 +2495,7 @@ export const dict = {
       },
       plantCard: {
         outOfStock: "মজুদে নেই",
-        onlyLeft: "শুধু {{ count }} বাকি",
+        onlyLeft: (count: number) => `শুধু ${count} টি বাকি`,
         lightTitle: "আলো",
         wateringTitle: "সিঁচাই",
       },

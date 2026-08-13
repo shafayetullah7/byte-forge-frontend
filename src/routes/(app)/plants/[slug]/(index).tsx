@@ -14,7 +14,6 @@ import {
   RulerIcon,
   TagIcon,
   HeartIcon,
-  ShareIcon,
   CheckBadgeIcon,
   SparklesIcon,
   ScissorsIcon,
@@ -345,9 +344,6 @@ export default function PlantDetailPage() {
                           </Show>
                         </div>
                         <div class="flex items-center gap-2">
-                          <button class="p-2.5 rounded-xl border border-cream-200 dark:border-forest-700 hover:bg-cream-50 dark:hover:bg-forest-800 transition-colors" aria-label={t("public.plants.detail.share")}>
-                            <ShareIcon class="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                          </button>
                           <button
                             type="button"
                             class="p-2.5 rounded-xl border border-cream-200 dark:border-forest-700 hover:bg-cream-50 dark:hover:bg-forest-800 transition-colors disabled:opacity-50"

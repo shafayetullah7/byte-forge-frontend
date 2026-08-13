@@ -46,7 +46,7 @@ export function PlantCard(props: { plant: PublicPlantListItem }) {
           </Show>
           <Show when={inStock && plant.inventoryCount <= 5}>
             <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-cream-500/90 backdrop-blur-sm text-xs font-semibold text-cream-900">
-              {t("public.plants.plantCard.onlyLeft", { count: plant.inventoryCount })}
+              {t("public.plants.plantCard.onlyLeft", plant.inventoryCount)}
             </span>
           </Show>
         </div>

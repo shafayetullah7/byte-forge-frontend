@@ -34,7 +34,7 @@ const VariantCard: Component<{
   const stockLabel = createMemo(() => {
     if (!props.variant.inStock) return t("public.plants.inventory.outOfStock");
     if (props.variant.inventoryCount <= 5)
-      return t("public.plants.inventory.onlyLeft", { count: props.variant.inventoryCount });
+      return t("public.plants.inventory.onlyLeft", props.variant.inventoryCount);
     return t("public.plants.inventory.inStockShort");
   });
 

@@ -21,6 +21,7 @@ export interface WishlistItem {
     id: string;
     slug: string;
     name: string;
+    logo: { id: string; url: string } | null;
   } | null;
 }
 

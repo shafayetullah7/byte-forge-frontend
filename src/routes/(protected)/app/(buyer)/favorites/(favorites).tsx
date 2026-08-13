@@ -1,13 +1,18 @@
-import { Component, For, Show, createEffect } from "solid-js";
+import { Component, For, Show, createEffect, createMemo } from "solid-js";
 import { Title } from "@solidjs/meta";
 import { A, createAsync, useAction, useSubmission, type RouteDefinition } from "@solidjs/router";
-import { HeartIcon, TrashIcon } from "~/components/icons";
+import { HeartIcon, LeafIcon } from "~/components/icons";
 import { useI18n } from "~/i18n";
 import { formatPageTitle } from "~/lib/seo/meta";
 import { getWishlist } from "~/lib/api/endpoints/buyer/wishlist.api";
 import { removeFromWishlistAction } from "~/lib/api/endpoints/buyer/wishlist.actions";
-import { formatPrice } from "~/routes/(app)/plants/constants";
 import { toaster } from "~/components/ui/Toast";
+import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
+import {
+  FavoritesEmptyState,
+  FavoritesSkeleton,
+  WishlistCard,
+} from "./components";
 
 export const route = {
   preload: () => getWishlist(),
@@ -17,6 +22,7 @@ const Favorites: Component = () => {
   const { t } = useI18n();
   const wishlist = createAsync(() => getWishlist(), { deferStream: true });
   const items = () => wishlist()?.data ?? [];
+  const itemCount = createMemo(() => items().length);
 
   const removeTrigger = useAction(removeFromWishlistAction);
   const removeSubmission = useSubmission(removeFromWishlistAction);
@@ -34,100 +40,76 @@ const Favorites: Component = () => {
   };
 
   return (
-    <>
+    <SafeErrorBoundary
+      fallback={(err, reset) => (
+        <InlineErrorFallback error={err} reset={reset} label={t("buyer.favorites.title")} />
+      )}
+    >
       <Title>{formatPageTitle(t("buyer.favorites.title"))}</Title>
-      <div class="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center gap-3 mb-8">
-          <div class="w-12 h-12 rounded-2xl bg-forest-100 dark:bg-forest-900/40 flex items-center justify-center">
-            <HeartIcon class="w-6 h-6 text-forest-600 dark:text-forest-400" />
-          </div>
-          <div>
-            <h1 class="text-2xl font-bold text-forest-800 dark:text-cream-50">
-              {t("buyer.favorites.title")}
-            </h1>
-            <p class="text-sm text-gray-500">{t("buyer.favorites.subtitle")}</p>
-          </div>
-        </div>
 
-        <Show
-          when={wishlist() !== undefined}
-          fallback={<div class="h-40 bg-cream-200 dark:bg-forest-800 rounded-xl animate-pulse" />}
-        >
-          <Show
-            when={items().length > 0}
-            fallback={
-              <div class="text-center py-16">
-                <p class="text-gray-600 dark:text-gray-300 mb-6">{t("buyer.favorites.empty")}</p>
+      <div class="min-h-screen bg-cream-50 dark:bg-forest-900">
+        <section class="bg-linear-to-br from-forest-400 via-forest-500 to-forest-600 dark:from-forest-600 dark:via-forest-700 dark:to-sage-700 text-white">
+          <div class="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+            <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+              <div class="flex items-start gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center shrink-0 border border-white/20">
+                  <HeartIcon class="w-7 h-7 text-white" />
+                </div>
+                <div>
+                  <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">
+                    {t("buyer.favorites.title")}
+                  </h1>
+                  <p class="text-base text-white/90 max-w-xl">
+                    {t("buyer.favorites.subtitle")}
+                  </p>
+                </div>
+              </div>
+              <Show when={itemCount() > 0}>
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 text-sm font-semibold">
+                  <HeartIcon class="w-4 h-4" />
+                  {t("buyer.favorites.itemCount", itemCount())}
+                </div>
+              </Show>
+            </div>
+          </div>
+        </section>
+
+        <section class="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-8 md:py-10">
+          <Show when={wishlist() !== undefined}>
+            <Show
+              when={itemCount() > 0}
+              fallback={<FavoritesEmptyState />}
+            >
+              <div class="mb-6 flex justify-end">
                 <A
                   href="/plants"
-                  class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-forest-600 hover:bg-forest-700 text-white text-sm font-semibold transition-colors"
+                  class="inline-flex items-center gap-2 text-sm font-semibold text-forest-600 dark:text-forest-400 hover:underline w-fit"
                 >
+                  <LeafIcon class="w-4 h-4" />
                   {t("buyer.favorites.browsePlants")}
                 </A>
               </div>
-            }
-          >
-            <div class="grid sm:grid-cols-2 gap-4">
-              <For each={items()}>
-                {(item) => (
-                  <article class="flex gap-4 p-4 rounded-xl border border-cream-200 dark:border-forest-700 bg-white dark:bg-forest-800">
-                    <Show when={item.product?.thumbnail?.url}>
-                      <img
-                        src={item.product!.thumbnail!.url}
-                        alt=""
-                        class="w-20 h-20 rounded-lg object-cover shrink-0"
-                      />
-                    </Show>
-                    <div class="min-w-0 flex-1">
-                      <Show when={item.shop}>
-                        {(shop) => (
-                          <A
-                            href={`/shops/${shop().slug}`}
-                            class="text-xs text-forest-600 dark:text-forest-400 hover:underline"
-                          >
-                            {shop().name}
-                          </A>
-                        )}
-                      </Show>
-                      <Show when={item.product}>
-                        {(product) => (
-                          <A
-                            href={`/plants/${product().slug}`}
-                            class="block font-semibold text-forest-800 dark:text-cream-50 hover:underline truncate"
-                          >
-                            {product().name}
-                          </A>
-                        )}
-                      </Show>
-                      <Show when={item.variant}>
-                        {(variant) => (
-                          <p class="text-sm font-medium text-terracotta-600 mt-1">
-                            {formatPrice(variant().price)}
-                          </p>
-                        )}
-                      </Show>
-                    </div>
-                    <Show when={item.variant}>
-                      {(variant) => (
-                        <button
-                          type="button"
-                          class="shrink-0 p-2 rounded-lg text-gray-500 hover:text-terracotta-600 hover:bg-cream-50 dark:hover:bg-forest-700 transition-colors disabled:opacity-50"
-                          aria-label={t("buyer.favorites.remove")}
-                          disabled={removeSubmission.pending}
-                          onClick={() => handleRemove(variant().id)}
-                        >
-                          <TrashIcon class="w-5 h-5" />
-                        </button>
-                      )}
-                    </Show>
-                  </article>
-                )}
-              </For>
-            </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <For each={items()}>
+                  {(item) => (
+                    <WishlistCard
+                      item={item}
+                      onRemove={handleRemove}
+                      removing={removeSubmission.pending}
+                    />
+                  )}
+                </For>
+              </div>
+            </Show>
           </Show>
-        </Show>
+
+          <Show when={wishlist() === undefined}>
+            <FavoritesSkeleton />
+          </Show>
+        </section>
       </div>
-    </>
+    </SafeErrorBoundary>
   );
 };
 

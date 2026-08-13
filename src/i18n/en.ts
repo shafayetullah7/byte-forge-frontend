@@ -390,7 +390,12 @@ export const dict = {
     favorites: {
       title: "Favorites",
       subtitle: "Plants you've saved for later",
+      itemCount: (count: number) =>
+        count === 1 ? "1 plant saved" : `${count} plants saved`,
       empty: "Your wishlist is empty. Browse plants and tap the heart to save them here.",
+      emptyTitle: "No saved plants yet",
+      emptyDescription:
+        "When you find a plant you love, tap the heart on its page. Your saved plants will appear here for easy COD checkout later.",
       added: "Added to wishlist",
       removed: "Removed from wishlist",
       remove: "Remove from wishlist",
@@ -2459,8 +2464,8 @@ export const dict = {
       },
       inventory: {
         outOfStock: "Out of Stock",
-        onlyLeft: "Only {{ count }} left",
-        inStock: "{{ count }} in stock",
+        onlyLeft: (count: number) => `Only ${count} left`,
+        inStock: (count: number) => `${count} in stock`,
         inStockShort: "In Stock",
       },
       sortOptions: {
@@ -2487,7 +2492,7 @@ export const dict = {
       },
       plantCard: {
         outOfStock: "Out of Stock",
-        onlyLeft: "Only {{ count }} left",
+        onlyLeft: (count: number) => `Only ${count} left`,
         lightTitle: "Light",
         wateringTitle: "Watering",
       },
