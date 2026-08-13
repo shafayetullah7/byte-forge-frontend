@@ -12,13 +12,14 @@ import type {
   UpdateSellerOrderStatusRequest,
 } from "~/lib/api/types/seller-orders.types";
 import { ApiError } from "~/lib/api/types";
+import { readApiErrorCode } from "~/lib/api/read-api-error-code";
 
 export type SellerOrderMutationResult =
   | { success: true }
   | {
       success: false;
       stale?: boolean;
-      error: { statusCode?: number; message: string };
+      error: { statusCode?: number; message: string; code?: string };
     };
 
 async function runSellerOrderMutation(
@@ -49,6 +50,7 @@ async function runSellerOrderMutation(
       error: {
         statusCode: apiError.statusCode,
         message: apiError.response?.message ?? apiError.message,
+        code: readApiErrorCode(apiError.response),
       },
     };
   }

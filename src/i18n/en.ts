@@ -2295,6 +2295,10 @@ export const dict = {
           "Billing portal is only available for Stripe subscriptions. Contact support for admin-managed plans.",
         portalStripeRequired:
           "Billing portal requires an active Stripe subscription. Subscribe via Stripe checkout first.",
+        publishRequiresSubscription:
+          "An active platform subscription is required to publish plants. Visit Subscription to renew or redeem a coupon.",
+        fulfillmentRequired:
+          "Renew your platform subscription to ship, deliver, or confirm payment on orders. You can still cancel orders.",
       },
     },
     setupShop: {
@@ -3063,6 +3067,11 @@ export const dict = {
     viewOrders: "View Orders",
     continueShopping: "Continue Shopping",
     loadError: "Failed to load checkout",
+    errors: {
+      placeOrderFailed: "Failed to place order. Please try again.",
+      shopUnavailable:
+        "One or more shops in your cart are not accepting orders right now. Remove those items or try again later.",
+    },
     paymentMethod: "Payment Method",
     loadingPaymentMethods: "Loading payment methods...",
     noPaymentMethods: "No payment methods are available right now.",

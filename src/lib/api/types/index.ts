@@ -8,12 +8,25 @@ export interface ApiResponse<T = unknown> {
 }
 
 /**
+ * Nested error payload from auth API (`ResponseService.error`).
+ */
+export interface ApiErrorPayload {
+  code?: string;
+  details?: string;
+  validationErrors?: Array<{
+    field: string;
+    message: string;
+    code?: string;
+  }>;
+}
+
+/**
  * API error response structure
  */
 export interface ApiErrorResponse {
   success: false;
   message: string;
-  error?: string;
+  error?: string | ApiErrorPayload;
   statusCode?: number;
   errors?: Array<{
     field: string;

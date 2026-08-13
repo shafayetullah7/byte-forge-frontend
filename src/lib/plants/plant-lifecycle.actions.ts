@@ -6,10 +6,11 @@ import {
 } from "~/lib/api/endpoints/seller/plants.api";
 import type { PlantStatus } from "~/lib/api/types/seller.types";
 import { ApiError } from "~/lib/api/types";
+import { readApiErrorCode } from "~/lib/api/read-api-error-code";
 
 export type PlantLifecycleResult =
   | { success: true }
-  | { success: false; error: { message: string; statusCode?: number } };
+  | { success: false; error: { message: string; statusCode?: number; code?: string } };
 
 export const updatePlantStatusAction = action(
   async (input: { plantId: string; status: PlantStatus }): Promise<PlantLifecycleResult> => {
@@ -25,6 +26,7 @@ export const updatePlantStatusAction = action(
         error: {
           statusCode: apiError.statusCode,
           message: apiError.response?.message ?? apiError.message,
+          code: readApiErrorCode(apiError.response),
         },
       };
     }
@@ -46,6 +48,7 @@ export const deletePlantAction = action(
         error: {
           statusCode: apiError.statusCode,
           message: apiError.response?.message ?? apiError.message,
+          code: readApiErrorCode(apiError.response),
         },
       };
     }

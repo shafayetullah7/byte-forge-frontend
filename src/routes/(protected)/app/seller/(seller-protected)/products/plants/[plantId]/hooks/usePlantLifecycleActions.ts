@@ -29,6 +29,10 @@ export function usePlantLifecycleActions() {
         toaster.success(t("seller.products.plantOverview.publishSuccess"));
         return true;
       }
+      if (result?.error?.code === "SUBSCRIPTION_REQUIRED") {
+        toaster.error(t("seller.subscription.errors.publishRequiresSubscription"));
+        return false;
+      }
       toaster.error(result?.error?.message ?? t("seller.products.plantOverview.publishFailed"));
       return false;
     } finally {

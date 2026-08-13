@@ -135,7 +135,11 @@ export function useCheckout() {
       });
 
       if (!result || result.success === false) {
-        toaster.error(result?.error?.message ?? "Failed to place order");
+        if (result?.error?.code === "SHOP_UNAVAILABLE") {
+          toaster.error(t("checkout.errors.shopUnavailable"));
+          return;
+        }
+        toaster.error(result?.error?.message ?? t("checkout.errors.placeOrderFailed"));
         return;
       }
 
@@ -145,7 +149,7 @@ export function useCheckout() {
       );
       toaster.success(t("checkout.orderPlaced"));
     } catch (error) {
-      toaster.error(error instanceof Error ? error.message : "Failed to place order");
+      toaster.error(error instanceof Error ? error.message : t("checkout.errors.placeOrderFailed"));
     } finally {
       setIsPlacingOrder(false);
     }

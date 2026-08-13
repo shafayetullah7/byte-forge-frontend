@@ -95,7 +95,9 @@ const SellerOrderDetailPage: Component = () => {
   });
 
   const handleMutationResult = (
-    result: { success: boolean; stale?: boolean; error?: { message: string } } | undefined,
+    result:
+      | { success: boolean; stale?: boolean; error?: { message: string; code?: string } }
+      | undefined,
     successMessage: string,
   ) => {
     if (!result) return;
@@ -112,6 +114,10 @@ const SellerOrderDetailPage: Component = () => {
     }
     if (result.stale) {
       toaster.warning(t("seller.orders.detailPage.staleConflict"));
+      return;
+    }
+    if (result.error?.code === "SUBSCRIPTION_REQUIRED") {
+      toaster.error(t("seller.subscription.errors.fulfillmentRequired"));
       return;
     }
     toaster.error(result.error?.message ?? t("seller.orders.actionFailed"));
