@@ -11,6 +11,7 @@ import {
     MapPinIcon,
     ClipboardDocumentIcon,
     DocumentTextIcon,
+    CreditCardIcon,
 } from "~/components/icons";
 import { useI18n } from "~/i18n";
 
@@ -106,6 +107,11 @@ export const SellerLayout: ParentComponent = (props) => {
                 href: "/app/seller/articles",
                 icon: DocumentTextIcon,
                 label: t("seller.sidebar.articles"),
+            },
+            {
+                href: "/app/seller/subscription",
+                icon: CreditCardIcon,
+                label: t("seller.sidebar.subscription"),
             },
         ],
     }));

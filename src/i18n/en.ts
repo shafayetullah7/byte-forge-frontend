@@ -24,6 +24,7 @@ export const dict = {
     saving: "Saving...",
     cancel: "Cancel",
     close: "Close",
+    notAvailable: "—",
     confirm: "Confirm",
     delete: "Delete",
     edit: "Edit",
@@ -990,6 +991,7 @@ export const dict = {
       allProducts: "All products",
       campaigns: "Campaigns",
       articles: "Articles",
+      subscription: "Subscription",
     },
     dashboard: {
       orders30d: "Orders (30 days)",
@@ -2191,6 +2193,109 @@ export const dict = {
       columnDistrict: "District",
       columnBaseCost: "Base Cost",
       columnCostPerKg: "Cost/kg",
+    },
+    subscription: {
+      title: "Subscription",
+      subtitle: "Manage your shop platform subscription and redeem coupon codes.",
+      status: {
+        title: "Current plan",
+        activeUntil: "Active until",
+        billingProvider: "Billing source",
+        none: "No subscription",
+        active: "Active",
+        expired: "Expired",
+        noneDescription:
+          "You do not have an active subscription yet. Redeem a coupon or choose a plan to publish and take orders.",
+        activeDescription: "Your shop subscription is active. You can list products and receive orders.",
+        expiredDescription:
+          "Your subscription period has ended. Renew or redeem a coupon to restore full shop access.",
+        cancelAtPeriodEnd:
+          "Your Stripe subscription is set to cancel at the end of the current billing period.",
+      },
+      provider: {
+        none: "None",
+        coupon: "Coupon",
+        stripe: "Stripe",
+        admin: "Admin extension",
+        wallet: "Wallet",
+      },
+      coupon: {
+        title: "Redeem coupon",
+        subtitle: "Enter a coupon code from Byte Forge or a founding partner nursery.",
+        codeLabel: "Coupon code",
+        codePlaceholder: "e.g. FOUNDING2026",
+        codeRequired: "Enter a coupon code",
+        redeem: "Redeem coupon",
+        redeemed: "Coupon applied — your subscription has been extended.",
+        alreadyActive:
+          "Your subscription is already active. Coupons cannot be stacked while your current period is still running.",
+      },
+      plans: {
+        title: "Choose a plan",
+        subtitle: "Recurring Stripe billing in BDT. Only plans ready for checkout are shown.",
+        empty: "No subscription plans are available for checkout right now. Try a coupon or contact support.",
+        interval: {
+          monthly: "per month",
+          yearly: "per year",
+        },
+      },
+      checkout: {
+        title: "Pay with Stripe",
+        description: "You will be redirected to Stripe to complete subscription checkout securely.",
+        cta: "Subscribe with Stripe",
+        selectPlan: "Select a plan to continue",
+        success: "Payment received. Your subscription will update shortly after Stripe confirms.",
+        cancel: "Checkout was cancelled. You can try again when ready.",
+      },
+      portal: {
+        cta: "Manage Stripe billing",
+      },
+      invoices: {
+        title: "Billing history",
+        subtitle: "Coupon redemptions, Stripe payments, and admin extensions appear here.",
+        empty: "No subscription invoices yet. Redeem a coupon or subscribe to see records here.",
+        date: "Date",
+        amount: "Amount",
+        source: "Source",
+        status: "Status",
+        periodEnd: "Period end",
+        receipt: "Receipt",
+        viewReceipt: "View PDF",
+        page: (current: number, total: number) => `Page ${current} of ${total}`,
+        statusValues: {
+          paid: "Paid",
+          pending: "Pending",
+          failed: "Failed",
+          void: "Void",
+        },
+      },
+      nag: {
+        title: "Subscribe to unlock your shop",
+        body: "Your shop is verified, but you do not have an active platform subscription yet. Subscribe or redeem a coupon to list products and receive orders.",
+        cta: "View subscription plans",
+        dismiss: "Not now",
+      },
+      errors: {
+        couponNotFound: "Coupon code not found. Check the code and try again.",
+        couponAlreadyRedeemed: "This coupon has already been used for your shop.",
+        couponLimitReached: "This coupon has reached its redemption limit.",
+        couponInactive: "This coupon is no longer active.",
+        couponNotYetValid: "This coupon is not valid yet.",
+        couponExpired: "This coupon has expired.",
+        planNotFound: "Subscription plan not found.",
+        planUnavailable: "This plan is not available for new purchases.",
+        planNotSynced: "This plan is not ready for checkout yet. Try another plan or contact support.",
+        incompleteStripeSubscription:
+          "You have an incomplete Stripe subscription. Complete or cancel it before starting a new checkout.",
+        checkoutInProgressOtherPlan:
+          "A Stripe checkout is already in progress for another plan. Complete or cancel it first.",
+        portalCouponOnly:
+          "Billing portal is only available for Stripe subscriptions. Your shop is on a coupon plan.",
+        portalAdminOnly:
+          "Billing portal is only available for Stripe subscriptions. Contact support for admin-managed plans.",
+        portalStripeRequired:
+          "Billing portal requires an active Stripe subscription. Subscribe via Stripe checkout first.",
+      },
     },
     setupShop: {
       title: "Create Your Shop",
