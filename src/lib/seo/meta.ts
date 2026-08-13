@@ -14,6 +14,22 @@ export function getSiteOrigin(): string {
   return "https://byteforge.com.bd";
 }
 
+export function getPublicHostname(): string {
+  try {
+    return new URL(getSiteOrigin()).host;
+  } catch {
+    return "byteforge.com.bd";
+  }
+}
+
+export function getShopSlugPrefix(): string {
+  return `${getPublicHostname()}/shop/`;
+}
+
+export function getPlantSlugPrefix(): string {
+  return `${getPublicHostname()}/plants/`;
+}
+
 export function absoluteUrl(path: string): string {
   const normalized = path.startsWith("/") ? path : `/${path}`;
   return `${getSiteOrigin()}${normalized}`;

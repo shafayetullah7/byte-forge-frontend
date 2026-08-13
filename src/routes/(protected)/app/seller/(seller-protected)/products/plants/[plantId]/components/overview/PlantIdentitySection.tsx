@@ -7,14 +7,41 @@ import { PlantEditableSection } from "../PlantEditableSection";
 
 type SectionEdit = ReturnType<typeof usePlantSectionEdit>;
 
+function fieldOrDash(value: string | null | undefined) {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : "—";
+}
+
+function DescriptionFields(props: {
+  shortLabel: string;
+  shortValue: string;
+  detailedLabel: string;
+  detailedValue: string;
+}) {
+  return (
+    <div class="space-y-3">
+      <div>
+        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{props.shortLabel}</p>
+        <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{fieldOrDash(props.shortValue)}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{props.detailedLabel}</p>
+        <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{fieldOrDash(props.detailedValue)}</p>
+      </div>
+    </div>
+  );
+}
+
 export function PlantIdentitySection(props: {
   plant: PlantDetail;
   sectionEdit: SectionEdit;
   enName: string;
   enShortDescription: string;
+  enDescription: string;
+  bnShortDescription: string;
   bnDescription: string;
   scientificName: string;
-  hasBnTranslation: boolean;
+  hasBnContent: boolean;
 }) {
   const { t } = useI18n();
 
@@ -43,14 +70,24 @@ export function PlantIdentitySection(props: {
             <h2 class="text-lg font-bold text-forest-800 dark:text-cream-50 mb-1">
               {t("seller.products.plantOverview.english")}
             </h2>
-            <p class="text-xl font-semibold text-forest-800 dark:text-cream-50 mb-2">{props.enName}</p>
-            <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{props.enShortDescription}</p>
-            <Show when={props.hasBnTranslation}>
+            <p class="text-xl font-semibold text-forest-800 dark:text-cream-50 mb-3">{props.enName}</p>
+            <DescriptionFields
+              shortLabel={t("seller.products.newPlant.shortSummaryLabel")}
+              shortValue={props.enShortDescription}
+              detailedLabel={t("seller.products.newPlant.detailedDescriptionLabel")}
+              detailedValue={props.enDescription}
+            />
+            <Show when={props.hasBnContent}>
               <div class="mt-4 pt-4 border-t border-cream-200 dark:border-forest-700">
-                <h2 class="text-lg font-bold text-forest-800 dark:text-cream-50 mb-1">
+                <h2 class="text-lg font-bold text-forest-800 dark:text-cream-50 mb-3">
                   {t("seller.products.plantOverview.bengali")}
                 </h2>
-                <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{props.bnDescription}</p>
+                <DescriptionFields
+                  shortLabel={t("seller.products.newPlant.shortSummaryLabel")}
+                  shortValue={props.bnShortDescription}
+                  detailedLabel={t("seller.products.newPlant.detailedDescriptionLabel")}
+                  detailedValue={props.bnDescription}
+                />
               </div>
             </Show>
             <div class="mt-4 pt-4 border-t border-cream-200 dark:border-forest-700">

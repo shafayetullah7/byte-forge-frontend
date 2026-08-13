@@ -70,6 +70,7 @@ export function PlantSectionFieldEditor(props: {
           hasThumbnail={hasThumbnail}
           allowThumbnailDelete={false}
           isEditMode
+          hideStatus
           originalSlug={props.originalSlug}
           status={props.form.status}
           onStatusChange={(v) => props.setForm("status", v as PlantStatus)}

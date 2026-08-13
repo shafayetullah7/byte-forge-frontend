@@ -6,6 +6,7 @@ import { Button, ImageUpload } from "~/components/ui";
 import { getShop } from "~/lib/context/shop-context";
 import { toaster } from "~/components/ui/Toast";
 import { useI18n } from "~/i18n";
+import { getShopSlugPrefix } from "~/lib/seo/meta";
 import { useImageUpload } from "~/lib/hooks/useImageUpload";
 import type { ApplyAsSellerRequest, ShopTranslationInput } from "~/lib/api/types/seller.types";
 import { sellerApi } from "~/lib/api/endpoints/seller";
@@ -78,7 +79,7 @@ export default function SetupShop() {
     createEffect(() => {
         const currentShop = shop();
         if (currentShop) {
-            navigate("/app/seller/shops", { replace: true });
+            navigate("/app/seller/my-shop", { replace: true });
         }
     });
 
@@ -413,7 +414,7 @@ export default function SetupShop() {
                                                 </label>
                                                 <div class="flex rounded-lg">
                                                     <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-700 text-forest-700/70 dark:text-gray-400 body-small">
-                                                        byteforge.com/shop/
+                                                        {getShopSlugPrefix()}
                                                     </span>
                                                     <input
                                                         type="text"

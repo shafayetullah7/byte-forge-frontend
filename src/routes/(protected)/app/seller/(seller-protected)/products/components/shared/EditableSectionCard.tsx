@@ -27,6 +27,7 @@ export function EditableSectionCard(props: {
           <button
             type="button"
             onClick={props.onEdit}
+            aria-label={t("seller.products.plantSection.editSection", props.title)}
             class="inline-flex items-center gap-1.5 text-sm text-forest-600 dark:text-forest-400 hover:underline font-medium"
           >
             <PencilIcon class="w-3.5 h-3.5" />

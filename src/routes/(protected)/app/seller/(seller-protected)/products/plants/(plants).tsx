@@ -25,12 +25,14 @@ import { getStatusLabel } from "./[plantId]/utils";
 // Filter Chip
 // ========================
 
-function FilterChip(props: { label: string; onRemove: () => void }) {
+function FilterChip(props: { label: string; removeLabel: string; onRemove: () => void }) {
   return (
     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-forest-100 text-forest-800 dark:bg-forest-900/40 dark:text-forest-300 border border-forest-200 dark:border-forest-800">
       {props.label}
       <button
+        type="button"
         onClick={props.onRemove}
+        aria-label={props.removeLabel}
         class="ml-0.5 p-0.5 rounded-full hover:bg-forest-200 dark:hover:bg-forest-800 transition-colors"
       >
         <XIcon class="w-3 h-3" />
@@ -536,12 +538,14 @@ export default function PlantsPage() {
                 <Show when={searchQuery()}>
                   <FilterChip
                     label={t("seller.products.filterLabels.search", searchQuery())}
+                    removeLabel={t("seller.products.filters.removeFilter", t("seller.products.filterLabels.search", searchQuery()))}
                     onRemove={() => handleFilterChange(setSearchQuery, "")}
                   />
                 </Show>
                 <Show when={statusFilter()}>
                   <FilterChip
                     label={t("seller.products.filterLabels.status", statusFilterLabelText())}
+                    removeLabel={t("seller.products.filters.removeFilter", t("seller.products.filterLabels.status", statusFilterLabelText()))}
                     onRemove={() => handleFilterChange(setStatusFilter, "")}
                   />
                 </Show>
@@ -551,6 +555,13 @@ export default function PlantsPage() {
                       "seller.products.filterLabels.category",
                       flatCategories().find((c) => c.id === categoryFilter())?.name ?? "",
                     )}
+                    removeLabel={t(
+                      "seller.products.filters.removeFilter",
+                      t(
+                        "seller.products.filterLabels.category",
+                        flatCategories().find((c) => c.id === categoryFilter())?.name ?? "",
+                      ),
+                    )}
                     onRemove={() => handleFilterChange(setCategoryFilter, "")}
                   />
                 </Show>
@@ -558,6 +569,7 @@ export default function PlantsPage() {
                   {(tagId) => (
                     <FilterChip
                       label={tagIdToName()[tagId] || tagId}
+                      removeLabel={t("seller.products.filters.removeFilter", tagIdToName()[tagId] || tagId)}
                       onRemove={() => removeTag(tagId)}
                     />
                   )}

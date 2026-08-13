@@ -1,5 +1,6 @@
 import { A } from "@solidjs/router";
 import type { ShopMedia } from "~/lib/api/endpoints/seller/shop-detail.api";
+import { getShopSlugPrefix } from "~/lib/seo/meta";
 
 interface ShopHeaderProps {
   logo: ShopMedia | null;
@@ -100,7 +101,7 @@ export default function ShopHeader(props: ShopHeaderProps) {
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
               </svg>
-              <span class="font-mono truncate max-w-[200px] sm:max-w-md">byteforge.com/shop/{props.slug}</span>
+              <span class="font-mono truncate max-w-[200px] sm:max-w-md">{getShopSlugPrefix()}{props.slug}</span>
               <button 
                 onClick={copyUrl} 
                 class="p-1.5 hover:text-terracotta-500 hover:bg-terracotta-50 dark:hover:bg-terracotta-900/20 rounded-lg transition-all" 

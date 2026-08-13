@@ -89,8 +89,17 @@ export function usePlantOverviewData(plant: Accessor<PlantDetail | undefined>) {
     careBn,
     scientificName: () => plant()?.plantDetails?.scientificName ?? "—",
     enName: () => enTranslation()?.name ?? "",
+    enShortDescription: () => enTranslation()?.shortDescription ?? "",
+    enDescription: () => enTranslation()?.description ?? "",
+    bnShortDescription: () => bnTranslation()?.shortDescription ?? "",
     bnDescription: () => bnTranslation()?.description ?? "",
-    enShortDescription: () =>
-      enTranslation()?.shortDescription ?? enTranslation()?.description ?? "",
+    hasBnContent: () => {
+      const bn = bnTranslation();
+      return Boolean(
+        bn?.name?.trim()
+        || bn?.shortDescription?.trim()
+        || bn?.description?.trim(),
+      );
+    },
   };
 }

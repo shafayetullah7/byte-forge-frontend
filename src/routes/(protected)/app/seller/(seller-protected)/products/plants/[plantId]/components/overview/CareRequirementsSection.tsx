@@ -17,6 +17,8 @@ import type {
   WateringFrequency,
 } from "~/lib/api/types/seller.types";
 import type { usePlantSectionEdit } from "~/lib/plants/usePlantSectionEdit";
+import type { CareInstructionKey } from "../care-instruction-config";
+import type { CareInstructionContent } from "../../hooks/usePlantOverviewData";
 import {
   getDifficultyColor,
   getDifficultyLabel,
@@ -33,13 +35,27 @@ import { PlantEditableSection } from "../PlantEditableSection";
 
 type SectionEdit = ReturnType<typeof usePlantSectionEdit>;
 
+function careInstructionSnippet(
+  careEn: CareInstructionContent | null | undefined,
+  careBn: CareInstructionContent | null | undefined,
+  field: CareInstructionKey,
+  locale: "en" | "bn",
+): string {
+  const primary = locale === "bn" ? careBn?.[field] : careEn?.[field];
+  const fallback = locale === "bn" ? careEn?.[field] : careBn?.[field];
+  return (primary || fallback || "").trim();
+}
+
 export function CareRequirementsSection(props: {
   plant: PlantDetail;
   sectionEdit: SectionEdit;
   plantDetails: NonNullable<PlantDetail["plantDetails"]>;
+  careEn: () => CareInstructionContent | null;
+  careBn: () => CareInstructionContent | null;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const pd = () => props.plantDetails;
+  const loc = () => locale() as "en" | "bn";
 
   return (
     <PlantEditableSection
@@ -60,7 +76,12 @@ export function CareRequirementsSection(props: {
                   text: getLightLabel(light() as LightRequirement, t),
                   ...getLightColor(light() as LightRequirement),
                 }}
-                description={t("seller.products.plantOverview.lightDescription")}
+                description={careInstructionSnippet(
+                  props.careEn(),
+                  props.careBn(),
+                  "lightInstructions",
+                  loc(),
+                )}
               />
             )}
           </Show>
@@ -74,7 +95,12 @@ export function CareRequirementsSection(props: {
                   text: getWateringLabel(watering() as WateringFrequency, t),
                   ...getWateringColor(watering() as WateringFrequency),
                 }}
-                description={t("seller.products.plantOverview.wateringDescription")}
+                description={careInstructionSnippet(
+                  props.careEn(),
+                  props.careBn(),
+                  "wateringInstructions",
+                  loc(),
+                )}
               />
             )}
           </Show>
@@ -88,22 +114,26 @@ export function CareRequirementsSection(props: {
                   text: getHumidityLabel(humidity() as HumidityLevel, t),
                   ...getHumidityColor(humidity() as HumidityLevel),
                 }}
-                description={t("seller.products.plantOverview.humidityDescription")}
+                description={careInstructionSnippet(
+                  props.careEn(),
+                  props.careBn(),
+                  "humidityInstructions",
+                  loc(),
+                )}
               />
             )}
           </Show>
           <Show when={pd().temperatureRange}>
             {(temp) => (
               <CareCard
-                icon={<ThermometerIcon class="w-5 h-5 text-red-600 dark:text-red-400" />}
+                icon={<ThermometerIcon class="w-5 h-5 text-amber-600 dark:text-amber-400" />}
                 titleEn={t("seller.products.plantOverview.temperature")}
                 titleBn={t("seller.products.plantOverview.temperatureBn")}
                 badge={{
                   text: temp(),
-                  bg: "bg-red-100 dark:bg-red-900/40",
-                  textColor: "text-red-700 dark:text-red-300",
+                  bg: "bg-amber-100 dark:bg-amber-900/40",
+                  textColor: "text-amber-800 dark:text-amber-300",
                 }}
-                description={t("seller.products.plantOverview.temperatureDescription")}
               />
             )}
           </Show>
@@ -117,7 +147,6 @@ export function CareRequirementsSection(props: {
                   text: getDifficultyLabel(difficulty() as CareDifficulty, t),
                   ...getDifficultyColor(difficulty() as CareDifficulty),
                 }}
-                description={t("seller.products.plantOverview.careDifficultyDescription")}
               />
             )}
           </Show>
@@ -132,7 +161,6 @@ export function CareRequirementsSection(props: {
                   bg: "bg-sage-100 dark:bg-sage-900/40",
                   textColor: "text-sage-700 dark:text-sage-300",
                 }}
-                description={t("seller.products.plantOverview.growthRateDescription")}
               />
             )}
           </Show>

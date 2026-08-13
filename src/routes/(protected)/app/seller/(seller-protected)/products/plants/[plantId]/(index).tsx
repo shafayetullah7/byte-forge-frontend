@@ -50,9 +50,11 @@ export default function OverviewRoute() {
                 sectionEdit={sectionEdit}
                 enName={overview.enName()}
                 enShortDescription={overview.enShortDescription()}
+                enDescription={overview.enDescription()}
+                bnShortDescription={overview.bnShortDescription()}
                 bnDescription={overview.bnDescription()}
                 scientificName={overview.scientificName()}
-                hasBnTranslation={Boolean(overview.bnTranslation())}
+                hasBnContent={overview.hasBnContent()}
               />
 
               <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -77,6 +79,8 @@ export default function OverviewRoute() {
                       plant={p}
                       sectionEdit={sectionEdit}
                       plantDetails={p.plantDetails}
+                      careEn={overview.careEn}
+                      careBn={overview.careBn}
                     />
                   )}
 

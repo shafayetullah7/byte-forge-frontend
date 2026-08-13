@@ -1,12 +1,14 @@
 import { For, Show, createSignal, createMemo, createEffect, on, type Component } from "solid-js";
 import type { PublicPlantMedia } from "~/lib/api/types/public/plants.types";
 import { ChevronLeftIcon, ChevronRightIcon, ImageIcon } from "~/components/icons";
+import { useI18n } from "~/i18n";
 
 const ImageGallery: Component<{
   media: PublicPlantMedia[];
   plantName: string;
   mediaKey: string;
 }> = (props) => {
+  const { t } = useI18n();
   const [currentIndex, setCurrentIndex] = createSignal(0);
 
   createEffect(
@@ -50,16 +52,18 @@ const ImageGallery: Component<{
 
         <Show when={images().length > 1}>
           <button
+            type="button"
             onClick={goToPrev}
             class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 dark:bg-forest-800/90 backdrop-blur-sm shadow-lg flex items-center justify-center hover:bg-white dark:hover:bg-forest-800 transition-colors"
-            aria-label="Previous image"
+            aria-label={t("public.plants.detail.previousImage")}
           >
             <ChevronLeftIcon class="w-5 h-5 text-gray-700 dark:text-gray-300" />
           </button>
           <button
+            type="button"
             onClick={goToNext}
             class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 dark:bg-forest-800/90 backdrop-blur-sm shadow-lg flex items-center justify-center hover:bg-white dark:hover:bg-forest-800 transition-colors"
-            aria-label="Next image"
+            aria-label={t("public.plants.detail.nextImage")}
           >
             <ChevronRightIcon class="w-5 h-5 text-gray-700 dark:text-gray-300" />
           </button>
@@ -75,13 +79,14 @@ const ImageGallery: Component<{
           <For each={images()}>
             {(media, index) => (
               <button
+                type="button"
                 onClick={() => setCurrentIndex(index())}
                 class={`aspect-square rounded-xl border-2 overflow-hidden transition-all flex items-center justify-center ${
                   currentIndex() === index()
                     ? "border-forest-500 dark:border-forest-400 shadow-md ring-2 ring-forest-500/20"
                     : "border-cream-200 dark:border-forest-700 hover:border-forest-400 dark:hover:border-forest-500"
                 }`}
-                aria-label={`Go to image ${index() + 1}`}
+                aria-label={t("public.plants.detail.goToImage", index() + 1)}
               >
                 {media.url ? (
                   <img src={media.url} alt={props.plantName} class="w-full h-full object-cover" />

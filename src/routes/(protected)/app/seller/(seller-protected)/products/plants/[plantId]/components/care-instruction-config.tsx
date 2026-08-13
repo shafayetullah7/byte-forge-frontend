@@ -81,8 +81,8 @@ export const CARE_INSTRUCTION_ITEMS: CareInstructionItemConfig[] = [
   {
     field: "commonProblems",
     icon: <ExclamationCircleIcon class="w-5 h-5" />,
-    iconColor: "text-red-600 dark:text-red-400",
-    bgColor: "bg-red-50 dark:bg-red-900/20",
+    iconColor: "text-amber-600 dark:text-amber-400",
+    bgColor: "bg-amber-50 dark:bg-amber-900/20",
     titleEnKey: "seller.products.plantOverview.commonProblems",
     titleBnKey: "seller.products.plantOverview.commonProblemsBn",
   },

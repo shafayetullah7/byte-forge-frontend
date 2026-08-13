@@ -1,5 +1,6 @@
 import { createEffect, Show, createMemo } from "solid-js";
 import { CheckCircleIcon } from "~/components/icons";
+import { getPlantSlugPrefix } from "~/lib/seo/meta";
 import { Select } from "~/components/ui/Select";
 import { ImageUpload } from "~/components/ui/ImageUpload";
 import { Input, Textarea } from "~/components/ui";
@@ -41,6 +42,8 @@ export function IdentityFields(props: {
   allowThumbnailDelete?: boolean;
   isEditMode?: boolean;
   hideArchivedStatus?: boolean;
+  /** Hide status control entirely (e.g. overview edit uses quick actions). */
+  hideStatus?: boolean;
   originalSlug?: string;
   status: string;
   onStatusChange: (v: string) => void;
@@ -121,6 +124,7 @@ export function IdentityFields(props: {
 
         {/* Status + Slug + Scientific Name — 2 cols */}
         <div class="lg:col-span-2 space-y-4">
+          <Show when={!props.hideStatus}>
           <Show
             when={!props.hideArchivedStatus}
             fallback={
@@ -148,6 +152,7 @@ export function IdentityFields(props: {
               {props.t("seller.products.newPlant.statusHint")}
             </p>
           </Show>
+          </Show>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
@@ -156,7 +161,7 @@ export function IdentityFields(props: {
             </label>
             <div class="flex rounded-lg">
               <span class="inline-flex items-center px-2.5 rounded-l-lg border border-r-0 border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-700 text-forest-700/70 dark:text-gray-400 text-xs">
-                {props.t("seller.products.newPlant.slugUrlPrefix")}
+                {getPlantSlugPrefix()}
               </span>
               <input
                 type="text"

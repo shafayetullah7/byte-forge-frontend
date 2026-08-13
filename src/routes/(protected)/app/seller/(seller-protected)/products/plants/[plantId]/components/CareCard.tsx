@@ -1,11 +1,12 @@
 import type { JSX } from "solid-js";
+import { Show } from "solid-js";
 
 export function CareCard(props: {
   icon: JSX.Element;
   titleEn: string;
   titleBn: string;
   badge: { text: string; bg: string; textColor: string };
-  description: string;
+  description?: string;
 }) {
   return (
     <div class="bg-white dark:bg-forest-800 rounded-xl border border-cream-200 dark:border-forest-700 p-5 hover:shadow-md transition-shadow">
@@ -19,7 +20,9 @@ export function CareCard(props: {
       </div>
       <h4 class="text-sm font-semibold text-forest-800 dark:text-cream-50 mb-1">{props.titleEn}</h4>
       <p class="text-sm font-medium text-forest-600 dark:text-forest-400 mb-1">{props.titleBn}</p>
-      <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{props.description}</p>
+      <Show when={props.description}>
+        <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{props.description}</p>
+      </Show>
     </div>
   );
 }

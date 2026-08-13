@@ -1,24 +1,27 @@
 import { useNavigate, createAsync, useAction } from "@solidjs/router";
-import { createSignal } from "solid-js";
+import { createSignal, Show } from "solid-js";
 import Button from "~/components/ui/Button";
 import Card from "~/components/ui/Card";
-import { Modal } from "~/components/ui/Modal";
+import { toaster } from "~/components/ui/Toast";
 import { getShop } from "~/lib/context/shop-context";
 import { deleteShopAction } from "./shop.actions";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
+import { useI18n } from "~/i18n";
+
+const DELETE_CONFIRM = "DELETE";
 
 export default function DeleteShopPage() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const shopData = createAsync(() => getShop());
   const deleteShopTrigger = useAction(deleteShopAction);
   const [isDeleting, setIsDeleting] = createSignal(false);
-  const [showConfirm, setShowConfirm] = createSignal(false);
   const [confirmText, setConfirmText] = createSignal("");
-  const [hasPendingOrders, setHasPendingOrders] = createSignal(false);
+  const [hasPendingOrders] = createSignal(false);
 
   const handleDelete = async () => {
-    if (confirmText() !== "DELETE") {
-      alert("Please type 'DELETE' to confirm");
+    if (confirmText() !== DELETE_CONFIRM) {
+      toaster.error(t("seller.shop.deletePage.confirmTypeMismatch"));
       return;
     }
 
@@ -26,17 +29,19 @@ export default function DeleteShopPage() {
     try {
       const result = await deleteShopTrigger();
       if (result?.success === true) {
-        navigate("/seller");
+        navigate("/app/seller");
       } else {
-        alert(result?.error?.message ?? "Failed to delete shop. Please try again.");
+        toaster.error(result?.error?.message ?? t("seller.shop.deletePage.deleteFailed"));
       }
-    } catch (error) {
-      console.error("Failed to delete shop:", error);
-      alert("Failed to delete shop. Please try again.");
+    } catch {
+      toaster.error(t("seller.shop.deletePage.deleteFailed"));
     } finally {
       setIsDeleting(false);
     }
   };
+
+  const shopName = () =>
+    shopData()?.translations?.find((row) => row.locale === "en")?.name ?? "";
 
   return (
     <SafeErrorBoundary
@@ -46,78 +51,74 @@ export default function DeleteShopPage() {
     >
       <div class="min-h-screen bg-cream-50 dark:bg-forest-900">
         <div class="mx-auto max-w-2xl">
-          <Card title="Delete Shop">
+          <Card title={t("seller.shop.deletePage.pageTitle")}>
             <div class="space-y-6">
-              {/* Warning */}
               <div class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                 <h3 class="font-semibold text-red-800 dark:text-red-400 mb-2">
-                  ⚠️ Warning: This action cannot be undone
+                  {t("seller.shop.deletePage.warningTitle")}
                 </h3>
                 <ul class="text-sm text-red-700 dark:text-red-300 list-disc list-inside space-y-1">
-                  <li>Your shop will be permanently deleted</li>
-                  <li>All products will be deactivated</li>
-                  <li>You cannot create a new shop for 30 days</li>
-                  <li>Pending orders must be completed first</li>
+                  <li>{t("seller.shop.deletePage.warningItem1")}</li>
+                  <li>{t("seller.shop.deletePage.warningItem2")}</li>
+                  <li>{t("seller.shop.deletePage.warningItem3")}</li>
+                  <li>{t("seller.shop.deletePage.warningItem4")}</li>
                 </ul>
               </div>
 
-              {/* Pending Orders Check */}
-              {hasPendingOrders() && (
+              <Show when={hasPendingOrders()}>
                 <div class="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
                   <h3 class="font-semibold text-amber-800 dark:text-amber-400 mb-2">
-                    Cannot Delete Shop
+                    {t("seller.shop.deletePage.cannotDeleteTitle")}
                   </h3>
                   <p class="text-sm text-amber-700 dark:text-amber-300">
-                    You have pending orders that must be completed before deleting your shop.
-                    Please complete or cancel all pending orders, or contact admin for assistance.
+                    {t("seller.shop.deletePage.cannotDeleteBody")}
                   </p>
                 </div>
-              )}
+              </Show>
 
-              {/* Shop Info */}
-              {shopData() && (
-                <div class="text-sm text-gray-600 dark:text-gray-400">
-                  <p>
-                    <strong>Shop:</strong> {shopData()?.translations?.find(t => t.locale === "en")?.name}
-                  </p>
-                  <p>
-                    <strong>Slug:</strong> {shopData()?.slug}
-                  </p>
-                  <p>
-                    <strong>Status:</strong> {shopData()?.status}
-                  </p>
-                </div>
-              )}
+              <Show when={shopData()}>
+                {(shop) => (
+                  <div class="text-sm text-gray-600 dark:text-gray-400">
+                    <p>
+                      <strong>{t("seller.shop.deletePage.shopLabel")}:</strong> {shopName()}
+                    </p>
+                    <p>
+                      <strong>{t("seller.shop.deletePage.slugLabel")}:</strong> {shop().slug}
+                    </p>
+                    <p>
+                      <strong>{t("seller.shop.deletePage.statusLabel")}:</strong> {shop().status}
+                    </p>
+                  </div>
+                )}
+              </Show>
 
-              {/* Confirmation */}
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Type "DELETE" to confirm:
+                  {t("seller.shop.deletePage.confirmPrompt")}
                 </label>
                 <input
                   type="text"
                   value={confirmText()}
                   onInput={(e) => setConfirmText(e.currentTarget.value)}
                   class="w-full px-3 py-2 border border-gray-200 dark:border-forest-600 rounded-lg bg-white dark:bg-forest-700 text-gray-900 dark:text-gray-100 outline-none focus:ring-2 focus:ring-red-500"
-                  placeholder="DELETE"
+                  placeholder={t("seller.shop.deletePage.confirmPlaceholder")}
                 />
               </div>
 
-              {/* Actions */}
               <div class="flex gap-3 justify-end">
                 <Button
                   variant="outline"
-                  onClick={() => navigate("/seller/my-shop")}
+                  onClick={() => navigate("/app/seller/my-shop")}
                 >
-                  Cancel
+                  {t("seller.shop.deletePage.cancel")}
                 </Button>
                 <Button
                   variant="secondary"
                   onClick={handleDelete}
                   loading={isDeleting()}
-                  disabled={confirmText() !== "DELETE" || hasPendingOrders()}
+                  disabled={confirmText() !== DELETE_CONFIRM || hasPendingOrders()}
                 >
-                  Delete Shop
+                  {t("seller.shop.deletePage.deleteButton")}
                 </Button>
               </div>
             </div>

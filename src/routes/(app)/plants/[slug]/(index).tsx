@@ -345,7 +345,7 @@ export default function PlantDetailPage() {
                           </Show>
                         </div>
                         <div class="flex items-center gap-2">
-                          <button class="p-2.5 rounded-xl border border-cream-200 dark:border-forest-700 hover:bg-cream-50 dark:hover:bg-forest-800 transition-colors" aria-label="Share">
+                          <button class="p-2.5 rounded-xl border border-cream-200 dark:border-forest-700 hover:bg-cream-50 dark:hover:bg-forest-800 transition-colors" aria-label={t("public.plants.detail.share")}>
                             <ShareIcon class="w-5 h-5 text-gray-500 dark:text-gray-400" />
                           </button>
                           <button
@@ -444,7 +444,7 @@ export default function PlantDetailPage() {
                         <button
                           onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                           class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 hover:bg-cream-50 dark:hover:bg-forest-800 transition-colors"
-                          aria-label="Decrease quantity"
+                          aria-label={t("public.plants.detail.decreaseQuantity")}
                         >
                           −
                         </button>
@@ -454,7 +454,7 @@ export default function PlantDetailPage() {
                         <button
                           onClick={() => setQuantity((q) => Math.min(selectedVariantData()?.inventoryCount ?? 1, q + 1))}
                           class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 hover:bg-cream-50 dark:hover:bg-forest-800 transition-colors"
-                          aria-label="Increase quantity"
+                          aria-label={t("public.plants.detail.increaseQuantity")}
                         >
                           +
                         </button>
@@ -569,8 +569,8 @@ export default function PlantDetailPage() {
                             icon={ExclamationCircleIcon}
                             title={t("public.plants.detail.commonProblems")}
                             description={plant().careInstructions!.commonProblems}
-                            iconColor="text-red-600 dark:text-red-400"
-                            bgColor="bg-red-50 dark:bg-red-900/20"
+                            iconColor="text-amber-600 dark:text-amber-400"
+                            bgColor="bg-amber-50 dark:bg-amber-900/20"
                           />
                           <CareInstructionCard
                             icon={CalendarIcon}
