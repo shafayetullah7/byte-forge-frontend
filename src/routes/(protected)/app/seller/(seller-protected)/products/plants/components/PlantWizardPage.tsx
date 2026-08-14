@@ -214,7 +214,7 @@ export function PlantWizardPage() {
 
   // Thumbnail upload — hook handles upload logic, state syncs to form via callbacks
   const thumbnailUpload = useImageUpload({
-    maxSizeMB: 5,
+    maxSizeMB: 3,
     deleteReplacedMedia: false,
     deleteFromServer: false,
     onSuccess: (id, url) => setForm("thumbnail", { id, url }),

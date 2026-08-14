@@ -6,6 +6,7 @@ import type {
   PublicShopCampaignHighlights,
 } from "~/lib/types/public/shops.types";
 import { formatPrice } from "~/routes/(app)/plants/constants";
+import { cloudinaryUrl } from "~/lib/media/cloudinary-url";
 
 const STATUS_STYLES: Record<string, string> = {
   ACTIVE: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
@@ -67,7 +68,7 @@ export const ShopCampaignHistory: Component<{
             <article class="rounded-2xl border border-cream-200 dark:border-forest-700 bg-white dark:bg-forest-800 overflow-hidden">
               <A href={`/shops/${props.shopSlug}/campaigns/${campaign.slug}`} class="block">
                 <div class="h-32 overflow-hidden">
-                  <img src={campaign.bannerUrl} alt="" class="w-full h-full object-cover" loading="lazy" />
+                  <img src={cloudinaryUrl(campaign.bannerUrl, "card")} alt="" class="w-full h-full object-cover" loading="lazy" decoding="async" />
                 </div>
                 <div class="p-4">
                   <div class="flex items-center justify-between gap-2 mb-2">

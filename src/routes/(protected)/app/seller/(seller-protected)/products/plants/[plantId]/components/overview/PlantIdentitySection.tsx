@@ -4,6 +4,7 @@ import { useI18n } from "~/i18n";
 import type { PlantDetail } from "~/lib/api/types/seller.types";
 import type { usePlantSectionEdit } from "~/lib/plants/usePlantSectionEdit";
 import { PlantEditableSection } from "../PlantEditableSection";
+import { cloudinaryUrl } from "~/lib/media/cloudinary-url";
 
 type SectionEdit = ReturnType<typeof usePlantSectionEdit>;
 
@@ -58,9 +59,10 @@ export function PlantIdentitySection(props: {
           <div class="sm:w-64 md:w-72 h-56 sm:h-auto bg-cream-100 dark:bg-forest-900/50 flex items-center justify-center flex-shrink-0 border-b sm:border-b-0 sm:border-r border-cream-200 dark:border-forest-700">
             {props.plant.thumbnail?.url ? (
               <img
-                src={props.plant.thumbnail.url}
+                src={cloudinaryUrl(props.plant.thumbnail.url, "card")}
                 alt={props.enName}
                 class="w-full h-full object-cover"
+                decoding="async"
               />
             ) : (
               <LeafIcon class="w-20 h-20 text-gray-300 dark:text-gray-600" />

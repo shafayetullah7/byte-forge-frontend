@@ -13,6 +13,7 @@ import { PackageIcon, DollarSignIcon, CubeIcon, EyeIcon, ShoppingBagIcon, StarIc
 import { StatCard } from "./components/StatCard";
 import { SectionErrorFallback } from "~/components/seller/SectionErrorFallback";
 import { useI18n } from "~/i18n";
+import { cloudinaryUrl } from "~/lib/media/cloudinary-url";
 
 const ORDER_STATUS_ICONS: Record<string, any> = {
   DELIVERED: CheckCircleIcon,
@@ -82,9 +83,10 @@ export default function ProductOverviewRoute() {
             <div class="w-full h-full flex items-center justify-center">
               {overview()?.thumbnail?.url ? (
                 <img
-                  src={overview()!.thumbnail!.url}
+                  src={cloudinaryUrl(overview()!.thumbnail!.url, "card")}
                   alt={summary()?.name ?? ""}
                   class="w-full h-full object-cover"
+                  decoding="async"
                 />
               ) : (
                 <PackageIcon class="w-16 h-16 text-gray-300 dark:text-gray-600" />

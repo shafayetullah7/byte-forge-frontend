@@ -2,6 +2,12 @@ import { For, Show, createSignal, createMemo, createEffect, on, type Component }
 import type { PublicPlantMedia } from "~/lib/api/types/public/plants.types";
 import { ChevronLeftIcon, ChevronRightIcon, ImageIcon } from "~/components/icons";
 import { useI18n } from "~/i18n";
+import {
+  cloudinarySizes,
+  cloudinarySrcSet,
+  cloudinaryUrl,
+} from "~/lib/media/cloudinary-url";
+import { CloudinaryImage } from "~/lib/media/CloudinaryImage";
 
 const ImageGallery: Component<{
   media: PublicPlantMedia[];
@@ -43,10 +49,14 @@ const ImageGallery: Component<{
             </div>
           }
         >
-          <img
-            src={currentImage()!.url}
+          <CloudinaryImage
+            url={currentImage()!.url}
+            preset="gallery"
             alt={props.plantName}
-            class="w-full h-full object-cover"
+            responsive
+            placeholder
+            fetchpriority="high"
+            decoding="async"
           />
         </Show>
 
@@ -89,7 +99,15 @@ const ImageGallery: Component<{
                 aria-label={t("public.plants.detail.goToImage", index() + 1)}
               >
                 {media.url ? (
-                  <img src={media.url} alt={props.plantName} class="w-full h-full object-cover" />
+                  <img
+                    src={cloudinaryUrl(media.url, "thumb")}
+                    srcset={cloudinarySrcSet(media.url, "thumb")}
+                    sizes={cloudinarySizes("thumb")}
+                    alt={props.plantName}
+                    class="w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
                 ) : (
                   <ImageIcon class="w-6 h-6 text-gray-400 dark:text-gray-500" />
                 )}

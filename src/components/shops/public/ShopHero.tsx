@@ -4,6 +4,7 @@ import type { PublicShopProfile } from "~/lib/types/public/shops.types";
 import { VerifiedBadge, ActiveStatusBadge } from "./ReputationBadge";
 import { ShopTrustSnapshot } from "./ShopTrustSnapshot";
 import Button from "~/components/ui/Button";
+import { cloudinaryUrl } from "~/lib/media/cloudinary-url";
 
 export const ShopHero: Component<{
   shop: PublicShopProfile;
@@ -21,9 +22,11 @@ export const ShopHero: Component<{
       <div class="h-48 sm:h-64 md:h-72 overflow-hidden bg-gradient-to-r from-forest-600 to-sage-700">
         <Show when={props.shop.banner?.url}>
           <img
-            src={props.shop.banner!.url}
+            src={cloudinaryUrl(props.shop.banner!.url, "hero")}
             alt=""
             class="w-full h-full object-cover"
+            fetchpriority="high"
+            decoding="async"
           />
         </Show>
         <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
@@ -33,7 +36,12 @@ export const ShopHero: Component<{
         <div class="flex flex-col sm:flex-row gap-4 sm:items-end">
           <Show when={props.shop.logo?.url}>
             <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl border-4 border-white dark:border-forest-900 bg-white dark:bg-forest-800 overflow-hidden shadow-xl shrink-0">
-              <img src={props.shop.logo!.url} alt="" class="w-full h-full object-cover" />
+              <img
+                src={cloudinaryUrl(props.shop.logo!.url, "logo-md")}
+                alt=""
+                class="w-full h-full object-cover"
+                decoding="async"
+              />
             </div>
           </Show>
 

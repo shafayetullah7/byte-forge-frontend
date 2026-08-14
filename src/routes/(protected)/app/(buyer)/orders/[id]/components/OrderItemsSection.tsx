@@ -3,6 +3,7 @@ import { useI18n } from "~/i18n";
 import type { OrderItemDetail } from "~/lib/api/types/order.types";
 import { CheckCircleIcon, PackageIcon } from "~/components/icons";
 import { formatCurrency } from "./utils";
+import { cloudinaryUrl } from "~/lib/media/cloudinary-url";
 
 export function OrderItemsSection(props: {
   items: OrderItemDetail[];
@@ -25,9 +26,11 @@ export function OrderItemsSection(props: {
               <div class="w-14 h-14 bg-gray-100 dark:bg-forest-700 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden">
                 {item.thumbnail?.url ? (
                   <img
-                    src={item.thumbnail.url}
+                    src={cloudinaryUrl(item.thumbnail.url, "thumb")}
                     alt={item.productName}
                     class="w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
                   />
                 ) : (
                   <PackageIcon class="w-5 h-5 text-gray-400 dark:text-gray-500" />

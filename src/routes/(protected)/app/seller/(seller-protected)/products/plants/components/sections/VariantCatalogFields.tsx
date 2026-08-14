@@ -4,9 +4,11 @@ import { PlusIcon, TrashIcon, ClipboardDocumentIcon } from "~/components/icons";
 import { Select, type SelectOption } from "~/components/ui/Select";
 import Input from "~/components/ui/Input";
 import { uploadMediaAction } from "~/lib/media/media.actions";
+import { prepareImageForUpload } from "~/lib/media/prepare-image-for-upload";
 import { toaster } from "~/components/ui/Toast";
 import { labelFromOptions } from "~/lib/utils/select-options";
 import { formatPrice } from "~/routes/(app)/plants/constants";
+import type { Translator } from "~/i18n";
 
 function CheckboxField(props: {
   id: string;
@@ -74,20 +76,22 @@ function VariantImageUpload(props: {
   mediaIds: string[];
   mediaUrls: string[];
   setVariants: (fn: (v: VariantStore[]) => VariantStore[]) => void;
-  t: (key: string) => string;
+  t: Translator;
 }) {
   const [isUploading, setIsUploading] = createSignal(false);
   const uploadTrigger = useAction(uploadMediaAction);
 
   const handleUpload = async (file: File) => {
-    if (file.size > 5 * 1024 * 1024) {
-      toaster.error(props.t("seller.products.newPlant.imageSizeError"));
-      return;
-    }
     setIsUploading(true);
     try {
+      const uploadFile = await prepareImageForUpload(file, { maxSizeMB: 3 });
+      if (uploadFile.size > 3 * 1024 * 1024) {
+        toaster.error(props.t("seller.products.newPlant.imageSizeError"));
+        return;
+      }
+
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", uploadFile);
       const result = await uploadTrigger(formData);
       if (!result || result.success === false) {
         throw new Error(result?.error?.message ?? props.t("seller.products.newPlant.imageUploadFailed"));
@@ -202,7 +206,7 @@ export function VariantCatalogFields(props: {
   variantFilterId?: string;
   hideToolbar?: boolean;
   hideIntro?: boolean;
-  t: (key: string) => string;
+  t: Translator;
   onWarningChange: (hasWarning: boolean, missingFields: string[]) => void;
 }) {
   const visibleVariants = createMemo(() => {

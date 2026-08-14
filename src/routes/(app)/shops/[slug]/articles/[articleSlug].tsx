@@ -9,6 +9,7 @@ import { mapApiArticle } from "~/lib/public-shops/content.mappers";
 import { unwrapSuccess } from "~/lib/public-shops/shop.mappers";
 import { formatPageTitle } from "~/lib/seo/meta";
 import { ApiError } from "~/lib/api/types";
+import { cloudinaryUrl } from "~/lib/media/cloudinary-url";
 
 export const route = {
   preload: ({ params }) =>
@@ -65,9 +66,11 @@ export default function ShopArticleDetailPage() {
               </A>
               <Show when={article().coverUrl}>
                 <img
-                  src={article().coverUrl}
+                  src={cloudinaryUrl(article().coverUrl, "hero")}
                   alt=""
                   class="w-full aspect-[16/9] object-cover rounded-2xl"
+                  loading="lazy"
+                  decoding="async"
                 />
               </Show>
               <div>

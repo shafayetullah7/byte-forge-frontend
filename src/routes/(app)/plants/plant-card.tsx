@@ -4,6 +4,7 @@ import { useI18n } from "~/i18n";
 import type { PublicPlantListItem } from "~/lib/api/types/public/plants.types";
 import { LeafIcon, SunIcon, DropletIcon, CubeIcon } from "~/components/icons";
 import { formatPrice, getInventoryLabel, getDifficultyLabel, getDifficultyColor, lightLabel, wateringLabel } from "./constants";
+import { cloudinarySizes, cloudinarySrcSet, cloudinaryUrl } from "~/lib/media/cloudinary-url";
 
 export function PlantCard(props: { plant: PublicPlantListItem }) {
   const { t } = useI18n();
@@ -24,9 +25,13 @@ export function PlantCard(props: { plant: PublicPlantListItem }) {
         }>
           {(thumbnail) => (
             <img
-              src={thumbnail().url} alt={plant.name}
+              src={cloudinaryUrl(thumbnail().url, "card")}
+              srcset={cloudinarySrcSet(thumbnail().url, "card")}
+              sizes={cloudinarySizes("card")}
+              alt={plant.name}
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               loading="lazy"
+              decoding="async"
               onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
             />
           )}
@@ -86,8 +91,10 @@ export function PlantCard(props: { plant: PublicPlantListItem }) {
               <Show when={shop().logo}>
                 {(logo) => (
                   <img
-                    src={logo().url} alt={shop().name}
+                    src={cloudinaryUrl(logo().url, "logo-sm")} alt={shop().name}
                     class="w-5 h-5 rounded-full object-cover ring-1 ring-gray-200 dark:ring-forest-600"
+                    loading="lazy"
+                    decoding="async"
                   />
                 )}
               </Show>

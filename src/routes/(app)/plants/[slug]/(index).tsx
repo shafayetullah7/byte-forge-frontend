@@ -31,6 +31,7 @@ import { getPlantBySlug } from "~/lib/public-plants/public-plant.service";
 import { cartApi, invalidateAllCart } from "~/lib/api/endpoints/buyer/cart.api";
 import HreflangLinks from "~/components/seo/HreflangLinks";
 import { absoluteUrl, formatPageTitle } from "~/lib/seo/meta";
+import { cloudinaryUrl } from "~/lib/media/cloudinary-url";
 import { addToWishlistAction } from "~/lib/api/endpoints/buyer/wishlist.actions";
 import { useSession, buildLoginHref } from "~/lib/auth";
 import {
@@ -189,7 +190,8 @@ export default function PlantDetailPage() {
   const primaryImage = createMemo(() => {
     const p = plant();
     if (!p) return undefined;
-    return displayMedia()[0]?.url || p.thumbnail?.url || undefined;
+    const raw = displayMedia()[0]?.url || p.thumbnail?.url || undefined;
+    return raw ? cloudinaryUrl(raw, "og") : undefined;
   });
 
   const productJsonLd = createMemo(() => {
@@ -365,9 +367,11 @@ export default function PlantDetailPage() {
                             <Show when={shop().logo}>
                               {(logo) => (
                                 <img
-                                  src={logo().url}
+                                  src={cloudinaryUrl(logo().url, "logo-sm")}
                                   alt={shop().name}
                                   class="w-6 h-6 rounded-full object-cover"
+                                  loading="lazy"
+                                  decoding="async"
                                 />
                               )}
                             </Show>

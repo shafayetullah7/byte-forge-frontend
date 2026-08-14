@@ -8,6 +8,7 @@ import type {
 import { ChevronLeftIcon } from "~/components/icons";
 import { Button } from "~/components/ui";
 import { A } from "@solidjs/router";
+import { cloudinaryUrl } from "~/lib/media/cloudinary-url";
 
 interface PaymentStepContentProps {
   selectedPaymentMethod: PaymentMethod;
@@ -96,9 +97,11 @@ const PaymentStepContent: Component<PaymentStepContentProps> = (props) => {
                           >
                             {(logoUrl) => (
                               <img
-                                src={logoUrl()}
+                                src={cloudinaryUrl(logoUrl(), "logo-sm")}
                                 alt={method.displayName}
                                 class="w-full h-full object-contain p-1"
+                                loading="lazy"
+                                decoding="async"
                               />
                             )}
                           </Show>

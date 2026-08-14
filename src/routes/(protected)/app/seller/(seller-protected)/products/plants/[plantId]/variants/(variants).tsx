@@ -23,6 +23,7 @@ import { DetailRow } from "~/routes/(protected)/app/seller/(seller-protected)/pr
 import { EditableSectionCard } from "~/routes/(protected)/app/seller/(seller-protected)/products/components/shared/EditableSectionCard";
 import { PlantSectionFieldEditor } from "../../components/PlantSectionFieldEditor";
 import { useI18n } from "~/i18n";
+import { cloudinaryUrl } from "~/lib/media/cloudinary-url";
 import type { PlantSectionId } from "~/lib/plants/plant-section-edit";
 
 export default function VariantsRoute() {
@@ -241,9 +242,11 @@ export default function VariantsRoute() {
                                           {(media) => (
                                             <div class="w-20 h-20 rounded-lg overflow-hidden border border-cream-200 dark:border-forest-600">
                                               <img
-                                                src={media.url}
+                                                src={cloudinaryUrl(media.url, "thumb")}
                                                 alt={`Variant image ${media.displayOrder}`}
                                                 class="w-full h-full object-cover"
+                                                loading="lazy"
+                                                decoding="async"
                                               />
                                             </div>
                                           )}

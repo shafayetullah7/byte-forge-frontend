@@ -2,6 +2,7 @@ import { createSignal, Show } from 'solid-js';
 import { useAction } from '@solidjs/router';
 import { FileUpload } from '~/components/ui/FileUpload';
 import { deleteMediaAction, uploadMediaAction } from '~/lib/media/media.actions';
+import { prepareImageForUpload } from '~/lib/media/prepare-image-for-upload';
 import { toaster } from '~/components/ui/Toast';
 import { useI18n } from '~/i18n';
 
@@ -32,17 +33,22 @@ export function DocumentUploader(props: DocumentUploaderProps) {
     const hasFile = () => !!(props.uploadedMediaId || previewUrl() || fileName());
 
     const handleFileSelect = async (file: File) => {
-        const maxSizeBytes = (props.maxSizeMB || 10) * 1024 * 1024;
-        if (file.size > maxSizeBytes) {
-            toaster.error(`File size must be less than ${props.maxSizeMB || 10}MB`);
-            return;
-        }
-
+        const maxSizeMB = props.maxSizeMB || 10;
         setIsUploading(true);
 
         try {
+            const uploadFile = file.type.startsWith('image/')
+                ? await prepareImageForUpload(file, { maxSizeMB })
+                : file;
+
+            const maxSizeBytes = maxSizeMB * 1024 * 1024;
+            if (uploadFile.size > maxSizeBytes) {
+                toaster.error(`File size must be less than ${maxSizeMB}MB`);
+                return;
+            }
+
             const formData = new FormData();
-            formData.append("file", file);
+            formData.append("file", uploadFile);
             const result = await uploadTrigger(formData);
             if (!result || result.success === false) {
                 throw new Error(result?.error?.message ?? 'Failed to upload document');

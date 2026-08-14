@@ -1,6 +1,7 @@
 import { useI18n } from "~/i18n";
 import { A } from "@solidjs/router";
 import { ArrowTopRightOnSquareIcon } from "~/components/icons";
+import { cloudinaryUrl } from "~/lib/media/cloudinary-url";
 
 export function ShopInfoCard(props: {
   shopName: string;
@@ -23,7 +24,13 @@ export function ShopInfoCard(props: {
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-forest-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
             {props.shopLogo ? (
-              <img src={props.shopLogo} alt={props.shopName} class="w-full h-full object-cover" />
+              <img
+                src={cloudinaryUrl(props.shopLogo, "logo-sm")}
+                alt={props.shopName}
+                class="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
+              />
             ) : (
               <span class="text-sm font-bold text-gray-500 dark:text-gray-400">
                 {(props.shopName || '?').charAt(0)}

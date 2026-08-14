@@ -2,11 +2,14 @@ import { createSignal } from "solid-js";
 import { useAction } from "@solidjs/router";
 import { toaster } from "~/components/ui/Toast";
 import { deleteMediaAction, uploadMediaAction } from "~/lib/media/media.actions";
+import { prepareImageForUpload } from "~/lib/media/prepare-image-for-upload";
 
 export interface UseImageUploadOptions {
   maxSizeMB?: number;
   allowedTypes?: string[];
   folder?: string;
+  /** Compress raster images in the browser before upload (default: true). */
+  compressBeforeUpload?: boolean;
   /** When false, replaced uploads do not call mediaApi.delete on the previous id. */
   deleteReplacedMedia?: boolean;
   /** When false, deleteMedia only clears local state (no API delete). */
@@ -35,6 +38,7 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
     maxSizeMB = 3,
     allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"],
     folder,
+    compressBeforeUpload = true,
     deleteReplacedMedia = true,
     deleteFromServer = true,
     onSuccess,
@@ -56,14 +60,6 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
   };
 
   const upload = async (file: File) => {
-    const maxSizeBytes = maxSizeMB * 1024 * 1024;
-    if (file.size > maxSizeBytes) {
-      const error = new Error(`File size must be less than ${maxSizeMB}MB`);
-      toaster.error(error.message);
-      onError?.(error);
-      return;
-    }
-
     if (!allowedTypes.includes(file.type)) {
       const error = new Error(
         `Only ${allowedTypes.map((t) => t.split("/")[1].toUpperCase()).join(", ")} images are allowed`
@@ -77,8 +73,18 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
     const oldMediaId = mediaId();
 
     try {
+      const uploadFile = await prepareImageForUpload(file, {
+        maxSizeMB,
+        enabled: compressBeforeUpload,
+      });
+
+      const maxSizeBytes = maxSizeMB * 1024 * 1024;
+      if (uploadFile.size > maxSizeBytes) {
+        throw new Error(`File size must be less than ${maxSizeMB}MB`);
+      }
+
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", uploadFile);
       if (folder) {
         formData.append("folder", folder);
       }

@@ -5,6 +5,7 @@ import type { OrderGroup } from "~/lib/api/types/order.types";
 import { PackageIcon } from "~/components/icons";
 import { StatusBadge } from "~/components/ui/StatusBadge";
 import { getPaymentMethodLabel } from "~/lib/orders/order-display.utils";
+import { cloudinaryUrl } from "~/lib/media/cloudinary-url";
 import { mapStatus, getStatusColor, formatTotal, formatDate, getOrderItemsPreview } from "./utils";
 
 export function OrdersTable(props: {
@@ -75,7 +76,13 @@ export function OrdersTable(props: {
                         <div class="flex items-center gap-2 min-w-0">
                           <div class="w-7 h-7 rounded-lg bg-gray-50 dark:bg-forest-900/50 flex items-center justify-center flex-shrink-0 overflow-hidden">
                             {order.shopLogo ? (
-                              <img src={order.shopLogo} alt={order.shopName} class="w-full h-full object-cover" />
+                              <img
+                                src={cloudinaryUrl(order.shopLogo, "logo-sm")}
+                                alt={order.shopName}
+                                class="w-full h-full object-cover"
+                                loading="lazy"
+                                decoding="async"
+                              />
                             ) : (
                               <span class="text-xs font-bold text-gray-500 dark:text-gray-400">
                                 {order.shopName?.charAt(0) ?? "?"}
@@ -105,7 +112,13 @@ export function OrdersTable(props: {
                             {(item) => (
                               <div class="w-8 h-8 rounded-md bg-gray-100 dark:bg-forest-700 border-2 border-white dark:border-forest-800 flex items-center justify-center flex-shrink-0 overflow-hidden">
                                 {item.thumbnail ? (
-                                  <img src={item.thumbnail.url} alt={item.productName} class="w-full h-full object-cover" />
+                                  <img
+                                    src={cloudinaryUrl(item.thumbnail.url, "thumb")}
+                                    alt={item.productName}
+                                    class="w-full h-full object-cover"
+                                    loading="lazy"
+                                    decoding="async"
+                                  />
                                 ) : (
                                   <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />

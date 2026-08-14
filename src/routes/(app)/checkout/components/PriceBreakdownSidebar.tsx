@@ -1,6 +1,7 @@
 import { Component, Show } from "solid-js";
 import { useI18n } from "~/i18n";
 import { formatPrice } from "../../plants/constants";
+import { cloudinaryUrl } from "~/lib/media/cloudinary-url";
 import {
   ShieldCheckIcon,
   PackageIcon,
@@ -107,7 +108,13 @@ const PriceBreakdownSidebar: Component<PriceBreakdownSidebarProps> = (props) => 
                 fallback={<span class="text-base">{props.paymentMethod === "COD" ? "💵" : "💰"}</span>}
               >
                 {(logoUrl) => (
-                  <img src={logoUrl()} alt={selectedPaymentLabel()} class="w-5 h-5 object-contain" />
+                  <img
+                    src={cloudinaryUrl(logoUrl(), "logo-sm")}
+                    alt={selectedPaymentLabel()}
+                    class="w-5 h-5 object-contain"
+                    loading="lazy"
+                    decoding="async"
+                  />
                 )}
               </Show>
               <span class="text-sm font-medium text-forest-800 dark:text-cream-50">

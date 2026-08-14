@@ -34,7 +34,7 @@ export function PlantSectionFieldEditor(props: {
   const selectOptions = usePlantSelectOptions(t);
 
   const thumbnailUpload = useImageUpload({
-    maxSizeMB: 5,
+    maxSizeMB: 3,
     deleteReplacedMedia: false,
     deleteFromServer: false,
     onSuccess: (id, url) => props.setForm("thumbnail", { id, url }),

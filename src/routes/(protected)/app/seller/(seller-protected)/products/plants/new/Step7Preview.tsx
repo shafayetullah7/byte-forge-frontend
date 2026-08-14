@@ -4,6 +4,7 @@ import { labelFromOptions } from "~/lib/utils/select-options";
 import { formatPrice } from "~/routes/(app)/plants/constants";
 import type { VariantStore } from "./Step4Variants";
 import type { CareGuideSection } from "~/lib/types/plant-form";
+import type { Translator } from "~/i18n";
 
 interface TagInfo {
   id: string;
@@ -118,7 +119,7 @@ export function Step7Preview(props: {
   leafDensityOptions: SelectOption[];
   propagationTypeOptions: SelectOption[];
   containerTypeOptions: SelectOption[];
-  t: (key: string, params?: Record<string, unknown>) => string;
+  t: Translator;
 }) {
   const englishLabel = () => props.t("seller.products.newPlant.englishLabel");
   const bengaliLabel = () => props.t("seller.products.newPlant.bengaliLabel");

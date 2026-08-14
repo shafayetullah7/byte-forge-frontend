@@ -1,10 +1,9 @@
 import type { OrderFilterParams } from "~/lib/api/types/order.types";
 import type { StatusType } from "~/components/ui/StatusBadge";
 import type { FilterOption } from "~/components/ui/FilterSelect";
+import type { Translator } from "~/i18n";
 
-type TranslateFn = (key: string, params?: Record<string, string | number>) => string;
-
-export function getOrderStatusOptions(t: TranslateFn): FilterOption[] {
+export function getOrderStatusOptions(t: Translator): FilterOption[] {
   return [
     { value: "", label: t("buyer.orders.filters.allStatuses") },
     { value: "PENDING_PAYMENT", label: t("buyer.orders.status.pendingPayment"), dotColor: "bg-cream-400" },
@@ -18,7 +17,7 @@ export function getOrderStatusOptions(t: TranslateFn): FilterOption[] {
   ];
 }
 
-export function getPaymentStatusOptions(t: TranslateFn): FilterOption[] {
+export function getPaymentStatusOptions(t: Translator): FilterOption[] {
   return [
     { value: "", label: t("buyer.orders.filters.allPayments") },
     { value: "PENDING", label: t("buyer.orders.payment.pending"), dotColor: "bg-cream-400" },

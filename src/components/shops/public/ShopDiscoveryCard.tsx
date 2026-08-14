@@ -4,6 +4,7 @@ import type { Component } from "solid-js";
 import type { PublicShopListItem } from "~/lib/types/public/shops.types";
 import { VerifiedBadge, ActiveStatusBadge } from "./ReputationBadge";
 import { formatPrice } from "~/routes/(app)/plants/constants";
+import { cloudinaryUrl } from "~/lib/media/cloudinary-url";
 
 export const ShopDiscoveryCard: Component<{
   shop: PublicShopListItem;
@@ -29,10 +30,11 @@ export const ShopDiscoveryCard: Component<{
           }
         >
           <img
-            src={props.shop.banner!.url}
+            src={cloudinaryUrl(props.shop.banner!.url, "card")}
             alt=""
             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
+            decoding="async"
           />
         </Show>
         <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
@@ -43,7 +45,7 @@ export const ShopDiscoveryCard: Component<{
         </div>
         <Show when={props.shop.logo?.url}>
           <div class="absolute -bottom-6 left-4 w-14 h-14 rounded-xl border-2 border-white dark:border-forest-800 bg-white dark:bg-forest-800 overflow-hidden shadow-md">
-            <img src={props.shop.logo!.url} alt="" class="w-full h-full object-cover" loading="lazy" />
+            <img src={cloudinaryUrl(props.shop.logo!.url, "logo-sm")} alt="" class="w-full h-full object-cover" loading="lazy" decoding="async" />
           </div>
         </Show>
       </div>
@@ -103,7 +105,7 @@ export const ShopDiscoveryCard: Component<{
                 {(product) => (
                   <div class="flex-1 min-w-0">
                     <div class="aspect-square rounded-lg overflow-hidden bg-cream-100 dark:bg-forest-900">
-                      <img src={product.thumbnailUrl} alt="" class="w-full h-full object-cover" loading="lazy" />
+                      <img src={cloudinaryUrl(product.thumbnailUrl, "thumb")} alt="" class="w-full h-full object-cover" loading="lazy" decoding="async" />
                     </div>
                     <p class="text-[10px] text-gray-500 dark:text-gray-400 truncate mt-1">{formatPrice(product.price)}</p>
                   </div>

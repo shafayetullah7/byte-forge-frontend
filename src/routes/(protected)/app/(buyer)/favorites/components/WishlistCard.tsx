@@ -4,6 +4,7 @@ import { useI18n } from "~/i18n";
 import { HeartIcon, LeafIcon } from "~/components/icons";
 import type { WishlistItem } from "~/lib/api/endpoints/buyer/wishlist.api";
 import { formatPrice } from "~/routes/(app)/plants/constants";
+import { cloudinaryUrl, cloudinarySizes, cloudinarySrcSet } from "~/lib/media/cloudinary-url";
 
 export interface WishlistCardProps {
   item: WishlistItem;
@@ -34,10 +35,13 @@ const WishlistCard: Component<WishlistCardProps> = (props) => {
         >
           {(thumbnail) => (
             <img
-              src={thumbnail().url}
+              src={cloudinaryUrl(thumbnail().url, "card")}
+              srcset={cloudinarySrcSet(thumbnail().url, "card")}
+              sizes={cloudinarySizes("card")}
               alt={props.item.product?.name ?? ""}
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               loading="lazy"
+              decoding="async"
             />
           )}
         </Show>
@@ -98,9 +102,11 @@ const WishlistCard: Component<WishlistCardProps> = (props) => {
               >
                 {(logo) => (
                   <img
-                    src={logo().url}
+                    src={cloudinaryUrl(logo().url, "logo-sm")}
                     alt=""
                     class="w-5 h-5 rounded-full object-cover shrink-0 ring-1 ring-cream-200 dark:ring-forest-600"
+                    loading="lazy"
+                    decoding="async"
                   />
                 )}
               </Show>

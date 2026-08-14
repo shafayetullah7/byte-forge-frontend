@@ -1,8 +1,7 @@
 import type { OrderPaymentFields } from "~/lib/api/types/order.types";
+import type { Translator } from "~/i18n";
 
 export type OrderStatusVariant = "forest" | "sage" | "cream" | "terracotta" | "default";
-
-type TranslateFn = (key: string, params?: Record<string, string | number>) => string;
 
 export function getPaymentMethodLabel(payment: OrderPaymentFields): string {
   if (payment.paymentMethodDisplayName) return payment.paymentMethodDisplayName;
@@ -32,7 +31,7 @@ export function getOrderStatusVariant(status: string): OrderStatusVariant {
 
 export function getOrderStatusLabel(
   status: string,
-  t: TranslateFn,
+  t: Translator,
   paymentMethodKey?: string | null,
 ): string {
   if (status === "PENDING_PAYMENT" && paymentMethodKey === "COD") {
@@ -54,7 +53,7 @@ export function getOrderStatusLabel(
   return key ? t(key) : status.replace(/_/g, " ");
 }
 
-export function getSellerOrderStatusLabel(status: string, t: TranslateFn): string {
+export function getSellerOrderStatusLabel(status: string, t: Translator): string {
   const keyMap: Record<string, string> = {
     PENDING_PAYMENT: "seller.orders.status.pendingPayment",
     PROCESSING: "seller.orders.status.processing",
@@ -85,7 +84,7 @@ export function getOrderStage(status: string): { current: number; total: number 
   return { current, total: 6 };
 }
 
-export function getPaymentStatusLabel(status: string, t: TranslateFn): string {
+export function getPaymentStatusLabel(status: string, t: Translator): string {
   const keyMap: Record<string, string> = {
     PENDING: "buyer.orders.payment.pending",
     PROCESSING: "buyer.orders.payment.processing",
@@ -99,7 +98,7 @@ export function getPaymentStatusLabel(status: string, t: TranslateFn): string {
   return key ? t(key) : status.replace(/_/g, " ");
 }
 
-export function getShipmentStatusLabel(status: string, t: TranslateFn): string {
+export function getShipmentStatusLabel(status: string, t: Translator): string {
   const keyMap: Record<string, string> = {
     PENDING: "buyer.orders.details.shipmentStatusPending",
     IN_TRANSIT: "buyer.orders.details.shipmentStatusInTransit",
@@ -112,7 +111,7 @@ export function getShipmentStatusLabel(status: string, t: TranslateFn): string {
   return key ? t(key) : status.replace(/_/g, " ");
 }
 
-export function getShippingMethodLabel(method: string | null | undefined, t: TranslateFn): string {
+export function getShippingMethodLabel(method: string | null | undefined, t: Translator): string {
   switch (method) {
     case "COURIER":
       return t("buyer.orders.details.shippingMethodCourier");

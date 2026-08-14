@@ -3,6 +3,7 @@ import { A } from "@solidjs/router";
 import type { Component } from "solid-js";
 import { useI18n } from "~/i18n";
 import type { PublicShopArticle } from "~/lib/types/public/shops.types";
+import { cloudinaryUrl } from "~/lib/media/cloudinary-url";
 
 export const ShopEducationalContent: Component<{
   shopSlug: string;
@@ -80,7 +81,7 @@ const ShopArticleCard: Component<{
     class="block rounded-xl border border-cream-200 dark:border-forest-700 bg-white dark:bg-forest-800 overflow-hidden hover:shadow-md transition-shadow"
   >
     <div class="aspect-[16/9] overflow-hidden">
-      <img src={props.article.coverUrl} alt="" class="w-full h-full object-cover" loading="lazy" />
+      <img src={cloudinaryUrl(props.article.coverUrl, "card")} alt="" class="w-full h-full object-cover" loading="lazy" decoding="async" />
     </div>
     <div class="p-4">
       <span class="text-xs font-medium text-forest-600 dark:text-forest-400">{props.article.category}</span>

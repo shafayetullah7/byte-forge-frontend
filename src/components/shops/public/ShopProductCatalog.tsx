@@ -3,6 +3,7 @@ import { A } from "@solidjs/router";
 import type { Component } from "solid-js";
 import type { PublicShopProduct } from "~/lib/types/public/shops.types";
 import { formatPrice } from "~/routes/(app)/plants/constants";
+import { cloudinaryUrl, cloudinarySizes, cloudinarySrcSet } from "~/lib/media/cloudinary-url";
 
 export const ShopProductCard: Component<{
   product: PublicShopProduct;
@@ -14,10 +15,13 @@ export const ShopProductCard: Component<{
   >
     <div class="relative aspect-[4/3] bg-cream-100 dark:bg-forest-900 overflow-hidden">
       <img
-        src={props.product.thumbnailUrl}
+        src={cloudinaryUrl(props.product.thumbnailUrl, "card")}
+        srcset={cloudinarySrcSet(props.product.thumbnailUrl, "card")}
+        sizes={cloudinarySizes("card")}
         alt={props.product.name}
         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         loading="lazy"
+        decoding="async"
       />
       <Show when={!props.product.inStock}>
         <span class="absolute top-2 left-2 px-2 py-1 rounded text-xs font-semibold bg-terracotta-500 text-white">

@@ -1,9 +1,10 @@
 import type { StockStatus } from "~/lib/api/types/cart.types";
+import type { Translator } from "~/i18n";
 
 export function getStockStatusLabel(
   status: StockStatus,
   available: number | null,
-  t: (key: string, params?: Record<string, any>) => string,
+  t: Translator,
 ): { label: string; color: string } {
   switch (status) {
     case "in_stock":

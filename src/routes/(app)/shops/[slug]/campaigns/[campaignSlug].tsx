@@ -10,6 +10,7 @@ import { unwrapSuccess } from "~/lib/public-shops/shop.mappers";
 import { formatPageTitle } from "~/lib/seo/meta";
 import { ApiError } from "~/lib/api/types";
 import { formatPrice } from "~/routes/(app)/plants/constants";
+import { cloudinaryUrl } from "~/lib/media/cloudinary-url";
 
 export const route = {
   preload: ({ params }) =>
@@ -66,9 +67,11 @@ export default function ShopCampaignDetailPage() {
               </A>
               <Show when={campaign().bannerUrl}>
                 <img
-                  src={campaign().bannerUrl}
+                  src={cloudinaryUrl(campaign().bannerUrl, "hero")}
                   alt=""
                   class="w-full h-56 object-cover rounded-2xl"
+                  loading="lazy"
+                  decoding="async"
                 />
               </Show>
               <div>
@@ -106,9 +109,11 @@ export default function ShopCampaignDetailPage() {
                         >
                           <Show when={product.thumbnailUrl}>
                             <img
-                              src={product.thumbnailUrl}
+                              src={cloudinaryUrl(product.thumbnailUrl, "thumb")}
                               alt=""
                               class="w-16 h-16 rounded-lg object-cover shrink-0"
+                              loading="lazy"
+                              decoding="async"
                             />
                           </Show>
                           <div class="min-w-0">

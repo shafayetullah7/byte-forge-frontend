@@ -1,6 +1,7 @@
 import { Component, Show, For } from "solid-js";
 import { useI18n } from "~/i18n";
 import { formatPrice } from "../../plants/constants";
+import { cloudinaryUrl } from "~/lib/media/cloudinary-url";
 import {
   LeafIcon,
   TruckIcon,
@@ -68,10 +69,11 @@ const ShopOrderReview: Component<ShopOrderReviewProps> = (props) => {
                 >
                   {(url) => (
                     <img
-                      src={url()}
+                      src={cloudinaryUrl(url(), "thumb")}
                       alt={item.productName}
                       class="w-full h-full object-cover"
                       loading="lazy"
+                      decoding="async"
                     />
                   )}
                 </Show>

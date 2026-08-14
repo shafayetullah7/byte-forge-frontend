@@ -20,6 +20,7 @@ import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 import { config } from "~/lib/config";
 import HreflangLinks from "~/components/seo/HreflangLinks";
 import { absoluteUrl, formatPageTitle } from "~/lib/seo/meta";
+import { cloudinaryUrl } from "~/lib/media/cloudinary-url";
 import { toggleShopFollowAction } from "~/lib/api/endpoints/buyer/shop-follow.actions";
 import { toaster } from "~/components/ui/Toast";
 import { useSession, buildLoginHref } from "~/lib/auth";
@@ -156,7 +157,7 @@ export default function ShopDetailLayout(props: RouteSectionProps) {
             <Link rel="canonical" href={absoluteUrl(`/shops/${slug()}`)} />
             <HreflangLinks path={`/shops/${slug()}`} />
             <Show when={shopData().banner?.url}>
-              <Meta property="og:image" content={shopData().banner!.url} />
+              <Meta property="og:image" content={cloudinaryUrl(shopData().banner!.url, "og")} />
             </Show>
 
             <div class="min-h-screen bg-cream-50 dark:bg-forest-900 pb-16">

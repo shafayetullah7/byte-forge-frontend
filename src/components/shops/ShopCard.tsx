@@ -1,4 +1,5 @@
 import type { PublicShop } from "~/lib/api/endpoints/public/shops.api";
+import { cloudinaryUrl } from "~/lib/media/cloudinary-url";
 
 interface ShopCardProps {
   shop: PublicShop;
@@ -11,9 +12,11 @@ export function ShopCard(props: ShopCardProps) {
       <div class="h-40 bg-gradient-to-r from-green-400 to-blue-400 dark:from-forest-600 dark:to-sage-600 overflow-hidden">
         {props.shop.banner?.url ? (
           <img
-            src={props.shop.banner.url}
+            src={cloudinaryUrl(props.shop.banner.url, "card")}
             alt={props.shop.name}
             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+            decoding="async"
           />
         ) : (
           <div class="w-full h-full flex items-center justify-center text-white/50">
@@ -61,9 +64,11 @@ export function ShopCard(props: ShopCardProps) {
         {props.shop.logo?.url && (
           <div class="mt-4 pt-4 border-t border-gray-100 dark:border-forest-700">
             <img
-              src={props.shop.logo.url}
+              src={cloudinaryUrl(props.shop.logo.url, "logo-md")}
               alt={`${props.shop.name} logo`}
               class="h-12 w-auto object-contain"
+              loading="lazy"
+              decoding="async"
             />
           </div>
         )}

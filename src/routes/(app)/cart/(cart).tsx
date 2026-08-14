@@ -7,7 +7,7 @@ import {
   Suspense,
 } from "solid-js";
 import { createAsync, A, useAction } from "@solidjs/router";
-import { useI18n } from "~/i18n";
+import { useI18n, type Translator } from "~/i18n";
 import { toaster } from "~/components/ui/Toast";
 import { getCart } from "~/lib/api/endpoints/buyer/cart.api";
 import {
@@ -16,6 +16,7 @@ import {
 } from "~/lib/cart/cart.actions";
 import type { CartItem } from "~/lib/api/types/cart.types";
 import { formatPrice } from "../plants/constants";
+import { cloudinaryUrl } from "~/lib/media/cloudinary-url";
 import { getStockStatusLabel } from "./cart.helpers";
 import {
   ExclamationCircleIcon,
@@ -176,10 +177,11 @@ export default function CartPage() {
                             }>
                               {(thumb) => (
                                 <img
-                                  src={thumb().url}
+                                  src={cloudinaryUrl(thumb().url, "thumb")}
                                   alt={item.productName}
                                   class="w-full h-full object-cover"
                                   loading="lazy"
+                                  decoding="async"
                                   onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
                                 />
                               )}
@@ -236,7 +238,7 @@ export default function CartPage() {
   );
 }
 
-function StockBadge(props: { item: CartItem; t: (key: string, params?: Record<string, any>) => string }) {
+function StockBadge(props: { item: CartItem; t: Translator }) {
   const info = getStockStatusLabel(props.item.stockStatus, props.item.availableQuantity, props.t);
   return (
     <span class={`inline-flex items-center gap-1.5 text-xs font-medium ${info.color}`}>

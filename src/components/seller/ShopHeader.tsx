@@ -1,6 +1,7 @@
 import { A } from "@solidjs/router";
 import type { ShopMedia } from "~/lib/api/endpoints/seller/shop-detail.api";
 import { getShopSlugPrefix } from "~/lib/seo/meta";
+import { cloudinaryUrl } from "~/lib/media/cloudinary-url";
 
 interface ShopHeaderProps {
   logo: ShopMedia | null;
@@ -22,9 +23,11 @@ export default function ShopHeader(props: ShopHeaderProps) {
         {props.banner ? (
           <>
             <img
-              src={props.banner.url}
+              src={cloudinaryUrl(props.banner.url, "hero")}
               alt="Shop Banner"
               class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              fetchpriority="high"
+              decoding="async"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
           </>
@@ -74,9 +77,10 @@ export default function ShopHeader(props: ShopHeaderProps) {
             <div class="w-28 h-28 rounded-2xl overflow-hidden bg-white dark:bg-forest-800 shadow-xl border-4 border-white dark:border-forest-700">
               {props.logo ? (
                 <img
-                  src={props.logo.url}
+                  src={cloudinaryUrl(props.logo.url, "logo-md")}
                   alt="Shop Logo"
                   class="w-full h-full object-cover"
+                  decoding="async"
                 />
               ) : (
                 <div class="flex items-center justify-center h-full bg-gradient-to-br from-terracotta-100 to-forest-100 dark:from-terracotta-900/30 dark:to-forest-900/30">

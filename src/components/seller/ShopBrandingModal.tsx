@@ -20,7 +20,7 @@ export default function ShopBrandingModal(props: ShopBrandingModalProps) {
 
   // Use the same image upload hook as setup-shop
   const logoUpload = useImageUpload({
-    maxSizeMB: 5,
+    maxSizeMB: 3,
     onSuccess: () => {
       // Media ID is already stored in the hook
     },
@@ -83,7 +83,7 @@ export default function ShopBrandingModal(props: ShopBrandingModalProps) {
             onFileSelect={logoUpload.upload}
             onDelete={logoUpload.deleteMedia}
             accept="image/*"
-            description="PNG, JPG up to 5MB. Recommended: 500x500px, square format"
+            description="PNG, JPG up to 3MB. Recommended: 500x500px, square format"
           />
         </div>
 
