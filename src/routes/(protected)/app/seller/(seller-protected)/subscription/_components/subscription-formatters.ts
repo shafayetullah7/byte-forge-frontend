@@ -12,7 +12,7 @@ export function formatSubscriptionDate(
 ): string {
   if (!dateStr) return emptyLabel;
   return new Date(dateStr).toLocaleDateString(FORMAT_LOCALE[locale], {
-    month: "short",
+    month: locale === "bn" ? "long" : "short",
     day: "numeric",
     year: "numeric",
     hour: "numeric",
