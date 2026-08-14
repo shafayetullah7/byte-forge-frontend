@@ -5,6 +5,7 @@ import { VerifiedBadge, ActiveStatusBadge } from "./ReputationBadge";
 import { ShopTrustSnapshot } from "./ShopTrustSnapshot";
 import Button from "~/components/ui/Button";
 import { cloudinaryUrl } from "~/lib/media/cloudinary-url";
+import { useI18n } from "~/i18n";
 
 export const ShopHero: Component<{
   shop: PublicShopProfile;
@@ -15,11 +16,12 @@ export const ShopHero: Component<{
   onFollow?: () => void;
   onShare?: () => void;
 }> = (props) => {
+  const { t } = useI18n();
   const memberYear = () => new Date(props.shop.createdAt).getFullYear();
 
   return (
     <section aria-label={props.shop.name} class="relative">
-      <div class="h-48 sm:h-64 md:h-72 overflow-hidden bg-gradient-to-r from-forest-600 to-sage-700">
+      <div class="relative h-48 sm:h-64 md:h-72 overflow-hidden bg-gradient-to-r from-forest-600 to-sage-700">
         <Show when={props.shop.banner?.url}>
           <img
             src={cloudinaryUrl(props.shop.banner!.url, "hero")}
@@ -29,42 +31,51 @@ export const ShopHero: Component<{
             decoding="async"
           />
         </Show>
-        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-black/10" />
       </div>
 
-      <div class="max-w-7xl mx-auto px-4 -mt-16 sm:-mt-20 relative z-10 pb-6">
-        <div class="flex flex-col sm:flex-row gap-4 sm:items-end">
+      <div class="max-w-7xl mx-auto px-4 sm:-mt-20 relative z-10 pb-6">
+        <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
           <Show when={props.shop.logo?.url}>
-            <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl border-4 border-white dark:border-forest-900 bg-white dark:bg-forest-800 overflow-hidden shadow-xl shrink-0">
+            <div
+              class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl border-4 border-white dark:border-forest-900 bg-white dark:bg-forest-800 overflow-hidden shadow-xl shrink-0 -mt-12 sm:mt-0"
+            >
               <img
                 src={cloudinaryUrl(props.shop.logo!.url, "logo-md")}
-                alt=""
+                alt={props.shop.name}
                 class="w-full h-full object-cover"
                 decoding="async"
               />
             </div>
           </Show>
 
-          <div class="flex-1 min-w-0 text-white sm:text-inherit">
+          {/* Mobile: text on page background. sm+: overlaps banner — light text on scrim. */}
+          <div class="flex-1 min-w-0">
             <div class="flex flex-wrap items-center gap-2 mb-2">
               <Show when={props.shop.isVerified}>
                 <VerifiedBadge label={props.labels.verified} />
               </Show>
               <ActiveStatusBadge label={props.labels.active} />
-              <span class="text-sm text-cream-100 sm:text-gray-500 sm:dark:text-gray-400">
+              <span class="text-sm text-forest-600 dark:text-forest-400 sm:text-cream-100/90">
                 {props.shop.category}
               </span>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-bold text-white sm:text-forest-800 sm:dark:text-cream-50 mb-1">
+            <h1
+              class="text-2xl sm:text-3xl font-bold text-forest-800 dark:text-cream-50 sm:text-cream-50 sm:drop-shadow-sm mb-2"
+            >
               {props.shop.name}
             </h1>
-            <p class="text-sm sm:text-base text-cream-100/90 sm:text-gray-600 sm:dark:text-gray-300 mb-2">
-              {props.shop.tagline}
-            </p>
-            <div class="flex flex-wrap items-center gap-3 text-sm text-cream-100/80 sm:text-gray-500 sm:dark:text-gray-400">
+            <Show when={props.shop.tagline}>
+              <p class="text-sm sm:text-base text-forest-700/80 dark:text-gray-300 sm:text-cream-100/90 mb-2">
+                {props.shop.tagline}
+              </p>
+            </Show>
+            <div
+              class="flex flex-wrap items-center gap-3 text-sm text-forest-700 dark:text-forest-300"
+            >
               <span>{props.shop.city}, {props.shop.division}</span>
               <span aria-hidden="true">·</span>
-              <span>{props.labels.memberSince} {memberYear()}</span>
+              <span>{t("public.shops.detail.memberSince", memberYear())}</span>
               <Show when={props.followEnabled && props.shop.metrics.followerCount > 0}>
                 <span aria-hidden="true">·</span>
                 <span>
@@ -74,7 +85,7 @@ export const ShopHero: Component<{
             </div>
           </div>
 
-          <div class="flex gap-2 shrink-0">
+          <div class="flex gap-2 shrink-0 max-sm:self-start">
             <Show
               when={props.followEnabled}
               fallback={

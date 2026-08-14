@@ -2784,7 +2784,7 @@ export const dict = {
         statusActive: "সক্রিয়",
         statusUpcoming: "আসন্ন",
         statusCompleted: "সম্পন্ন",
-        memberSince: "সদস্য desde",
+        memberSince: (year: number) => `${year} সাল থেকে বিক্রেতা`,
         tabs: { overview: "সংক্ষিপ্ত", products: "পণ্য", reviews: "রিভিউ", campaigns: "ক্যাম্পেইন", articles: "নিবন্ধ" },
         about: "এই দোকান সম্পর্কে",
         story: "বিক্রেতার গল্প",

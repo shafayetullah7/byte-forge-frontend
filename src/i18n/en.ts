@@ -2780,7 +2780,7 @@ export const dict = {
         statusActive: "Active",
         statusUpcoming: "Upcoming",
         statusCompleted: "Completed",
-        memberSince: "Member since",
+        memberSince: (year: number) => `Member since ${year}`,
         tabs: {
           overview: "Overview",
           products: "Products",

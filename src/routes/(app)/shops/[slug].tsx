@@ -114,7 +114,6 @@ export default function ShopDetailLayout(props: RouteSectionProps) {
     share: t("public.shops.detail.share"),
     followSoon: t("public.shops.detail.followSoon"),
     following: t("public.shops.detail.following"),
-    memberSince: t("public.shops.detail.memberSince"),
     products: t("public.shops.detail.productsKpi"),
     orders: t("public.shops.detail.ordersKpi"),
     rating: t("public.shops.detail.ratingKpi"),
@@ -164,7 +163,7 @@ export default function ShopDetailLayout(props: RouteSectionProps) {
               <div class="max-w-7xl mx-auto px-4 pt-4">
                 <A
                   href="/shops"
-                  class="inline-flex items-center text-sm text-forest-600 dark:text-forest-400 hover:underline"
+                  class="inline-flex items-center text-sm text-forest-600 dark:text-cream-200 hover:underline"
                 >
                   ← {t("public.shops.directory.backToShops")}
                 </A>
