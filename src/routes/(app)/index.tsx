@@ -4,7 +4,7 @@ import { Title, Meta, Link } from "@solidjs/meta";
 import {
   Hero,
   TrustBar,
-  FeaturedPlants,
+  FeaturedListings,
   FeaturedShops,
   HowItWorks,
   WhyChooseByteForge,
@@ -14,6 +14,7 @@ import {
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 import { getFeaturedPublicReviews } from "~/lib/api/endpoints/public/reviews.api";
 import { listShops } from "~/lib/public-shops/public-shop.service";
+import { listFeaturedPlants } from "~/lib/public-plants/public-plant.service";
 import { useI18n } from "~/i18n";
 import HreflangLinks from "~/components/seo/HreflangLinks";
 import { absoluteUrl, formatPageTitle } from "~/lib/seo/meta";
@@ -22,6 +23,7 @@ export const route = {
   preload: () => {
     getFeaturedPublicReviews(6);
     listShops({ sort: "popular", limit: 3 });
+    listFeaturedPlants();
   },
 } satisfies RouteDefinition;
 
@@ -39,7 +41,13 @@ export default function Home() {
       <HreflangLinks path="/" />
       <Hero />
       <TrustBar />
-      <FeaturedPlants />
+      <SafeErrorBoundary
+        fallback={(error, reset) => (
+          <InlineErrorFallback error={error} reset={reset} label="featured plants" />
+        )}
+      >
+        <FeaturedListings />
+      </SafeErrorBoundary>
       <SafeErrorBoundary
         fallback={(error, reset) => (
           <InlineErrorFallback error={error} reset={reset} label="featured shops" />

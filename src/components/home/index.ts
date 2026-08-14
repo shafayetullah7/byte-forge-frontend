@@ -1,6 +1,6 @@
 export { Hero } from "./Hero";
 export { TrustBar } from "./TrustBar";
-export { FeaturedPlants } from "./FeaturedPlants";
+export { FeaturedListings } from "./FeaturedListings";
 export { LiveCampaigns } from "./LiveCampaigns";
 export { TrendingPlants } from "./TrendingPlants";
 export { FeaturedShops } from "./FeaturedShops";

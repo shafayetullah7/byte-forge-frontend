@@ -2434,13 +2434,6 @@ export const dict = {
         districts: "Districts",
       },
     },
-    categories: {
-      label: "Browse Collection",
-      title: "Find Your Perfect Plant",
-      description: "From rare tropical specimens to hardy succulents, discover plants that match your space and style.",
-      items: "items",
-      browse: "Browse",
-    },
     campaigns: {
       label: "Live Campaigns",
       title: "Active Deals from Top Shops",
@@ -2464,6 +2457,13 @@ export const dict = {
       title: "What to Grow This Season",
       description: "Plants that thrive in Bangladesh's current weather conditions, chosen by expert nurseries.",
       shop: "Shop Now",
+    },
+    featuredListings: {
+      label: "Available now",
+      title: "Plants you can order today",
+      description:
+        "Real listings from verified nurseries — order with cash on delivery.",
+      browseAll: "Browse all plants",
     },
     featuredShops: {
       label: "Top Rated Nurseries",

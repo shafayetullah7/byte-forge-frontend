@@ -1,7 +1,30 @@
 import { query } from "@solidjs/router";
-import { getPublicPlantBySlug } from "~/lib/api/endpoints/public/plants.api";
+import {
+  getPublicPlantBySlug,
+  getPublicPlants,
+} from "~/lib/api/endpoints/public/plants.api";
 import { ApiError } from "~/lib/api/types";
-import type { PublicPlantDetail } from "~/lib/api/types/public/plants.types";
+import type {
+  PublicPlantDetail,
+  PublicPlantFilter,
+} from "~/lib/api/types/public/plants.types";
+
+/** Homepage featured grid: newest in-stock listings from entitled sellers. */
+export const FEATURED_LISTINGS_FILTER = {
+  page: 1,
+  limit: 8,
+  inStockOnly: true,
+  sortBy: "createdAt",
+  sortOrder: "desc",
+} as const satisfies PublicPlantFilter;
+
+export const listFeaturedPlants = query(
+  async () => {
+    "use server";
+    return getPublicPlants(FEATURED_LISTINGS_FILTER);
+  },
+  "public-plants-featured",
+);
 
 export const getPlantBySlug = query(
   async (slug: string): Promise<PublicPlantDetail | null> => {

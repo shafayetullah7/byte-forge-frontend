@@ -6,7 +6,7 @@ import { LeafIcon, SunIcon, DropletIcon, CubeIcon } from "~/components/icons";
 import { formatPrice, getInventoryLabel, getDifficultyLabel, getDifficultyColor, lightLabel, wateringLabel } from "./constants";
 import { cloudinarySizes, cloudinarySrcSet, cloudinaryUrl } from "~/lib/media/cloudinary-url";
 
-export function PlantCard(props: { plant: PublicPlantListItem }) {
+export function PlantCard(props: { plant: PublicPlantListItem; priority?: boolean }) {
   const { t } = useI18n();
   const navigate = useNavigate();
   const plant = props.plant;
@@ -30,7 +30,8 @@ export function PlantCard(props: { plant: PublicPlantListItem }) {
               sizes={cloudinarySizes("card")}
               alt={plant.name}
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              loading="lazy"
+              loading={props.priority ? "eager" : "lazy"}
+              fetchpriority={props.priority ? "high" : "auto"}
               decoding="async"
               onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
             />
