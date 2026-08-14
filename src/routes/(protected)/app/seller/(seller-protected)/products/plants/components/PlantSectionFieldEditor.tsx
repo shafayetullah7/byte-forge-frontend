@@ -29,6 +29,7 @@ export function PlantSectionFieldEditor(props: {
   knownPlantTags?: Accessor<KnownTagOption[]>;
 }) {
   const { t } = useI18n();
+  // Modal-scoped reference data: no deferStream (editor mounts after parent data is ready).
   const categoryTree = createAsync(() => getCategoryTree());
   const tags = createAsync(() => getTags());
   const selectOptions = usePlantSelectOptions(t);

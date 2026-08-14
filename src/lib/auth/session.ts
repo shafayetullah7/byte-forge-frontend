@@ -105,4 +105,4 @@ export const performLogout = async (): Promise<boolean> => {
  *
  * @returns Signal containing the current user session or null
  */
-export const useSession = () => createAsync(() => getSession());
+export const useSession = () => createAsync(() => getSession(), { deferStream: true });

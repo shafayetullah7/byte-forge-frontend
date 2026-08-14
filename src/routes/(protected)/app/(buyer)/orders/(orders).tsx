@@ -1,4 +1,4 @@
-import { Show, createMemo, createDeferred, Suspense } from "solid-js";
+import { Show, createMemo, createDeferred, Suspense, createSignal, createEffect } from "solid-js";
 import { createAsync, useSearchParams } from "@solidjs/router";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 import { useI18n } from "~/i18n";
@@ -40,27 +40,39 @@ export default function OrdersPage() {
   const deferredSearch = createDeferred(searchQuery, { timeoutMs: 300 });
 
   // Inline filter params - no separate memo needed
-  const ordersData = createAsync(() =>
-    getOrders(
-      buildFilterParams({
-        page: currentPage(),
-        limit: ITEMS_PER_PAGE,
-        statusFilter: statusFilter(),
-        paymentFilter: paymentFilter(),
-        searchQuery: deferredSearch(),
-      })
-    )
+  const ordersData = createAsync(
+    () =>
+      getOrders(
+        buildFilterParams({
+          page: currentPage(),
+          limit: ITEMS_PER_PAGE,
+          statusFilter: statusFilter(),
+          paymentFilter: paymentFilter(),
+          searchQuery: deferredSearch(),
+        })
+      ),
+    { deferStream: true }
   );
 
   // Stats - no filter dependency, fetched once
-  const statsData = createAsync(() => getOrdersStats());
+  const statsData = createAsync(() => getOrdersStats(), { deferStream: true });
 
-  // Derived loading state - no signal or effect needed
+  const [stableOrders, setStableOrders] = createSignal<
+    Awaited<ReturnType<typeof getOrders>> | undefined
+  >(undefined);
+
+  createEffect(() => {
+    const data = ordersData();
+    if (data !== undefined) {
+      setStableOrders(data);
+    }
+  });
+
   const isRefetching = () =>
-    ordersData() === undefined && ordersData.latest !== undefined;
+    ordersData() === undefined && stableOrders() !== undefined;
 
-  const totalItems = createMemo(() => ordersData.latest?.meta?.total ?? 0);
-  const totalPages = createMemo(() => ordersData.latest?.meta?.pages ?? 1);
+  const totalItems = createMemo(() => stableOrders()?.meta?.total ?? 0);
+  const totalPages = createMemo(() => stableOrders()?.meta?.pages ?? 1);
 
   const hasActiveFilters = createMemo(
     () => !!(searchQuery() || statusFilter() || paymentFilter())
@@ -117,7 +129,7 @@ export default function OrdersPage() {
 
       <div class="mb-4">
         <p class="text-sm text-gray-500 dark:text-gray-400">
-          {t("buyer.orders.resultsCount", { showing: ordersData.latest?.data?.length ?? 0, total: totalItems() })}
+          {t("buyer.orders.resultsCount", { showing: stableOrders()?.data?.length ?? 0, total: totalItems() })}
         </p>
       </div>
 
@@ -127,7 +139,7 @@ export default function OrdersPage() {
         )}
       >
         <Show
-          when={ordersData.latest}
+          when={stableOrders()}
           fallback={<OrdersLoading />}
         >
           {(resp) => (

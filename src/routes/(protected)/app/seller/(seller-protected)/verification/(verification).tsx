@@ -51,11 +51,12 @@ export default function VerificationPage() {
     const submission = useSubmission(submitVerificationAction);
     
     // Fetch shop data to check if shop exists
-    const shopData = createAsync(() => getShop());
+    const shopData = createAsync(() => getShop(), { deferStream: true });
 
     // Fetch verification status - automatically refreshes when action completes
-    const verificationData = createAsync(() =>
-        sellerShopApi.getVerificationStatus().catch(() => null)
+    const verificationData = createAsync(
+        () => sellerShopApi.getVerificationStatus().catch(() => null),
+        { deferStream: true },
     );
 
     // Handle server errors from the action - show in toast

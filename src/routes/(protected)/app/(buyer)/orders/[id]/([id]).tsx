@@ -415,7 +415,10 @@ function OrderCard(props: { order: OrderDetail; groupId: string }) {
 const OrderDetails: Component = () => {
   const params = useParams<{ id: string }>();
   const { t } = useI18n();
-  const group = createAsync(() => getOrderGroup(params.id).then((res) => res.data));
+  const group = createAsync(
+    () => getOrderGroup(params.id).then((res) => res.data),
+    { deferStream: true },
+  );
 
   const groupItemCount = createMemo(() =>
     group()?.orders.reduce((sum, o) => sum + o.items.length, 0) ?? 0

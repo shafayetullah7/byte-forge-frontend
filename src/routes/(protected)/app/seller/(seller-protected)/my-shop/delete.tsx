@@ -13,7 +13,7 @@ const DELETE_CONFIRM = "DELETE";
 export default function DeleteShopPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
-  const shopData = createAsync(() => getShop());
+  const shopData = createAsync(() => getShop(), { deferStream: true });
   const deleteShopTrigger = useAction(deleteShopAction);
   const [isDeleting, setIsDeleting] = createSignal(false);
   const [confirmText, setConfirmText] = createSignal("");

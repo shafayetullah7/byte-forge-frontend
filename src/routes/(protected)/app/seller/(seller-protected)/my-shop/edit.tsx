@@ -16,7 +16,7 @@ import { useI18n } from "~/i18n";
 export default function EditShopPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
-  const shopData = createAsync(() => getShop());
+  const shopData = createAsync(() => getShop(), { deferStream: true });
   const updateShopTrigger = useAction(updateShopInfoAction);
   const submitForReviewTrigger = useAction(submitShopForReviewAction);
   const [isSubmitting, setIsSubmitting] = createSignal(false);

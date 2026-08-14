@@ -167,6 +167,68 @@ Need async data in a component?
 
 ---
 
+## When to Use `deferStream`
+
+`createAsync(fn, { deferStream: true })` controls **SSR streaming**: the server holds that HTML chunk until the promise resolves instead of flushing a shell first.
+
+| Setting | SSR behavior | Use when |
+|---|---|---|
+| **`deferStream: true`** | Waits for data before sending that chunk | Primary route data, forms, auth guards, SEO-critical content |
+| **No `deferStream`** (default) | Shell can stream first; section arrives later | Below-the-fold sections with their own `<Suspense>` boundary |
+| **`initialValue`** | Never suspends | Navbar widgets, optimistic defaults (e.g. cart count `0`) |
+
+### Decision rules
+
+```
+Is this data required before the page is useful?
+├─ YES, single entity / form / guard (PDP, order detail, shop status)
+│  └─ deferStream: true + preload + page Suspense
+│
+├─ YES, but page has independent sections (dashboard, list + stats)
+│  └─ deferStream: true per section + nested Suspense with section skeletons
+│
+├─ NO, below-the-fold / optional (reviews, recommendations)
+│  └─ NO deferStream + own nested Suspense (main content shows first)
+│
+└─ Filtered list that refetches (plants, orders, products)
+   └─ deferStream: true + stable/latest pattern (keep old results while refetching)
+```
+
+### Refetching lists (stable/latest pattern)
+
+```tsx
+const data = createAsync(() => getItems(filters()), { deferStream: true });
+const [stable, setStable] = createSignal(undefined);
+const [isRefreshing, setIsRefreshing] = createSignal(false);
+
+createEffect(() => {
+  const next = data();
+  if (next !== undefined) {
+    setStable(next);
+    setIsRefreshing(false);
+  } else if (stable() !== undefined) {
+    setIsRefreshing(true);
+  }
+});
+```
+
+### PR checklist (route data changes)
+
+- [ ] `preload` matches `createAsync` query keys
+- [ ] Primary data has `deferStream: true`
+- [ ] Secondary data has its own `<Suspense>` boundary (no `deferStream`)
+- [ ] Fallback DOM matches server/client (no `null` fallbacks on guarded routes)
+- [ ] `npm run audit:defer-stream` passes before merge
+
+### Intentionally without `deferStream`
+
+- **Nested secondary fetches** inside a component that already deferred primary data (e.g. `PlantReviews`, `ShopOverviewReputation`)
+- **Wizard / modal reference data** (`PlantWizardPage`, `PlantSectionFieldEditor`) — parent route or step UI gates render; categories/tags load in-place
+
+See `docs/DEFER_STREAM_REFACTOR_PLAN.md` for the phased rollout.
+
+---
+
 ## Anti-Patterns to Avoid
 
 1. **❌ `async function MyComponent()`** — Components must be synchronous.

@@ -34,7 +34,7 @@ export default function ConfirmationPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const paymentMethods = createAsync(() => getActivePaymentMethods());
+  const paymentMethods = createAsync(() => getActivePaymentMethods(), { deferStream: true });
 
   const orderNumber = () => (searchParams.order as string) ?? "";
   const paymentMethod = () => (searchParams.method as PaymentMethod) ?? null;

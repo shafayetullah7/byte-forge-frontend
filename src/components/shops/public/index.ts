@@ -11,5 +11,7 @@ export { ShopStatisticsSection, ShopCommunitySection } from "./ShopStatisticsSec
 export { SimilarShops } from "./SimilarShops";
 export { ShopProductCard, ShopFeaturedProducts, ShopProductCatalog } from "./ShopProductCatalog";
 export { ShopReviewsPreview } from "./ShopReviewsPreview";
+export { ShopOverviewReputation } from "./ShopOverviewReputation";
+export { ShopReviewsTab } from "./ShopReviewsTab";
 export { ShopCampaignHistory } from "./ShopCampaignHistory";
 export { ShopEducationalContent } from "./ShopEducationalContent";

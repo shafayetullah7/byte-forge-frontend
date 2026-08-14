@@ -9,8 +9,8 @@ import { getShopStatus } from "~/lib/context/shop-context";
 
 const SellerProtectedLayout: ParentComponent = (props) => {
     const { t } = useI18n();
-    const shopStatus = createAsync(() => getShopStatus());
-    const subscription = createAsync(() => getSellerSubscription());
+    const shopStatus = createAsync(() => getShopStatus(), { deferStream: true });
+    const subscription = createAsync(() => getSellerSubscription(), { deferStream: true });
 
     return (
         <SellerLayout>
@@ -19,7 +19,17 @@ const SellerProtectedLayout: ParentComponent = (props) => {
                     <InlineErrorFallback error={error} reset={reset} label="seller page" />
                 )}
             >
-                <Suspense fallback={<div class="flex justify-center py-20">{t("common.loading")}</div>}>
+                <Suspense
+                    fallback={
+                        <div class="flex justify-center py-20">
+                            <div
+                                class="w-8 h-8 border-2 border-forest-600 border-t-transparent rounded-full animate-spin"
+                                role="status"
+                                aria-label={t("common.loading")}
+                            />
+                        </div>
+                    }
+                >
                     <Show
                         when={shopStatus() !== null}
                         fallback={<Navigate href="/app/seller/setup-shop" />}

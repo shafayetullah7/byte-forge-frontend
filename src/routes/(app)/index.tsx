@@ -29,7 +29,7 @@ export const route = {
 
 export default function Home() {
   const { t } = useI18n();
-  const featuredReviews = createAsync(() => getFeaturedPublicReviews(6));
+  const featuredReviews = createAsync(() => getFeaturedPublicReviews(6), { deferStream: true });
 
   return (
     <main class="min-h-screen bg-cream-50 dark:bg-forest-900">

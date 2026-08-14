@@ -84,7 +84,7 @@ export function useCheckout() {
     cartItems().filter((item) => selectedItemIds().has(item.id))
   );
 
-  const addresses = createAsync(() => getAddresses({ type: "shipping" }));
+  const addresses = createAsync(() => getAddresses({ type: "shipping" }), { deferStream: true });
 
   createEffect(() => {
     const addrList = addresses();

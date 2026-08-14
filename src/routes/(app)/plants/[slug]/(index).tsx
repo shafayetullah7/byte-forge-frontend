@@ -26,7 +26,6 @@ import {
 import { Button } from "~/components/ui";
 import { toaster } from "~/components/ui/Toast";
 import { formatPrice, getDifficultyLabel, getDifficultyColor, lightLabel, wateringLabel } from "../constants";
-import { getPublicPlantReviews } from "~/lib/api/endpoints/public/reviews.api";
 import { getPlantBySlug } from "~/lib/public-plants/public-plant.service";
 import { cartApi, invalidateAllCart } from "~/lib/api/endpoints/buyer/cart.api";
 import HreflangLinks from "~/components/seo/HreflangLinks";
@@ -42,7 +41,7 @@ import {
   CareInstructionCard,
   DetailRow,
   Breadcrumb,
-  ReviewsSection,
+  PlantReviews,
   ToxicityInfoCard,
 } from "./components";
 
@@ -69,8 +68,7 @@ export default function PlantDetailPage() {
   const params = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const session = useSession();
-  const plant = createAsync(() => getPlantBySlug(params.slug));
-  const reviewData = createAsync(() => getPublicPlantReviews(params.slug));
+  const plant = createAsync(() => getPlantBySlug(params.slug), { deferStream: true });
   const [selectedVariant, setSelectedVariant] = createSignal<string | undefined>(undefined);
   const [quantity, setQuantity] = createSignal(1);
 
@@ -214,15 +212,6 @@ export default function PlantDetailPage() {
         url: absoluteUrl(`/plants/${p.slug}`),
       },
     };
-
-    const summary = reviewData()?.summary;
-    if (summary && summary.total > 0) {
-      schema.aggregateRating = {
-        "@type": "AggregateRating",
-        ratingValue: summary.average,
-        reviewCount: summary.total,
-      };
-    }
 
     return JSON.stringify(schema);
   });
@@ -616,20 +605,7 @@ export default function PlantDetailPage() {
                   </div>
                 </div>
 
-                <ReviewsSection
-                  summary={reviewData()?.summary}
-                  reviews={
-                    reviewData()?.reviews.map((review) => ({
-                      id: review.id,
-                      author: review.customerName,
-                      rating: review.rating,
-                      date: review.createdAt,
-                      title: review.title ?? t("public.plants.detail.verifiedPurchaseReview"),
-                      content: review.comment ?? "",
-                      verified: review.isVerifiedPurchase,
-                    })) ?? []
-                  }
-                />
+                <PlantReviews slug={plant().slug} />
 
               </div>
             </div>

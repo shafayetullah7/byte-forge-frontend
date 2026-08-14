@@ -38,7 +38,7 @@ const AVAILABLE_LOCALES: Locale[] = ["en", "bn"];
 export default function SetupShop() {
     const navigate = useNavigate();
     const { t, locale, setLocale } = useI18n();
-    const shop = createAsync(() => getShop());
+    const shop = createAsync(() => getShop(), { deferStream: true });
     const applyTrigger = useAction(applyAsSellerAction);
     const submission = useSubmission(applyAsSellerAction);
 
@@ -209,7 +209,17 @@ export default function SetupShop() {
     };
 
     return (
-        <Suspense fallback={<div class="flex justify-center py-20">{t("common.loading")}</div>}>
+        <Suspense
+            fallback={
+                <div class="flex justify-center py-20">
+                    <div
+                        class="w-8 h-8 border-2 border-forest-600 border-t-transparent rounded-full animate-spin"
+                        role="status"
+                        aria-label={t("common.loading")}
+                    />
+                </div>
+            }
+        >
             <div class="min-h-full flex items-center justify-center py-12">
                 <div class="mx-auto max-w-3xl w-full space-y-8">
                     {/* Header */}

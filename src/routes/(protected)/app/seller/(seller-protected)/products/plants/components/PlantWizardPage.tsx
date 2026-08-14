@@ -88,7 +88,7 @@ export function PlantWizardPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // ---- Category Tree ----
+  // Wizard-scoped reference data: no deferStream (parent wizard already gates render).
   const categoryTree = createAsync(() => getCategoryTree());
 
   // ---- Tags ----

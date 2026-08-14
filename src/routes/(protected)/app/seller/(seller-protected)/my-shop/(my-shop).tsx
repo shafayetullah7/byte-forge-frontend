@@ -36,8 +36,8 @@ export default function MyShopPage() {
   const brandingSubmission = useSubmission(updateBrandingAction);
   const shopInfoTrigger = useAction(updateShopInfoAction);
   const shopInfoSubmission = useSubmission(updateShopInfoAction);
-  const shopData = createAsync(() => getShop());
-  const shopStatusData = createAsync(() => getShopStatus());
+  const shopData = createAsync(() => getShop(), { deferStream: true });
+  const shopStatusData = createAsync(() => getShopStatus(), { deferStream: true });
 
   // Reset close signal when modal is manually closed
   const handleModalClose = () => {

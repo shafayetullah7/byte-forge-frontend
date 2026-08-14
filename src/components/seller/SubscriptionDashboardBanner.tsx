@@ -9,8 +9,8 @@ import { SELLER_SUBSCRIPTION_PATH } from "~/lib/subscription/subscription-gate-u
 
 export function SubscriptionDashboardBanner() {
   const { t } = useI18n();
-  const shopStatus = createAsync(() => getShopStatus());
-  const subscription = createAsync(() => getSellerSubscription());
+  const shopStatus = createAsync(() => getShopStatus(), { deferStream: true });
+  const subscription = createAsync(() => getSellerSubscription(), { deferStream: true });
 
   const shouldShow = () => {
     const shop = shopStatus();

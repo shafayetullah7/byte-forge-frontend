@@ -59,7 +59,7 @@ const SellerOrderDetailPage: Component = () => {
     return typeof value === "string" ? value : null;
   };
 
-  const order = createAsync(() => getSellerOrder(params.orderId));
+  const order = createAsync(() => getSellerOrder(params.orderId), { deferStream: true });
 
   const [shipCarrier, setShipCarrier] = createSignal("");
   const [shipTracking, setShipTracking] = createSignal("");

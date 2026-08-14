@@ -43,7 +43,7 @@ const statusColors: Record<string, "default" | "forest" | "sage" | "terracotta" 
 
 export default function VerificationHistoryPage() {
   const { t, locale } = useI18n();
-  const shopData = createAsync(() => sellerShopApi.getMyShop());
+  const shopData = createAsync(() => sellerShopApi.getMyShop(), { deferStream: true });
   const history = mockHistory;
 
   const actionLabel = (action: string) => {

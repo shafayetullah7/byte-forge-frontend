@@ -42,7 +42,7 @@ function LoadingFallback() {
 
 export default function CartPage() {
   const { t } = useI18n();
-  const cart = createAsync(() => getCart());
+  const cart = createAsync(() => getCart(), { deferStream: true });
   const updateCartTrigger = useAction(updateCartItemAction);
   const removeCartTrigger = useAction(removeCartItemAction);
   const items = createMemo(() => cart()?.items ?? []);

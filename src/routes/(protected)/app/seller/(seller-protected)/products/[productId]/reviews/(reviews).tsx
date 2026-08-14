@@ -37,10 +37,12 @@ const reportReviewAction = action(
 export default function ProductReviewsRoute() {
   const params = useParams<{ productId: string }>();
   const [reviewFilter, setReviewFilter] = createSignal<number | null>(null);
-  const reviewsData = createAsync(() =>
-    getSellerProductReviews(params.productId, {
-      rating: reviewFilter() ?? undefined,
-    }),
+  const reviewsData = createAsync(
+    () =>
+      getSellerProductReviews(params.productId, {
+        rating: reviewFilter() ?? undefined,
+      }),
+    { deferStream: true },
   );
 
   const summary = () => reviewsData()?.summary;
