@@ -11,6 +11,7 @@ export const config = {
     },
   },
   auth: {
+    /** Legacy in-app path; redirects immediately to OIDC login. */
     loginUrl: "/login",
     /** External Aponika account registration (OIDC IdP) */
     get registerUrl(): string {

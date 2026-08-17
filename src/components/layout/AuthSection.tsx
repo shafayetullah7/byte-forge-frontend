@@ -1,5 +1,5 @@
 import { Show } from "solid-js";
-import { useSession } from "~/lib/auth";
+import { useSession, getOidcLoginUrl } from "~/lib/auth";
 import { UserMenu } from "./UserMenu";
 import { useI18n } from "~/i18n";
 import { config } from "~/lib/config";
@@ -16,7 +16,7 @@ export function AuthSection() {
             fallback={
                 <div class="hidden md:flex items-center gap-3">
                     <LinkButton
-                        href="/login"
+                        href={getOidcLoginUrl()}
                         variant="secondary"
                         class="font-semibold"
                     >

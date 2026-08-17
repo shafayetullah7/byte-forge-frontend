@@ -29,28 +29,6 @@ export function safeReturnTo(
   return parseReturnToParam(value) ?? fallback;
 }
 
-export function buildLoginHref(returnTo?: string | string[] | null): string {
-  const safe = parseReturnToParam(returnTo ?? undefined);
-  if (!safe) return "/login";
-  return `/login?returnTo=${encodeURIComponent(safe)}`;
-}
-
-export function buildLoginHrefFromLocation(pathname: string, search = ""): string {
-  const normalizedSearch = search
-    ? search.startsWith("?")
-      ? search
-      : `?${search}`
-    : "";
-  const pathnameOnly = pathname.split("?")[0] ?? pathname;
-
-  if (isBlockedReturnPath(pathnameOnly)) {
-    return "/login";
-  }
-
-  const returnPath = `${pathnameOnly}${normalizedSearch}`;
-  return buildLoginHref(returnPath);
-}
-
 export function appendReturnToQuery(
   href: string,
   returnTo?: string | string[] | null,

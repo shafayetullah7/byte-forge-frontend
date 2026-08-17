@@ -23,7 +23,7 @@ import { absoluteUrl, formatPageTitle } from "~/lib/seo/meta";
 import { cloudinaryUrl } from "~/lib/media/cloudinary-url";
 import { toggleShopFollowAction } from "~/lib/api/endpoints/buyer/shop-follow.actions";
 import { toaster } from "~/components/ui/Toast";
-import { useSession, buildLoginHref } from "~/lib/auth";
+import { useSession, goToLogin } from "~/lib/auth";
 
 const TAB_TO_SECTION: Record<string, PublicShopDetailSection> = {
   overview: "",
@@ -67,7 +67,7 @@ export default function ShopDetailLayout(props: RouteSectionProps) {
     const current = shop();
     if (!current || !config.followEnabled) return;
     if (!session()) {
-      navigate(buildLoginHref(`/shops/${slug()}`));
+      goToLogin(`/shops/${slug()}`);
       return;
     }
     followTrigger({ slug: slug(), follow: !current.isFollowedByViewer });

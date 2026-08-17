@@ -78,10 +78,10 @@ export interface AuthErrorConfig {
  * 4. /admin/auth/login - Prevents redirect loop for admin login
  */
 export const defaultAuthErrorConfig: AuthErrorConfig = {
-  loginUrl: "/login",
   excludedEndpoints: [
     "/api/v1/user/auth/oidc-check",
     "/api/v1/user/auth/oidc/refresh",
+    "/api/v1/user/auth/oidc/login",
     "/api/v1/user/auth/logout",
     "/api/v1/admin/auth/login",
   ],

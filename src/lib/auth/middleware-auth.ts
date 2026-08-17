@@ -1,5 +1,5 @@
 import { getRequestEvent } from "solid-js/web";
-import { redirect } from "@solidjs/router";
+import { loginRedirectFromRequest } from "./login-redirect";
 
 /**
  * Get auth status from middleware locals
@@ -14,46 +14,25 @@ export function getAuthStatus() {
 }
 
 /**
- * Require authentication in a route loader
- * Throws redirect to login if not authenticated
- *
- * @example
- * ```typescript
- * export const route = {
- *   load: () => {
- *     requireAuth(); // Redirects if not authenticated
- *     return loadData();
- *   }
- * };
- * ```
+ * Require authentication in a route loader (cookie presence only).
+ * Redirects to OIDC login via API when unauthenticated.
  */
-export function requireAuth(redirectTo: string = "/login") {
+export function requireAuth(): void {
   const { isAuthenticated } = getAuthStatus();
 
   if (!isAuthenticated) {
-    throw redirect(redirectTo);
+    loginRedirectFromRequest();
   }
 }
 
 /**
  * Wrapper for protected route loaders
- *
- * @example
- * ```typescript
- * export const route = {
- *   load: protectedLoader(async () => {
- *     const data = await fetcher<Profile>("/api/v1/user/profile");
- *     return data;
- *   })
- * };
- * ```
  */
 export function protectedLoader<T>(
   loader: () => T | Promise<T>,
-  redirectTo: string = "/login"
 ): () => T | Promise<T> {
   return () => {
-    requireAuth(redirectTo);
+    requireAuth();
     return loader();
   };
 }

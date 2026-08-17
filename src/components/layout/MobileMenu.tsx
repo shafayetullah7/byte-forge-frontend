@@ -6,7 +6,7 @@ import {
     ArrowRightOnRectangleIcon,
     Squares2x2Icon,
 } from "../icons";
-import { logoutAction, performFederatedLogout } from "~/lib/auth";
+import { logoutAction, performFederatedLogout, getOidcLoginUrl } from "~/lib/auth";
 import { type AuthUser } from "~/lib/api/types/auth.types";
 import { useI18n } from "~/i18n";
 import { config } from "~/lib/config";
@@ -97,7 +97,7 @@ export function MobileMenu(props: MobileMenuProps) {
                         fallback={
                             <div class="px-4 flex flex-col gap-2">
                                 <LinkButton
-                                    href="/login"
+                                    href={getOidcLoginUrl()}
                                     variant="secondary"
                                     class="w-full font-semibold"
                                     onClick={props.onClose}

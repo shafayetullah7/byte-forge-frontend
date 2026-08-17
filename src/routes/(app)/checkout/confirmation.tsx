@@ -3,6 +3,7 @@ import { useNavigate, A, useSearchParams, Navigate, createAsync } from "@solidjs
 import { useI18n } from "~/i18n";
 import { requireAuth } from "~/lib/auth/guards";
 import { ApiError } from "~/lib/api";
+import { RedirectToLogin } from "~/components/auth/RedirectToLogin";
 import { getActivePaymentMethods } from "~/lib/api/endpoints/public/payment-methods.api";
 import {
   ExclamationCircleIcon,
@@ -56,7 +57,7 @@ export default function ConfirmationPage() {
       fallback={(error) => {
         if (error instanceof Response) throw error;
         if (error instanceof ApiError && error.statusCode === 401) {
-          return <Navigate href="/login" />;
+          return <RedirectToLogin />;
         }
         return (
           <div class="min-h-screen bg-cream-50 dark:bg-forest-900 flex items-center justify-center p-6">

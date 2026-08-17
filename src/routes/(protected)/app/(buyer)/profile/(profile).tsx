@@ -11,7 +11,7 @@ const Profile: Component = () => {
 
     const handleLogout = () => {
         logout().then(() => {
-            navigate("/login", { replace: true });
+            navigate("/", { replace: true });
         });
     };
 

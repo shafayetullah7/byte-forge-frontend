@@ -32,7 +32,7 @@ import HreflangLinks from "~/components/seo/HreflangLinks";
 import { absoluteUrl, formatPageTitle } from "~/lib/seo/meta";
 import { cloudinaryUrl } from "~/lib/media/cloudinary-url";
 import { addToWishlistAction } from "~/lib/api/endpoints/buyer/wishlist.actions";
-import { useSession, buildLoginHref } from "~/lib/auth";
+import { useSession, goToLogin } from "~/lib/auth";
 import {
   ImageGallery,
   CareBadge,
@@ -89,7 +89,7 @@ export default function PlantDetailPage() {
     const variant = selectedVariantData();
     if (!variant?.id) return;
     if (!session()) {
-      navigate(buildLoginHref(`/plants/${params.slug}`));
+      goToLogin(`/plants/${params.slug}`);
       return;
     }
     addToWishlistTrigger({ variantId: variant.id });

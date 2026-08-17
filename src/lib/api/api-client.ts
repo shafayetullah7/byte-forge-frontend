@@ -1,6 +1,24 @@
 import { ApiError } from "./types";
 import { config } from "../config";
 import { defaultAuthErrorConfig } from "./config";
+import { getOidcLoginUrlFromLocation } from "../auth/login-redirect";
+import { getRequestEvent } from "solid-js/web";
+
+function resolveOidcLoginRedirectUrl(): string {
+  if (import.meta.env.SSR) {
+    const event = getRequestEvent();
+    if (event?.request.url) {
+      const { pathname, search } = new URL(event.request.url);
+      return getOidcLoginUrlFromLocation(pathname, search);
+    }
+    return getOidcLoginUrlFromLocation("/", "");
+  }
+
+  return getOidcLoginUrlFromLocation(
+    window.location.pathname,
+    window.location.search,
+  );
+}
 
 /**
  * Request options for API calls
@@ -275,10 +293,11 @@ export async function fetcher<T>(
 
           // 4. Default Action (Redirect)
           if (strict && !preventDefault) {
+            const loginUrl = resolveOidcLoginRedirectUrl();
             if (import.meta.env.SSR) {
               try {
                 const { redirect } = await import("@solidjs/router");
-                throw redirect(defaultAuthErrorConfig.loginUrl || "/login");
+                throw redirect(loginUrl);
               } catch (e) {
                 // During SSR streaming (e.g., inside createAsync),
                 // response headers may already be sent. redirect() will
@@ -287,8 +306,7 @@ export async function fetcher<T>(
                 throw apiError;
               }
             } else {
-              window.location.href =
-                defaultAuthErrorConfig.loginUrl || "/login";
+              window.location.href = loginUrl;
               return {} as T;
             }
           }
