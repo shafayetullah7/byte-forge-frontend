@@ -1,7 +1,6 @@
 import { createEffect, createSignal, onCleanup } from "solid-js";
 import { authApi } from "~/lib/api/endpoints/user/auth.api";
-import { useSession } from "~/lib/auth/session";
-import { performLogout } from "~/lib/auth/session";
+import { useSession, performLogout } from "~/lib/auth/session";
 
 /**
  * Automatic token refresh hook for ByteForge JWT authentication.
@@ -58,7 +57,7 @@ export function useTokenRefresh() {
 
   // Configuration
   const REFRESH_LEEWAY = 5 * 60 * 1000; // 5 minutes before expiry
-  const TOKEN_LIFETIME = 7 * 24 * 60 * 60 * 1000; // 7 days (matches backend)
+  const TOKEN_LIFETIME = 15 * 60 * 1000; // 15 minutes (OIDC access token default)
 
   /**
    * Perform token refresh
@@ -68,9 +67,13 @@ export function useTokenRefresh() {
       return;
     }
 
+    if (!session()) {
+      return;
+    }
+
     try {
       setIsRefreshing(true);
-      await authApi.refreshTokens();
+      await authApi.refreshOidcTokens();
       setLastRefreshTime(Date.now());
       console.log("[TokenRefresh] Tokens refreshed successfully");
     } catch (error: unknown) {

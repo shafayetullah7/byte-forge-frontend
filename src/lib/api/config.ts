@@ -80,10 +80,10 @@ export interface AuthErrorConfig {
 export const defaultAuthErrorConfig: AuthErrorConfig = {
   loginUrl: "/login",
   excludedEndpoints: [
-    "/api/v1/user/auth/login", // User login endpoint
-    "/api/v1/user/auth/register", // User registration endpoint
-    "/api/v1/user/auth/check", // Session check endpoint (used by useSession)
-    "/api/v1/admin/auth/login", // Admin login endpoint
+    "/api/v1/user/auth/oidc-check",
+    "/api/v1/user/auth/oidc/refresh",
+    "/api/v1/user/auth/logout",
+    "/api/v1/admin/auth/login",
   ],
   clearStorageOnAuthError: false,
   storageKeysToClear: [],

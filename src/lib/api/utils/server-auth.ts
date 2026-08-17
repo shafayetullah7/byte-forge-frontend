@@ -24,7 +24,7 @@ import { ApiError } from "../types";
  * export const route = {
  *   load: async () => {
  *     try {
- *       const data = await authApi.checkAuth();
+ *       const data = await authApi.oidcCheck();
  *       return data;
  *     } catch (error) {
  *       handleServerAuthError(error); // Redirects if 401
@@ -70,7 +70,7 @@ export function handleServerAuthError(
  * ```typescript
  * // In a route loader
  * export const route = {
- *   load: () => withServerAuthRedirect(() => authApi.checkAuth())
+ *   load: () => withServerAuthRedirect(() => authApi.oidcCheck())
  * };
  *
  * // Or with custom redirect URL

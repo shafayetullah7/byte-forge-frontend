@@ -4,73 +4,36 @@ import { authApi } from "~/lib/api/endpoints/user/auth.api";
 /**
  * Session Management for ByteForge Frontend
  *
- * ## Architecture Decision: JWT-Based Authentication
- *
- * This implementation uses JWT tokens via API calls instead of SolidStart's built-in
- * `useSession` from `vinxi/http`. This is an **intentional design decision** to support:
- *
- * 1. **Mobile App Compatibility** - The same backend API serves both web and native mobile apps.
- *    Mobile apps cannot use SolidStart's server-side encrypted sessions.
- *
- * 2. **API-First Architecture** - The backend is designed as a stateless API that can be
- *    consumed by multiple clients (web, mobile, third-party integrations).
- *
- * 3. **Cross-Domain Support** - JWT tokens work across domains, enabling future microservices
- *    or CDN-hosted frontends.
- *
- * 4. **Standard Industry Practice** - JWT-based authentication is the standard for modern
- *    API-driven applications with multiple client platforms.
- *
- * ## How It Works
- *
- * - Access tokens are stored in HTTP-only cookies (secure, XSS-resistant)
- * - Refresh tokens are also stored in HTTP-only cookies
- * - Token refresh is handled automatically via `useTokenRefresh` hook
- * - Session validation happens via `/api/v1/auth/check` endpoint
- *
- * ## Why Not SolidStart Sessions?
- *
- * SolidStart's `useSession` from `vinxi/http` uses server-side encrypted sessions tied to
- * browser cookies. This approach:
- * - Only works for web browsers (not mobile apps)
- * - Requires session storage/redis for scalability
- * - Ties authentication to the SolidStart frontend
- *
- * Our JWT approach is more flexible for a multi-platform application.
+ * OIDC-only: session is resolved via the API resource server (`oidc-check`).
+ * Access tokens live in HTTP-only cookies on the API host (`bfAccessToken`).
  */
 
-/**
- * Server-side session loader
- *
- * Uses SolidStart's query() and the authApi.checkAuth with strict: false.
- * This ensures the auth check happens once per request during SSR and
- * doesn't force a redirect if the user is unauthenticated (public pages).
- */
+function logSessionCheckFailure(error: unknown): void {
+  if (!import.meta.env.DEV) return;
+  const message = error instanceof Error ? error.message : String(error);
+  console.warn("[Auth] oidc-check failed:", message);
+}
+
 export const getSession = query(async () => {
   "use server";
   try {
-    // checkAuth validates JWT tokens and returns user data
-    // Returns null if not authenticated (supports public pages)
-    return await authApi.checkAuth();
+    return await authApi.oidcCheck();
   } catch (error) {
-    // Fail silently for session checks to support public pages
+    logSessionCheckFailure(error);
     return null;
   }
 }, "user-session");
 
-/**
- * Logout Action
- *
- * Server-side logout that invalidates the session on the backend
- * and clears the session cache. Returns success only when the session
- * is no longer active after revalidation.
- */
 export const logoutAction = action(async (): Promise<{ success: boolean }> => {
   "use server";
   try {
     await authApi.logout();
-  } catch (error: any) {
-    if (error?.statusCode !== 401) {
+  } catch (error: unknown) {
+    const statusCode =
+      typeof error === "object" && error !== null
+        ? (error as Record<string, unknown>)?.statusCode
+        : undefined;
+    if (statusCode !== 401) {
       console.error("[Auth] Logout API error:", error);
     }
   }
@@ -79,30 +42,16 @@ export const logoutAction = action(async (): Promise<{ success: boolean }> => {
   await revalidate("user-session");
 
   try {
-    await authApi.checkAuth();
+    await authApi.oidcCheck();
     return { success: false };
   } catch {
     return { success: true };
   }
 }, "logout-action");
 
-/**
- * Perform a logout operation
- *
- * Convenience wrapper around logoutAction for use outside
- * component contexts (e.g., hooks, effects).
- */
 export const performLogout = async (): Promise<boolean> => {
   const result = await logoutAction();
   return result.success;
 };
 
-/**
- * Client/Server hook to access the current session
- *
- * Uses createAsync() to subscribe to session changes.
- * Must be called within a Router context (inside a Route component).
- *
- * @returns Signal containing the current user session or null
- */
 export const useSession = () => createAsync(() => getSession(), { deferStream: true });

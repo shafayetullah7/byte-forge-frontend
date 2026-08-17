@@ -1,11 +1,4 @@
-const BLOCKED_RETURN_PATHS = [
-  "/login",
-  "/register",
-  "/forgot-password",
-  "/reset-password",
-  "/verify-reset",
-  "/verify-account",
-] as const;
+const BLOCKED_RETURN_PATHS = ["/login"] as const;
 
 function isBlockedReturnPath(pathname: string): boolean {
   return BLOCKED_RETURN_PATHS.some(

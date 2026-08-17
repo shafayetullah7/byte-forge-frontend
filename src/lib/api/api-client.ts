@@ -79,6 +79,7 @@ function getUniversalCookie(
 
 function getUserXsrfToken(headers?: Headers): string | undefined {
   return (
+    getUniversalCookie("bf-xsrf-token", headers) ??
     getUniversalCookie("userXsrfToken", headers) ??
     getUniversalCookie("xsrf-token", headers)
   );
@@ -181,8 +182,14 @@ export async function fetcher<T>(
   const method = fetchOptions.method?.toUpperCase() || "GET";
   const stateChangingMethods = ["POST", "PUT", "DELETE", "PATCH"];
   if (stateChangingMethods.includes(method)) {
-    const xsrfToken = getUserXsrfToken(headers);
+    const xsrfToken =
+      getUserXsrfToken(headers) ?? getUniversalCookie("bf-xsrf-token", headers);
     if (xsrfToken) headers.set("X-XSRF-TOKEN", xsrfToken);
+  }
+
+  const oidcAccessToken = getUniversalCookie("bfAccessToken", headers);
+  if (oidcAccessToken && !headers.has("Authorization")) {
+    headers.set("Authorization", `Bearer ${oidcAccessToken}`);
   }
 
   const makeRequest = (opts: RequestInit, currentHeaders: Headers) =>
@@ -225,6 +232,7 @@ export async function fetcher<T>(
           }
 
           const bootstrappedToken =
+            extractCookieValue(setCookies, "bf-xsrf-token") ??
             extractCookieValue(setCookies, "userXsrfToken") ??
             getUserXsrfToken(headers);
 

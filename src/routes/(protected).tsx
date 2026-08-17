@@ -1,15 +1,15 @@
 import { useNavigate, useLocation } from "@solidjs/router";
-import { Show, createEffect, ParentComponent, ErrorBoundary } from "solid-js";
+import { createEffect, ParentComponent, ErrorBoundary } from "solid-js";
 import { Meta } from "@solidjs/meta";
 import { useSession, buildLoginHrefFromLocation } from "~/lib/auth";
-import { requireVerifiedEmail } from "~/lib/auth/guards";
+import { requireAuth } from "~/lib/auth/guards";
 import { ApiError } from "~/lib/api";
 
 /**
  * Server-side route guard
  */
 export const route = {
-    load: () => requireVerifiedEmail(),
+    load: () => requireAuth(),
 };
 
 const ProtectedLayout: ParentComponent = (props) => {
@@ -29,18 +29,8 @@ const ProtectedLayout: ParentComponent = (props) => {
         // If userData is explicitly null, user is not logged in → Redirect to login
         if (userData === null) {
             navigate(loginHref(), { replace: true });
-            return;
-        }
-
-        // If userData exists but email is not verified → Redirect to verify-account
-        if (userData && !userData.emailVerified) {
-            navigate("/verify-account", { replace: true });
-            return;
         }
     });
-
-    // Only render content if user is verified
-    // We use user()?.emailVerified to safely handle the loading state (undefined) or null
     return (
         <ErrorBoundary
             fallback={(error, reset) => {

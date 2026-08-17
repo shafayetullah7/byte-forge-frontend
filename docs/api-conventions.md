@@ -7,8 +7,9 @@
 
 ## Cross-Domain Cookie Auth
 - Browser and SSR requests use `credentials: "include"`.
-- User mutations require the `userXsrfToken` cookie and matching `X-XSRF-TOKEN` header (injected automatically by `fetcher`).
-- After login or first API visit, ensure `sessionId`, `guestToken`, and `userXsrfToken` cookies are present before calling protected `POST`/`PUT`/`PATCH`/`DELETE` routes.
+- User mutations require the `bf-xsrf-token` cookie and matching `X-XSRF-TOKEN` header (injected automatically by `fetcher`).
+- OIDC session cookies (`bfAccessToken`, `bfRefreshToken`) are set on the API host (`VITE_API_BASE_URL`). Guest cart uses `guestToken`.
+- After login or first API visit, ensure CSRF and guest cookies are present before calling protected `POST`/`PUT`/`PATCH`/`DELETE` routes.
 - `403` with an invalid CSRF message is not an auth logout case; the client retries once after bootstrapping the CSRF cookie from the API response.
 
 ## Endpoint Module Structure

@@ -11,74 +11,20 @@ export default function AuthLayout(props: RouteSectionProps) {
 
   createEffect(() => {
     const currentUser = user();
-    const path = location.pathname;
+    if (!currentUser) return;
 
-    if (currentUser) {
-      // User IS logged in
-      if (currentUser.emailVerified) {
-        const returnTo = location.query.returnTo;
-        navigate(safeReturnTo(returnTo), { replace: true });
-      } else {
-        // 2. Unverified User: should ONLY be on /verify-account
-        if (path !== "/verify-account") {
-          navigate("/verify-account", { replace: true });
-        }
-      }
-    } else {
-      // User is Guest (NOT logged in)
-      // 3. Guest: Should NOT be on /verify-account (needs auth to verify)
-      if (path === "/verify-account") {
-        navigate("/login", { replace: true });
-      }
-      // Guests are allowed on login, register, forgot-password, etc.
-    }
+    const returnTo = location.query.returnTo;
+    navigate(safeReturnTo(returnTo), { replace: true });
   });
 
-  const metadata = createMemo(() => {
-    const path = location.pathname;
-    switch (path) {
-      case "/login":
-        return {
-          title: t("auth.login.title"),
-          subtitle: t("auth.login.subtitle"),
-        };
-      case "/register":
-        return {
-          title: t("auth.register.title"),
-          subtitle: t("auth.register.subtitle"),
-        };
-      case "/forgot-password":
-        return {
-          title: t("auth.forgotPassword.title"),
-          subtitle: t("auth.forgotPassword.subtitle"),
-        };
-      case "/reset-password":
-        return {
-          title: t("auth.resetPassword.title"),
-          subtitle: t("auth.resetPassword.subtitle"),
-        };
-      case "/verify-reset":
-        return {
-          title: t("auth.verifyReset.title"),
-          subtitle: t("auth.verifyReset.subtitle"),
-        };
-      case "/verify-account":
-        return {
-          title: t("auth.verifyAccount.title"),
-          subtitle: t("auth.verifyAccount.subtitle"),
-        };
-      default:
-        return {
-          title: "ByteForge",
-          subtitle: t("common.welcome"),
-        };
-    }
-  });
+  const metadata = createMemo(() => ({
+    title: t("auth.login.title"),
+    subtitle: t("auth.login.subtitle"),
+  }));
 
   return (
     <main class="min-h-screen flex items-center justify-center p-4 transition-colors duration-200">
       <div class="w-full max-w-fit mx-auto transition-all duration-300 ease-in-out">
-        {/* Header */}
         <div class="flex items-center justify-between mb-8">
           <A
             href="/"
@@ -107,9 +53,7 @@ export default function AuthLayout(props: RouteSectionProps) {
           </A>
         </div>
 
-        {/* Card Container */}
         <div class="bg-white dark:bg-forest-900 rounded-xl shadow-sm border border-cream-100 dark:border-forest-800 p-8 transition-colors">
-          {/* Title Section */}
           <div class="mb-8">
             <h1 class="text-2xl md:text-3xl font-bold text-forest-800 dark:text-cream-50 mb-2">
               {metadata().title}
@@ -119,7 +63,6 @@ export default function AuthLayout(props: RouteSectionProps) {
             </p>
           </div>
 
-          {/* Content */}
           {props.children}
         </div>
       </div>

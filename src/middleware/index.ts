@@ -14,7 +14,7 @@ import { getCookie } from "vinxi/http";
  *
  * 1. Middleware checks for the presence of the `session` cookie
  * 2. Sets `event.locals.isAuthenticated` for route loaders to use
- * 3. Does NOT validate the token (that happens in `authApi.checkAuth()`)
+ * 3. Does NOT validate the token (that happens in `authApi.oidcCheck()`)
  *
  * ### Why This Approach?
  *
@@ -45,16 +45,9 @@ import { getCookie } from "vinxi/http";
  */
 export default createMiddleware({
   onRequest: async (event) => {
-    // Check if session cookie exists (lightweight check, no validation)
-    const sessionCookie = getCookie(event.nativeEvent, "session");
+    const oidcCookie = getCookie(event.nativeEvent, "bfAccessToken");
 
-    // Store auth status in event.locals for use in route loaders
-    // This is accessible via getRequestEvent().locals in server functions
-    event.locals.isAuthenticated = !!sessionCookie;
-    event.locals.sessionId = sessionCookie || null;
-
-    // Optional: Add user data to locals if needed
-    // event.locals.user = await getUserFromSession(sessionCookie);
-    // Note: This would add latency to every request, so only do this if necessary
+    event.locals.isAuthenticated = Boolean(oidcCookie);
+    event.locals.sessionId = null;
   },
 });
