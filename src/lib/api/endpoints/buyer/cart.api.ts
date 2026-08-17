@@ -29,7 +29,14 @@ export const getCart = query(
 export const getCartCount = query(
   async (): Promise<{ itemsCount: number; totalQuantity: number }> => {
     "use server";
-    return fetcher<{ itemsCount: number; totalQuantity: number }>("/api/v1/user/buyer/cart/count");
+    try {
+      return await fetcher<{ itemsCount: number; totalQuantity: number }>(
+        "/api/v1/user/buyer/cart/count",
+        { strict: false },
+      );
+    } catch {
+      return { itemsCount: 0, totalQuantity: 0 };
+    }
   },
   "buyer-cart-count"
 );

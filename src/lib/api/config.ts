@@ -83,6 +83,7 @@ export const defaultAuthErrorConfig: AuthErrorConfig = {
     "/api/v1/user/auth/oidc/refresh",
     "/api/v1/user/auth/oidc/login",
     "/api/v1/user/auth/logout",
+    "/api/v1/user/buyer/cart/count",
     "/api/v1/admin/auth/login",
   ],
   clearStorageOnAuthError: false,
