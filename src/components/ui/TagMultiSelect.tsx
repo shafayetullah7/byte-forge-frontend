@@ -1,5 +1,6 @@
 import { createSignal, createMemo, For, Show, createEffect } from "solid-js";
 import { HashtagIcon, ChevronDownIcon, CheckIcon } from "~/components/icons";
+import { fieldControlClass, type FieldSize } from "./field-styles";
 
 export interface TagGroupOption {
   id: string;
@@ -14,6 +15,7 @@ export interface TagMultiSelectProps {
   groups: TagGroupOption[];
   placeholder?: string;
   class?: string;
+  size?: FieldSize;
 }
 
 export function TagMultiSelect(props: TagMultiSelectProps) {
@@ -55,11 +57,11 @@ export function TagMultiSelect(props: TagMultiSelectProps) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen())}
-        class={`w-full flex items-center justify-between gap-2 px-4 py-2.5 rounded-lg border-2 transition-standard focus-ring-flat text-left ${
-          isOpen()
-            ? "border-forest-500 dark:border-forest-400"
-            : "border-cream-200 dark:border-forest-700 hover:border-cream-300 dark:hover:border-forest-600"
-        } bg-white dark:bg-forest-900/30 text-gray-900 dark:text-gray-100`}
+        class={fieldControlClass({
+          size: props.size ?? "md",
+          open: isOpen(),
+          class: "flex items-center justify-between gap-2 text-left text-gray-900 dark:text-gray-100",
+        })}
       >
         <div class="flex items-center gap-2 min-w-0">
           <HashtagIcon class="w-4 h-4 text-gray-400 flex-shrink-0" />

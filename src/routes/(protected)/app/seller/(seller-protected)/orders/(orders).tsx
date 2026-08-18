@@ -1,7 +1,7 @@
 import { createMemo, Show, Suspense } from "solid-js";
 import { createAsync } from "@solidjs/router";
 import { ErrorBoundary } from "solid-js";
-import { FilterSelect } from "~/components/ui/FilterSelect";
+import { FilterSelect, fieldControlClass } from "~/components/ui";
 import { SectionErrorFallback } from "~/components/seller/SectionErrorFallback";
 import { MagnifyingGlassIcon } from "~/components/icons";
 import { useI18n } from "~/i18n";
@@ -79,7 +79,7 @@ export default function SellerOrdersRoute() {
                   filters.setSearchQuery(e.currentTarget.value);
                   filters.resetPage();
                 }}
-                class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 dark:border-forest-600 bg-white dark:bg-forest-900 text-sm"
+                class={fieldControlClass({ size: "sm", class: "!pl-10" })}
               />
             </div>
             <FilterSelect
@@ -101,7 +101,7 @@ export default function SellerOrdersRoute() {
                 filters.setDateFrom(e.currentTarget.value);
                 filters.resetPage();
               }}
-              class="px-3 py-2.5 rounded-lg border border-gray-200 dark:border-forest-600 text-sm"
+              class={fieldControlClass({ size: "sm", class: "w-auto" })}
               aria-label={t("seller.orders.filters.dateFrom")}
             />
             <input
@@ -111,7 +111,7 @@ export default function SellerOrdersRoute() {
                 filters.setDateTo(e.currentTarget.value);
                 filters.resetPage();
               }}
-              class="px-3 py-2.5 rounded-lg border border-gray-200 dark:border-forest-600 text-sm"
+              class={fieldControlClass({ size: "sm", class: "w-auto" })}
               aria-label={t("seller.orders.filters.dateTo")}
             />
           </div>

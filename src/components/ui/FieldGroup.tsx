@@ -1,5 +1,13 @@
 import { Show, type JSX } from "solid-js";
 import { useI18n } from "~/i18n";
+import {
+  fieldError,
+  fieldHint,
+  fieldLabelClass,
+  fieldOptionalMark,
+  fieldRequiredMark,
+  type FieldSize,
+} from "./field-styles";
 
 export type FieldRequirement = "required" | "optional" | "requiredForReview";
 
@@ -10,6 +18,7 @@ export function FieldGroup(props: {
   required?: boolean;
   hint?: string;
   error?: string;
+  size?: FieldSize;
   children: JSX.Element;
 }) {
   const { t } = useI18n();
@@ -22,28 +31,24 @@ export function FieldGroup(props: {
 
   return (
     <div>
-      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+      <label class={fieldLabelClass(props.size ?? "md")}>
         {props.label}
         <Show when={requirement() === "required"}>
-          <span class="text-red-500 ml-1">*</span>
+          <span class={fieldRequiredMark}>*</span>
         </Show>
         <Show when={requirement() === "optional"}>
-          <span class="text-gray-400 dark:text-gray-500 font-normal ml-1">
-            ({t("common.optional")})
-          </span>
+          <span class={fieldOptionalMark}>({t("common.optional")})</span>
         </Show>
         <Show when={requirement() === "requiredForReview"}>
-          <span class="text-gray-400 dark:text-gray-500 font-normal ml-1">
-            ({t("common.requiredForReview")})
-          </span>
+          <span class={fieldOptionalMark}>({t("common.requiredForReview")})</span>
         </Show>
       </label>
       {props.children}
       <Show when={props.error}>
-        <p class="mt-1 text-xs text-red-600 dark:text-red-400 font-medium">{props.error}</p>
+        <p class={fieldError}>{props.error}</p>
       </Show>
       <Show when={props.hint && !props.error}>
-        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{props.hint}</p>
+        <p class={fieldHint}>{props.hint}</p>
       </Show>
     </div>
   );

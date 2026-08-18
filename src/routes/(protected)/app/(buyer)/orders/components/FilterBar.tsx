@@ -2,6 +2,7 @@ import { Show } from "solid-js";
 import { useI18n } from "~/i18n";
 import { MagnifyingGlassIcon, XCircleIcon } from "~/components/icons";
 import { FilterSelect } from "~/components/ui/FilterSelect";
+import { fieldControlClass } from "~/components/ui";
 import { getOrderStatusOptions, getPaymentStatusOptions } from "./utils";
 
 function FilterChip(props: {
@@ -45,7 +46,7 @@ export function FilterBar(props: {
               placeholder={t("buyer.orders.searchPlaceholder")}
               value={props.searchQuery}
               onInput={(e) => props.onSearchChange(e.currentTarget.value)}
-              class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 dark:border-forest-700 bg-white dark:bg-forest-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:border-forest-500 dark:focus:border-forest-400 focus:ring-2 focus:ring-forest-500/20 transition-colors"
+              class={fieldControlClass({ size: "sm", class: "!pl-10" })}
             />
           </div>
           <FilterSelect

@@ -1,14 +1,33 @@
 import { JSX, splitProps, Show, createUniqueId, createMemo } from "solid-js";
+import {
+  fieldControlClass,
+  fieldCounter,
+  fieldCounterIdle,
+  fieldCounterWarn,
+  fieldError,
+  fieldLabelClass,
+  fieldRequiredMark,
+  type FieldSize,
+} from "./field-styles";
 
-export interface InputProps extends JSX.InputHTMLAttributes<HTMLInputElement> {
+export interface InputProps extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "size"> {
   label?: string;
   error?: string;
+  size?: FieldSize;
 }
 
 export default function Input(props: InputProps) {
-  const [local, others] = splitProps(props, ["label", "error", "class", "required", "maxLength"]);
-  
+  const [local, others] = splitProps(props, [
+    "label",
+    "error",
+    "class",
+    "required",
+    "maxLength",
+    "size",
+  ]);
+
   const inputId = createUniqueId();
+  const size = () => local.size ?? "md";
 
   const charCount = createMemo(() => {
     const val = props.value ?? "";
@@ -22,18 +41,12 @@ export default function Input(props: InputProps) {
 
   const hasCounter = createMemo(() => !!local.maxLength);
 
-  const baseStyles =
-    "w-full px-4 py-2.5 rounded-lg border-2 transition-standard focus-ring-flat disabled:opacity-50 disabled:cursor-not-allowed text-sm bg-white dark:bg-forest-900/30";
-
-  const counterStyles = "absolute right-3 top-1/2 -translate-y-1/2 text-xs select-none pointer-events-none";
-
-  const stateStyles = local.error
-    ? "border-red-500 active:border-red-600"
-    : "border-cream-200 dark:border-forest-700 hover:border-cream-300 dark:hover:border-forest-600 focus:border-forest-500 dark:focus:border-forest-400";
-
-  const inputClass = hasCounter()
-    ? `${baseStyles} ${stateStyles} pr-20 ${local.class || ""}`
-    : `${baseStyles} ${stateStyles} ${local.class || ""}`;
+  const inputClass = () =>
+    fieldControlClass({
+      size: size(),
+      error: !!local.error,
+      class: `${hasCounter() ? "pr-20" : ""} ${local.class || ""}`.trim(),
+    });
 
   const handleInput = (e: InputEvent) => {
     const target = e.target as HTMLInputElement;
@@ -49,7 +62,7 @@ export default function Input(props: InputProps) {
     handleInput(e as InputEvent);
     const handler = props.onInput;
     if (typeof handler === "function") {
-      handler(e as InputEvent & { currentTarget: HTMLInputElement; target: HTMLInputElement; });
+      handler(e as InputEvent & { currentTarget: HTMLInputElement; target: HTMLInputElement });
     }
   };
 
@@ -58,30 +71,30 @@ export default function Input(props: InputProps) {
   return (
     <div class="w-full">
       <Show when={local.label}>
-        <label for={inputId} class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+        <label for={inputId} class={fieldLabelClass(size())}>
           {local.label}
           <Show when={local.required}>
-            <span class="text-red-500 ml-1">*</span>
+            <span class={fieldRequiredMark}>*</span>
           </Show>
         </label>
       </Show>
       <div class="relative">
         <input
           id={inputId}
-          class={inputClass}
+          class={inputClass()}
           {...others}
           onInput={onInputHandler}
           aria-invalid={!!local.error}
           aria-describedby={local.error ? errorId : undefined}
         />
         <Show when={hasCounter()}>
-          <span class={`${counterStyles} ${isNearLimit() ? "text-amber-600 dark:text-amber-400" : "text-gray-400 dark:text-gray-500"}`}>
+          <span class={`${fieldCounter} ${isNearLimit() ? fieldCounterWarn : fieldCounterIdle}`}>
             {charCount()}
           </span>
         </Show>
       </div>
       <Show when={local.error}>
-        <p id={errorId} class="mt-1 text-xs text-red-600 dark:text-red-400 font-medium" role="alert">
+        <p id={errorId} class={fieldError} role="alert">
           {local.error}
         </p>
       </Show>

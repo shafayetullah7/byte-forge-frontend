@@ -11,6 +11,7 @@
     "test:coverage": "vitest --coverage",
     "test:run": "vitest run --passWithNoTests",
     "audit:defer-stream": "node scripts/audit-defer-stream.mjs",
+    "audit:form-fields": "node scripts/audit-form-fields.mjs",
     "docker:dev": "NODE_ENV=development docker compose --env-file .env.development up",
     "docker:dev:build": "NODE_ENV=development docker compose --env-file .env.development build --no-cache",
     "docker:dev:down": "NODE_ENV=development docker compose --env-file .env.development down",

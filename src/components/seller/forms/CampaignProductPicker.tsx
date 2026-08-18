@@ -1,5 +1,6 @@
 import { createMemo, createSignal, For, Show } from "solid-js";
 import { useI18n } from "~/i18n";
+import { Input, fieldHint, fieldLabel } from "~/components/ui";
 import type { ProductListItem } from "~/lib/api/types/seller.types";
 
 export function CampaignProductPicker(props: {
@@ -38,17 +39,17 @@ export function CampaignProductPicker(props: {
 
   return (
     <div class="space-y-2">
-      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{props.label}</label>
+      <label class={fieldLabel}>{props.label}</label>
       <Show when={props.hint}>
-        <p class="text-xs text-gray-500 dark:text-gray-400 -mt-1 mb-2">{props.hint}</p>
+        <p class={`${fieldHint} !mt-0`}>{props.hint}</p>
       </Show>
-      <input
+      <Input
         type="search"
+        size="sm"
         value={search()}
         disabled={props.disabled}
         onInput={(e) => setSearch(e.currentTarget.value)}
         placeholder={t("seller.campaigns.fields.products.searchPlaceholder")}
-        class="w-full px-3 py-2 rounded-lg border-2 border-cream-200 dark:border-forest-700 bg-white dark:bg-forest-900/30 text-sm"
       />
       <p class="text-xs text-gray-500 dark:text-gray-400">
         {t("seller.campaigns.fields.products.selectedCount", props.selectedIds.length)}

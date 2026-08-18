@@ -1,5 +1,5 @@
 import { Component, Show, createSignal } from "solid-js";
-import type { JSX } from "solid-js";
+import { fieldLabel, fieldRequiredMark } from "./field-styles";
 
 export interface FileUploadProps {
     preview?: string | null;
@@ -149,10 +149,10 @@ export const FileUpload: Component<FileUploadProps> = (props) => {
         <div>
             {/* Label */}
             <Show when={props.label}>
-                <label for={inputId} class="block text-sm font-medium text-forest-800 dark:text-forest-200 mb-2">
+                <label for={inputId} class={fieldLabel}>
                     {props.label}
                     <Show when={props.required}>
-                        <span class="text-red-500 ml-1">*</span>
+                        <span class={fieldRequiredMark}>*</span>
                     </Show>
                 </label>
             </Show>

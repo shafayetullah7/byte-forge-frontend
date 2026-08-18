@@ -1,4 +1,5 @@
 import { createSignal, createMemo, For, Show, createEffect } from "solid-js";
+import { fieldControlClass } from "~/components/ui";
 
 export interface CategoryOption {
   id: string;
@@ -100,7 +101,10 @@ export function CategorySearchSelect(props: CategorySearchSelectProps) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen())}
-        class="w-full flex items-center justify-between gap-2 px-4 py-2.5 rounded-lg border-2 border-cream-200 dark:border-forest-700 focus:border-forest-500 dark:focus:border-forest-400 bg-white dark:bg-forest-900/30 text-gray-900 dark:text-gray-100 transition-standard focus-ring-flat text-left"
+        class={fieldControlClass({
+          open: isOpen(),
+          class: "flex items-center justify-between gap-2 text-left text-gray-900 dark:text-gray-100",
+        })}
       >
         <div class="flex items-center gap-2 min-w-0">
           <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -134,7 +138,10 @@ export function CategorySearchSelect(props: CategorySearchSelectProps) {
                 placeholder="Search categories..."
                 value={searchQuery()}
                 onInput={(e) => setSearchQuery(e.currentTarget.value)}
-                class="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-forest-900/30 text-gray-900 dark:text-gray-100 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-forest-500"
+                class={fieldControlClass({
+                  size: "sm",
+                  class: "!pl-9",
+                })}
               />
             </div>
           </div>

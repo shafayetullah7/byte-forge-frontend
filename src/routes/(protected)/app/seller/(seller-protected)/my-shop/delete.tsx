@@ -2,6 +2,7 @@ import { useNavigate, createAsync, useAction } from "@solidjs/router";
 import { createSignal, Show } from "solid-js";
 import Button from "~/components/ui/Button";
 import Card from "~/components/ui/Card";
+import Input from "~/components/ui/Input";
 import { toaster } from "~/components/ui/Toast";
 import { getShop } from "~/lib/context/shop-context";
 import { deleteShopAction } from "./shop.actions";
@@ -92,18 +93,12 @@ export default function DeleteShopPage() {
                 )}
               </Show>
 
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {t("seller.shop.deletePage.confirmPrompt")}
-                </label>
-                <input
-                  type="text"
-                  value={confirmText()}
-                  onInput={(e) => setConfirmText(e.currentTarget.value)}
-                  class="w-full px-3 py-2 border border-gray-200 dark:border-forest-600 rounded-lg bg-white dark:bg-forest-700 text-gray-900 dark:text-gray-100 outline-none focus:ring-2 focus:ring-red-500"
-                  placeholder={t("seller.shop.deletePage.confirmPlaceholder")}
-                />
-              </div>
+              <Input
+                label={t("seller.shop.deletePage.confirmPrompt")}
+                value={confirmText()}
+                onInput={(e) => setConfirmText(e.currentTarget.value)}
+                placeholder={t("seller.shop.deletePage.confirmPlaceholder")}
+              />
 
               <div class="flex gap-3 justify-end">
                 <Button

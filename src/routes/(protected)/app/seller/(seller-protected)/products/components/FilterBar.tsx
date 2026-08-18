@@ -7,6 +7,7 @@ import {
   XIcon,
 } from "~/components/icons";
 import { FilterSelect } from "~/components/ui/FilterSelect";
+import { fieldControlClass } from "~/components/ui";
 import { FilterChip } from "./FilterChip";
 import { SORT_OPTIONS, getTypeLabel } from "./utils";
 
@@ -42,7 +43,7 @@ export function FilterBar(props: {
               placeholder={t("seller.products.searchPlaceholder")}
               value={props.searchQuery}
               onInput={(e) => props.onSearchChange(e.currentTarget.value)}
-              class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-cream-200 dark:border-forest-700 focus:border-forest-500 dark:focus:border-forest-400 bg-white dark:bg-forest-800 text-forest-800 dark:text-cream-50 placeholder-gray-400 dark:placeholder-gray-500 transition-standard focus-ring-flat"
+              class={fieldControlClass({ size: "sm", class: "!pl-10" })}
             />
             <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           </div>

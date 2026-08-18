@@ -1,6 +1,13 @@
 import { createSignal, createMemo, For, Show, createEffect } from "solid-js";
 import { ChevronDownIcon, CheckIcon, FolderIcon } from "~/components/icons";
 import type { CategoryTree } from "~/lib/api/endpoints/public/categories.api";
+import {
+  fieldControlClass,
+  fieldError,
+  fieldLabelClass,
+  fieldRequiredMark,
+  type FieldSize,
+} from "./field-styles";
 
 export interface CategoryTreeSelectProps {
   categories: CategoryTree[];
@@ -12,6 +19,7 @@ export interface CategoryTreeSelectProps {
   error?: string;
   required?: boolean;
   class?: string;
+  size?: FieldSize;
 }
 
 interface FlatNode {
@@ -92,28 +100,28 @@ export function CategoryTreeSelect(props: CategoryTreeSelectProps) {
     return () => document.removeEventListener("mousedown", handler);
   });
 
+  const size = () => props.size ?? "md";
+
   return (
-    <div data-category-tree-select class={`space-y-2 w-full relative ${props.class || ""}`}>
+    <div data-category-tree-select class={`w-full relative ${props.class || ""}`}>
       <Show when={props.label}>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label class={fieldLabelClass(size())}>
           {props.label}
           <Show when={props.required}>
-            <span class="text-red-500 ml-1">*</span>
+            <span class={fieldRequiredMark}>*</span>
           </Show>
         </label>
       </Show>
 
-      {/* Trigger */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen())}
-        class={`w-full flex items-center justify-between gap-2 px-4 py-2.5 rounded-lg border-2 text-left transition-colors ${
-          isOpen()
-            ? "border-forest-500 dark:border-forest-400"
-            : props.error
-              ? "border-red-500"
-              : "border-cream-200 dark:border-forest-700 hover:border-cream-300 dark:hover:border-forest-600"
-        } bg-white dark:bg-forest-900/30`}
+        class={fieldControlClass({
+          size: size(),
+          error: !!props.error,
+          open: isOpen(),
+          class: "flex items-center justify-between gap-2 text-left",
+        })}
       >
         <span
           class={`text-sm truncate ${
@@ -197,7 +205,7 @@ export function CategoryTreeSelect(props: CategoryTreeSelectProps) {
       </Show>
 
       <Show when={props.error}>
-        <p class="mt-1 text-xs text-red-600 dark:text-red-400 font-medium">{props.error}</p>
+        <p class={fieldError}>{props.error}</p>
       </Show>
     </div>
   );

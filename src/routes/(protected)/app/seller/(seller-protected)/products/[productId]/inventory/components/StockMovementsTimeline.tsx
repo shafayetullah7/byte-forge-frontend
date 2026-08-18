@@ -1,5 +1,6 @@
 import { For, Show, createMemo, createSignal } from "solid-js";
 import { ChevronDownIcon, FilterIcon, XIcon, SpinnerIcon, ClockIcon, ArrowUpIcon, ArrowDownIcon, ArrowsRightLeftIcon } from "~/components/icons";
+import { FilterSelect, fieldLabelClass } from "~/components/ui";
 import {
   getStockMovementTypeLabel,
   getStockMovementTypeVariant,
@@ -104,18 +105,14 @@ export default function StockMovementsTimeline(props: StockMovementsTimelineProp
         <div class="p-4 bg-cream-50 dark:bg-forest-900/30 rounded-lg border border-cream-200 dark:border-forest-700 space-y-3">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+              <label class={fieldLabelClass("sm")}>
                 {props.t("seller.products.inventoryDetail.movementTypeLabel")}
               </label>
-              <select
+              <FilterSelect
+                options={movementTypeOptions()}
                 value={props.activeFilters.movementType || ""}
-                onChange={(e) => handleTypeFilter(e.currentTarget.value)}
-                class="w-full px-3 py-2 rounded-lg border border-cream-200 dark:border-forest-700 text-sm bg-white dark:bg-forest-900/50 text-gray-700 dark:text-gray-300 focus:border-forest-500 dark:focus:border-forest-400 focus:outline-none"
-              >
-                <For each={movementTypeOptions()}>
-                  {(opt) => <option value={opt.value}>{opt.label}</option>}
-                </For>
-              </select>
+                onChange={handleTypeFilter}
+              />
             </div>
           </div>
         </div>

@@ -49,3 +49,5 @@ Example mapping:
 - Field hints under `seller.*.fields.*Hint` without optional/required language.
 
 See also: [form-field-conventions.md](../docs/form-field-conventions.md).
+
+Visual chrome (label size, control padding, borders, focus): use `~/components/ui/field-styles` and `.agent/workflows/form-fields.md`. Never use `h6` on field labels.

@@ -2,7 +2,7 @@ import { createSignal, createEffect, Show, For, ParentComponent, Suspense } from
 import { createStore } from "solid-js/store";
 import { slugify } from "~/lib/utils/slugify";
 import { useNavigate, action, useSubmission, useAction, createAsync, type RouteDefinition, redirect } from "@solidjs/router";
-import { Button, ImageUpload } from "~/components/ui";
+import { Button, FieldGroup, ImageUpload, Input, Textarea, fieldControlClass } from "~/components/ui";
 import { getShop } from "~/lib/context/shop-context";
 import { toaster } from "~/components/ui/Toast";
 import { useI18n } from "~/i18n";
@@ -268,47 +268,24 @@ export default function SetupShop() {
                                                         </div>
                                                     </div>
 
-                                                    {/* English Shop Name */}
-                                                    <div>
-                                                        <label class="block h6 mb-1">
-                                                            {t("seller.shop.nameLabel")}
-                                                            <span class="text-red-500 ml-1">*</span>
-                                                        </label>
-                                                        <input
-                                                            type="text"
-                                                            value={translations.en.name}
-                                                            onInput={(e) => setTranslations("en", "name", (e.target as HTMLInputElement).value)}
-                                                            placeholder={t("seller.shop.namePlaceholder")}
-                                                            class={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors body-small ${errors().name
-                                                                ? "border-red-500 dark:border-red-400"
-                                                                : "border-cream-200 dark:border-forest-600"
-                                                                }`}
-                                                        />
-                                                        <Show when={errors().name}>
-                                                            <p class="mt-1 body-small text-red-600 dark:text-red-400">{errors().name}</p>
-                                                        </Show>
-                                                    </div>
+                                                    <Input
+                                                        label={t("seller.shop.nameLabel")}
+                                                        required
+                                                        value={translations.en.name}
+                                                        onInput={(e) => setTranslations("en", "name", e.currentTarget.value)}
+                                                        placeholder={t("seller.shop.namePlaceholder")}
+                                                        error={errors().name}
+                                                    />
 
-                                                    {/* English Description */}
-                                                    <div>
-                                                        <label class="block h6 mb-1">
-                                                            {t("seller.shop.aboutLabel")}
-                                                            <span class="text-red-500 ml-1">*</span>
-                                                        </label>
-                                                        <textarea
-                                                            value={translations.en.description}
-                                                            onInput={(e) => setTranslations("en", "description", (e.target as HTMLTextAreaElement).value)}
-                                                            placeholder={t("seller.shop.aboutPlaceholder")}
-                                                            class={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors resize-none body-small ${errors().description
-                                                                ? "border-red-500 dark:border-red-400"
-                                                                : "border-cream-200 dark:border-forest-600"
-                                                                }`}
-                                                            rows={4}
-                                                        />
-                                                        <Show when={errors().description}>
-                                                            <p class="mt-1 body-small text-red-600 dark:text-red-400">{errors().description}</p>
-                                                        </Show>
-                                                    </div>
+                                                    <Textarea
+                                                        label={t("seller.shop.aboutLabel")}
+                                                        required
+                                                        value={translations.en.description}
+                                                        onInput={(e) => setTranslations("en", "description", e.currentTarget.value)}
+                                                        placeholder={t("seller.shop.aboutPlaceholder")}
+                                                        rows={4}
+                                                        error={errors().description}
+                                                    />
                                                 </div>
 
                                                 {/* Right Section: Bengali Fields */}
@@ -335,112 +312,80 @@ export default function SetupShop() {
                                                         </div>
                                                     </div>
 
-                                                    {/* Bengali Shop Name */}
-                                                    <div>
-                                                        <label class="block h6 mb-1">
-                                                            {t("seller.shop.nameLabel")}
-                                                            <span class="text-red-500 ml-1">*</span>
-                                                        </label>
-                                                        <input
-                                                            type="text"
-                                                            value={translations.bn.name}
-                                                            onInput={(e) => setTranslations("bn", "name", (e.target as HTMLInputElement).value)}
-                                                            placeholder={t("seller.shop.namePlaceholder")}
-                                                            class={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors body-small ${errors().name
-                                                                ? "border-red-500 dark:border-red-400"
-                                                                : "border-cream-200 dark:border-forest-600"
-                                                                }`}
-                                                            dir="auto"
-                                                        />
-                                                        <Show when={errors().name}>
-                                                            <p class="mt-1 body-small text-red-600 dark:text-red-400">{errors().name}</p>
-                                                        </Show>
-                                                    </div>
+                                                    <Input
+                                                        label={t("seller.shop.nameLabel")}
+                                                        required
+                                                        dir="auto"
+                                                        value={translations.bn.name}
+                                                        onInput={(e) => setTranslations("bn", "name", e.currentTarget.value)}
+                                                        placeholder={t("seller.shop.namePlaceholder")}
+                                                        error={errors().name}
+                                                    />
 
-                                                    {/* Bengali Description */}
-                                                    <div>
-                                                        <label class="block h6 mb-1">
-                                                            {t("seller.shop.aboutLabel")}
-                                                            <span class="text-red-500 ml-1">*</span>
-                                                        </label>
-                                                        <textarea
-                                                            value={translations.bn.description}
-                                                            onInput={(e) => setTranslations("bn", "description", (e.target as HTMLTextAreaElement).value)}
-                                                            placeholder={t("seller.shop.aboutPlaceholder")}
-                                                            class={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors resize-none body-small ${errors().description
-                                                                ? "border-red-500 dark:border-red-400"
-                                                                : "border-cream-200 dark:border-forest-600"
-                                                                }`}
-                                                            rows={4}
-                                                            dir="auto"
-                                                        />
-                                                        <Show when={errors().description}>
-                                                            <p class="mt-1 body-small text-red-600 dark:text-red-400">{errors().description}</p>
-                                                        </Show>
-                                                    </div>
+                                                    <Textarea
+                                                        label={t("seller.shop.aboutLabel")}
+                                                        required
+                                                        dir="auto"
+                                                        value={translations.bn.description}
+                                                        onInput={(e) => setTranslations("bn", "description", e.currentTarget.value)}
+                                                        placeholder={t("seller.shop.aboutPlaceholder")}
+                                                        rows={4}
+                                                        error={errors().description}
+                                                    />
                                                 </div>
                                             </div>
 
-                                        {/* Business Hours - Full Width Below */}
                                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                            {/* English Business Hours */}
-                                            <div>
-                                                <label class="block h6 mb-1">
-                                                    {t("seller.shop.brandStoryLabel")}
-                                                    <span class="text-gray-400 ml-1">({t("common.optional")})</span>
-                                                </label>
-                                                <textarea
+                                            <FieldGroup
+                                                label={t("seller.shop.brandStoryLabel")}
+                                                requirement="optional"
+                                            >
+                                                <Textarea
                                                     value={translations.en.businessHours}
-                                                    onInput={(e) => setTranslations("en", "businessHours", (e.target as HTMLTextAreaElement).value)}
+                                                    onInput={(e) => setTranslations("en", "businessHours", e.currentTarget.value)}
                                                     placeholder={t("seller.shop.brandStoryPlaceholder")}
-                                                    class="w-full px-3 py-2 rounded-lg border border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors resize-none body-small"
                                                     rows={3}
                                                 />
-                                            </div>
+                                            </FieldGroup>
 
-                                            {/* Bengali Business Hours */}
-                                            <div>
-                                                <label class="block h6 mb-1">
-                                                    {t("seller.shop.brandStoryLabel")}
-                                                    <span class="text-gray-400 ml-1">({t("common.optional")})</span>
-                                                </label>
-                                                <textarea
-                                                    value={translations.bn.businessHours}
-                                                    onInput={(e) => setTranslations("bn", "businessHours", (e.target as HTMLTextAreaElement).value)}
-                                                    placeholder={t("seller.shop.brandStoryPlaceholder")}
-                                                    class="w-full px-3 py-2 rounded-lg border border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors resize-none body-small"
-                                                    rows={3}
+                                            <FieldGroup
+                                                label={t("seller.shop.brandStoryLabel")}
+                                                requirement="optional"
+                                            >
+                                                <Textarea
                                                     dir="auto"
+                                                    value={translations.bn.businessHours}
+                                                    onInput={(e) => setTranslations("bn", "businessHours", e.currentTarget.value)}
+                                                    placeholder={t("seller.shop.brandStoryPlaceholder")}
+                                                    rows={3}
                                                 />
-                                            </div>
+                                            </FieldGroup>
                                         </div>
 
-                                        {/* Shop Slug (URL) - Global Identity Field */}
                                         <div class="bg-cream-50 dark:bg-forest-800/50 rounded-lg p-4 border border-cream-200 dark:border-forest-700">
-                                            <div>
-                                                <label class="block h6 text-gray-700 dark:text-gray-300 mb-2">
-                                                    {t("seller.shop.slugSectionTitle")}
-                                                    <span class="text-gray-400 ml-1">({t("common.optional")})</span>
-                                                </label>
-                                                <div class="flex rounded-lg">
-                                                    <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-700 text-forest-700/70 dark:text-gray-400 body-small">
+                                            <FieldGroup
+                                                label={t("seller.shop.slugSectionTitle")}
+                                                requirement="optional"
+                                                hint={`💡 ${t("seller.shop.slugIdentityHint")}`}
+                                            >
+                                                <div class="flex min-w-0">
+                                                    <span class="inline-flex items-center px-4 py-2.5 rounded-l-lg border-2 border-r-0 border-cream-200 dark:border-forest-700 bg-cream-50 dark:bg-forest-900/50 text-sm text-gray-500 dark:text-gray-400 shrink-0">
                                                         {getShopSlugPrefix()}
                                                     </span>
                                                     <input
                                                         type="text"
                                                         value={shopSlug()}
                                                         onInput={(e) => {
-                                                            setShopSlug((e.currentTarget as HTMLInputElement).value);
+                                                            setShopSlug(e.currentTarget.value);
                                                             setIsSlugManual(true);
                                                         }}
                                                         placeholder={t("seller.shop.slugPlaceholder")}
-                                                        class="flex-1 min-w-0 block w-full px-3 py-2 rounded-r-lg border border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors body-small"
+                                                        class={fieldControlClass({
+                                                            class: "rounded-l-none flex-1 min-w-0",
+                                                        })}
                                                     />
                                                 </div>
-                                                <p class="mt-2 body-small text-forest-700/70 dark:text-gray-400">
-                                                    💡 {t("seller.shop.slugIdentityHint")}
-                                                </p>
-                                            </div>
+                                            </FieldGroup>
                                         </div>
 
                                         {/* Branding (Optional) */}
@@ -454,25 +399,33 @@ export default function SetupShop() {
 
                                             {/* Logo & Banner Upload (Optional) */}
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <ImageUpload
-                                                    preview={logoUpload.preview()}
-                                                    isUploading={logoUpload.isUploading()}
-                                                    isDeleting={logoUpload.isDeleting()}
-                                                    onFileSelect={logoUpload.upload}
-                                                    onDelete={logoUpload.deleteMedia}
-                                                    label={`${t("seller.shop.logoLabel")} (Optional)`}
-                                                    description="JPEG, PNG, WEBP, or GIF (max 3MB)"
-                                                />
+                                                <FieldGroup
+                                                    label={t("seller.shop.logoLabel")}
+                                                    requirement="optional"
+                                                >
+                                                    <ImageUpload
+                                                        preview={logoUpload.preview()}
+                                                        isUploading={logoUpload.isUploading()}
+                                                        isDeleting={logoUpload.isDeleting()}
+                                                        onFileSelect={logoUpload.upload}
+                                                        onDelete={logoUpload.deleteMedia}
+                                                        description="JPEG, PNG, WEBP, or GIF (max 3MB)"
+                                                    />
+                                                </FieldGroup>
 
-                                                <ImageUpload
-                                                    preview={bannerUpload.preview()}
-                                                    isUploading={bannerUpload.isUploading()}
-                                                    isDeleting={bannerUpload.isDeleting()}
-                                                    onFileSelect={bannerUpload.upload}
-                                                    onDelete={bannerUpload.deleteMedia}
-                                                    label={`${t("seller.shop.bannerLabel")} (Optional)`}
-                                                    description="JPEG, PNG, WEBP, or GIF (max 3MB)"
-                                                />
+                                                <FieldGroup
+                                                    label={t("seller.shop.bannerLabel")}
+                                                    requirement="optional"
+                                                >
+                                                    <ImageUpload
+                                                        preview={bannerUpload.preview()}
+                                                        isUploading={bannerUpload.isUploading()}
+                                                        isDeleting={bannerUpload.isDeleting()}
+                                                        onFileSelect={bannerUpload.upload}
+                                                        onDelete={bannerUpload.deleteMedia}
+                                                        description="JPEG, PNG, WEBP, or GIF (max 3MB)"
+                                                    />
+                                                </FieldGroup>
                                             </div>
 
                                             {/* Skip Note */}

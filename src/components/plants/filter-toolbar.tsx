@@ -1,6 +1,7 @@
 import { For, Show } from "solid-js";
 import { useI18n } from "~/i18n";
 import { MagnifyingGlassIcon, FilterIcon, XIcon, ChevronDownIcon } from "~/components/icons";
+import { fieldControlClass } from "~/components/ui";
 import { SORT_OPTIONS } from "../../routes/(app)/plants/constants";
 
 export function FilterToolbar(props: {
@@ -28,7 +29,7 @@ export function FilterToolbar(props: {
               placeholder={t("public.plants.toolbar.searchPlaceholder")}
               value={props.searchQuery()}
               onInput={(e) => props.setSearchQuery(e.currentTarget.value)}
-              class="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-cream-200 dark:border-forest-700 focus:border-forest-500 dark:focus:border-forest-400 bg-white dark:bg-forest-900/30 text-forest-800 dark:text-cream-50 placeholder-gray-400 dark:placeholder-gray-500 transition-standard focus-ring-flat text-sm"
+              class={fieldControlClass({ size: "sm", class: "!pl-11" })}
             />
             <Show when={props.searchQuery()}>
               <button
@@ -64,7 +65,10 @@ export function FilterToolbar(props: {
                 props.setSortBy(e.currentTarget.value);
                 props.setSortOrder("asc");
               }}
-              class="w-full sm:w-auto px-4 py-3 rounded-xl border-2 border-cream-200 dark:border-forest-700 focus:border-forest-500 dark:focus:border-forest-400 bg-white dark:bg-forest-900/30 text-forest-800 dark:text-cream-50 transition-standard focus-ring-flat text-sm appearance-none cursor-pointer pr-8"
+              class={fieldControlClass({
+                size: "sm",
+                class: "w-full sm:w-auto appearance-none cursor-pointer pr-8",
+              })}
             >
               <For each={SORT_OPTIONS}>
                 {(opt) => <option value={opt.value}>{t(opt.labelKey as any)}</option>}

@@ -24,6 +24,7 @@ import {
 import { StatCard } from "./components/StatCard";
 import { DivisionGroup } from "./components/DivisionGroup";
 import { CurrencyInput } from "./components/CurrencyInput";
+import { fieldControlClass } from "~/components/ui";
 
 const updateShippingRatesAction = action(
   async (input: { rates: Array<{ districtId: string; cost: string; costPerKg?: string }>; successMessage?: string }) => {
@@ -303,7 +304,7 @@ export default function ShippingRatesPage() {
                         placeholder={t("seller.shippingRates.searchPlaceholder")}
                         value={searchQuery()}
                         onInput={(e) => setSearchQuery(e.currentTarget.value)}
-                        class="w-full pl-9 pr-3 py-2.5 rounded-lg border-2 border-cream-200 dark:border-forest-600 bg-white dark:bg-forest-900 text-forest-800 dark:text-cream-50 text-sm placeholder-gray-400 dark:placeholder-gray-500 focus:border-terracotta-500 dark:focus:border-terracotta-400 focus:ring-2 focus:ring-terracotta-500/20 transition-colors"
+                        class={fieldControlClass({ size: "sm", class: "!pl-9" })}
                       />
                     </div>
                   </div>

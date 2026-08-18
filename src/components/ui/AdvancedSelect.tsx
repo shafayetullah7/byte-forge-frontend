@@ -1,5 +1,12 @@
 import { createSignal, createMemo, Show, For, onMount, onCleanup } from "solid-js";
 import { isServer } from "solid-js/web";
+import {
+  fieldControlClass,
+  fieldError,
+  fieldLabelClass,
+  fieldRequiredMark,
+  type FieldSize,
+} from "./field-styles";
 
 export interface AdvancedSelectOption {
   value: string;
@@ -19,6 +26,7 @@ export interface AdvancedSelectProps {
   class?: string;
   allowClear?: boolean;
   required?: boolean;
+  size?: FieldSize;
 }
 
 export function AdvancedSelect(props: AdvancedSelectProps) {
@@ -76,24 +84,29 @@ export function AdvancedSelect(props: AdvancedSelectProps) {
     props.onChange(null);
   };
 
+  const size = () => props.size ?? "md";
+
   return (
-    <div class={`relative space-y-1.5 w-full ${props.class || ""}`} ref={containerRef}>
+    <div class={`relative w-full ${props.class || ""}`} ref={containerRef}>
       <Show when={props.label}>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label class={fieldLabelClass(size())}>
           {props.label}
           <Show when={props.required}>
-            <span class="text-red-500 ml-1">*</span>
+            <span class={fieldRequiredMark}>*</span>
           </Show>
         </label>
       </Show>
 
       <div
         onClick={handleToggle}
-        class={`flex items-center justify-between w-full h-[46px] px-4 py-2.5 body-base bg-white dark:bg-forest-900/30 border-2 rounded-lg cursor-pointer transition-standard focus-ring-flat
-          ${isOpen() ? "border-forest-500 dark:border-forest-400" : "border-cream-200 dark:border-forest-700 hover:border-cream-300 dark:hover:border-forest-600"}
-          ${props.disabled ? "bg-cream-50 dark:bg-forest-800 cursor-not-allowed opacity-50" : ""}
-          ${props.error ? "border-red-500 focus:border-red-600" : ""}
-        `}
+        class={fieldControlClass({
+          size: size(),
+          error: !!props.error,
+          open: isOpen(),
+          class: `flex items-center justify-between text-left cursor-pointer ${
+            props.disabled ? "bg-cream-50 dark:bg-forest-800 cursor-not-allowed" : ""
+          }`,
+        })}
       >
         <div class="flex-1 truncate">
           <Show
@@ -133,7 +146,7 @@ export function AdvancedSelect(props: AdvancedSelectProps) {
       </div>
 
       <Show when={props.error}>
-        <p class="mt-1 text-xs text-red-600 dark:text-red-400 font-medium" role="alert">{props.error}</p>
+        <p class={fieldError} role="alert">{props.error}</p>
       </Show>
 
       <Show when={isOpen()}>

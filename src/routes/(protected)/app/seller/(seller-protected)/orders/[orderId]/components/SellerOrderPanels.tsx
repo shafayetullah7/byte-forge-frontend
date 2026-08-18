@@ -1,6 +1,7 @@
 import { Show } from "solid-js";
 import { useI18n } from "~/i18n";
 import Button from "~/components/ui/Button";
+import { Textarea } from "~/components/ui";
 import { ShipOrderForm } from "../../components/ShipOrderForm";
 import { getSellerOrderAction } from "~/lib/orders/seller-order.utils";
 import type { ShippingMethod, SellerOrderActionDescriptor, SellerOrderDetail } from "~/lib/api/types/seller-orders.types";
@@ -63,11 +64,13 @@ export function SellerOrderCancelPanel(props: {
       {(action) => (
         <div class="space-y-2 border rounded-xl p-4 border-gray-200 dark:border-forest-700 print:hidden">
           <h3 class="text-sm font-semibold">{t("seller.orders.detail.cancelOrder")}</h3>
-          <textarea
+          <Textarea
+            size="sm"
             placeholder={t("seller.orders.detail.cancelReasonPlaceholder")}
             value={props.reason}
             onInput={(e) => props.onReasonChange(e.currentTarget.value)}
-            class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-forest-600 bg-white dark:bg-forest-900 text-sm min-h-20"
+            class="min-h-20"
+            rows={3}
           />
           <Button
             variant="outline"

@@ -1,7 +1,8 @@
-import { createSignal, Show } from "solid-js";
+import { createSignal } from "solid-js";
 import { Modal } from "~/components/ui/Modal";
 import Input from "~/components/ui/Input";
 import Button from "~/components/ui/Button";
+import { FieldGroup, Select, fieldControlClass } from "~/components/ui";
 import { createStore } from "solid-js/store";
 import { useI18n } from "~/i18n";
 import type { ShopAddress, UpdateAddressDto } from "~/lib/api/endpoints/seller/shop-detail.api";
@@ -117,75 +118,55 @@ export default function AddressEditModal(props: AddressEditModalProps) {
                 <h6 class="font-bold text-gray-900 dark:text-gray-100">English Address</h6>
               </div>
 
-              {/* Country - Fixed */}
-              <div class="space-y-1.5">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Country <span class="text-red-500 ml-1">*</span>
-                </label>
-                <div class="px-3 py-2 border border-gray-200 dark:border-forest-600 rounded-lg bg-gray-50 dark:bg-forest-800 text-gray-900 dark:text-gray-100 cursor-not-allowed">
+              <FieldGroup
+                label="Country"
+                requirement="required"
+                error={errors().enCountry}
+              >
+                <div class={fieldControlClass({ class: "cursor-not-allowed pointer-events-none bg-cream-50 dark:bg-forest-800" })}>
                   Bangladesh
                 </div>
-                <Show when={errors().enCountry}><p class="text-sm text-red-600 dark:text-red-400">{errors().enCountry}</p></Show>
-              </div>
+              </FieldGroup>
 
-              {/* Division Selector */}
-              <div class="space-y-1.5">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Division <span class="text-red-500 ml-1">*</span>
-                </label>
-                <select
-                  value={formData.translations.en.division}
-                  onChange={(e) => {
+              <Select
+                id="address-en-division"
+                label="Division"
+                required
+                placeholder="Select Division"
+                value={formData.translations.en.division}
+                error={errors().enDivision}
+                options={BANGLADESH.divisions.map((d) => ({ value: d.en, label: d.en }))}
+                onChange={(e) => {
                     const selectedEn = e.currentTarget.value;
-                    const division = BANGLADESH.divisions.find(d => d.en === selectedEn);
+                    const division = BANGLADESH.divisions.find((d) => d.en === selectedEn);
                     if (division) {
-                      // Set English division
                       setFormData("translations", "en", "division", division.en);
-                      // Sync Bengali division
                       setFormData("translations", "bn", "division", division.bn);
-                      // Reset districts
                       setFormData("translations", "en", "district", "");
                       setFormData("translations", "bn", "district", "");
                     }
                   }}
-                  class="w-full px-3 py-2 border border-gray-200 dark:border-forest-600 rounded-lg bg-white dark:bg-forest-700 text-gray-900 dark:text-gray-100 outline-none focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors"
-                >
-                  <option value="">Select Division</option>
-                  {BANGLADESH.divisions.map((d) => (
-                    <option value={d.en}>{d.en}</option>
-                  ))}
-                </select>
-                <Show when={errors().enDivision}><p class="text-sm text-red-600 dark:text-red-400">{errors().enDivision}</p></Show>
-              </div>
+              />
 
-              {/* District Selector */}
-              <div class="space-y-1.5">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  District <span class="text-red-500 ml-1">*</span>
-                </label>
-                <select
-                  value={formData.translations.en.district}
-                  onChange={(e) => {
+              <Select
+                id="address-en-district"
+                label="District"
+                required
+                placeholder={formData.translations.en.division ? "Select District" : "Select division first"}
+                value={formData.translations.en.district}
+                error={errors().enDistrict}
+                disabled={!formData.translations.en.division}
+                options={getDistricts().map((d) => ({ value: d.en, label: d.en }))}
+                onChange={(e) => {
                     const selectedEn = e.currentTarget.value;
-                    const division = BANGLADESH.divisions.find(d => d.en === formData.translations.en.division);
-                    const district = division?.districts.find(d => d.en === selectedEn);
+                    const division = BANGLADESH.divisions.find((d) => d.en === formData.translations.en.division);
+                    const district = division?.districts.find((d) => d.en === selectedEn);
                     if (district) {
                       setFormData("translations", "en", "district", district.en);
                       setFormData("translations", "bn", "district", district.bn);
                     }
                   }}
-                  disabled={!formData.translations.en.division}
-                  class="w-full px-3 py-2 border border-gray-200 dark:border-forest-600 rounded-lg bg-white dark:bg-forest-700 text-gray-900 dark:text-gray-100 outline-none focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <option value="">
-                    {formData.translations.en.division ? 'Select District' : 'Select division first'}
-                  </option>
-                  {getDistricts().map((d) => (
-                    <option value={d.en}>{d.en}</option>
-                  ))}
-                </select>
-                <Show when={errors().enDistrict}><p class="text-sm text-red-600 dark:text-red-400">{errors().enDistrict}</p></Show>
-              </div>
+              />
 
               {/* Street Input */}
               <Input
@@ -207,75 +188,55 @@ export default function AddressEditModal(props: AddressEditModalProps) {
                 <h6 class="font-bold text-gray-900 dark:text-gray-100">বাংলা ঠিকানা</h6>
               </div>
 
-              {/* Country - Fixed */}
-              <div class="space-y-1.5">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  দেশ <span class="text-red-500 ml-1">*</span>
-                </label>
-                <div class="px-3 py-2 border border-gray-200 dark:border-forest-600 rounded-lg bg-gray-50 dark:bg-forest-800 text-gray-900 dark:text-gray-100 cursor-not-allowed">
+              <FieldGroup
+                label="দেশ"
+                requirement="required"
+                error={errors().bnCountry}
+              >
+                <div class={fieldControlClass({ class: "cursor-not-allowed pointer-events-none bg-cream-50 dark:bg-forest-800" })}>
                   বাংলাদেশ
                 </div>
-                <Show when={errors().bnCountry}><p class="text-sm text-red-600 dark:text-red-400">{errors().bnCountry}</p></Show>
-              </div>
+              </FieldGroup>
 
-              {/* Division Selector */}
-              <div class="space-y-1.5">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  বিভাগ <span class="text-red-500 ml-1">*</span>
-                </label>
-                <select
-                  value={formData.translations.bn.division}
-                  onChange={(e) => {
+              <Select
+                id="address-bn-division"
+                label="বিভাগ"
+                required
+                placeholder="বিভাগ নির্বাচন করুন"
+                value={formData.translations.bn.division}
+                error={errors().bnDivision}
+                options={BANGLADESH.divisions.map((d) => ({ value: d.bn, label: d.bn }))}
+                onChange={(e) => {
                     const selectedBn = e.currentTarget.value;
-                    const division = BANGLADESH.divisions.find(d => d.bn === selectedBn);
+                    const division = BANGLADESH.divisions.find((d) => d.bn === selectedBn);
                     if (division) {
-                      // Set Bengali division
                       setFormData("translations", "bn", "division", division.bn);
-                      // Sync English division
                       setFormData("translations", "en", "division", division.en);
-                      // Reset districts
                       setFormData("translations", "en", "district", "");
                       setFormData("translations", "bn", "district", "");
                     }
                   }}
-                  class="w-full px-3 py-2 border border-gray-200 dark:border-forest-600 rounded-lg bg-white dark:bg-forest-700 text-gray-900 dark:text-gray-100 outline-none focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors"
-                >
-                  <option value="">বিভাগ নির্বাচন করুন</option>
-                  {BANGLADESH.divisions.map((d) => (
-                    <option value={d.bn}>{d.bn}</option>
-                  ))}
-                </select>
-                <Show when={errors().bnDivision}><p class="text-sm text-red-600 dark:text-red-400">{errors().bnDivision}</p></Show>
-              </div>
+              />
 
-              {/* District Selector */}
-              <div class="space-y-1.5">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  জেলা <span class="text-red-500 ml-1">*</span>
-                </label>
-                <select
-                  value={formData.translations.bn.district}
-                  onChange={(e) => {
+              <Select
+                id="address-bn-district"
+                label="জেলা"
+                required
+                placeholder={formData.translations.en.division ? "জেলা নির্বাচন করুন" : "প্রথমে বিভাগ নির্বাচন করুন"}
+                value={formData.translations.bn.district}
+                error={errors().bnDistrict}
+                disabled={!formData.translations.en.division}
+                options={getDistricts().map((d) => ({ value: d.bn, label: d.bn }))}
+                onChange={(e) => {
                     const selectedBn = e.currentTarget.value;
-                    const division = BANGLADESH.divisions.find(d => d.en === formData.translations.en.division);
-                    const district = division?.districts.find(d => d.bn === selectedBn);
+                    const division = BANGLADESH.divisions.find((d) => d.en === formData.translations.en.division);
+                    const district = division?.districts.find((d) => d.bn === selectedBn);
                     if (district) {
                       setFormData("translations", "bn", "district", district.bn);
                       setFormData("translations", "en", "district", district.en);
                     }
                   }}
-                  disabled={!formData.translations.en.division}
-                  class="w-full px-3 py-2 border border-gray-200 dark:border-forest-600 rounded-lg bg-white dark:bg-forest-700 text-gray-900 dark:text-gray-100 outline-none focus:ring-2 focus:ring-terracotta-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <option value="">
-                    {formData.translations.en.division ? 'জেলা নির্বাচন করুন' : 'প্রথমে বিভাগ নির্বাচন করুন'}
-                  </option>
-                  {getDistricts().map((d) => (
-                    <option value={d.bn}>{d.bn}</option>
-                  ))}
-                </select>
-                <Show when={errors().bnDistrict}><p class="text-sm text-red-600 dark:text-red-400">{errors().bnDistrict}</p></Show>
-              </div>
+              />
 
               {/* Street Input */}
               <Input

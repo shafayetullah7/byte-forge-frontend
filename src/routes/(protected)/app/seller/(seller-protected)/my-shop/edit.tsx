@@ -2,6 +2,7 @@ import { createAsync, useNavigate, useAction } from "@solidjs/router";
 import { createEffect, createSignal, For, Show } from "solid-js";
 import Button from "~/components/ui/Button";
 import Input from "~/components/ui/Input";
+import Textarea from "~/components/ui/Textarea";
 import Card from "~/components/ui/Card";
 import { Modal } from "~/components/ui/Modal";
 import { toaster } from "~/components/ui/Toast";
@@ -136,28 +137,18 @@ export default function EditShopPage() {
 
             <Card title={t("seller.shop.editPage.descriptionCardTitle")}>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {t("seller.shop.editPage.descriptionEnLabel")}
-                  </label>
-                  <textarea
-                    value={descriptionEn()}
-                    onInput={(e) => setDescriptionEn(e.currentTarget.value)}
-                    rows={4}
-                    class="w-full px-3 py-2 border border-gray-200 dark:border-forest-600 rounded-lg bg-white dark:bg-forest-700 text-gray-900 dark:text-gray-100 outline-none focus:ring-2 focus:ring-green-500"
-                  />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {t("seller.shop.editPage.descriptionBnLabel")}
-                  </label>
-                  <textarea
-                    value={descriptionBn()}
-                    onInput={(e) => setDescriptionBn(e.currentTarget.value)}
-                    rows={4}
-                    class="w-full px-3 py-2 border border-gray-200 dark:border-forest-600 rounded-lg bg-white dark:bg-forest-700 text-gray-900 dark:text-gray-100 outline-none focus:ring-2 focus:ring-green-500"
-                  />
-                </div>
+                <Textarea
+                  label={t("seller.shop.editPage.descriptionEnLabel")}
+                  value={descriptionEn()}
+                  onInput={(e) => setDescriptionEn(e.currentTarget.value)}
+                  rows={4}
+                />
+                <Textarea
+                  label={t("seller.shop.editPage.descriptionBnLabel")}
+                  value={descriptionBn()}
+                  onInput={(e) => setDescriptionBn(e.currentTarget.value)}
+                  rows={4}
+                />
               </div>
             </Card>
 

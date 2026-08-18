@@ -1,5 +1,6 @@
 import { createMemo, For, Show } from "solid-js";
 import { useI18n } from "~/i18n";
+import { Input, fieldLabel } from "~/components/ui";
 import type { CategoryTree } from "~/lib/api/endpoints/public/categories.api";
 import { CARE_OPTIONS, LIGHT_OPTIONS, WATERING_OPTIONS, HUMIDITY_OPTIONS, GROWTH_OPTIONS } from "./constants";
 
@@ -65,18 +66,26 @@ export function FilterSection(props: {
       </Show>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label class={fieldLabel}>
           {t("public.plants.filters.priceRange")}
         </label>
         <div class="flex items-center gap-2">
-          <input
-            type="number" placeholder={t("public.plants.filters.min")} value={props.minPrice()} onInput={(e) => setMin(e.currentTarget.value)} min="0"
-            class="w-full px-3 py-2 rounded-lg border-2 border-cream-200 dark:border-forest-700 focus:border-forest-500 dark:focus:border-forest-400 bg-white dark:bg-forest-900/30 text-sm transition-standard focus-ring-flat"
+          <Input
+            size="sm"
+            type="number"
+            placeholder={t("public.plants.filters.min")}
+            value={props.minPrice()}
+            onInput={(e) => setMin(e.currentTarget.value)}
+            min="0"
           />
           <span class="text-gray-400 flex-shrink-0">—</span>
-          <input
-            type="number" placeholder={t("public.plants.filters.max")} value={props.maxPrice()} onInput={(e) => setMax(e.currentTarget.value)} min="0"
-            class="w-full px-3 py-2 rounded-lg border-2 border-cream-200 dark:border-forest-700 focus:border-forest-500 dark:focus:border-forest-400 bg-white dark:bg-forest-900/30 text-sm transition-standard focus-ring-flat"
+          <Input
+            size="sm"
+            type="number"
+            placeholder={t("public.plants.filters.max")}
+            value={props.maxPrice()}
+            onInput={(e) => setMax(e.currentTarget.value)}
+            min="0"
           />
         </div>
       </div>

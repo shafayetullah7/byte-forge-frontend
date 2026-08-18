@@ -1,6 +1,7 @@
 import { Show } from "solid-js";
 import { useI18n } from "~/i18n";
 import Button from "~/components/ui/Button";
+import { Textarea } from "~/components/ui";
 import { CheckCircleIcon, XCircleIcon } from "~/components/icons";
 import { getSellerOrderAction } from "~/lib/orders/seller-order.utils";
 import type { SellerOrderActionDescriptor, SellerOrderDetail } from "~/lib/api/types/seller-orders.types";
@@ -48,14 +49,14 @@ export function SellerOrderAcceptRejectPanel(props: {
                 <p class="text-sm font-semibold text-terracotta-800 dark:text-terracotta-200">
                   {t("seller.orders.detailPage.rejectOrder")}
                 </p>
-                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400">
-                  {t("seller.orders.detailPage.rejectReasonLabel")}
-                </label>
-                <textarea
+                <Textarea
+                  size="sm"
+                  label={t("seller.orders.detailPage.rejectReasonLabel")}
                   placeholder={t("seller.orders.detailPage.rejectReasonPlaceholder")}
                   value={props.rejectReason}
                   onInput={(e) => props.onRejectReasonChange(e.currentTarget.value)}
-                  class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-forest-600 bg-white dark:bg-forest-900 text-sm min-h-20"
+                  class="min-h-20"
+                  rows={3}
                 />
                 <Button
                   variant="outline"

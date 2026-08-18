@@ -1,5 +1,6 @@
 import { createSignal, createMemo, For, Show, createEffect } from "solid-js";
 import { ChevronDownIcon, CheckIcon } from "~/components/icons";
+import { fieldControlClass, type FieldSize } from "./field-styles";
 
 export interface FilterOption {
   value: string;
@@ -13,6 +14,8 @@ export interface FilterSelectProps {
   onChange: (value: string) => void;
   placeholder?: string;
   class?: string;
+  /** Compact by default — used in list filter bars. */
+  size?: FieldSize;
 }
 
 export function FilterSelect(props: FilterSelectProps) {
@@ -43,11 +46,11 @@ export function FilterSelect(props: FilterSelectProps) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen())}
-        class={`w-full flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 transition-standard focus-ring-flat text-left min-w-[140px] ${
-          isOpen()
-            ? "border-forest-500 dark:border-forest-400"
-            : "border-cream-200 dark:border-forest-700 hover:border-cream-300 dark:hover:border-forest-600"
-        } bg-white dark:bg-forest-900/30`}
+        class={fieldControlClass({
+          size: props.size ?? "sm",
+          open: isOpen(),
+          class: "flex items-center gap-2 text-left min-w-[140px]",
+        })}
       >
         <Show when={selectedOption()?.dotColor}>
           {(color) => (

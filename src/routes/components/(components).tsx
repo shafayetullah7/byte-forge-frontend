@@ -1,4 +1,4 @@
-import { Button, Badge, Card, Input } from "~/components/ui";
+import { Button, Badge, Card, Input, Select, Textarea } from "~/components/ui";
 
 export default function ComponentShowcase() {
   return (
@@ -118,30 +118,51 @@ export default function ComponentShowcase() {
         {/* Inputs */}
         <section class="mb-16">
           <h2 class="text-3xl font-semibold text-forest-600 dark:text-forest-400 mb-6">
-            Inputs
+            Form fields
           </h2>
-          <div class="max-w-md space-y-6">
-            <Input label="Email" type="email" placeholder="you@example.com" />
+          <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 max-w-2xl">
+            Default (`md`) is for page forms. Compact (`sm`) is for toolbars and side panels.
+            Labels are `text-sm`, never headings. Focus is forest.
+          </p>
 
-            <Input
-              label="Password"
-              type="password"
-              placeholder="Enter your password"
-            />
-
-            <Input
-              label="Name (with error)"
-              type="text"
-              placeholder="John Doe"
-              error="This field is required"
-            />
-
-            <Input
-              label="Disabled Input"
-              type="text"
-              placeholder="Cannot edit"
-              disabled
-            />
+          <div class="grid md:grid-cols-2 gap-10 max-w-4xl">
+            <div class="space-y-4">
+              <h3 class="text-xl font-medium text-gray-700 dark:text-gray-300">
+                Default (md)
+              </h3>
+              <Input label="Shop name" required placeholder="Green Leaf Nursery" />
+              <Textarea label="About" rows={3} placeholder="Short shop story" />
+              <Select
+                label="Status"
+                options={[
+                  { value: "draft", label: "Draft" },
+                  { value: "active", label: "Active" },
+                ]}
+                value="draft"
+              />
+              <Input
+                label="Name (error)"
+                placeholder="John Doe"
+                error="This field is required"
+              />
+            </div>
+            <div class="space-y-4">
+              <h3 class="text-xl font-medium text-gray-700 dark:text-gray-300">
+                Compact (sm)
+              </h3>
+              <Input size="sm" label="Courier" placeholder="Pathao" />
+              <Textarea size="sm" label="Note" rows={3} placeholder="Note to buyer" />
+              <Select
+                size="sm"
+                label="Method"
+                options={[
+                  { value: "courier", label: "Courier" },
+                  { value: "pickup", label: "Pickup" },
+                ]}
+                value="courier"
+              />
+              <Input size="sm" label="Disabled" placeholder="Cannot edit" disabled />
+            </div>
           </div>
         </section>
 

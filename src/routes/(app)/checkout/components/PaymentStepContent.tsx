@@ -6,7 +6,7 @@ import type {
   CheckoutPaymentMethodOption,
 } from "~/lib/api/types/checkout.types";
 import { ChevronLeftIcon } from "~/components/icons";
-import { Button } from "~/components/ui";
+import { Button, Textarea } from "~/components/ui";
 import { A } from "@solidjs/router";
 import { cloudinaryUrl } from "~/lib/media/cloudinary-url";
 
@@ -151,17 +151,14 @@ const PaymentStepContent: Component<PaymentStepContentProps> = (props) => {
       </div>
 
       <Show when={props.onOrderNotesChange}>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            {t("checkout.orderNotes")}
-          </label>
-          <textarea
-            value={props.orderNotes ?? ""}
-            onInput={(e) => props.onOrderNotesChange?.(e.currentTarget.value)}
-            placeholder={t("checkout.orderNotesPlaceholder")}
-            class="w-full px-4 py-3 rounded-xl border border-cream-200 dark:border-forest-700 bg-white dark:bg-forest-800 text-sm min-h-24 resize-y"
-          />
-        </div>
+        <Textarea
+          label={t("checkout.orderNotes")}
+          value={props.orderNotes ?? ""}
+          onInput={(e) => props.onOrderNotesChange?.(e.currentTarget.value)}
+          placeholder={t("checkout.orderNotesPlaceholder")}
+          class="min-h-24"
+          rows={4}
+        />
       </Show>
 
       <div class="flex justify-between items-center pt-4">

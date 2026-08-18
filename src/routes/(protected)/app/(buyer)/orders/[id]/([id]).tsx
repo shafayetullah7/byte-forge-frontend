@@ -9,6 +9,7 @@ import type { OrderDetail, OrderItemDetail } from "~/lib/api/types/order.types";
 import { toaster } from "~/components/ui/Toast";
 import { ConfirmDialog } from "~/components/ui/ConfirmDialog";
 import Button from "~/components/ui/Button";
+import { Input, Select, Textarea } from "~/components/ui";
 import {
   ChevronLeftIcon,
   PackageIcon,
@@ -330,14 +331,14 @@ function OrderCard(props: { order: OrderDetail; groupId: string }) {
         variant="danger"
       >
         <div class="w-full mb-4 text-left">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            {t("buyer.orders.details.cancelReasonLabel")}
-          </label>
-          <textarea
+          <Textarea
+            size="sm"
+            label={t("buyer.orders.details.cancelReasonLabel")}
             value={cancelReason()}
             onInput={(e) => setCancelReason(e.currentTarget.value)}
             placeholder={t("buyer.orders.details.cancelReasonPlaceholder")}
-            class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-forest-600 bg-white dark:bg-forest-900 text-sm min-h-20"
+            class="min-h-20"
+            rows={3}
           />
         </div>
       </ConfirmDialog>
@@ -368,44 +369,34 @@ function OrderCard(props: { order: OrderDetail; groupId: string }) {
         cancelLabel={t("common.cancel")}
       >
         <div class="w-full mb-4 space-y-3 text-left">
-          <label class="block">
-            <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Rating
-            </span>
-            <select
-              value={reviewRating()}
-              onChange={(e) => setReviewRating(Number(e.currentTarget.value))}
-              class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-forest-600 bg-white dark:bg-forest-900 text-sm"
-            >
-              <For each={[5, 4, 3, 2, 1]}>
-                {(rating) => <option value={rating}>{rating} stars</option>}
-              </For>
-            </select>
-          </label>
-          <label class="block">
-            <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Title
-            </span>
-            <input
-              value={reviewTitle()}
-              onInput={(e) => setReviewTitle(e.currentTarget.value)}
-              maxLength={255}
-              class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-forest-600 bg-white dark:bg-forest-900 text-sm"
-              placeholder="Healthy plant and good packaging"
-            />
-          </label>
-          <label class="block">
-            <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Comment
-            </span>
-            <textarea
-              value={reviewComment()}
-              onInput={(e) => setReviewComment(e.currentTarget.value)}
-              maxLength={3000}
-              class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-forest-600 bg-white dark:bg-forest-900 text-sm min-h-24"
-              placeholder="Tell other buyers about product quality, packaging, and delivery."
-            />
-          </label>
+          <Select
+            size="sm"
+            label="Rating"
+            value={String(reviewRating())}
+            onChange={(e) => setReviewRating(Number(e.currentTarget.value))}
+            options={[5, 4, 3, 2, 1].map((rating) => ({
+              value: String(rating),
+              label: `${rating} stars`,
+            }))}
+          />
+          <Input
+            size="sm"
+            label="Title"
+            value={reviewTitle()}
+            onInput={(e) => setReviewTitle(e.currentTarget.value)}
+            maxLength={255}
+            placeholder="Healthy plant and good packaging"
+          />
+          <Textarea
+            size="sm"
+            label="Comment"
+            value={reviewComment()}
+            onInput={(e) => setReviewComment(e.currentTarget.value)}
+            maxLength={3000}
+            class="min-h-24"
+            rows={4}
+            placeholder="Tell other buyers about product quality, packaging, and delivery."
+          />
         </div>
       </ConfirmDialog>
     </div>

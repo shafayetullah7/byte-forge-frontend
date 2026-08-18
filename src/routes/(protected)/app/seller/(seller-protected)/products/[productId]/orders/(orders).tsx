@@ -3,6 +3,7 @@ import { ErrorBoundary } from "solid-js";
 import { useParams, createAsync, A } from "@solidjs/router";
 import { SectionErrorFallback } from "~/components/seller/SectionErrorFallback";
 import { MagnifyingGlassIcon } from "~/components/icons";
+import { FilterSelect, fieldControlClass } from "~/components/ui";
 import { useI18n } from "~/i18n";
 import { getSellerOrders } from "~/lib/api/endpoints/seller/orders.api";
 import type { OrderStatus } from "~/lib/api/types/seller-orders.types";
@@ -49,21 +50,22 @@ export default function ProductOrdersRoute() {
                 placeholder={t("seller.orders.searchPlaceholder")}
                 value={orderSearchQuery()}
                 onInput={(e) => setOrderSearchQuery(e.currentTarget.value)}
-                class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-cream-200 dark:border-forest-700 focus:border-forest-500 dark:focus:border-forest-400 bg-white dark:bg-forest-800 text-forest-800 dark:text-cream-50 placeholder-gray-400 dark:placeholder-gray-500 transition-standard focus-ring-flat"
+                class={fieldControlClass({ size: "sm", class: "!pl-10" })}
               />
               <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             </div>
-            <select
+            <FilterSelect
+              class="w-full sm:w-52"
               value={orderStatusFilter()}
-              onChange={(e) => setOrderStatusFilter(e.currentTarget.value)}
-              class="px-4 py-2.5 rounded-lg border border-cream-200 dark:border-forest-700 bg-white dark:bg-forest-800 text-forest-800 dark:text-cream-50 text-sm"
-            >
-              <option value="">{t("seller.orders.filters.allStatuses")}</option>
-              <option value="DELIVERED">{t("seller.orders.delivered")}</option>
-              <option value="SHIPPED">{t("seller.orders.shipped")}</option>
-              <option value="PROCESSING">{t("seller.orders.processing")}</option>
-              <option value="CANCELLED">{t("seller.orders.cancelled")}</option>
-            </select>
+              onChange={setOrderStatusFilter}
+              options={[
+                { value: "", label: t("seller.orders.filters.allStatuses") },
+                { value: "DELIVERED", label: t("seller.orders.delivered") },
+                { value: "SHIPPED", label: t("seller.orders.shipped") },
+                { value: "PROCESSING", label: t("seller.orders.processing") },
+                { value: "CANCELLED", label: t("seller.orders.cancelled") },
+              ]}
+            />
           </div>
         </div>
 
