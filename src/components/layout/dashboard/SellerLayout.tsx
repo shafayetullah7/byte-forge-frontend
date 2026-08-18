@@ -1,4 +1,5 @@
 import { ParentComponent, createMemo } from "solid-js";
+import { createAsync } from "@solidjs/router";
 import { DashboardLayout } from "~/components/layout/dashboard/DashboardLayout";
 import { SidebarConfig } from "~/components/layout/dashboard/Sidebar";
 import {
@@ -12,13 +13,26 @@ import {
     ClipboardDocumentIcon,
     DocumentTextIcon,
     CreditCardIcon,
+    EyeIcon,
 } from "~/components/icons";
 import { useI18n } from "~/i18n";
+import { getShop } from "~/lib/context/shop-context";
 
 export const SellerLayout: ParentComponent = (props) => {
     const { t } = useI18n();
+    const shop = createAsync(() => getShop(), { deferStream: true });
 
-    const sidebarConfig = createMemo<SidebarConfig>(() => ({
+    const sidebarConfig = createMemo<SidebarConfig>(() => {
+        const storefrontLink = shop()?.slug
+            ? {
+                href: `/shops/${shop()!.slug}`,
+                icon: EyeIcon,
+                label: t("seller.sidebar.storefront"),
+                openInNewTab: true,
+            }
+            : null;
+
+        return {
         mode: "seller",
         brandColor: "terracotta",
         links: [
@@ -38,11 +52,7 @@ export const SellerLayout: ParentComponent = (props) => {
                         icon: ShoppingBagIcon,
                         label: t("seller.sidebar.shopOverview"),
                     },
-                    {
-                        href: "/app/seller/my-shop/storefront",
-                        icon: ShoppingBagIcon,
-                        label: t("seller.shop.storefront.title"),
-                    },
+                    ...(storefrontLink ? [storefrontLink] : []),
                     {
                         href: "/app/seller/verification",
                         icon: BoltIcon,
@@ -114,7 +124,8 @@ export const SellerLayout: ParentComponent = (props) => {
                 label: t("seller.sidebar.subscription"),
             },
         ],
-    }));
+    };
+    });
 
     return <DashboardLayout sidebarConfig={sidebarConfig()}>{props.children}</DashboardLayout>;
 };

@@ -1006,6 +1006,7 @@ export const dict = {
     history: "History",
     sidebar: {
       shopOverview: "Shop overview",
+      storefront: "Storefront",
       allProducts: "All products",
       campaigns: "Campaigns",
       articles: "Articles",

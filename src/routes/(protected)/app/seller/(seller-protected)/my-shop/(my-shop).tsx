@@ -462,7 +462,11 @@ export default function MyShopPage() {
                          </div>
                          )}
 
-                         <A href={shop.slug ? `/shop/${shop.slug}` : "/"}>
+                         <A
+                           href={shop.slug ? `/shops/${shop.slug}` : "/"}
+                           target="_blank"
+                           rel="noopener noreferrer"
+                         >
                            <button class="w-full p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-terracotta-500 dark:hover:border-terracotta-500 hover:bg-terracotta-50 dark:hover:bg-terracotta-900/20 transition-all group text-left">
                              <div class="flex items-center gap-3">
                                <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-sage-500 to-sage-600 flex items-center justify-center flex-shrink-0">

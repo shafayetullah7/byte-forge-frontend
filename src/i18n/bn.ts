@@ -1011,6 +1011,7 @@ export const dict = {
     history: "ইতিহাস",
     sidebar: {
       shopOverview: "দোকানের সারাংশ",
+      storefront: "আঙিনা",
       allProducts: "সকল পণ্য",
       campaigns: "ক্যাম্পেইন",
       articles: "নিবন্ধ",

@@ -8,6 +8,7 @@ export interface NavLink {
     label: string;
     id?: string;
     children?: NavLink[];
+    openInNewTab?: boolean;
 }
 
 export interface SidebarConfig {
@@ -99,6 +100,8 @@ const PlainNavItem: Component<{
             class={baseClasses()}
             onClick={props.onClick}
             aria-current={isActive() ? "page" : undefined}
+            target={props.link.openInNewTab ? "_blank" : undefined}
+            rel={props.link.openInNewTab ? "noopener noreferrer" : undefined}
         >
             <props.link.icon class={iconClasses()} />
             <span class="whitespace-nowrap">{props.link.label}</span>
