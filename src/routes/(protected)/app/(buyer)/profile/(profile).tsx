@@ -1,25 +1,13 @@
 import { Component } from "solid-js";
-import { useSession, logoutAction, performFederatedLogout } from "~/lib/auth";
+import { useSession, performFederatedLogout } from "~/lib/auth";
 import { useI18n } from "~/i18n";
-import { useNavigate, useAction } from "@solidjs/router";
-import { toaster } from "~/components/ui/Toast";
 
 const Profile: Component = () => {
     const user = useSession();
     const { t } = useI18n();
-    const navigate = useNavigate();
-    const logout = useAction(logoutAction);
 
     const handleLogout = () => {
-        logout()
-            .then((result) => {
-                if (result && result.success === false) {
-                    toaster.error(t("auth.logoutFailed"));
-                    return;
-                }
-                navigate("/", { replace: true });
-            })
-            .catch(() => toaster.error(t("auth.logoutFailed")));
+        performFederatedLogout();
     };
 
     // Format date
@@ -141,7 +129,7 @@ const Profile: Component = () => {
                                 {t("common.signOut")}
                             </button>
                             <button
-                                onClick={() => performFederatedLogout()}
+                                onClick={() => performFederatedLogout({ allDevices: true })}
                                 class="px-6 py-3 bg-red-600 dark:bg-red-700 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-800 transition-colors font-medium"
                             >
                                 {t("common.signOutEverywhere")}

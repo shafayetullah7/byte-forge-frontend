@@ -2,6 +2,7 @@ import { config } from "~/lib/config";
 
 /**
  * Soft logout: clears BF cookies via API; Aponika SSO may remain.
+ * Used when token refresh fails — must not hit end_session.
  */
 export { performLogout, logoutAction } from "./session";
 
@@ -24,7 +25,7 @@ function readCookie(name: string): string | undefined {
 }
 
 /** Top-level POST so CSRF cookie + form field are sent; GET is rejected. */
-export function performFederatedLogout(): void {
+export function performFederatedLogout(options?: { allDevices?: boolean }): void {
   if (typeof window === "undefined") return;
 
   const form = document.createElement("form");
@@ -39,6 +40,14 @@ export function performFederatedLogout(): void {
     input.name = "xsrf";
     input.value = xsrf;
     form.appendChild(input);
+  }
+
+  if (options?.allDevices) {
+    const allDevices = document.createElement("input");
+    allDevices.type = "hidden";
+    allDevices.name = "allDevices";
+    allDevices.value = "1";
+    form.appendChild(allDevices);
   }
 
   document.body.appendChild(form);

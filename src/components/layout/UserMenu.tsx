@@ -1,8 +1,7 @@
 import { Component, createSignal, Show, onMount, onCleanup } from "solid-js";
 import { isServer } from "solid-js/web";
-import { A, useNavigate, useAction, useSubmission } from "@solidjs/router";
-import { logoutAction, performFederatedLogout } from "~/lib/auth";
-import { toaster } from "~/components/ui/Toast";
+import { A } from "@solidjs/router";
+import { performFederatedLogout } from "~/lib/auth";
 import { useI18n } from "~/i18n";
 import { getInitials } from "~/lib/utils/string.utils";
 import {
@@ -23,10 +22,7 @@ interface UserMenuProps {
 
 export const UserMenu: Component<UserMenuProps> = (props) => {
     const { t } = useI18n();
-    const navigate = useNavigate();
     const [isOpen, setIsOpen] = createSignal(false);
-    const logout = useAction(logoutAction);
-    const submission = useSubmission(logoutAction);
 
     const handleClickOutside = (e: MouseEvent) => {
         const target = e.target as HTMLElement;
@@ -48,21 +44,13 @@ export const UserMenu: Component<UserMenuProps> = (props) => {
     });
 
     const handleLogout = () => {
-        logout()
-            .then((result) => {
-                if (result && result.success === false) {
-                    toaster.error(t("auth.logoutFailed"));
-                    return;
-                }
-                navigate("/", { replace: true });
-            })
-            .catch(() => toaster.error(t("auth.logoutFailed")));
         setIsOpen(false);
+        performFederatedLogout();
     };
 
     const handleFederatedLogout = () => {
         setIsOpen(false);
-        performFederatedLogout();
+        performFederatedLogout({ allDevices: true });
     };
 
     return (
@@ -134,22 +122,20 @@ export const UserMenu: Component<UserMenuProps> = (props) => {
                         </A>
                     </div>
 
-                    {/* Logout — soft (app only) and federated (IdP) */}
+                    {/* Logout — this browser (Aponika SSO) vs all devices */}
                     <div class="border-t border-cream-200 dark:border-forest-700 py-2 px-2 space-y-1">
                         <button
                             onClick={handleLogout}
-                            disabled={submission.pending}
-                            class="flex items-center gap-3 w-full px-3 py-2.5 body-small font-semibold text-forest-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-900/40 rounded-lg transition-standard disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="flex items-center gap-3 w-full px-3 py-2.5 body-small font-semibold text-forest-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-900/40 rounded-lg transition-standard"
                             type="button"
                             title={t("common.signOutHint")}
                         >
                             <ArrowRightOnRectangleIcon class="w-5 h-5" />
-                            {submission.pending ? t("common.loading") : t("common.signOut")}
+                            {t("common.signOut")}
                         </button>
                         <button
                             onClick={handleFederatedLogout}
-                            disabled={submission.pending}
-                            class="flex items-center gap-3 w-full px-3 py-2.5 body-small font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-standard disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="flex items-center gap-3 w-full px-3 py-2.5 body-small font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-standard"
                             type="button"
                             title={t("common.signOutEverywhereHint")}
                         >

@@ -14,7 +14,7 @@ export const dict = {
     signUp: "Sign Up",
     signOut: "Sign Out",
     signOutEverywhere: "Sign out everywhere",
-    signOutHint: "Sign out of Byte Forge on this browser",
+    signOutHint: "End Aponika sign-in in this browser (password required next time)",
     signOutEverywhereHint: "Also end your Aponika session (full sign-in required next time)",
     dashboard: "Dashboard",
     settings: "Settings",

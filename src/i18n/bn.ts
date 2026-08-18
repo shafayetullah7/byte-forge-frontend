@@ -14,7 +14,7 @@ export const dict = {
     signUp: "নিবন্ধন করুন",
     signOut: "লগ আউট",
     signOutEverywhere: "সব জায়গা থেকে লগ আউট",
-    signOutHint: "এই ব্রাউজারে বাইট ফোর্জ থেকে লগ আউট",
+    signOutHint: "এই ব্রাউজারে Aponika সাইন ইন শেষ করুন (পরের বার ইমেইল ও পাসওয়ার্ড লাগবে)",
     signOutEverywhereHint: "আপনার আপোনিকা সেশনও শেষ করুন (পরবর্তী বার পূর্ণ লগইন লাগবে)",
     dashboard: "ড্যাশবোর্ড",
     settings: "সেটিংস",

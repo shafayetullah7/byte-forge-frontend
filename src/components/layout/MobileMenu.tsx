@@ -1,4 +1,4 @@
-import { A, useNavigate, useAction, useSubmission, useLocation } from "@solidjs/router";
+import { A, useLocation } from "@solidjs/router";
 import { Show, type Accessor } from "solid-js";
 import {
     UserIcon,
@@ -6,8 +6,7 @@ import {
     ArrowRightOnRectangleIcon,
     Squares2x2Icon,
 } from "../icons";
-import { logoutAction, performFederatedLogout, getOidcLoginUrlFromLocation } from "~/lib/auth";
-import { toaster } from "~/components/ui/Toast";
+import { performFederatedLogout, getOidcLoginUrlFromLocation } from "~/lib/auth";
 import { type AuthUser } from "~/lib/api/types/auth.types";
 import { useI18n } from "~/i18n";
 import { config } from "~/lib/config";
@@ -22,29 +21,17 @@ interface MobileMenuProps {
 }
 
 export function MobileMenu(props: MobileMenuProps) {
-    const navigate = useNavigate();
     const location = useLocation();
     const { t, locale, toggleLocale } = useI18n();
 
-    const logout = useAction(logoutAction);
-    const submission = useSubmission(logoutAction);
-
     const handleLogout = () => {
-        logout()
-            .then((result) => {
-                if (result && result.success === false) {
-                    toaster.error(t("auth.logoutFailed"));
-                    return;
-                }
-                navigate("/", { replace: true });
-            })
-            .catch(() => toaster.error(t("auth.logoutFailed")));
         props.onClose();
+        performFederatedLogout();
     };
 
     const handleFederatedLogout = () => {
         props.onClose();
-        performFederatedLogout();
+        performFederatedLogout({ allDevices: true });
     };
 
     return (
@@ -170,12 +157,11 @@ export function MobileMenu(props: MobileMenuProps) {
                                 <div class="border-t border-cream-200 dark:border-forest-700 mt-2 pt-2 space-y-1">
                                     <button
                                         onClick={handleLogout}
-                                        class="flex items-center gap-3 w-full px-4 py-3 text-sm text-forest-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-900/40 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                        disabled={submission.pending}
+                                        class="flex items-center gap-3 w-full px-4 py-3 text-sm text-forest-700 dark:text-gray-300 hover:bg-forest-50 dark:hover:bg-forest-900/40 transition-colors duration-200"
                                         type="button"
                                     >
                                         <ArrowRightOnRectangleIcon class="w-4 h-4" />
-                                        {submission.pending ? t("common.loading") : t("common.signOut")}
+                                        {t("common.signOut")}
                                     </button>
                                     <button
                                         onClick={handleFederatedLogout}
