@@ -1,5 +1,8 @@
 import { query, createAsync, action } from "@solidjs/router";
 import { authApi } from "~/lib/api/endpoints/user/auth.api";
+import { invalidateAllCart } from "~/lib/api/endpoints/buyer/cart.api";
+import { invalidateWishlist } from "~/lib/api/endpoints/buyer/wishlist.api";
+import { invalidateAllOrders } from "~/lib/api/endpoints/buyer/orders.api";
 
 /**
  * Session Management for ByteForge Frontend
@@ -45,6 +48,9 @@ export const logoutAction = action(async (): Promise<{ success: boolean }> => {
     await authApi.oidcCheck();
     return { success: false };
   } catch {
+    invalidateAllCart();
+    invalidateWishlist();
+    invalidateAllOrders();
     return { success: true };
   }
 }, "logout-action");

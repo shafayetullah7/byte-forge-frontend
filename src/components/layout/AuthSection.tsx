@@ -1,5 +1,6 @@
 import { Show } from "solid-js";
-import { useSession, getOidcLoginUrl } from "~/lib/auth";
+import { useLocation } from "@solidjs/router";
+import { useSession, getOidcLoginUrlFromLocation } from "~/lib/auth";
 import { UserMenu } from "./UserMenu";
 import { useI18n } from "~/i18n";
 import { config } from "~/lib/config";
@@ -7,6 +8,7 @@ import LinkButton from "../ui/LinkButton";
 
 export function AuthSection() {
     const user = useSession();
+    const location = useLocation();
     const { t } = useI18n();
 
     return (
@@ -16,7 +18,7 @@ export function AuthSection() {
             fallback={
                 <div class="hidden md:flex items-center gap-3">
                     <LinkButton
-                        href={getOidcLoginUrl()}
+                        href={getOidcLoginUrlFromLocation(location.pathname, location.search)}
                         variant="secondary"
                         class="font-semibold"
                     >

@@ -5,8 +5,10 @@ import { config } from "~/lib/config";
  */
 export { performLogout, logoutAction } from "./session";
 
+const XSRF_COOKIE = "bf-xsrf-token";
+
 /**
- * Federated logout URL — browser navigates here; API clears cookies then submits
+ * Federated logout URL — browser POSTs here; API clears cookies then submits
  * to IdP end_session (registered post_logout_redirect_uri only).
  */
 export function buildFederatedLogoutUrl(): string {
@@ -14,7 +16,31 @@ export function buildFederatedLogoutUrl(): string {
   return `${base}/api/v1/user/auth/oidc/logout`;
 }
 
+function readCookie(name: string): string | undefined {
+  const match = document.cookie.match(
+    new RegExp(`(?:^|;\\s*)${name}=([^;]*)`),
+  );
+  return match ? decodeURIComponent(match[1]) : undefined;
+}
+
+/** Top-level POST so CSRF cookie + form field are sent; GET is rejected. */
 export function performFederatedLogout(): void {
   if (typeof window === "undefined") return;
-  window.location.assign(buildFederatedLogoutUrl());
+
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action = buildFederatedLogoutUrl();
+  form.style.display = "none";
+
+  const xsrf = readCookie(XSRF_COOKIE);
+  if (xsrf) {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "xsrf";
+    input.value = xsrf;
+    form.appendChild(input);
+  }
+
+  document.body.appendChild(form);
+  form.submit();
 }

@@ -1,4 +1,4 @@
-import { A, useNavigate, useAction, useSubmission } from "@solidjs/router";
+import { A, useNavigate, useAction, useSubmission, useLocation } from "@solidjs/router";
 import { Show, type Accessor } from "solid-js";
 import {
     UserIcon,
@@ -6,7 +6,8 @@ import {
     ArrowRightOnRectangleIcon,
     Squares2x2Icon,
 } from "../icons";
-import { logoutAction, performFederatedLogout, getOidcLoginUrl } from "~/lib/auth";
+import { logoutAction, performFederatedLogout, getOidcLoginUrlFromLocation } from "~/lib/auth";
+import { toaster } from "~/components/ui/Toast";
 import { type AuthUser } from "~/lib/api/types/auth.types";
 import { useI18n } from "~/i18n";
 import { config } from "~/lib/config";
@@ -22,15 +23,22 @@ interface MobileMenuProps {
 
 export function MobileMenu(props: MobileMenuProps) {
     const navigate = useNavigate();
+    const location = useLocation();
     const { t, locale, toggleLocale } = useI18n();
 
     const logout = useAction(logoutAction);
     const submission = useSubmission(logoutAction);
 
     const handleLogout = () => {
-        logout().then(() => {
-            navigate("/", { replace: true });
-        });
+        logout()
+            .then((result) => {
+                if (result && result.success === false) {
+                    toaster.error(t("auth.logoutFailed"));
+                    return;
+                }
+                navigate("/", { replace: true });
+            })
+            .catch(() => toaster.error(t("auth.logoutFailed")));
         props.onClose();
     };
 
@@ -97,7 +105,7 @@ export function MobileMenu(props: MobileMenuProps) {
                         fallback={
                             <div class="px-4 flex flex-col gap-2">
                                 <LinkButton
-                                    href={getOidcLoginUrl()}
+                                    href={getOidcLoginUrlFromLocation(location.pathname, location.search)}
                                     variant="secondary"
                                     class="w-full font-semibold"
                                     onClick={props.onClose}

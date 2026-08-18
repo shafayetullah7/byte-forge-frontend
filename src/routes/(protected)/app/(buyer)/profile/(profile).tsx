@@ -2,6 +2,7 @@ import { Component } from "solid-js";
 import { useSession, logoutAction, performFederatedLogout } from "~/lib/auth";
 import { useI18n } from "~/i18n";
 import { useNavigate, useAction } from "@solidjs/router";
+import { toaster } from "~/components/ui/Toast";
 
 const Profile: Component = () => {
     const user = useSession();
@@ -10,9 +11,15 @@ const Profile: Component = () => {
     const logout = useAction(logoutAction);
 
     const handleLogout = () => {
-        logout().then(() => {
-            navigate("/", { replace: true });
-        });
+        logout()
+            .then((result) => {
+                if (result && result.success === false) {
+                    toaster.error(t("auth.logoutFailed"));
+                    return;
+                }
+                navigate("/", { replace: true });
+            })
+            .catch(() => toaster.error(t("auth.logoutFailed")));
     };
 
     // Format date

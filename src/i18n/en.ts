@@ -81,6 +81,21 @@ export const dict = {
       createAccount: "Create one now",
       success: "Logged in successfully! Redirecting...",
     },
+    oidcError: {
+      title: "Could not sign you in",
+      redirecting: "Redirecting to sign in…",
+      tryAgain: "Try again",
+      access_denied: "You cancelled sign in. You can try again when you are ready.",
+      login_required: "Please sign in again to continue.",
+      temporarily_unavailable:
+        "Sign in is temporarily unavailable. Please try again in a moment.",
+      provision_failed:
+        "Your account could not be set up on Byte Forge. Contact support if this continues.",
+      token_exchange_failed:
+        "Sign in could not be completed. Please try again.",
+      failed: "Sign in failed. Please try again.",
+    },
+    logoutFailed: "Could not sign out. Please try again.",
     register: {
       title: "Create an account",
       subtitle: "Join us today! Please enter your details.",

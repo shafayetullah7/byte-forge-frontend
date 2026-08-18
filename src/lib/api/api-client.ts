@@ -30,6 +30,8 @@ export interface FetchOptions extends RequestInit {
   unwrapData?: boolean; // If false, returns full response (with meta). Default: true
   /** @internal One-time CSRF bootstrap retry */
   csrfRetried?: boolean;
+  /** @internal One-time OIDC refresh retry after 401 */
+  authRefreshRetried?: boolean;
 
   // Callbacks for specialized error handling
   /**
@@ -125,6 +127,35 @@ function extractCookieValue(
   return undefined;
 }
 
+const OIDC_REFRESH_PATH = "/api/v1/user/auth/oidc/refresh";
+
+let refreshInFlight: Promise<Response> | null = null;
+let loginRedirectStarted = false;
+
+function postOidcRefresh(cookieHeader: string | null): Promise<Response> {
+  const refreshHeaders = new Headers();
+  if (cookieHeader) refreshHeaders.set("cookie", cookieHeader);
+  const xsrf = getUserXsrfToken(refreshHeaders);
+  if (xsrf) refreshHeaders.set("X-XSRF-TOKEN", xsrf);
+  return fetch(`${config.api.baseUrl}${OIDC_REFRESH_PATH}`, {
+    method: "POST",
+    credentials: "include",
+    headers: refreshHeaders,
+  });
+}
+
+function refreshOidcSession(cookieHeader: string | null): Promise<Response> {
+  if (import.meta.env.SSR) {
+    return postOidcRefresh(cookieHeader);
+  }
+  if (!refreshInFlight) {
+    refreshInFlight = postOidcRefresh(cookieHeader).finally(() => {
+      refreshInFlight = null;
+    });
+  }
+  return refreshInFlight;
+}
+
 function appendCookieHeader(
   headers: Headers,
   name: string,
@@ -160,6 +191,7 @@ export async function fetcher<T>(
     onAuthError,
     onError,
     csrfRetried = false,
+    authRefreshRetried = false,
     ...fetchOptions
   } = options;
 
@@ -272,6 +304,55 @@ export async function fetcher<T>(
           endpoint.includes(e)
         );
 
+        if (!isExcluded && !authRefreshRetried) {
+          try {
+            const refreshResponse = await refreshOidcSession(
+              headers.get("cookie"),
+            );
+            if (refreshResponse.ok) {
+              if (import.meta.env.SSR && event) {
+                try {
+                  const { propagateSetCookies } = await import(
+                    "./api-client.server"
+                  );
+                  await propagateSetCookies(event, refreshResponse);
+                } catch (e) {
+                  console.warn(
+                    "[API] Failed to propagate cookies during SSR refresh",
+                    e,
+                  );
+                }
+              }
+
+              const setCookies = getSetCookies(refreshResponse);
+              const newAccess =
+                extractCookieValue(setCookies, "bfAccessToken") ??
+                getUniversalCookie("bfAccessToken", headers);
+              if (newAccess) {
+                appendCookieHeader(headers, "bfAccessToken", newAccess);
+                headers.set("Authorization", `Bearer ${newAccess}`);
+              }
+
+              const newXsrf =
+                extractCookieValue(setCookies, "bf-xsrf-token") ??
+                extractCookieValue(setCookies, "userXsrfToken") ??
+                getUserXsrfToken(headers);
+              if (newXsrf && stateChangingMethods.includes(method)) {
+                appendCookieHeader(headers, "userXsrfToken", newXsrf);
+                headers.set("X-XSRF-TOKEN", newXsrf);
+              }
+
+              return fetcher<T>(endpoint, {
+                ...options,
+                authRefreshRetried: true,
+                headers,
+              });
+            }
+          } catch {
+            // Refresh network failure — fall through to login redirect.
+          }
+        }
+
         if (!isExcluded) {
           // 1. Request-level hook
           const preventDefault = onAuthError?.(apiError) === false;
@@ -299,14 +380,18 @@ export async function fetcher<T>(
                 const { redirect } = await import("@solidjs/router");
                 throw redirect(loginUrl);
               } catch (e) {
+                if (e instanceof Response) throw e;
                 // During SSR streaming (e.g., inside createAsync),
                 // response headers may already be sent. redirect() will
                 // fail with ERR_HTTP_HEADERS_SENT. Fall through to
                 // throw the ApiError, which ErrorBoundary handles.
                 throw apiError;
               }
-            } else {
+            } else if (!loginRedirectStarted) {
+              loginRedirectStarted = true;
               window.location.href = loginUrl;
+              return {} as T;
+            } else {
               return {} as T;
             }
           }

@@ -2,6 +2,7 @@ import { Component, createSignal, Show, onMount, onCleanup } from "solid-js";
 import { isServer } from "solid-js/web";
 import { A, useNavigate, useAction, useSubmission } from "@solidjs/router";
 import { logoutAction, performFederatedLogout } from "~/lib/auth";
+import { toaster } from "~/components/ui/Toast";
 import { useI18n } from "~/i18n";
 import { getInitials } from "~/lib/utils/string.utils";
 import {
@@ -47,9 +48,15 @@ export const UserMenu: Component<UserMenuProps> = (props) => {
     });
 
     const handleLogout = () => {
-        logout().then(() => {
-            navigate("/", { replace: true });
-        });
+        logout()
+            .then((result) => {
+                if (result && result.success === false) {
+                    toaster.error(t("auth.logoutFailed"));
+                    return;
+                }
+                navigate("/", { replace: true });
+            })
+            .catch(() => toaster.error(t("auth.logoutFailed")));
         setIsOpen(false);
     };
 

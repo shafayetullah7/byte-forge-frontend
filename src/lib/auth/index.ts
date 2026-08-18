@@ -4,6 +4,7 @@ export * from "./login-redirect";
 export * from "./guards";
 export * from "./return-to";
 export * from "./middleware-auth";
+export * from "./oidc-error";
 
 /** @deprecated Use getOidcLoginUrl */
 export { getOidcLoginUrl as buildLoginHref } from "./login-redirect";
