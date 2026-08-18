@@ -3,10 +3,14 @@ import { Show } from "solid-js";
 import { SubscriptionDashboardBanner } from "~/components/seller/SubscriptionDashboardBanner";
 import { useI18n } from "~/i18n";
 import { getSellerAnalyticsOverview } from "~/lib/api/endpoints/seller/analytics.api";
+import { getShopStatus } from "~/lib/context/shop-context";
 import { formatPrice } from "~/routes/(app)/plants/constants";
 
 export const route = {
-  preload: () => getSellerAnalyticsOverview(),
+  preload: async () => {
+    const shop = await getShopStatus();
+    if (shop) getSellerAnalyticsOverview();
+  },
 } satisfies RouteDefinition;
 
 export default function SellerDashboard() {

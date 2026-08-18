@@ -10,7 +10,11 @@ import { getShopStatus } from "~/lib/context/shop-context";
 const SellerProtectedLayout: ParentComponent = (props) => {
     const { t } = useI18n();
     const shopStatus = createAsync(() => getShopStatus(), { deferStream: true });
-    const subscription = createAsync(() => getSellerSubscription(), { deferStream: true });
+    const subscription = createAsync(async () => {
+        const shop = shopStatus();
+        if (!shop) return undefined;
+        return getSellerSubscription();
+    }, { deferStream: true });
 
     return (
         <SellerLayout>

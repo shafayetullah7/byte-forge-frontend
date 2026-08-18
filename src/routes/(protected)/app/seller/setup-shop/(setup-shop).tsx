@@ -220,8 +220,8 @@ export default function SetupShop() {
                 </div>
             }
         >
-            <div class="min-h-full flex items-center justify-center py-12">
-                <div class="mx-auto max-w-3xl w-full space-y-8">
+            <div class="w-full min-w-0 flex-1 overflow-y-auto">
+                <div class="mx-auto max-w-3xl w-full space-y-8 py-12 px-4 sm:px-6">
                     {/* Header */}
                     <div class="text-center">
                         <h1 class="h1 mb-3">
