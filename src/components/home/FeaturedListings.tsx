@@ -2,6 +2,11 @@ import { Show, For } from "solid-js";
 import { createAsync } from "@solidjs/router";
 import { LinkButton } from "~/components/ui";
 import { useI18n } from "~/i18n";
+import {
+  HOME_ANALYTICS_SECTIONS,
+  homeClickAttrs,
+  homeSectionAttrs,
+} from "~/lib/analytics/home-analytics";
 import { listFeaturedPlants } from "~/lib/public-plants/public-plant.service";
 import { PlantCard } from "~/routes/(app)/plants/plant-card";
 
@@ -16,6 +21,7 @@ export function FeaturedListings() {
       <section
         class="py-24 px-4 bg-white dark:bg-forest-900/50"
         aria-labelledby={headingId}
+        {...homeSectionAttrs(HOME_ANALYTICS_SECTIONS.featured_listings)}
       >
         <div class="max-w-7xl mx-auto">
           <div class="text-center mb-16">
@@ -39,7 +45,12 @@ export function FeaturedListings() {
           </div>
 
           <div class="text-center mt-12">
-            <LinkButton href="/plants" variant="primary" size="lg">
+            <LinkButton
+              href="/plants"
+              variant="primary"
+              size="lg"
+              {...homeClickAttrs("featured_listings.browse_all")}
+            >
               {t("landing.featuredListings.browseAll")} →
             </LinkButton>
           </div>

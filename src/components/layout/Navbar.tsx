@@ -1,27 +1,28 @@
-import { A, useLocation, createAsync } from "@solidjs/router";
+import { A, createAsync } from "@solidjs/router";
 import { createSignal, onMount, onCleanup, Show } from "solid-js";
 import { isServer } from "solid-js/web";
-import { MagnifyingGlassIcon, ShoppingBagIcon, Bars3Icon } from "../icons";
+import { HeartIcon, ShoppingBagIcon, Bars3Icon } from "../icons";
 import { AuthSection } from "./AuthSection";
 import { MobileMenu } from "./MobileMenu";
 import { ThemeToggle } from "./ThemeToggle";
+import { NavbarPlantSearch } from "./NavbarPlantSearch";
 import { useSession } from "~/lib/auth";
-import { getInitials } from "~/lib/utils/string.utils";
 import { useI18n } from "~/i18n";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { getCartCount } from "~/lib/api/endpoints/buyer/cart.api";
+import { NavbarPrimaryLinks } from "./NavbarPrimaryLinks";
+import { MobileHeaderAccountLink } from "./UserAvatarChip";
 
 export function Navbar() {
   const user = useSession();
-  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = createSignal(false);
-  const { t, locale, toggleLocale } = useI18n();
-  const cartCount = createAsync(() => getCartCount(), { initialValue: { itemsCount: 0, totalQuantity: 0 } });
+  const { t } = useI18n();
+  const cartCount = createAsync(() => getCartCount(), {
+    initialValue: { itemsCount: 0, totalQuantity: 0 },
+  });
 
-  // Close mobile menu when clicking outside
   const handleClickOutside = (e: MouseEvent) => {
     const target = e.target as HTMLElement;
-    // If the element was removed from DOM (e.g. toggled icon), ignore the click
     if (!document.contains(target)) return;
 
     if (!target.closest(".mobile-menu-container")) {
@@ -42,67 +43,42 @@ export function Navbar() {
   });
 
   return (
-    <header class="sticky top-0 z-50 pointer-events-auto">
-      <nav class="w-full bg-white dark:bg-forest-800 border-b border-cream-200 dark:border-forest-700 transition-colors duration-200">
+    <header class="sticky top-0 z-50">
+      <nav
+        class="w-full bg-cream-50 dark:bg-forest-900 border-b border-cream-200/60 dark:border-forest-700/60 transition-colors duration-200"
+        aria-label={t("landing.nav.mainAriaLabel")}
+      >
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex items-center justify-between h-16">
-            {/* Logo Section */}
+          <div class="flex items-center justify-between gap-2 min-h-16 py-2">
             <div class="flex-shrink-0">
               <A
                 href="/"
                 class="h5 flex items-center gap-2 hover:text-forest-600 dark:hover:text-forest-300 transition-standard"
               >
                 ByteForge
-                <span class="w-1.5 h-1.5 bg-terracotta-500 rounded-full"></span>
+                <span class="w-1.5 h-1.5 bg-terracotta-500 rounded-full" />
               </A>
             </div>
 
-            {/* Center Links - Hidden on mobile */}
-            <div class="hidden md:flex items-center gap-8">
-              <A
-                href="/"
-                class="text-forest-700 dark:text-gray-300 font-semibold body-small hover:text-terracotta-500 dark:hover:text-terracotta-300 transition-standard"
-                activeClass="text-terracotta-600 dark:text-terracotta-400 font-bold"
-                end
-              >
-                {t("common.home")}
-              </A>
-              <A
-                href="/plants"
-                class="text-forest-700 dark:text-gray-300 font-semibold body-small hover:text-terracotta-500 dark:hover:text-terracotta-300 transition-standard"
-                activeClass="text-terracotta-600 dark:text-terracotta-400 font-bold"
-              >
-                {t("common.plants")}
-              </A>
-              <A
-                href="/shops"
-                class="text-forest-700 dark:text-gray-300 font-semibold body-small hover:text-terracotta-500 dark:hover:text-terracotta-300 transition-standard"
-                activeClass="text-terracotta-600 dark:text-terracotta-400 font-bold"
-              >
-                {t("common.shops")}
-              </A>
-              <A
-                href="/about"
-                class="text-forest-700 dark:text-gray-300 font-semibold body-small hover:text-terracotta-500 dark:hover:text-terracotta-300 transition-standard"
-                activeClass="text-terracotta-600 dark:text-terracotta-400 font-bold"
-              >
-                {t("common.about")}
-              </A>
+            <NavbarPlantSearch />
+
+            <div class="hidden md:flex items-center gap-6 lg:gap-8 flex-shrink-0">
+              <NavbarPrimaryLinks variant="desktop" />
             </div>
 
-            {/* Right Actions */}
-            <div class="flex items-center gap-4">
-              <button
+            <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+              <A
+                href="/app/favorites"
                 class="p-2.5 text-gray-500 dark:text-gray-400 hover:text-terracotta-500 dark:hover:text-terracotta-400 transition-colors duration-200"
-                aria-label="Search"
+                aria-label={t("buyer.favorites.title")}
               >
-                <MagnifyingGlassIcon class="w-5 h-5" />
-              </button>
+                <HeartIcon class="w-5 h-5" />
+              </A>
 
               <A
                 href="/cart"
                 class="p-2.5 text-gray-500 dark:text-gray-400 hover:text-terracotta-500 dark:hover:text-terracotta-400 transition-colors duration-200 relative"
-                aria-label="Cart"
+                aria-label={t("common.cart")}
               >
                 <ShoppingBagIcon class="w-5 h-5" />
                 <Show when={cartCount()?.totalQuantity > 0}>
@@ -112,24 +88,30 @@ export function Navbar() {
                 </Show>
               </A>
 
-              {/* Theme & Language - Hidden on mobile, accessible in menu */}
               <div class="hidden md:flex items-center gap-2">
                 <ThemeToggle />
                 <LanguageSwitcher variant="compact" />
               </div>
 
-              {/* Auth Section */}
               <div class="hidden md:block">
                 <AuthSection />
               </div>
 
+              <Show when={user()} keyed>
+                {(userData) => (
+                  <div class="md:hidden">
+                    <MobileHeaderAccountLink user={userData} />
+                  </div>
+                )}
+              </Show>
 
-              {/* Mobile Menu Trigger */}
-              <div class="md:hidden mobile-menu-container">
+              <div class="md:hidden mobile-menu-container relative">
                 <button
+                  type="button"
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen())}
                   class="p-2.5 text-forest-700 dark:text-gray-300 hover:text-terracotta-500 dark:hover:text-terracotta-400 transition-colors duration-200"
-                  aria-label="Toggle menu"
+                  aria-label={t("landing.nav.toggleMenu")}
+                  aria-expanded={mobileMenuOpen()}
                 >
                   <Bars3Icon class="w-6 h-6" />
                 </button>

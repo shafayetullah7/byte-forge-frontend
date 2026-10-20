@@ -3,7 +3,6 @@ import { useLocation } from "@solidjs/router";
 import { useSession, getOidcLoginUrlFromLocation } from "~/lib/auth";
 import { UserMenu } from "./UserMenu";
 import { useI18n } from "~/i18n";
-import { config } from "~/lib/config";
 import LinkButton from "../ui/LinkButton";
 
 export function AuthSection() {
@@ -16,22 +15,15 @@ export function AuthSection() {
             when={user()}
             keyed
             fallback={
-                <div class="hidden md:flex items-center gap-3">
-                    <LinkButton
-                        href={getOidcLoginUrlFromLocation(location.pathname, location.search)}
-                        variant="secondary"
-                        class="font-semibold"
-                    >
-                        {t("common.signIn")}
-                    </LinkButton>
-                    <LinkButton
-                        href={config.auth.registerUrl}
-                        variant="primary"
-                        class="font-semibold"
-                    >
-                        {t("common.signUp")}
-                    </LinkButton>
-                </div>
+                <LinkButton
+                    href={getOidcLoginUrlFromLocation(location.pathname, location.search)}
+                    variant="outline"
+                    size="sm"
+                    class="!rounded-full whitespace-nowrap font-semibold"
+                    aria-label={t("landing.nav.beginAriaLabel")}
+                >
+                    {t("landing.nav.begin")}
+                </LinkButton>
             }
         >
             {(userData) => (

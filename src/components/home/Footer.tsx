@@ -1,126 +1,108 @@
 import { A } from "@solidjs/router";
-import { SproutIcon, EnvelopeIcon, PhoneIcon, MapPinIcon } from "~/components/icons";
+import { SproutIcon, MapPinIcon } from "~/components/icons";
 import { useI18n } from "~/i18n";
 import { config } from "~/lib/config";
+import { buildPlantsFilterHref } from "~/lib/plants/plants-url";
+import {
+  HOME_ANALYTICS_SECTIONS,
+  homeSectionAttrs,
+} from "~/lib/analytics/home-analytics";
 
-const footerLinks = {
-  marketplace: [
-    { label: "Browse Plants", href: "/plants" },
-    { label: "All Shops", href: "/shops" },
-    { label: "New Arrivals", href: "/plants" },
-    { label: "Best Sellers", href: "/plants" },
-  ],
-  sellers: [
-    { label: "Start Selling", href: config.auth.registerUrl },
-    { label: "Seller Guide", href: "/help" },
-    { label: "Pricing", href: "/help" },
-    { label: "Success Stories", href: "/help" },
-  ],
-  company: [
-    { label: "About Us", href: "/help" },
-    { label: "Careers", href: "/help" },
-    { label: "Privacy Policy", href: "/legal/privacy" },
-    { label: "Terms of Service", href: "/legal/terms" },
-  ],
-  support: [
-    { label: "Help Center", href: "/help" },
-    { label: "Contact Us", href: "/help" },
-    { label: "Shipping Info", href: "/help/shipping-and-returns" },
-    { label: "COD Policy", href: "/help/cod" },
-  ],
-};
+const footerSections = [
+  {
+    headerKey: "landing.footer.marketplace",
+    links: [
+      { labelKey: "landing.footer.links.browsePlants", href: "/plants" },
+      { labelKey: "landing.footer.links.allShops", href: "/shops" },
+      {
+        labelKey: "landing.footer.links.inStockPlants",
+        href: buildPlantsFilterHref({ inStockOnly: true }),
+      },
+    ],
+  },
+  {
+    headerKey: "landing.footer.sellers",
+    links: [
+      { labelKey: "landing.footer.links.startSelling", href: config.auth.registerUrl },
+      { labelKey: "landing.footer.links.sellerGuide", href: "/help" },
+      { labelKey: "landing.footer.links.sellerHelp", href: "/help" },
+    ],
+  },
+  {
+    headerKey: "landing.footer.company",
+    links: [
+      { labelKey: "landing.footer.links.about", href: "/help" },
+      { labelKey: "landing.footer.links.privacy", href: "/legal/privacy" },
+      { labelKey: "landing.footer.links.terms", href: "/legal/terms" },
+    ],
+  },
+  {
+    headerKey: "landing.footer.support",
+    links: [
+      { labelKey: "landing.footer.links.helpCenter", href: "/help" },
+      { labelKey: "landing.footer.links.contact", href: "/help" },
+      { labelKey: "landing.footer.links.shipping", href: "/help/shipping-and-returns" },
+      { labelKey: "landing.footer.links.cod", href: "/help/cod" },
+    ],
+  },
+] as const;
 
 export function Footer() {
   const { t } = useI18n();
 
   return (
-    <footer class="bg-forest-900 dark:bg-forest-950 text-cream-100">
-      {/* Main Footer */}
+    <footer
+      class="bg-forest-900 dark:bg-forest-950 text-cream-100"
+      {...homeSectionAttrs(HOME_ANALYTICS_SECTIONS.footer)}
+    >
       <div class="max-w-7xl mx-auto px-4 py-16">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12">
-          {/* Brand Column */}
           <div class="lg:col-span-2">
-            <A href="/" class="h4 flex items-center gap-2 text-white hover:text-forest-300 transition-standard mb-4">
+            <A
+              href="/"
+              class="h4 flex items-center gap-2 text-white hover:text-forest-300 transition-standard mb-4"
+            >
               ByteForge
               <span class="w-2 h-2 bg-terracotta-500 rounded-full" />
             </A>
             <p class="body-small text-cream-300 leading-relaxed mb-6 max-w-sm">
-              Bangladesh's premier marketplace for plants. Connect with verified nurseries, discover rare species, and grow your green world.
+              {t("landing.footer.brandBlurb")}
             </p>
 
-            {/* Contact Info */}
             <div class="space-y-3">
-              <div class="flex items-center gap-3">
-                <EnvelopeIcon class="w-4 h-4 text-forest-400 flex-shrink-0" />
-                <span class="body-small text-cream-300">hello@byteforge.com.bd</span>
-              </div>
-              <div class="flex items-center gap-3">
-                <PhoneIcon class="w-4 h-4 text-forest-400 flex-shrink-0" />
-                <span class="body-small text-cream-300">+880 1XXX-XXXXXX</span>
-              </div>
+              <A
+                href="/help"
+                class="body-small text-cream-300 hover:text-white transition-standard block"
+              >
+                {t("landing.footer.contactHelp")}
+              </A>
               <div class="flex items-start gap-3">
                 <MapPinIcon class="w-4 h-4 text-forest-400 flex-shrink-0 mt-0.5" />
-                <span class="body-small text-cream-300">Dhaka, Bangladesh</span>
+                <span class="body-small text-cream-300">{t("landing.footer.contactLocation")}</span>
               </div>
             </div>
           </div>
 
-          {/* Links Columns */}
-          <div>
-            <h4 class="h6 text-white mb-4">{t("landing.footer.marketplace")}</h4>
-            <ul class="space-y-3">
-              {footerLinks.marketplace.map((link) => (
-                <li>
-                  <A href={link.href} class="body-small text-cream-300 hover:text-white transition-standard">
-                    {link.label}
-                  </A>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 class="h6 text-white mb-4">{t("landing.footer.sellers")}</h4>
-            <ul class="space-y-3">
-              {footerLinks.sellers.map((link) => (
-                <li>
-                  <A href={link.href} class="body-small text-cream-300 hover:text-white transition-standard">
-                    {link.label}
-                  </A>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 class="h6 text-white mb-4">{t("landing.footer.company")}</h4>
-            <ul class="space-y-3">
-              {footerLinks.company.map((link) => (
-                <li>
-                  <A href={link.href} class="body-small text-cream-300 hover:text-white transition-standard">
-                    {link.label}
-                  </A>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 class="h6 text-white mb-4">{t("landing.footer.support")}</h4>
-            <ul class="space-y-3">
-              {footerLinks.support.map((link) => (
-                <li>
-                  <A href={link.href} class="body-small text-cream-300 hover:text-white transition-standard">
-                    {link.label}
-                  </A>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {footerSections.map((section) => (
+            <div>
+              <h4 class="h6 text-white mb-4">{t(section.headerKey)}</h4>
+              <ul class="space-y-3">
+                {section.links.map((link) => (
+                  <li>
+                    <A
+                      href={link.href}
+                      class="body-small text-cream-300 hover:text-white transition-standard"
+                    >
+                      {t(link.labelKey)}
+                    </A>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Bottom Bar */}
       <div class="border-t border-forest-700">
         <div class="max-w-7xl mx-auto px-4 py-6">
           <div class="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -129,9 +111,7 @@ export function Footer() {
             </p>
             <div class="flex items-center gap-2">
               <SproutIcon class="w-4 h-4 text-forest-400" />
-              <span class="body-small text-cream-400">
-                {t("landing.footer.madeWith")}
-              </span>
+              <span class="body-small text-cream-400">{t("landing.footer.madeWith")}</span>
             </div>
           </div>
         </div>

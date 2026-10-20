@@ -16,8 +16,8 @@ export default function NotFound() {
           Home
         </A>
         {" - "}
-        <A href="/about" class="text-sky-600 hover:underline">
-          About Page
+        <A href="/help" class="text-sky-600 hover:underline">
+          Help Center
         </A>
       </p>
     </main>

@@ -4,12 +4,16 @@ import {
   getPublicPlants,
 } from "~/lib/api/endpoints/public/plants.api";
 import { ApiError } from "~/lib/api/types";
+import { HOME_BUDGET_MAX_PRICE_BDT } from "~/lib/home/discovery-presets";
 import type {
   PublicPlantDetail,
   PublicPlantFilter,
 } from "~/lib/api/types/public/plants.types";
 
-/** Homepage featured grid: newest in-stock listings from entitled sellers. */
+/**
+ * Homepage featured grid: newest in-stock listings.
+ * Seller entitlement is enforced in `ListPublicPlantsQuery` (server-side), not in this filter.
+ */
 export const FEATURED_LISTINGS_FILTER = {
   page: 1,
   limit: 8,
@@ -24,6 +28,23 @@ export const listFeaturedPlants = query(
     return getPublicPlants(FEATURED_LISTINGS_FILTER);
   },
   "public-plants-featured",
+);
+
+export const BUDGET_FINDS_FILTER = {
+  page: 1,
+  limit: 16,
+  maxPrice: HOME_BUDGET_MAX_PRICE_BDT,
+  inStockOnly: true,
+  sortBy: "price",
+  sortOrder: "asc",
+} as const satisfies PublicPlantFilter;
+
+export const listBudgetFindPlants = query(
+  async () => {
+    "use server";
+    return getPublicPlants(BUDGET_FINDS_FILTER);
+  },
+  "public-plants-budget-finds",
 );
 
 export const getPlantBySlug = query(

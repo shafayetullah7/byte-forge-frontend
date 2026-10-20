@@ -1,5 +1,5 @@
 import { createSignal, createMemo, createEffect, Show, ErrorBoundary, onCleanup } from "solid-js";
-import { createAsync, type RouteDefinition } from "@solidjs/router";
+import { createAsync, useSearchParams, type RouteDefinition } from "@solidjs/router";
 import { Title, Meta, Link } from "@solidjs/meta";
 import { useI18n } from "~/i18n";
 import type { PublicPlantFilter } from "~/lib/api/types/public/plants.types";
@@ -15,6 +15,13 @@ import { PlantGrid } from "~/components/plants/plant-grid";
 import { Pagination } from "~/components/plants/pagination";
 import HreflangLinks from "~/components/seo/HreflangLinks";
 import { absoluteUrl, formatPageTitle } from "~/lib/seo/meta";
+import {
+  canonicalPlantsQueryString,
+  parsePlantsSearchParams,
+  plantsUrlSearchParamsToSetterObject,
+  plantsUrlStateFromPageSignals,
+  serializePlantsUrlState,
+} from "~/lib/plants/plants-url";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -33,6 +40,7 @@ export const route = {
 
 export default function PlantsPage() {
   const { t } = useI18n();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = createSignal("");
   const [debouncedSearch, setDebouncedSearch] = createSignal("");
   const [categoryId, setCategoryId] = createSignal("");
@@ -50,15 +58,64 @@ export default function PlantsPage() {
   const [currentPage, setCurrentPage] = createSignal(1);
   const [sidebarOpen, setSidebarOpen] = createSignal(false);
 
+  createEffect(() => {
+    const parsed = parsePlantsSearchParams(searchParams);
+    setSearchQuery(parsed.search);
+    setDebouncedSearch(parsed.search);
+    setCategoryId(parsed.categoryId);
+    setSelectedTagIds(new Set(parsed.selectedTagIds));
+    setCareDifficulty(parsed.careDifficulty);
+    setLightRequirement(parsed.lightRequirement);
+    setWateringFrequency(parsed.wateringFrequency);
+    setHumidityLevel(parsed.humidityLevel);
+    setGrowthRate(parsed.growthRate);
+    setMinPrice(parsed.minPrice);
+    setMaxPrice(parsed.maxPrice);
+    setInStockOnly(parsed.inStockOnly);
+    setSortBy(parsed.sortBy);
+    setSortOrder(parsed.sortOrder);
+    setCurrentPage(parsed.page);
+  });
+
   let debounceTimer: ReturnType<typeof setTimeout>;
   createEffect(() => {
     const query = searchQuery();
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
-      setDebouncedSearch(query);
-      setCurrentPage(1);
+      const trimmed = query.trim();
+      if (trimmed !== debouncedSearch()) {
+        setDebouncedSearch(trimmed);
+        setCurrentPage(1);
+      }
     }, 300);
     onCleanup(() => clearTimeout(debounceTimer));
+  });
+
+  createEffect(() => {
+    const state = plantsUrlStateFromPageSignals({
+      debouncedSearch: debouncedSearch(),
+      categoryId: categoryId(),
+      selectedTagIds: selectedTagIds(),
+      careDifficulty: careDifficulty(),
+      lightRequirement: lightRequirement(),
+      wateringFrequency: wateringFrequency(),
+      humidityLevel: humidityLevel(),
+      growthRate: growthRate(),
+      minPrice: minPrice(),
+      maxPrice: maxPrice(),
+      inStockOnly: inStockOnly(),
+      sortBy: sortBy() as NonNullable<PublicPlantFilter["sortBy"]>,
+      sortOrder: sortOrder(),
+      page: currentPage(),
+    });
+
+    const desired = serializePlantsUrlState(state).toString();
+    const current = canonicalPlantsQueryString(searchParams);
+    if (desired === current) return;
+
+    setSearchParams(
+      plantsUrlSearchParamsToSetterObject(serializePlantsUrlState(state)),
+    );
   });
 
   const filterParams = createMemo<PublicPlantFilter>(() => ({
@@ -248,7 +305,7 @@ export default function PlantsPage() {
             </div>
           </aside>
 
-          <main class="lg:ml-64">
+          <div class="lg:ml-64">
             <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
               <FilterToolbar
                 searchQuery={searchQuery}
@@ -325,7 +382,7 @@ export default function PlantsPage() {
                 setCurrentPage={setCurrentPage}
               />
             </div>
-          </main>
+          </div>
         </div>
       </div>
     </ErrorBoundary>

@@ -2449,13 +2449,56 @@ export const dict = {
     },
   },
   landing: {
+    nav: {
+      mainAriaLabel: "Main navigation",
+      searchPlaceholder: "Search plants…",
+      searchAriaLabel: "Search plants",
+      searchLoading: "Searching…",
+      searchNoResults: "No plants or nurseries found. Press Enter to browse the catalog.",
+      searchSuggestError: "Suggestions unavailable. Press Enter to search the catalog.",
+      searchSuggestListboxLabel: "Search suggestions",
+      searchTypePlant: "Plant",
+      searchTypeNursery: "Nursery",
+      categories: "Categories",
+      nurseries: "Nurseries",
+      offers: "Offers",
+      sellOnByteForge: "Sell on Byte Forge",
+      begin: "Let's begin",
+      beginAriaLabel: "Sign in or create an account",
+      accountAriaLabel: "Go to your account",
+      toggleMenu: "Toggle menu",
+    },
+    trust: {
+      items: {
+        verified: {
+          label: "Verified nurseries",
+          sublabel: "Trade-license checked sellers",
+        },
+        cod: {
+          label: "Cash on delivery",
+          sublabel: "Pay the seller when your order arrives",
+        },
+        orders: {
+          label: "Order updates",
+          sublabel: "Track status from placement to delivery",
+        },
+        reviews: {
+          label: "Real buyer reviews",
+          sublabel: "From verified purchases when available",
+        },
+      },
+    },
     hero: {
-      liveBadge: "50+ shops running active campaigns",
+      liveBadge: "Verified nurseries · Cash on delivery",
+      liveBadgeWithStats: (p: { shopCount: number; plantCount: number }) =>
+        `${p.shopCount} nurseries · ${p.plantCount} plants in stock · Cash on delivery`,
       title: "Bangladesh's Premier Plant Marketplace",
       subtitle:
         "Discover rare plants from verified nurseries or grow your own plant business online.",
       searchPlaceholder: "Search plants, shops, categories...",
       shopNow: "Shop Plants",
+      explorePlants: "Explore plants",
+      exploreNurseries: "Explore nurseries",
       startSelling: "Start Selling",
       stats: {
         verifiedShops: "Verified Shops",
@@ -2468,6 +2511,17 @@ export const dict = {
       label: "Live Campaigns",
       title: "Active Deals from Top Shops",
       viewAll: "See All Deals",
+      endsOn: (p: { date: string }) => `Ends ${p.date}`,
+      homeEmptyHint:
+        "No live deals at the moment. Browse the offers page or check nurseries for new promotions.",
+    },
+    offers: {
+      pageDescription:
+        "Browse time-limited promotions from verified nurseries. Pay cash on delivery when you order from the shop.",
+      emptyTitle: "No active deals right now",
+      emptyDescription:
+        "Check back soon—or explore nurseries and plants while sellers prepare their next campaign.",
+      browseShops: "Browse nurseries",
     },
     trending: {
       label: "What's Hot",
@@ -2481,12 +2535,128 @@ export const dict = {
       description: "Whether you're buying your first plant or opening a nursery, we've made it easy.",
       buyer: "For Buyers",
       seller: "For Sellers",
+      buyerSteps: {
+        step01: {
+          title: "Browse & discover",
+          description:
+            "Explore plants from verified nurseries across Bangladesh — filter by care, light, and price.",
+        },
+        step02: {
+          title: "Order with COD",
+          description:
+            "Place your order on Byte Forge and pay cash on delivery when the seller delivers.",
+        },
+        step03: {
+          title: "Grow & review",
+          description:
+            "Get care context on listings and leave reviews after verified purchases.",
+        },
+      },
+      sellerSteps: {
+        step01: {
+          title: "Create your shop",
+          description: "Register and set up your digital nursery with our seller onboarding.",
+        },
+        step02: {
+          title: "List your plants",
+          description: "Add in-stock plants with photos, variants, and care details buyers can trust.",
+        },
+        step03: {
+          title: "Get verified & sell",
+          description: "Complete verification and reach plant lovers ordering with cash on delivery.",
+        },
+      },
     },
     seasonal: {
       label: "Seasonal Picks",
       title: "What to Grow This Season",
       description: "Plants that thrive in Bangladesh's current weather conditions, chosen by expert nurseries.",
       shop: "Shop Now",
+    },
+    quickDiscovery: {
+      title: "Find plants by need",
+      subtitle: "Jump straight to listings that match how you grow — no search needed.",
+      presets: {
+        easyCare: "Easy care",
+        lowLight: "Low light",
+        inStock: "Ready to ship",
+        budget: "Under ৳500",
+      },
+    },
+    plantFinder: {
+      cta: "Help me choose",
+      pageTitle: "Find your plant",
+      stepLabel: (p: { current: number; total: number }) =>
+        `Step ${p.current} of ${p.total}`,
+      disclaimer:
+        "These filters are guidance based on typical care — check each listing for details.",
+      steps: {
+        placement: {
+          title: "Where will it live?",
+          options: {
+            indoor: "Indoors (room or office)",
+            balcony: "Balcony or veranda",
+            rooftop: "Rooftop terrace",
+            outdoor: "Outdoor garden or yard",
+          },
+        },
+        light: {
+          title: "How much light is there?",
+          options: {
+            low: "Low — away from windows",
+            indirect: "Indirect — bright room, no direct sun",
+            bright: "Bright — near a sunny window",
+            direct: "Direct sun — outdoors or full sun spot",
+          },
+        },
+        care: {
+          title: "How much care are you comfortable with?",
+          options: {
+            easy: "Easy — forgiving, low maintenance",
+            moderate: "Moderate — regular watering and attention",
+            demanding: "Demanding — I enjoy detailed plant care",
+          },
+        },
+      },
+      actions: {
+        cancel: "Cancel",
+        back: "Back",
+        next: "Next",
+        submit: "See matching plants",
+      },
+    },
+    shopByNeed: {
+      title: "Shop by need",
+      subtitle: "Start from how you will use the plant — each card opens filtered listings.",
+      guidance: "Filters are guidance based on typical care — check each listing for details.",
+      presets: {
+        gifting: {
+          title: "Gifts",
+          description: "Easy-care plants in stock — ready for cash on delivery.",
+        },
+        lowMaintenance: {
+          title: "Low maintenance",
+          description: "Forgiving beginners that tolerate lower light.",
+        },
+        brightLight: {
+          title: "Bright & sunny",
+          description: "Plants for direct sun — balconies, rooftops, and sunny spots.",
+        },
+        indoorCorners: {
+          title: "Indoor rooms",
+          description: "Bright indirect light — typical living rooms and offices.",
+        },
+        budgetStarter: {
+          title: "Starter budget",
+          description: "In-stock listings at entry-level prices from verified nurseries.",
+        },
+      },
+    },
+    shopByCategory: {
+      title: "Browse by category",
+      subtitle: "Explore the plant catalog by type — each category opens filtered listings.",
+      subcategories: (p: { count: number }) =>
+        p.count === 1 ? "1 subcategory" : `${p.count} subcategories`,
     },
     featuredListings: {
       label: "Available now",
@@ -2495,6 +2665,19 @@ export const dict = {
         "Real listings from verified nurseries — order with cash on delivery.",
       browseAll: "Browse all plants",
     },
+    budgetFinds: {
+      label: "Starter picks",
+      title: (p: { maxPrice: number }) => `Plants under ৳${p.maxPrice}`,
+      description:
+        "In-stock listings at entry-level prices from verified nurseries — pay cash on delivery.",
+      browseAll: (p: { maxPrice: number }) => `See all under ৳${p.maxPrice}`,
+    },
+    foundingArticles: {
+      label: "From our nurseries",
+      title: "Growing advice from verified sellers",
+      description:
+        "Short reads written by nursery owners — learn their approach, then visit their shop when you are ready to order.",
+    },
     featuredShops: {
       label: "Top Rated Nurseries",
       title: "Featured Shops",
@@ -2502,10 +2685,45 @@ export const dict = {
       products: "products",
       viewAll: "View All Shops",
     },
+    featuredReviews: {
+      title: "Featured buyer reviews",
+      explorePlants: "Explore plants",
+      fallbackTitle: "Verified purchase review",
+      fallbackComment: "No written comment provided.",
+      verifiedPurchase: "Verified purchase",
+      ratingMeta: (p: { rating: number; name: string }) => `${p.rating}/5 · ${p.name}`,
+    },
     whyChoose: {
       label: "Why ByteForge",
       title: "Built for Plant People",
       description: "Every feature is designed with plant lovers and sellers in mind.",
+      features: {
+        verified: {
+          title: "Verified sellers",
+          description:
+            "Shops are verified so buyers know who they are ordering from.",
+        },
+        bilingual: {
+          title: "Bilingual experience",
+          description: "Browse and sell in English or Bengali across the marketplace.",
+        },
+        profiles: {
+          title: "Rich plant profiles",
+          description: "Care traits and listing detail help buyers choose with confidence.",
+        },
+        sellerTools: {
+          title: "Seller tools",
+          description: "Inventory, variants, and shop content to run a serious nursery online.",
+        },
+        categories: {
+          title: "Clear categories",
+          description: "Taxonomy and filters make discovery easier for new plant parents.",
+        },
+        community: {
+          title: "Trust from reviews",
+          description: "Ratings and verified purchase reviews strengthen seller reputation.",
+        },
+      },
     },
     sellerCTA: {
       label: "For Sellers",
@@ -2518,6 +2736,14 @@ export const dict = {
       activeBuyers: "Active Buyers",
       plantsSold: "Plants Sold",
       districts: "Districts Reached",
+      benefits: {
+        benefit1: "Free shop setup while we onboard founding nurseries",
+        benefit2: "Inventory and stock tracking for your listings",
+        benefit3: "Bilingual product content (English + Bengali)",
+        benefit4: "Shop articles and campaigns to show your expertise",
+        benefit5: "Multi-variant listings for sizes and forms",
+        benefit6: "Verification badge when your shop is approved",
+      },
     },
     testimonials: {
       label: "Testimonials",
@@ -2542,6 +2768,25 @@ export const dict = {
       support: "Support",
       rights: "All rights reserved.",
       madeWith: "Made with 🌿 in Bangladesh",
+      brandBlurb:
+        "A plant marketplace built for Bangladesh — discover verified nurseries and order with cash on delivery.",
+      contactHelp: "Questions? Visit our Help Center",
+      contactLocation: "Dhaka, Bangladesh",
+      links: {
+        browsePlants: "Browse plants",
+        allShops: "All shops",
+        inStockPlants: "In-stock plants",
+        startSelling: "Start selling",
+        sellerGuide: "Seller guide",
+        sellerHelp: "Seller help",
+        about: "About Byte Forge",
+        privacy: "Privacy policy",
+        terms: "Terms of service",
+        helpCenter: "Help center",
+        contact: "Contact & support",
+        shipping: "Shipping & returns",
+        cod: "Cash on delivery (COD)",
+      },
     },
   },
   public: {
@@ -2915,6 +3160,11 @@ export const dict = {
       title: "Browse Plants",
       description:
         "Explore indoor and outdoor plants from verified sellers. Filter by care level, light, and price.",
+    },
+    offers: {
+      title: "Nursery Offers & Deals",
+      description:
+        "See active promotions from verified plant nurseries in Bangladesh. Order with cash on delivery.",
     },
   },
 

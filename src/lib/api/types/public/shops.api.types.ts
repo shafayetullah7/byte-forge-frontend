@@ -75,6 +75,12 @@ export interface ApiPublicShopCampaign {
   }>;
 }
 
+export interface ApiPublicCampaignFeedItem {
+  shopSlug: string;
+  shopName: string;
+  campaign: ApiPublicShopCampaign;
+}
+
 export interface ApiPublicShopCampaignHighlights {
   campaignsLast12Months: number;
   totalSavingsBdt: number;

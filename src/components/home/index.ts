@@ -1,9 +1,15 @@
 export { Hero } from "./Hero";
 export { TrustBar } from "./TrustBar";
+export { QuickDiscovery } from "./QuickDiscovery";
+export { ShopByCategory } from "./ShopByCategory";
+export { ShopByNeed } from "./ShopByNeed";
 export { FeaturedListings } from "./FeaturedListings";
-export { LiveCampaigns } from "./LiveCampaigns";
+export { BudgetFinds } from "./BudgetFinds";
+export { HomeOffers } from "./HomeOffers";
 export { TrendingPlants } from "./TrendingPlants";
 export { FeaturedShops } from "./FeaturedShops";
+export { FoundingArticles } from "./FoundingArticles";
+export { FeaturedReviews } from "./FeaturedReviews";
 export { HowItWorks } from "./HowItWorks";
 export { SeasonalPicks } from "./SeasonalPicks";
 export { WhyChooseByteForge } from "./WhyChooseByteForge";

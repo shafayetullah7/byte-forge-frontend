@@ -1,3 +1,5 @@
+import { parseCommaSeparatedSlugs } from "~/lib/config/founding-shops";
+
 /**
  * Global Application Configuration
  * Bridges environment variables from .env to the rest of the application.
@@ -42,6 +44,10 @@ export const config = {
     return this.campaignsEnabled && this.articlesEnabled && this.followEnabled;
   },
   siteUrl: (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/$/, "") || "",
+  /** Home founding articles row (P-066); from `VITE_FOUNDING_SHOP_SLUGS`. */
+  foundingShopSlugs: parseCommaSeparatedSlugs(
+    import.meta.env.VITE_FOUNDING_SHOP_SLUGS as string | undefined,
+  ),
 };
 
 export type AppConfig = typeof config;

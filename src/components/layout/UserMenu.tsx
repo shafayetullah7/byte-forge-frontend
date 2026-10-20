@@ -3,7 +3,7 @@ import { isServer } from "solid-js/web";
 import { A } from "@solidjs/router";
 import { performFederatedLogout } from "~/lib/auth";
 import { useI18n } from "~/i18n";
-import { getInitials } from "~/lib/utils/string.utils";
+import { UserAvatarChip } from "./UserAvatarChip";
 import {
     UserIcon,
     Cog6ToothIcon,
@@ -66,9 +66,10 @@ export const UserMenu: Component<UserMenuProps> = (props) => {
                 <span class="body-small font-semibold text-forest-800 dark:text-cream-100 hidden sm:inline-block">
                     {props.user.userName || props.user.email?.split('@')[0] || "User"}
                 </span>
-                <div class="w-8 h-8 rounded-full bg-linear-to-br from-forest-500 to-forest-600 dark:from-forest-400 dark:to-forest-500 text-white dark:text-cream-50 flex items-center justify-center font-bold text-xs ring-2 ring-white dark:ring-forest-800 shadow-sm transition-transform group-hover:scale-105 group-focus:scale-105">
-                    {getInitials(props.user.userName || props.user.email || "U")}
-                </div>
+                <UserAvatarChip
+                    user={props.user}
+                    class="transition-transform group-hover:scale-105 group-focus:scale-105"
+                />
             </button>
 
             <Show when={isOpen()}>

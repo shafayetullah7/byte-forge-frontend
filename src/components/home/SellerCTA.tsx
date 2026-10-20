@@ -3,24 +3,30 @@ import { ShopIcon, TrendingUpIcon, CheckIcon } from "~/components/icons";
 import { LinkButton } from "~/components/ui";
 import { config } from "~/lib/config";
 import { useI18n } from "~/i18n";
+import {
+  HOME_ANALYTICS_SECTIONS,
+  homeSectionAttrs,
+} from "~/lib/analytics/home-analytics";
 
-const sellerBenefits = [
-  "Free shop creation — no monthly fees to get started",
-  "Inventory management with stock tracking & alerts",
-  "Bilingual product listings (English + Bengali)",
-  "Detailed analytics & sales reporting",
-  "Multi-variant support for different sizes & forms",
-  "Verified badge builds buyer trust",
-];
+const benefitKeys = [
+  "landing.sellerCTA.benefits.benefit1",
+  "landing.sellerCTA.benefits.benefit2",
+  "landing.sellerCTA.benefits.benefit3",
+  "landing.sellerCTA.benefits.benefit4",
+  "landing.sellerCTA.benefits.benefit5",
+  "landing.sellerCTA.benefits.benefit6",
+] as const;
 
 export function SellerCTA() {
   const { t } = useI18n();
 
   return (
-    <section class="py-24 px-4 bg-cream-50 dark:bg-forest-950">
+    <section
+      class="py-24 px-4 bg-cream-50 dark:bg-forest-950"
+      {...homeSectionAttrs(HOME_ANALYTICS_SECTIONS.seller_cta)}
+    >
       <div class="max-w-7xl mx-auto">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Left: Content */}
           <div>
             <span class="body-small text-terracotta-600 dark:text-terracotta-400 uppercase tracking-widest font-semibold">
               {t("landing.sellerCTA.label")}
@@ -31,12 +37,12 @@ export function SellerCTA() {
             </p>
 
             <div class="space-y-4 mb-10">
-              {sellerBenefits.map((benefit) => (
+              {benefitKeys.map((key) => (
                 <div class="flex items-start gap-3">
                   <div class="w-6 h-6 rounded-full bg-sage-100 dark:bg-sage-800 flex items-center justify-center flex-shrink-0 mt-0.5">
                     <CheckIcon class="w-4 h-4 text-sage-600 dark:text-sage-400" />
                   </div>
-                  <span class="body-base text-gray-700 dark:text-gray-300">{benefit}</span>
+                  <span class="body-base text-gray-700 dark:text-gray-300">{t(key)}</span>
                 </div>
               ))}
             </div>
@@ -47,7 +53,7 @@ export function SellerCTA() {
                 {t("landing.sellerCTA.startSelling")}
               </LinkButton>
               <A
-                href="/about"
+                href="/help"
                 class="inline-flex items-center justify-center px-8 py-3.5 border-2 border-forest-600 dark:border-forest-400 text-forest-700 dark:text-forest-300 rounded-12 font-semibold body-base hover:bg-forest-50 dark:hover:bg-forest-800/50 transition-standard"
               >
                 {t("landing.sellerCTA.learnMore")}
@@ -55,7 +61,6 @@ export function SellerCTA() {
             </div>
           </div>
 
-          {/* Right: Stats Card */}
           <div class="relative">
             <div class="flat-card p-10 bg-gradient-to-br from-forest-600 to-forest-800 dark:from-forest-700 dark:to-forest-900 border-0">
               <div class="text-white">
@@ -84,7 +89,6 @@ export function SellerCTA() {
                 </div>
               </div>
 
-              {/* Decorative dots */}
               <div class="absolute top-6 right-6 grid grid-cols-3 gap-2 opacity-20">
                 {Array.from({ length: 9 }).map(() => (
                   <div class="w-2 h-2 rounded-full bg-white" />

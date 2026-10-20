@@ -1,8 +1,15 @@
 import { createSignal, createMemo, createEffect, Show, For, onCleanup } from "solid-js";
-import { createAsync, A, type RouteDefinition } from "@solidjs/router";
+import { createAsync, useSearchParams, type RouteDefinition } from "@solidjs/router";
 import { useI18n } from "~/i18n";
 import { listShops } from "~/lib/public-shops/public-shop.service";
 import type { PublicShopSortOption } from "~/lib/types/public/shops.types";
+import {
+  canonicalShopsQueryString,
+  parseShopsSearchParams,
+  shopsUrlSearchParamsToSetterObject,
+  shopsUrlStateFromPageSignals,
+  serializeShopsUrlState,
+} from "~/lib/shops/shops-url";
 import {
   ShopDiscoveryCard,
   ShopDiscoveryCardLink,
@@ -23,20 +30,46 @@ export const route = {
 
 export default function ShopsDirectoryPage() {
   const { t } = useI18n();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = createSignal("");
   const [debouncedSearch, setDebouncedSearch] = createSignal("");
   const [sort, setSort] = createSignal<PublicShopSortOption>("popular");
   const [page, setPage] = createSignal(1);
+
+  createEffect(() => {
+    const parsed = parseShopsSearchParams(searchParams);
+    setSearch(parsed.search);
+    setDebouncedSearch(parsed.search);
+    setSort(parsed.sort);
+    setPage(parsed.page);
+  });
 
   let debounceTimer: ReturnType<typeof setTimeout>;
   createEffect(() => {
     const query = search();
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
-      setDebouncedSearch(query);
-      setPage(1);
+      const trimmed = query.trim();
+      if (trimmed !== debouncedSearch()) {
+        setDebouncedSearch(trimmed);
+        setPage(1);
+      }
     }, 300);
     onCleanup(() => clearTimeout(debounceTimer));
+  });
+
+  createEffect(() => {
+    const state = shopsUrlStateFromPageSignals({
+      debouncedSearch: debouncedSearch(),
+      sort: sort(),
+      page: page(),
+    });
+
+    const desired = serializeShopsUrlState(state).toString();
+    const current = canonicalShopsQueryString(searchParams);
+    if (desired === current) return;
+
+    setSearchParams(shopsUrlSearchParamsToSetterObject(serializeShopsUrlState(state)));
   });
 
   const filterParams = createMemo(() => ({
@@ -84,8 +117,13 @@ export default function ShopsDirectoryPage() {
           sortOptions={sortOptions()}
           resultsCount={shopsResult()?.meta.total ?? 0}
           searchPlaceholder={t("public.shops.directory.searchPlaceholder")}
-          onSearchChange={(v) => { setSearch(v); }}
-          onSortChange={(v) => { setSort(v as PublicShopSortOption); resetPage(); }}
+          onSearchChange={(v) => {
+            setSearch(v);
+          }}
+          onSortChange={(v) => {
+            setSort(v as PublicShopSortOption);
+            resetPage();
+          }}
         />
 
         <SafeErrorBoundary

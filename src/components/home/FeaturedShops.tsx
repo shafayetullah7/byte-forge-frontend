@@ -2,17 +2,22 @@ import { Show, For } from "solid-js";
 import { createAsync } from "@solidjs/router";
 import { LinkButton } from "~/components/ui";
 import { useI18n } from "~/i18n";
-import { listShops } from "~/lib/public-shops/public-shop.service";
+import { listFeaturedShopsForHome } from "~/lib/public-shops/featured-shops-home";
 import {
   ShopDiscoveryCard,
   ShopDiscoveryCardLink,
 } from "~/components/shops/public";
+import {
+  HOME_ANALYTICS_SECTIONS,
+  homeClickAttrs,
+  homeSectionAttrs,
+} from "~/lib/analytics/home-analytics";
 
 export function FeaturedShops() {
   const { t } = useI18n();
-  const shops = createAsync(() => listShops({ sort: "popular", limit: 3 }), {
-    deferStream: true,
-  });
+  const shops = createAsync(() => listFeaturedShopsForHome(), { deferStream: true });
+
+  const headingId = "featured-shops-heading";
 
   const cardLabels = () => ({
     verifiedLabel: t("public.shops.directory.verified"),
@@ -23,13 +28,19 @@ export function FeaturedShops() {
 
   return (
     <Show when={shops() !== undefined && (shops()?.data.length ?? 0) > 0}>
-      <section class="py-24 px-4 bg-cream-50 dark:bg-forest-950">
+      <section
+        class="py-24 px-4 bg-cream-50 dark:bg-forest-950"
+        aria-labelledby={headingId}
+        {...homeSectionAttrs(HOME_ANALYTICS_SECTIONS.featured_shops)}
+      >
         <div class="max-w-7xl mx-auto">
           <div class="text-center mb-16">
             <span class="body-small text-terracotta-600 dark:text-terracotta-400 uppercase tracking-widest font-semibold">
               {t("landing.featuredShops.label")}
             </span>
-            <h2 class="h2 mt-3 mb-4">{t("landing.featuredShops.title")}</h2>
+            <h2 id={headingId} class="h2 mt-3 mb-4">
+              {t("landing.featuredShops.title")}
+            </h2>
             <p class="body-large text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               {t("public.shops.directory.subtitle")}
             </p>
@@ -46,7 +57,12 @@ export function FeaturedShops() {
           </div>
 
           <div class="text-center mt-12">
-            <LinkButton href="/shops" variant="primary" size="lg">
+            <LinkButton
+              href="/shops"
+              variant="primary"
+              size="lg"
+              {...homeClickAttrs("featured_shops.view_all")}
+            >
               {t("landing.featuredShops.viewAll")} →
             </LinkButton>
           </div>

@@ -1,20 +1,34 @@
-import { A, createAsync, type RouteDefinition } from "@solidjs/router";
-import { For, Show } from "solid-js";
+import { type RouteDefinition } from "@solidjs/router";
 import { Title, Meta, Link } from "@solidjs/meta";
 import {
   Hero,
   TrustBar,
+  QuickDiscovery,
+  HomeOffers,
+  ShopByCategory,
   FeaturedListings,
+  BudgetFinds,
   FeaturedShops,
+  ShopByNeed,
+  FoundingArticles,
+  FeaturedReviews,
   HowItWorks,
   WhyChooseByteForge,
   SellerCTA,
   Footer,
 } from "~/components/home";
+import { HomeSectionAnalytics } from "~/components/home/HomeSectionAnalytics";
 import { SafeErrorBoundary, InlineErrorFallback } from "~/components/errors";
 import { getFeaturedPublicReviews } from "~/lib/api/endpoints/public/reviews.api";
-import { listShops } from "~/lib/public-shops/public-shop.service";
-import { listFeaturedPlants } from "~/lib/public-plants/public-plant.service";
+import { listFeaturedShopsForHome } from "~/lib/public-shops/featured-shops-home";
+import {
+  listBudgetFindPlants,
+  listFeaturedPlants,
+} from "~/lib/public-plants/public-plant.service";
+import { getCategoryTree } from "~/lib/api/endpoints/public/categories.api";
+import { listHomeCampaigns } from "~/lib/public-shops/home-campaigns";
+import { listHomeFoundingArticles } from "~/lib/public-shops/home-founding-articles";
+import { listHomeHeroStats } from "~/lib/home/hero-public-stats";
 import { useI18n } from "~/i18n";
 import HreflangLinks from "~/components/seo/HreflangLinks";
 import { absoluteUrl, formatPageTitle } from "~/lib/seo/meta";
@@ -22,17 +36,22 @@ import { absoluteUrl, formatPageTitle } from "~/lib/seo/meta";
 export const route = {
   preload: () => {
     getFeaturedPublicReviews(6);
-    listShops({ sort: "popular", limit: 3 });
+    listFeaturedShopsForHome();
     listFeaturedPlants();
+    listBudgetFindPlants();
+    getCategoryTree();
+    listHomeCampaigns();
+    listHomeFoundingArticles();
+    listHomeHeroStats();
   },
 } satisfies RouteDefinition;
 
 export default function Home() {
   const { t } = useI18n();
-  const featuredReviews = createAsync(() => getFeaturedPublicReviews(6), { deferStream: true });
 
   return (
-    <main class="min-h-screen bg-cream-50 dark:bg-forest-900">
+    <div id="home-analytics-root" class="min-h-screen bg-cream-50 dark:bg-forest-900">
+      <HomeSectionAnalytics />
       <Title>{formatPageTitle(t("seo.home.title"))}</Title>
       <Meta name="description" content={t("seo.home.description")} />
       <Meta property="og:title" content={formatPageTitle(t("seo.home.title"))} />
@@ -41,6 +60,15 @@ export default function Home() {
       <HreflangLinks path="/" />
       <Hero />
       <TrustBar />
+      <QuickDiscovery />
+      <SafeErrorBoundary
+        fallback={(error, reset) => (
+          <InlineErrorFallback error={error} reset={reset} label="nursery offers" />
+        )}
+      >
+        <HomeOffers />
+      </SafeErrorBoundary>
+      <ShopByCategory />
       <SafeErrorBoundary
         fallback={(error, reset) => (
           <InlineErrorFallback error={error} reset={reset} label="featured plants" />
@@ -50,10 +78,25 @@ export default function Home() {
       </SafeErrorBoundary>
       <SafeErrorBoundary
         fallback={(error, reset) => (
+          <InlineErrorFallback error={error} reset={reset} label="budget finds" />
+        )}
+      >
+        <BudgetFinds />
+      </SafeErrorBoundary>
+      <SafeErrorBoundary
+        fallback={(error, reset) => (
           <InlineErrorFallback error={error} reset={reset} label="featured shops" />
         )}
       >
         <FeaturedShops />
+      </SafeErrorBoundary>
+      <ShopByNeed />
+      <SafeErrorBoundary
+        fallback={(error, reset) => (
+          <InlineErrorFallback error={error} reset={reset} label="founding articles" />
+        )}
+      >
+        <FoundingArticles />
       </SafeErrorBoundary>
       <HowItWorks />
       <WhyChooseByteForge />
@@ -63,37 +106,9 @@ export default function Home() {
           <InlineErrorFallback error={error} reset={reset} label="featured reviews" />
         )}
       >
-        <Show when={(featuredReviews()?.length ?? 0) > 0}>
-          <section class="px-4 sm:px-6 lg:px-8 py-10 max-w-7xl mx-auto">
-            <div class="flex items-center justify-between mb-4">
-              <h2 class="text-xl font-bold text-forest-800 dark:text-cream-50">
-                Featured Buyer Reviews
-              </h2>
-              <A href="/plants" class="text-sm text-forest-600 dark:text-forest-400 hover:underline">
-                Explore plants
-              </A>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <For each={featuredReviews() ?? []}>
-                {(review) => (
-                  <article class="rounded-xl border border-cream-200 dark:border-forest-700 bg-white dark:bg-forest-800 p-4">
-                    <p class="text-sm font-semibold text-forest-800 dark:text-cream-50">
-                      {review.title ?? "Verified purchase review"}
-                    </p>
-                    <p class="text-sm text-gray-600 dark:text-gray-300 mt-2 line-clamp-3">
-                      {review.comment ?? "No written comment provided."}
-                    </p>
-                    <div class="mt-3 text-xs text-gray-500 dark:text-gray-400">
-                      {review.rating}/5 · {review.customerName}
-                    </div>
-                  </article>
-                )}
-              </For>
-            </div>
-          </section>
-        </Show>
+        <FeaturedReviews />
       </SafeErrorBoundary>
       <Footer />
-    </main>
+    </div>
   );
 }
