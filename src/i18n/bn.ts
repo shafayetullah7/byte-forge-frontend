@@ -14,8 +14,10 @@ export const dict = {
     signUp: "নিবন্ধন করুন",
     signOut: "লগ আউট",
     signOutEverywhere: "সব জায়গা থেকে লগ আউট",
-    signOutHint: "এই ব্রাউজারে Aponika সাইন ইন শেষ করুন (পরের বার ইমেইল ও পাসওয়ার্ড লাগবে)",
-    signOutEverywhereHint: "আপনার আপোনিকা সেশনও শেষ করুন (পরবর্তী বার পূর্ণ লগইন লাগবে)",
+    signOutHint:
+      "Byte Forge থেকে লগ আউট করুন এবং শুধু এই ব্রাউজারে Aponika SSO শেষ করুন",
+    signOutEverywhereHint:
+      "সব ডিভাইস থেকে লগ আউট (সব Aponika হোস্টেড সেশন বাতিল)",
     dashboard: "ড্যাশবোর্ড",
     settings: "সেটিংস",
     sellerWorkspace: "বিক্রেতা প্যানেল",
@@ -90,6 +92,12 @@ export const dict = {
       login_required: "চালিয়ে যেতে আবার লগ ইন করুন।",
       temporarily_unavailable:
         "লগ ইন এখন সাময়িকভাবে অনুপলব্ধ। কিছুক্ষণ পর আবার চেষ্টা করুন।",
+      email_unverified:
+        "আপনার ইমেইল Aponika Auth-এ যাচাই করুন, তারপর আবার লগ ইন করুন।",
+      account_inactive:
+        "এই অ্যাকাউন্ট নিষ্ক্রিয় করা হয়েছে। সাহায্যের জন্য সহায়তায় যোগাযোগ করুন।",
+      identity_conflict:
+        "এই ইমেইল বা অ্যাকাউন্ট অন্যভাবে লিংক করা আছে। অন্য অ্যাকাউন্ট দিয়ে লগ ইন করুন বা সহায়তায় যোগাযোগ করুন।",
       provision_failed:
         "Byte Forge-এ আপনার অ্যাকাউন্ট সেট আপ করা যায়নি। সমস্যা থাকলে সহায়তায় যোগাযোগ করুন।",
       token_exchange_failed:
@@ -97,6 +105,9 @@ export const dict = {
       failed: "লগ ইন ব্যর্থ হয়েছে। আবার চেষ্টা করুন।",
     },
     logoutFailed: "সাইন আউট করা যায়নি। আবার চেষ্টা করুন।",
+    logoutMissingXsrf:
+      "পূর্ণ সাইন আউট সম্পন্ন করা যায়নি। আপনি Byte Forge থেকে সাইন আউট হয়েছেন।",
+    sessionExpiredSoft: "সেশনের মেয়াদ শেষ — আবার লগ ইন করুন।",
     register: {
       title: "একটি অ্যাকাউন্ট তৈরি করুন",
       subtitle: "আজই আমাদের সাথে যোগ দিন! আপনার বিবরণ লিখুন।",

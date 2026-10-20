@@ -1,6 +1,8 @@
 import { createEffect, createSignal, onCleanup } from "solid-js";
 import { authApi } from "~/lib/api/endpoints/user/auth.api";
 import { useSession, performLogout } from "~/lib/auth/session";
+import { resolveClientAuthMessage } from "~/lib/auth/client-auth-message";
+import { toaster } from "~/components/ui/Toast";
 
 /**
  * Automatic token refresh hook for ByteForge JWT authentication.
@@ -91,8 +93,11 @@ export function useTokenRefresh() {
         if (!import.meta.env.SSR) {
           window.dispatchEvent(new CustomEvent("session-expired"));
         }
-        // Perform logout to clear session state
+        // Soft logout only — Aponika SSO may still be warm
         await performLogout();
+        if (!import.meta.env.SSR) {
+          toaster.info(resolveClientAuthMessage("sessionExpiredSoft"));
+        }
       }
       // For other errors (network issues, etc.), don't logout
       // Let the next API call handle 401 if needed

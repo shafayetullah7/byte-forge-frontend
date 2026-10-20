@@ -14,8 +14,10 @@ export const dict = {
     signUp: "Sign Up",
     signOut: "Sign Out",
     signOutEverywhere: "Sign out everywhere",
-    signOutHint: "End Aponika sign-in in this browser (password required next time)",
-    signOutEverywhereHint: "Also end your Aponika session (full sign-in required next time)",
+    signOutHint:
+      "Sign out of Byte Forge and end Aponika SSO in this browser only",
+    signOutEverywhereHint:
+      "Sign out on every device (revokes all Aponika hosted sessions)",
     dashboard: "Dashboard",
     settings: "Settings",
     sellerWorkspace: "Seller Workspace",
@@ -89,6 +91,12 @@ export const dict = {
       login_required: "Please sign in again to continue.",
       temporarily_unavailable:
         "Sign in is temporarily unavailable. Please try again in a moment.",
+      email_unverified:
+        "Verify your email with Aponika Auth, then try signing in again.",
+      account_inactive:
+        "This account is disabled. Contact support if you need help.",
+      identity_conflict:
+        "This email or account is already linked another way. Sign in with the other account or contact support.",
       provision_failed:
         "Your account could not be set up on Byte Forge. Contact support if this continues.",
       token_exchange_failed:
@@ -96,6 +104,9 @@ export const dict = {
       failed: "Sign in failed. Please try again.",
     },
     logoutFailed: "Could not sign out. Please try again.",
+    logoutMissingXsrf:
+      "Could not complete full sign-out. You have been signed out of Byte Forge.",
+    sessionExpiredSoft: "Session expired — sign in again.",
     register: {
       title: "Create an account",
       subtitle: "Join us today! Please enter your details.",

@@ -1,4 +1,7 @@
 import { config } from "~/lib/config";
+import { toaster } from "~/components/ui/Toast";
+import { resolveClientAuthMessage } from "./client-auth-message";
+import { performLogout } from "./session";
 
 /**
  * Soft logout: clears BF cookies via API; Aponika SSO may remain.
@@ -6,7 +9,7 @@ import { config } from "~/lib/config";
  */
 export { performLogout, logoutAction } from "./session";
 
-const XSRF_COOKIE = "bf-xsrf-token";
+export const BF_XSRF_COOKIE = "bf-xsrf-token";
 
 /**
  * Federated logout URL — browser POSTs here; API clears cookies then submits
@@ -17,30 +20,52 @@ export function buildFederatedLogoutUrl(): string {
   return `${base}/api/v1/user/auth/oidc/logout`;
 }
 
-function readCookie(name: string): string | undefined {
-  const match = document.cookie.match(
+/** Read a cookie value from a Cookie header string (testable without `document`). */
+export function readCookieFromHeader(
+  cookieHeader: string,
+  name: string,
+): string | undefined {
+  const match = cookieHeader.match(
     new RegExp(`(?:^|;\\s*)${name}=([^;]*)`),
   );
   return match ? decodeURIComponent(match[1]) : undefined;
 }
 
-/** Top-level POST so CSRF cookie + form field are sent; GET is rejected. */
-export function performFederatedLogout(options?: { allDevices?: boolean }): void {
+export function hasBfXsrfCookie(cookieHeader: string): boolean {
+  const value = readCookieFromHeader(cookieHeader, BF_XSRF_COOKIE);
+  return Boolean(value?.trim());
+}
+
+function readCookie(name: string): string | undefined {
+  if (typeof document === "undefined") return undefined;
+  return readCookieFromHeader(document.cookie, name);
+}
+
+/**
+ * Top-level POST so CSRF cookie + form field are sent; GET is rejected.
+ * If `bf-xsrf-token` is missing, soft-logout + toast instead of a silent 403.
+ */
+export function performFederatedLogout(options?: {
+  allDevices?: boolean;
+}): void {
   if (typeof window === "undefined") return;
+
+  const xsrf = readCookie(BF_XSRF_COOKIE);
+  if (!xsrf?.trim()) {
+    void fallbackSoftLogoutMissingXsrf();
+    return;
+  }
 
   const form = document.createElement("form");
   form.method = "POST";
   form.action = buildFederatedLogoutUrl();
   form.style.display = "none";
 
-  const xsrf = readCookie(XSRF_COOKIE);
-  if (xsrf) {
-    const input = document.createElement("input");
-    input.type = "hidden";
-    input.name = "xsrf";
-    input.value = xsrf;
-    form.appendChild(input);
-  }
+  const input = document.createElement("input");
+  input.type = "hidden";
+  input.name = "xsrf";
+  input.value = xsrf;
+  form.appendChild(input);
 
   if (options?.allDevices) {
     const allDevices = document.createElement("input");
@@ -52,4 +77,10 @@ export function performFederatedLogout(options?: { allDevices?: boolean }): void
 
   document.body.appendChild(form);
   form.submit();
+}
+
+async function fallbackSoftLogoutMissingXsrf(): Promise<void> {
+  await performLogout();
+  toaster.warning(resolveClientAuthMessage("logoutMissingXsrf"));
+  window.location.assign("/");
 }
